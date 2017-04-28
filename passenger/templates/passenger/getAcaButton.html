@@ -1,0 +1,5 @@
+{% load staticfiles %}
+{% for a in academy %}
+<button type="button" class="btn btn-info" onclick="location.href='inventory/getSchedule?bid={{a.bid}}&aid={{a.id}}&day=월'">{{a.name}}</button>
+</div>
+{% endfor %}

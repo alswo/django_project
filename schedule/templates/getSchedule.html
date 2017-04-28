@@ -1,0 +1,173 @@
+{% load staticfiles %}
+<html>
+<head>
+    <script src="{% static 'js/jquery-1.10.2.js' %}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.3.7/js/tether.min.js"></script>
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+    <script src="{% static 'js/bootstrap.min.js' %}"></script>
+    <link href="{% static 'css/timeline.css' %}" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<style>
+function callNumber(num){
+    location.href=”tel:”+num;
+}
+</style>
+<body>
+  <div class="container">
+    <br>
+        <div class="row day" align="center">
+          <button type="button" class="btn btn-danger" onclick="location.href='/'">홈</button>
+          <button type="button" class="btn btn-info" onclick="location.href='getSchedule?bid={{bid}}&aid={{aid}}&day=월'">월</button>
+          <button type="button" class="btn btn-info" onclick="location.href='getSchedule?bid={{bid}}&aid={{aid}}&day=화'">화</button>
+          <button type="button" class="btn btn-info" onclick="location.href='getSchedule?bid={{bid}}&aid={{aid}}&day=수'">수</button>
+          <button type="button" class="btn btn-info" onclick="location.href='getSchedule?bid={{bid}}&aid={{aid}}&day=목'">목</button>
+          <button type="button" class="btn btn-info" onclick="location.href='getSchedule?bid={{bid}}&aid={{aid}}&day=금'">금</button>
+          <button type="button" class="btn btn-info" onclick="location.href='getSchedule?bid={{bid}}&aid={{aid}}&day=토'">토</button>
+          <button type="button" class="btn btn-primary" onclick="window.print()">출력</button>
+        </div>
+        <br>
+    <div class="row schedule">
+        <div class="col-md-1"></div>
+
+        <div class="col-md-10 col-xs-12">
+            {% for c in contacts %}
+            <div class="panel panel-default">
+              <!-- Default panel contents -->
+              <div class="panel-heading">
+                <button type="button" class="btn-xs btn-warning">{{c.carnum}}호차</button>
+                <button type="button" class="btn-xs btn-warning">{{c.day}}요일</button>
+                {% for aname in c.anamelist %}
+                <button type="button" class="btn-xs btn-warning">{{aname}}</button>
+                {% endfor %}
+              </div>
+              <div class="panel-body">
+
+              </div>
+            <table class="table table-bordered table-responsive">
+                <thead>
+                    <tr>
+                        <th>시간</th>
+                        <th>주소</th>
+                        <th>이름</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for s in c.scheduletables.all %}
+                    {% if s.lflag == 1 %}
+                    <tr class="info">
+                        <td>{{s.time}}</td>
+                        <td>{{s.addr}}</td>
+                        <td>
+                          {% for f in s.tflag %}
+                            {% for name in s.sname %}
+                            {% if forloop.counter == forloop.parentloop.counter %}
+                            <div class="dropdown">
+                              {% if f == 0 %}
+                                  <button type="button" id="{{c.id}}{{s.id}}{{forloop.counter}}" class="load btn-xs btn-primary dropdown-toggle" data-toggle="dropdown" onclick="dropdown(this, {{forloop.counter}},{{c.id}},{{s.id}},0);">{{name}}</button>
+                              {% endif %}
+                              {% if f == 1 %}
+                                  <button type="button" id="{{c.id}}{{s.id}}{{forloop.counter}}" class="load btn-xs btn-default dropdown-toggle" data-toggle="dropdown" onclick="dropdown(this, {{forloop.counter}},{{c.id}},{{s.id}},1);">{{name}}</button>
+                              {% endif %}
+                              <ul class="dropdown-menu pull-right">
+                              </ul>
+                            </div>
+                            {% endif %}
+                            {% endfor %}
+                          {% endfor %}
+                        </td>
+                    {% endif %}
+                    {% if s.lflag == 0 %}
+                    <tr class="warning">
+                        <td>{{s.time}}</td>
+                        <td>{{s.addr}}</td>
+                        <td>
+                            {% for f in s.tflag %}
+                              {% for name in s.sname %}
+                              {% if forloop.counter == forloop.parentloop.counter %}
+                              <div class="dropdown">
+                                {% if f == 0 %}
+                                    <button type="button" id="{{c.id}}{{s.id}}{{forloop.counter}}" class="load btn-xs btn-primary dropdown-toggle" data-toggle="dropdown" onclick="dropdown(this, {{forloop.counter}},{{c.id}},{{s.id}},0);">{{name}}</button>
+                                {% endif %}
+                                {% if f == 1 %}
+                                    <button type="button" id="{{c.id}}{{s.id}}{{forloop.counter}}" class="load btn-xs btn-default dropdown-toggle" data-toggle="dropdown" onclick="dropdown(this, {{forloop.counter}},{{c.id}},{{s.id}},1);">{{name}}</button>
+                                {% endif %}
+                                <ul class="dropdown-menu pull-right">
+                                </ul>
+                                <br>
+                              </div>
+                              {% endif %}
+                              {% endfor %}
+                            {% endfor %}
+                        </td>
+                    </tr>
+                    {% endif %}
+                    {% if s.lflag == 2 %}
+                    <tr>
+                        <td>{{s.time}}</td>
+                        <td>출발</td>
+                        <td></td>
+                    </tr>
+                    {% endif %}
+                    {% if s.lflag == 3 %}
+                    <tr>
+                        <td>{{s.time}}</td>
+                        <td>도착</td>
+                        <td></td>
+                    </tr>
+                    {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+          </div>
+          <br><br>
+          {% endfor %}
+        </div>
+        <div class="col-md-1"></div>
+<script>
+function dropdown(t,offset,invenid,stableid,choice) {
+    var chocie = choice
+    $.ajax({
+        url: "/inventory/todayLoad",
+        type: "GET",
+        data: {
+          offset: offset,
+          invenid: invenid,
+          stableid: stableid,
+        },
+        success: function(data) {
+          if (choice == 0){
+            $("ul", t.parent).html("<li><a href='#'>"+data['aname']+"</a></li><li><a href='javascript:todayLoad("+offset+","+invenid+","+stableid+");'>오늘안타요</a></li><li><a href='tel:0"+data['phone1']+"'>학생전화</a></li><li><a href='#' class='pphone'></a></li>");
+          }
+          else if (chocie == 1){
+            $("ul", t.parent).html("<li><a href='#'>"+data['aname']+"</a></li><li><a href='javascript:todayLoad("+offset+","+invenid+","+stableid+");'>오늘안타요(취소)</a></li><li><a href='tel:0"+data['phone1']+"'>학생전화</a></li><li><a href='#' class='pphone'></a></li>");
+
+          }
+        }
+    });
+}
+
+function todayLoad(offset,invenid, stableid){
+    var btnid = invenid+''+stableid+''+offset
+    console.log(btnid)
+    $.ajax({
+      url:"/inventory/todayLoad",
+      type:"POST",
+      data:{
+        offset: offset,
+        invenid: invenid,
+        stableid: stableid,
+      },
+      success: function(data){
+          if(data == 0){
+              $("#"+btnid).attr('class','load btn-xs btn-default dropdown-toggle')
+          }
+          else if(data == 1){
+              $("#"+btnid).attr('class','load btn-xs btn-primary dropdown-toggle')
+          }
+      }
+    });
+}
+</script>
+
+</html>

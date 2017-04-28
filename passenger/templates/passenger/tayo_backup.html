@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TAYO</title>
+    {% load staticfiles %}
+    <!-- Core CSS - Include with every page -->
+    <link href="{% static 'css/font-awesome.css' %}" rel="stylesheet" />
+    <link href="{% static 'css/bootstrap.css' %}" rel="stylesheet" />
+    <link href="{% static 'css/pace-theme-big-counter.css' %}" rel="stylesheet" />
+    <link href="{% static 'css/style.css' %}" rel="stylesheet" />
+    <link href="{% static 'css/main-style.css' %}" rel="stylesheet" />
+    <!-- Page-Level CSS -->
+    <link href="{% static 'css/morris-0.4.3.min.css' %}" rel="stylesheet" />
+   </head>
+<body>
+    <!--  wrapper -->
+    <div id="wrapper">
+        <!-- navbar top -->
+        <nav class="navbar navbar-default navbar-fixed-top" role="navigation" id="navbar">
+            <div class="navbar-header">
+                <h3>TAYO TOOLKIT</h3>
+            </div>
+        </nav>
+        <!-- end navbar top -->
+        <!-- navbar side -->
+        <nav class="navbar-default navbar-static-side" role="navigation">
+            <!-- sidebar-collapse -->
+            <div class="sidebar-collapse">
+                <!-- side-menu -->
+                <div class="nav" id="side-menu">
+                    <div>
+                        <a href="#"><i class="fa fa-dashboard fa-fw"></i>운행 전</a>
+                    </div>
+                    <div>
+                        <a href="#"><i class="fa fa-dashboard fa-fw"></i>운행 중</a>
+                    </div>
+                    <div>
+                        <a href="#"><i class="fa fa-dashboard fa-fw"></i>운행 후</a>
+                    </div>
+                    <div class="">
+                        <a href="opti"><i class="fa fa-dashboard fa-fw"></i>동선찾기</a>
+                    </div>
+                </div>
+                <!-- end side-menu -->
+            </div>
+            <!-- end sidebar-collapse -->
+        </nav>
+        <!-- end navbar side -->
+        <!--  page-wrapper -->
+        <div id="page-wrapper">
+
+            <div class="row">
+                <!-- Page Header -->
+                <div class="col-lg-12">
+                    <h1 class="page-header">운행 중</h1>
+                </div>
+                <!--End Page Header -->
+            </div>
+
+            <div class="row">
+                <!-- Welcome -->
+                <div class="col-lg-12">
+                    <div class="alert alert-info">
+                        <b>&nbsp; 운행 중 안전 10계명</b>
+                    </div>
+                </div>
+                <!--end  Welcome -->
+            </div>
+
+
+            <div class="row">
+                <!--quick info section -->
+                <div class="col-lg-3">
+                    <div class="alert alert-danger text-center">
+                        <a>운행 버튼</a>
+                    </div>
+                </div>
+                <div class="col-lg-3">
+                    <div class="alert alert-success text-center">
+                        <a>정차 버튼</a>
+                    </div>
+                </div>
+                <div class="col-lg-3">
+                    <div class="alert alert-info text-center">
+                        <a>하차 및 인계 버튼</a>
+                    </div>
+                </div>
+                <div class="col-lg-3">
+                    <div class="alert alert-warning text-center">
+                        <a>학생 주의 버튼</a>
+                    </div>
+                </div>
+                <!--end quick info section -->
+            </div>
+
+            <div class="row">
+                <div class="col-lg-8">
+                    <!--Area chart example -->
+                    <div class="panel panel-primary">
+                        <div class="panel-heading">
+                            <i class="fa fa-bar-chart-o fa-fw"></i>Student List
+                        </div>
+
+                        <div class="panel-body">
+                            {% for contact in contacts %}
+                            <li>{{contact.s_name}} {{contact.name}} {{contact.load}}<li>
+                            {% endfor %}
+                        </div>
+
+                    </div>
+                    <!--End area chart example -->
+                    <!--Simple table example -->
+                    <div class="panel panel-primary">
+                        <div class="panel-heading">
+                            <i class="fa fa-bar-chart-o fa-fw"></i>Simple Table Example
+                        </div>
+
+                        <div class="panel-body">
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered table-hover table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th>#</th>
+                                                    <th>Date</th>
+                                                    <th>Time</th>
+                                                    <th>Amount</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td>3326</td>
+                                                    <td>10/21/2013</td>
+                                                    <td>3:29 PM</td>
+                                                    <td>$321.33</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>3325</td>
+                                                    <td>10/21/2013</td>
+                                                    <td>3:20 PM</td>
+                                                    <td>$234.34</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>3324</td>
+                                                    <td>10/21/2013</td>
+                                                    <td>3:03 PM</td>
+                                                    <td>$724.17</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>3323</td>
+                                                    <td>10/21/2013</td>
+                                                    <td>3:00 PM</td>
+                                                    <td>$23.71</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>3322</td>
+                                                    <td>10/21/2013</td>
+                                                    <td>2:49 PM</td>
+                                                    <td>$8345.23</td>
+                                                </tr>
+
+
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                </div>
+
+                            </div>
+                            <!-- /.row -->
+                        </div>
+                        <!-- /.panel-body -->
+                    </div>
+                    <!--End simple table example -->
+
+                </div>
+
+                <div class="col-lg-4">
+                    <div class="panel panel-primary text-center no-boder">
+                        <div class="panel-body yellow">
+                            <i class="fa fa-bar-chart-o fa-3x"></i>
+                            <h3>20,741 </h3>
+                        </div>
+                        <div class="panel-footer">
+                            <span class="panel-eyecandy-title">Daily User Visits
+                            </span>
+                        </div>
+                    </div>
+                    <div class="panel panel-primary text-center no-boder">
+                        <div class="panel-body blue">
+                            <i class="fa fa-pencil-square-o fa-3x"></i>
+                            <h3>2,060 </h3>
+                        </div>
+                        <div class="panel-footer">
+                            <span class="panel-eyecandy-title">Pending Orders Found
+                            </span>
+                        </div>
+                    </div>
+                    <div class="panel panel-primary text-center no-boder">
+                        <div class="panel-body green">
+                            <i class="fa fa fa-floppy-o fa-3x"></i>
+                            <h3>20 GB</h3>
+                        </div>
+                        <div class="panel-footer">
+                            <span class="panel-eyecandy-title">New Data Uploaded
+                            </span>
+                        </div>
+                    </div>
+                    <div class="panel panel-primary text-center no-boder">
+                        <div class="panel-body red">
+                            <i class="fa fa-thumbs-up fa-3x"></i>
+                            <h3>2,700 </h3>
+                        </div>
+                        <div class="panel-footer">
+                            <span class="panel-eyecandy-title">New User Registered
+                            </span>
+                        </div>
+                    </div>
+
+
+
+
+
+
+
+                </div>
+
+            </div>
+
+            <div class="row">
+                <div class="col-lg-4">
+                </div>
+                <div class="col-lg-4">
+                </div>
+                <div class="col-lg-4">
+                </div>
+            </div>
+
+
+         
+
+
+        </div>
+        <!-- end page-wrapper -->
+
+    </div>
+    <!-- end wrapper -->
+
+    <!-- Core Scripts - Include with every page -->
+    <script src="{% static 'js/jquery-1.10.2.js' %}"></script>
+    <script src="{% static 'js/bootstrap.min.js' %}"></script>
+    <script src="{% static 'js/jquery.metisMenu.js' %}"></script>
+    <script src="{% static 'js/pace.js' %}"></script>
+    <script src="{% static 'js/siminta.js' %}"></script>
+    <!-- Page-Level Plugin Scripts-->
+    <script src="{% static 'js/raphael-2.1.0.min.js' %}"></script>
+    <script src="{% static 'js/morris.js' %}"></script>
+    <script src="{% static 'js/dashboard-demo.js' %}"></script>
+
+</body>
+
+</html>

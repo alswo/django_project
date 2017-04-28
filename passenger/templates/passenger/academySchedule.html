@@ -1,0 +1,117 @@
+<html>
+<head>
+    {% load staticfiles %}
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <meta charset="UTF-8">
+    <title>TAYO TIMELINE</title>
+    <script src="{% static 'js/jquery-3.1.0.min.js' %}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.3.7/js/tether.min.js"></script>
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+    <script src="{% static 'js/bootstrap.min.js' %}"></script>
+    <link href="{% static 'css/timeline.css' %}" rel="stylesheet">
+    <script type=”text/javascript”>
+        function callNumber(num){
+            location.href=”tel:”+num;
+        }
+    </script>
+</head>
+<body>
+{% if user.is_authenticated %}
+<div class="container">
+    <div class="row">
+
+        <div class="timeline-centered">
+
+        <article class="timeline-entry">
+
+            <div class="timeline-entry-inner">
+                <div class="row">
+                    <div class="col-md-4" align="right"></div>
+                    <div class="col-md-4" align="center"><button type="button" class="btn btn-danger" onclick="location.href='/'">홈</button>  <button type="button" class="btn btn-info" onclick="location.href='academySchedule?aid={{aid}}&day=월'">월</button>  <button type="button" class="btn btn-info" onclick="location.href='academySchedule?aid={{aid}}&day=화'">화</button>  <button type="button" class="btn btn-info" onclick="location.href='academySchedule?aid={{aid}}&day=수'">수</button>  <button type="button" class="btn btn-info" onclick="location.href='academySchedule?aid={{aid}}&day=목'">목</button>  <button type="button" class="btn btn-info" onclick="location.href='academySchedule?aid={{aid}}&day=금'">금</button>  <button type="button" class="btn btn-info" onclick="location.href='academySchedule?aid={{aid}}&day=토'">토</button> <button type="button" class="btn btn-primary" onclick="window.print()">출력</button></div>
+                </div>
+                <br>
+                {% for contact in contacts %}
+                <div class="timeline-icon bg-success">
+                    <i class="entypo-feather"></i>
+                </div>
+                <div class="timeline-label">
+                    <h>{{contact.a_name}}&nbsp{{contact.day}}&nbsp&nbsp&nbsp</h>
+                    {% if contact.gid == 1 %}
+                        <button type="button" class="btn btn-warning btn-xs" onclick="document.location.href='tel:010-4150-7123'">1호 기사님</button>
+                    {% endif %}
+                    {% if contact.gid == 2 %}
+                        <button type="button" class="btn btn-warning btn-xs" onclick="document.location.href='tel:010-3874-5956'">5호 기사님</button>
+                        <button type="button" class="btn btn-warning btn-xs" onclick="document.location.href='tel:010-8806-0865'">5호 동승자님</button>
+                    {% endif %}
+                    {% if contact.gid == 3 %}
+                        <button type="button" class="btn btn-warning btn-xs" onclick="document.location.href='tel:010-3772-9402'">2호 기사님</button>
+                        <button type="button" class="btn btn-warning btn-xs" onclick="document.location.href='tel:010-4150-3827'">2호 동승자님</button>
+                    {% endif %}
+                    {% if contact.gid == 4 %}
+                        <button type="button" class="btn btn-warning btn-xs" onclick="document.location.href='tel:010-9120-9126'">4호 기사님</button>
+                        <button type="button" class="btn btn-warning btn-xs" onclick="document.location.href='tel:010-5250-1713'">4호 동승자님</button>
+                    {% endif %}
+                    {% if contact.gid == 5 %}
+                        <button type="button" class="btn btn-warning btn-xs" onclick="document.location.href='tel:010-6247-3737'">3호 기사님</button>
+                        <button type="button" class="btn btn-warning btn-xs" onclick="document.location.href='tel:010-2701-2043'">3호 동승자님</button>
+                    {% endif %}
+                    {% if contact.gid == 6 %}
+                        <button type="button" class="btn btn-warning btn-xs" onclick="document.location.href='tel:010-3785-7995'">6호 기사님</button>
+                        <button type="button" class="btn btn-warning btn-xs" onclick="document.location.href='tel:010-9176-9142'">6호 동승자님</button>
+                    {% endif %}
+                    {% if contact.gid == 7 %}
+                        <button type="button" class="btn btn-warning btn-xs" onclick="document.location.href='tel:010-3798-9855'">7호 기사님</button>
+                        <button type="button" class="btn btn-warning btn-xs" onclick="document.location.href='tel:010-7490-8211'">7호 동승자님</button>
+                    {% endif %}
+                    {% if contact.gid == 8 %}
+                        <button type="button" class="btn btn-warning btn-xs" onclick="document.location.href='tel:010-5246-9467'">8호 기사님</button>
+                        <button type="button" class="btn btn-warning btn-xs" onclick="document.location.href='tel:010-5026-7828'">8호 동승자님</button>
+                    {% endif %}
+                    <br>
+                    <br>
+                    <h2>{{contact.schedule|linebreaksbr}}</h2>
+                </div>
+                {% endfor %}
+            </div>
+
+        </article>
+
+    </div>
+
+    </div>
+</div>
+{% else %}
+<div class="row">
+    <br>
+    <div class="col-sm-4"></div>
+    <div class="col-sm-4" align="center">
+        <a class="btn btn-success" href="/accounts/login">로그인이 필요합니다.</a>
+    </div>
+    <div class="col-sm-4"></div>
+</div>
+{% endif %}
+</body>
+<script>
+var now = new Date();
+var millisTill10 = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 18, 24, 0, 0) - now;
+if (millisTill10 < 0) {
+     millisTill10 += 86400000; // it's after 10am, try 10am tomorrow.
+}
+
+setTimeout(function(){
+                $.ajax({
+                  url: "/autoSave",
+                  type: "GET",
+                  data: {
+                        },
+                        success: function(data){
+                          console.log(data)
+                        }
+                });
+            }, millisTill10);
+</script>
+</html>

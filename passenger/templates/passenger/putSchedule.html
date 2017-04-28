@@ -1,0 +1,152 @@
+<html>
+
+<head>
+    {% load staticfiles %}
+    <script src="{% static 'js/jquery-1.11.1.min.js' %}"></script>
+    <script src="{% static 'js/dynamicTable.js' %}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.3.7/js/tether.min.js"></script>
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+    <script src="{% static 'js/bootstrap.min.js' %}"></script>
+    <style>
+        .table-sortable tbody tr {
+            cursor: move;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-9">
+                <div class="col-md-12 table-responsive">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label>DAY:</label>
+                            <select class="form-control" id="{{contact.id}}gid">
+                              <option value="" selected>월</option>
+                              <option value="">화</option>
+                              <option value="">수</option>
+                              <option value="">목</option>
+                              <option value="">금</option>
+                              <option value="">토</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label>CAR:</label>
+                            <select class="form-control" id="{{contact.id}}gid">
+                              <option value="" selected>호차</option>
+                              {% for g in group %}
+                              <option value="{{g.gid}}">{{g.gname}}</option>
+                              {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                        </div>
+                    </div>
+                    <br>
+                    <table class="table table-bordered table-hover table-sortable" id="tab_logic">
+                        <thead>
+                            <tr>
+                                <th class="text-center">
+                                    시간
+                                </th>
+                                <th class="text-center">
+                                    주소
+                                </th>
+                                <th class="text-center">
+                                    이름
+                                </th>
+                                <th class="text-center">
+                                    학원선택
+                                </th>
+                                <th class="text-center">
+                                    선택학원
+                                </th>
+                                <th class="text-center">
+                                    등하원
+                                </th>
+                                <th class="text-center" style="border-top: 1px solid #ffffff; border-right: 1px solid #ffffff;">
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr id='addr0' data-id="0" class="hidden">
+                                <td data-name="time">
+                                    <input type="text" name='time0' placeholder='Time' class="form-control" />
+                                </td>
+                                <td data-name="addr">
+                                    <input type="text" name='mail0' placeholder='Email' class="form-control" />
+                                </td>
+                                <td data-name="name">
+                                    <input type="text" name='name0' placeholder='Name' class="form-control" />
+                                </td>
+                                <td data-name="sel">
+                                    <select class="form-control" onchange="addAca(this)">
+                                        <option value="">학원선택</option>
+                                        {% for a in academy %}
+                                        <option value = "{{a.id}}">{{a.name}}({{a.id}})</option>
+                                        {% endfor %}
+                                      </select>
+                                    <br>
+                                    <br>
+                                </td>
+                                <td data-name="academy">
+                                  <input type="text" name='academy' class="form-control" />
+                                </td>
+                                <td data-name="sel">
+                                    <select name="load">
+        				                        <option value="">등하원</option>
+    					                          <option value="1">등원</option>
+        				                        <option value="2">하원</option>
+						                        </select>
+                                </td>
+                                <td data-name="del">
+                                    <button name="del0" class='btn btn-danger glyphicon glyphicon-remove row-remove'></button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <a id="add_row" class="btn btn-default pull-right" onclick="emptyTempList();">Add Row</a>
+            </div>
+            <div id="recommand_inven" class="col-md-3">
+                <div class="row affix bg-info">
+                    <h3 align="center">인벤토리추천</h3>
+                    <br>
+                    <label for="exampleInputEmail1">요일</label>
+                    <select class="form-control" id="{{contact.id}}gid">
+                        <option value="" selected>월</option>
+                        <option value="">화</option>
+                        <option value="">수</option>
+                        <option value="">목</option>
+                        <option value="">금</option>
+                        <option value="">토</option>
+                      </select>
+                    <label for="exampleInputEmail1">시작시간</label>
+                    <input type="email" class="form-control" placeholder="시작시간">
+
+                    <br>
+                    <a class="btn btn-default pull-right">검색</a>
+                </div>
+            </div>
+        </div>
+
+</body>
+<script>
+var tempList = new Array();
+
+function addAca(selected) {
+    tempList.push(selected.value);
+    selected.parentNode.parentNode.children[4].children[0].value = tempList;
+    console.log(selected.parentNode.parentNode.children[4].children[0].value)
+}
+
+
+function emptyTempList(){
+    tempList.splice(0,tempList.length);
+}
+
+
+</script>
+
+</html>

@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+<head>
+{% load staticfiles %}
+    <meta charset="UTF-8">
+    <title>TAYO</title>
+    <script src="{% static 'js/jquery-3.1.0.min.js' %}"></script>
+    <script src="https://apis.skplanetx.com/tmap/js?version=1&format=javascript&appKey=3ac77692-0c29-3c60-ac31-0652eaccac9c"></script>
+    <script type="text/javascript" src="{% static 'js/graph.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/bootstrap.min.js' %}"></script>
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+</head>
+<body  onload="init()">
+
+<div class="row">
+    <div class="col-md-8">
+        <div id="map_div" style="width:800px;height:800px;"></div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Position</th>
+                </tr>
+            </thead>
+            <tbody id="info-marker">
+            
+            </tbody>
+        </table>
+        </div>
+        <button type="button" class="btn btn-primary" onclick="getOptimized();">노드계산</button>
+        <button type="button" class="btn btn-success" onclick="getOpti();">최적동선 찾기</button>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-4" id="students">
+        <ul class="list-group">
+        {% for contact in contacts %}
+            <li class="list-group-item">
+                {{contact.s_name}} <input type="hidden" value={{contact.l_lon}}> <input type="hidden" value={{contact.l_lat}}> <input type="hidden" value={{contact.u_lon}}> <input type="hidden" value={{contact.u_lat}}>
+            </li>
+        {% endfor %}
+        </ul>
+        <div class="row">
+            <div class="col-md-8">
+            </div>
+            <div class="col-md-4" align="right">
+            <button type="button" class="btn btn-primary" onclick="setLoadPosition();">등원</button>
+            <button type="button" class="btn btn-success" onclick="setUnloadPosition();">하원</button>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4" id="recommand">
+    </div>
+    <div class="col-md-4">
+    </div>
+</div>
+
+</body>
+<script>
+    markers = []
+    var number = 0;
+
+    function setVariables(){    
+                cLonLat = new Tmap.LonLat(14135912.880612050, 4518334.160091842);  
+                        //중심점 좌표 입니다. EPSG3857 좌표계 형식 입니다. 
+                zoom = 16;  // zoom level입니다.  0~19 레벨을 서비스 하고 있습니다. 
+                mapW = '500px';  // 지도의 가로 크기 입니다. 
+                mapH = '400px';  // 지도의 세로 크기 입니다. 
+    }
+    
+     var map;
+     var mapW, mapH;     // 지도의 가로, 세로 크기(Pixel단위) 를 지정 합니다. 
+     var cLonLat, zoom;      //중심 좌표와 지도레벨을 정의 합니다. 
+             
+     function setVariables(){   
+        cLonLat = new Tmap.LonLat(14153512.506373,4505167.5833894);         
+            //중심점 좌표 입니다. EPSG3857 좌표계 형식 입니다. 
+            zoom = 16;  // zoom level입니다.  0~19 레벨을 서비스 하고 있습니다. 
+            mapW = '100%';  // 지도의 가로 크기 입니다. 
+            mapH = '800px';  // 지도의 세로 크기 입니다. 
+    }
+             
+    function init() {
+        setVariables();
+        map = new Tmap.Map({div:'map_div', width:mapW, height:mapH, animation:true}); 
+        // div : 지도가 생성될 div의 id값과 같은 값을 옵션으로 정의 합니다.
+        // Tmap,Map 클래스에 대한 상세 사항은 "JavaScript" 하위메뉴인 "기본 기능" 페이지를 참조 해주세요. 
+        map.events.register("click", map, onClickMap); 
+        map.setCenter(cLonLat,zoom);
+    }
+  
+//    function initTmap(){
+//        map = new Tmap.Map({div:'map_div', width:'100%', height:'800px'});
+//        map.events.register("click", map, onClickMap);
+
+//    }
+
+
+    function onClickMap(e){
+        var markerLayer = new Tmap.Layer.Markers();
+        map.addLayer(markerLayer);
+
+        var lonlat = map.getLonLatFromViewPortPx(e.xy);
+        var icon = new Tmap.Icon('https://developers.skplanetx.com/upload/tmap/marker/pin_b_m_a.png');
+
+        var marker = new Tmap.Marker(lonlat, icon);
+        markerLayer.addMarker(marker);
+
+        setTable(marker.lonlat);
+
+        markers.push(marker);
+    }
+
+    function setTable(position){
+        //marker info table
+        var node_tr = document.createElement('tr');
+        var node_td = document.createElement('td');
+
+
+        node_td.innerText = number+ ' ' + position;
+        var target = document.getElementById('info-marker');
+
+        target.appendChild(node_tr);
+        target.appendChild(node_td);
+
+        number++;
+    }
+
+    var g = new Graph();
+
+    function getOptimized(){
+        //getWeight(markers[0].lonlat, markers[1].lonlat);
+
+        for(var i = 0; i <markers.length; i++){
+            g.addNode(i.toString());
+        }
+
+        for(var j = 0; j < markers.length; j++){
+            for(var k = j+1; k < markers.length; k++){
+                getWeight(markers[j].lonlat, markers[k].lonlat,j,k,function(){
+                    var temp = this.valueOf();
+                    edge_1 = temp[0].toString();
+                    edge_2 = temp[1].toString();
+                    edge_3 = temp[2];
+                    console.log(edge_1, edge_2, edge_3);
+                    g.addEdge(edge_1, edge_2,edge_3);
+                });
+
+            }
+        }
+    alert("Done")
+    }
+
+    function getOpti(){
+        var result = Prim(g);
+        doc = document.getElementById('recommand');
+        doc.innerHTML='<h2>Result</h2><br>' + result;
+    }
+
+    var capacity;
+    function getWeight(start, end,j,k, callback) {
+
+        var j = j;
+        var k = k;
+        var startX = start.lon;
+        var startY = start.lat;
+        var endX = end.lon;
+        var endY = end.lat;
+
+        var urlStr = "https://apis.skplanetx.com/tmap/routes?version=1";
+        urlStr += "&startX=" + startX;
+        urlStr += "&startY=" + startY;
+        urlStr += "&endX=" + endX;
+        urlStr += "&endY=" + endY;
+        urlStr += "&appKey=3ac77692-0c29-3c60-ac31-0652eaccac9c";
+
+        var xmlHttp = new XMLHttpRequest();
+
+
+        xmlHttp.onreadystatechange = function () {
+            if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
+                capacity = xmlHttp.responseText;
+                jsonObj = JSON.parse(capacity);
+
+                capa = jsonObj.features[0].properties.totalTime;
+
+                capacity = []
+                capacity.push(j);
+                capacity.push(k);
+                capacity.push(capa);
+
+
+                callback.apply(capacity);
+            }
+        }
+
+        xmlHttp.open("GET", urlStr, true); // true for asynchronous
+        xmlHttp.send(null);
+    }
+
+</script>
+<script>
+    function setLoadPosition(){
+        var list = document.getElementsByClassName('list-group-item');
+            for(var i = 0; i < list.length; i++) {
+                var node_tr = document.createElement('tr');
+                var node_td = document.createElement('td');
+
+                node_td.innerText = list[i].innerText + ' ' + list[i].getElementsByTagName('input')[0].value + ' ' + list[i].getElementsByTagName('input')[1].value ;
+                var target = document.getElementById('info-marker');
+
+                target.appendChild(node_tr);
+                target.appendChild(node_td);        
+            }
+    }
+    function setUnloadPosition(){
+    
+    }
+</script>
+</html>

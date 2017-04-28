@@ -1,0 +1,279 @@
+{% load staticfiles %}
+<script language="JavaScript" src="{% static 'js/jquery-1.11.1.min.js' %}" type="text/javascript"></script>
+<script language="JavaScript" src="{% static 'js/jquery.dataTables.min.js' %}" type="text/javascript"></script>
+<script language="JavaScript" src="{% static 'js/dataTables.bootstrap.js' %}" type="text/javascript"></script>
+<script language="JavaScript" src="{% static 'js/bootstrap.js' %}" type="text/javascript"></script>
+
+<link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.min.css' %}">
+
+<link rel="stylesheet" type="text/css" href="{% static 'css/dataTables.bootstrap.css' %}">
+<style>
+    #datatable_filter{
+        text-align: right
+    }
+    .thstyle{
+        text-align:center;
+        width: 8%;
+    }
+    .thstyle2{
+        text-align:center;
+        width: 15%;
+    }
+</style>
+<body>
+{% if user.is_authenticated %}
+<div class="container">
+    <div class="row">
+        <h2 class="text-center"><a href="/"><img src = "{% static 'img/tayologo.png' %}"style = "width:5%"></img></a> 학원별 학생데이터 관리</h2>
+    </div>
+    <div class="row">
+        <div>
+            <div class="col-md-6">
+                <div class="dropdown">
+                    <button class="btn btn-info" id="dLabel" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    학원선택
+                    <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="dLabel">
+                        {% for aca in academies %}
+                        <li><a href="/studata?id={{aca.id}}">{{aca.name}}</a></li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            <div class="col-md-5"></div>
+            <div class="col-md-1 pull-right">
+                <p data-placement="top" data-toggle="tooltip" title="Add"><button class="btn btn-success btn-xs" data-title="Add" data-toggle="modal" data-target="#add" ><span class="glyphicon glyphicon-pencil">ADD</span></button></p>
+            </div>
+        </div>
+        <div class="col-md-12">
+            <div class="table-responsive">
+            <table id="datatable" class="table table-condensed table-striped table-bordered text-center" cellspacing="0" width="100%">
+                <thead>
+                <tr>
+                    <th class="thstyle">이름</th>
+                    <th class="thstyle">학원</th>
+                    <th class="thstyle">요일</th>
+                    <th class="thstyle">수업시작</th>
+                    <th class="thstyle">수업끝</th>
+                    <th class="thstyle">등원 lon</th>
+                    <th class="thstyle">등원 lat</th>
+                    <th class="thstyle">하원 lon</th>
+                    <th class="thstyle">하원 lat</th>
+                    <th class="thstyle2">등원위치</th>
+                    <th class="thstyle2">하원위치</th>
+                    <th class="thstyle2">기타사항</th>
+                    <th class="thstyle">수정</th>
+                    <th class="thstyle">삭제</th>
+                </tr>
+                <thead>
+                <tbody>
+                {% for s in students%}
+                <tr>
+                    <td>{{s.name}}</td>
+                    <td>{{s.a_name}}</td>
+                    <td>{{s.day}}</td>
+                    <td>{{s.stime}}</td>
+                    <td>{{s.etime}}</td>
+                    <td>{{s.on_lon}}</td>
+                    <td>{{s.on_lat}}</td>
+                    <td>{{s.off_lon}}</td>
+                    <td>{{s.off_lat}}</td>
+                    <td>{{s.onlocation}}</td>
+                    <td>{{s.offlocation}}</td>
+                    <td>{{s.etc}}</td>
+                    <td><p data-placement="top" data-toggle="tooltip" title="Edit"><button onclick="editStudata('{{s.id}}','{{s.name}}', '{{s.a_name}}', '{{s.day}}', '{{s.stime}}', '{{s.etime}}', '{{s.onlocation}}', '{{s.offlocation}}', '{{s.on_lon}}', '{{s.on_lat}}','{{s.off_lon}}','{{s.off_lat}}', '{{s.etc}}')" class="open-row btn btn-primary btn-xs" data-title="Edit" data-toggle="modal" data-target="#edit" ><span class="glyphicon glyphicon-pencil"></span></button></p></td>
+                    <td><p data-placement="top" data-toggle="tooltip" title="Delete"><button data-id="{{s.id}}" class="open-row btn btn-danger btn-xs" data-title="Delete" data-toggle="modal" data-target="#delete" ><span class="glyphicon glyphicon-trash"></span></button></p></td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="edit" tabindex="-1" role="dialog" aria-labelledby="edit" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                <h4 class="modal-title custom_align" id="Heading">Edit Your Detail</h4>
+            </div>
+            <div class="modal-body">
+                <form action="/studata" method="post" id="formedit">
+                    <input class="form-control" type="hidden" name="class" value="edit">
+                    <input class="form-control" type="hidden" id="e_sid" name="e_sid" value=""/>
+                <div class="form-group">
+                    <input class="form-control " type="text" name="name" id="name" placeholder="이름">
+                </div>
+                <div class="form-group">
+                    <select class="form-control" name="eaid">
+                        {% for aca in academies %}
+                        <option id="a_name" value="{{aca.id}}">{{aca.name}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <input class="form-control" name="day" type="text" id="day" placeholder="요일">
+                </div>
+                <div class="form-group">
+                    <input class="form-control" name="stime" type="text" id="stime" placeholder="수업시작">
+                </div>
+                <div class="form-group">
+                    <input class="form-control" name="etime" type="text" id="etime" placeholder="수업 끝">
+                </div>
+                <div class="form-group">
+                    <input class="form-control" name="onlocation" type="text" id="onlocation" placeholder="등원위치">
+                </div>
+                <div class="form-group">
+                    <input class="form-control" name="offlocation" type="text" id="offlocation" placeholder="하원위치">
+                </div>
+                <div class="form-group">
+                    <input class="form-control" name="on_lon" type="text" id="on_lon" placeholder="등원lon">
+                </div>
+                <div class="form-group">
+                    <input class="form-control" name="on_lat" type="text" id="on_lat" placeholder="등원lat">
+                </div>
+                <div class="form-group">
+                    <input class="form-control" name="off_lon" type="text" id="off_lon" placeholder="하원lon">
+                </div>
+                <div class="form-group">
+                    <input class="form-control" name="off_lat" type="text" id="off_lat" placeholder="하원lat">
+                </div>
+                <div class="form-group">
+                    <input class="form-control" name="etc" type="text" id="etc" placeholder="기타사항">
+                </div>
+                </form>
+            </div>
+            <div class="modal-footer ">
+                <button type="submit" class="btn btn-warning btn-lg" form="formedit"style="width: 100%;"><span class="glyphicon glyphicon-ok-sign"></span> Update</button>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+
+<div class="modal fade" id="add" tabindex="-1" role="dialog" aria-labelledby="edit" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                <h4 class="modal-title custom_align" id="Heading">학생추가</h4>
+            </div>
+            <div class="modal-body">
+                <form action="/studata" method="post" id="formadd">
+                    <input class="form-control" type="hidden" name="class" value="add">
+                <div class="form-group">
+                    <input class="form-control " type="text" name="name" placeholder="이름">
+                </div>
+                <div class="form-group">
+                    <select class="form-control" name="aid">
+                        {% for aca in academies %}
+                        <option value="{{aca.id}}">{{aca.name}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <input class="form-control" name="day" type="text" placeholder="요일">
+                </div>
+                <div class="form-group">
+                    <input class="form-control" name="start" type="text" placeholder="수업시작">
+                </div>
+                <div class="form-group">
+                    <input class="form-control" name="end" type="text" placeholder="수업 끝">
+                </div>
+                <div class="form-group">
+                    <input class="form-control" name="onlocation" type="text" placeholder="등원위치">
+                </div>
+                <div class="form-group">
+                    <input class="form-control" name="offlocation" type="text" placeholder="하원위치">
+                </div>
+                <div class="form-group">
+                    <input class="form-control" name="on_lon" type="text" id="on_lon" placeholder="등원lon">
+                </div>
+                <div class="form-group">
+                    <input class="form-control" name="on_lat" type="text" id="on_lat" placeholder="등원lat">
+                </div>
+                <div class="form-group">
+                    <input class="form-control" name="off_lon" type="text" id="off_lon" placeholder="하원lon">
+                </div>
+                <div class="form-group">
+                    <input class="form-control" name="off_lat" type="text" id="off_lat" placeholder="하원lat">
+                </div>
+                <div class="form-group">
+                    <input class="form-control" name="etc" type="text" placeholder="기타사항">
+                </div>
+                </form>
+            </div>
+            <div class="modal-footer ">
+                <button type="submit" class="btn btn-warning btn-lg" form="formadd" style="width: 100%;"><span class="glyphicon glyphicon-ok-sign"></span>Add</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="delete" tabindex="-1" role="dialog" aria-labelledby="edit" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">× </button>
+                <h4 class="modal-title custom_align" id="Heading">삭제</h4>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-danger"><span class="glyphicon glyphicon-warning-sign"></span>정말 지우시겠어요?</div>
+            </div>
+            <div class="modal-footer ">
+                <form action="/studata" method="post">
+                    <input class="form-control" type="hidden" id="d_sid" name="d_sid" value=""/>
+                    <button type="submit" name="class" value="delete" class="btn btn-success" ><span class="glyphicon glyphicon-ok-sign"></span>Yes</button>
+                </form>
+                <button type="button" class="btn btn-default" data-dismiss="modal"><span class="glyphicon glyphicon-remove"></span> No</button>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+{% else %}
+<div class="row">
+    <br>
+    <div class="col-sm-4"></div>
+    <div class="col-sm-4" align="center">
+        <a class="btn btn-success" href="/accounts/login">로그인이 필요합니다.</a>
+    </div>
+    <div class="col-sm-4"></div>
+</div>
+{% endif %}
+</body>
+<script>
+    $(document).ready(function() {
+        $('#datatable').dataTable();
+
+        $("[data-toggle=tooltip]").tooltip();
+
+    });
+
+    $(document).on("click", ".open-row", function () {
+        var sid = $(this).data('id');
+        $("#d_sid").val(sid);
+    });
+
+    function editStudata(id,name,a_name,day,stime,etime,onlocation,offlocation,on_lon,on_lat,off_lon,off_lat,etc){
+        $("#e_sid").val(id);
+        $("#name").val(name);
+        $("#day").val(day);
+        $("#stime").val(stime);
+        $("#etime").val(etime);
+        $("#onlocation").val(onlocation);
+        $("#offlocation").val(offlocation);
+        $("#on_lon").val(on_lon);
+        $("#on_lat").val(on_lat);
+        $("#off_lon").val(off_lon);
+        $("#off_lat").val(off_lat);
+        $("#etc").val(etc);
+
+    };
+</script>
+</body>

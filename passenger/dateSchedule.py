@@ -1,0 +1,52 @@
+#_*_ coding:utf-8 _*_
+import time
+
+class timeToDate:
+
+    def __init__(self):
+        self.t = time.localtime()
+
+    def timeToDmy(self):
+        fmt ="%m/%d/%Y"
+        dmy = time.strftime(fmt,self.t)
+
+        return dmy
+
+    def timeToYmd(self):
+        fmt ="%Y-%m-%d"
+        dmy = time.strftime(fmt,self.t)
+
+        return dmy
+
+    def timeToD(self):
+        d = "%a"
+        day = time.strftime(d,self.t)
+
+        if day == "Mon":
+            return "월"
+
+        elif day == "Tue":
+            return "화"
+
+        elif day == "Wed":
+            return "수"
+
+        elif day == "Thu":
+            return "목"
+
+        elif day == "Fri":
+            return "금"
+
+        elif day == "Sat":
+            return "토"
+
+        elif day == "Sun":
+            return "일"
+
+        return d
+
+    def timeToDtype(self,time):
+        timeList = time.split("/")
+        timeDtype = timeList[2]+"-"+timeList[0]+"-"+timeList[1]
+
+        return timeDtype

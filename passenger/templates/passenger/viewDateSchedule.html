@@ -1,0 +1,29 @@
+<div class="container">
+    <div class="row">
+        <div class = "row">
+        <h4>&nbsp&nbsp&nbsp&nbsp&nbsp이용 횟수 : {{count}}</h4> 
+        </div>
+        <div class = "row">
+        <div class="timeline-centered">
+        <article class="timeline-entry">
+            <div class="timeline-entry-inner">
+                <br>
+                {% for contact in contacts %}
+                <div class="timeline-icon bg-success">
+                    <i class="entypo-feather"></i>
+                </div>
+                <div class="timeline-label">
+                    <h>{{contact.a_name}}&nbsp{{contact.day}}&nbsp&nbsp&nbsp</h>
+                    <br>
+                    <br>
+                    <h2>{{contact.schedule|linebreaksbr}}</h2>
+                </div>
+                {% endfor %}
+            </div>
+        </article>
+        </div>
+
+    </div>
+    
+    </div>
+</div>

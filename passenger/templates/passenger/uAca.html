@@ -1,0 +1,324 @@
+<html>
+
+<head>
+    {% load staticfiles %}
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <meta charset="UTF-8">
+    <title>TAYO TIMELINE</title>
+    <script src="{% static 'js/jquery-3.1.0.min.js' %}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.3.7/js/tether.min.js"></script>
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+    <script src="{% static 'js/bootstrap.min.js' %}"></script>
+    <link href="{% static 'css/timeline.css' %}" rel="stylesheet">
+    <style>
+        .span2 {
+            position: fixed;
+            top: 10%;
+            right: 10%;
+            z-index: 10;
+        }
+    </style>
+</head>
+
+<body>
+    {% if user.is_authenticated %}
+    <div class="container">
+        <div class="row">
+            <div class="span2">
+                <button class="btn btn-primary btn-block" data-toggle="modal" data-target="#addInventory">인벤토리추가</button>
+            </div>
+            <div class="modal fade" id="addInventory" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            <h4 class="modal-title" id="myModalLabel">인벤토리 추가</h4>
+                        </div>
+                        <form action="/updateSchedule" method="post" id="addInventory">
+                            <div class="modal-body">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <select class="form-control" name="aid">
+                                              {% for aca in academies %}
+                                                  <option value="{{aca.id}}">{{aca.name}}</option>
+                                              {% endfor %}
+                                          </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <select class="form-control" name="gid">
+                                              {% for g in groups %}
+                                                  <option value="{{g.gid}}">{{g.gname}}</option>
+                                              {% endfor %}
+                                          </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <label>a_name:</label><input type="text" name="a_name" class="form-control">
+                                        <label>Day:</label>
+                                        <select class="form-control" name="day">
+                                          <option value="월">월</option>
+                                          <option value="화">화</option>
+                                          <option value="수">수</option>
+                                          <option value="목">목</option>
+                                          <option value="금">금</option>
+                                          <option value="토">토</option>
+                                        </select>
+                                        <label>time</label><input type="text" name="time" class="form-control">
+                                        <label>Branch</label>
+                                        <select class="form-control" name="bid">
+                                                <option value="1" selected>위례신도시</option>
+                                                <option value="2">미사신도시</option>
+                                        </select>
+                                        <br>
+                                        <textarea class="form-control" cols="20" name="schedule" rows="10"></textarea>
+                                    </div>
+                                    <br>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                <button type="submit" class="btn btn-primary">Add</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="timeline-centered">
+
+                <article class="timeline-entry">
+
+                    <div class="timeline-entry-inner">
+                        <div class="row">
+                            <div class="col-md-4"></div>
+                            <div class="col-md-4" aling="center"><button type="button" class="btn btn-danger" onclick="location.href='/'">홈</button> <button type="button" class="btn btn-info" onclick="location.href='uAca?aid={{aid}}&day=월'">월</button> <button type="button" class="btn btn-info"
+                                    onclick="location.href='uAca?aid={{aid}}&day=화'">화</button> <button type="button" class="btn btn-info" onclick="location.href='uAca?aid={{aid}}&day=수'">수</button> <button type="button" class="btn btn-info" onclick="location.href='uAca?aid={{aid}}&day=목'">목</button>                                <button type="button" class="btn btn-info" onclick="location.href='uAca?aid={{aid}}&day=금'">금</button> <button type="button" class="btn btn-info" onclick="location.href='uAca?aid={{aid}}&day=토'">토</button> <button type="button"
+                                    class="btn btn-primary" onclick="window.print()">출력</button></div>
+                        </div>
+                        <br> {% for contact in contacts %}
+                        <div class="timeline-icon bg-success">
+                            <i class="entypo-feather"></i>
+                        </div>
+                        <div class="timeline-label" value="{{contact.id}}">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="col-xs-8">
+                                        <input type="hidden" id="{{contact.id}}id" value="{{contact.id}}" />
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <label>Aid:</label>
+                                                <input type="text" class="form-control" id="{{contact.id}}aid" value="{{contact.aid}}" readonly/>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label>Gid:</label>
+                                                <select class="form-control" id="{{contact.id}}gid">
+                                    {% for g in groups %}
+                                        {% if g.gid == contact.gid %}
+                                        <option value="{{g.gid}}" selected>{{g.gname}}</option>
+                                        {% else %}
+                                        <option value="{{g.gid}}">{{g.gname}}</option>
+                                        {% endif %}
+                                    {% endfor %}
+                                </select>
+                                            </div>
+                                        </div>
+                                        <label>a_name:</label><input type="text" class="form-control" id="{{contact.id}}a_name" value="{{contact.a_name}}">
+                                        <label>Day:</label>
+                                        <input type="text" class="form-control" id="{{contact.id}}day" value="{{contact.day}}">
+                                        <label>time</label><input type="text" class="form-control" id="{{contact.id}}time" value="{{contact.time}}">
+                                        <label>Branch</label>
+                                        <select class="form-control" id="{{contact.id}}bid">
+                                          {% for b in branch %}
+                                            {% if b.id == contact.bid %}
+                                                <option value="{{b.id}}" selected>{{b.location}}</option>
+                                            {% else %}
+                                                <option value="{{b.id}}">{{b.location}}</option>
+                                            {% endif %}
+                                          {% endfor %}
+                                        </select>
+                                        <br>
+                                    </div>
+                                    <textarea class="form-control" cols="20" id="{{contact.id}}schedule" rows="10">{{contact.schedule}}</textarea>
+                                    <br>
+                                    <button type="button" onclick="saveSchedule('{{contact.id}}')" class="btn btn-primary">저장</button>
+                                    <button type="button" onclick="updateSchedule('{{contact.id}}')" class="btn btn-success">수정</button>
+                                    <button type="button" onclick="deleteSchedule('{{contact.id}}')" class="btn btn-danger">삭제</button>
+                                </div>
+                                <div class="col-md-8">
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <!-- Nav tabs -->
+                                            <div class="card">
+                                                <ul class="nav nav-tabs" role="tablist">
+                                                    <li role="presentation" class="active"><a href="#{{contact.id}}memo" aria-controls="memo" role="tab" data-toggle="tab">메모장</a></li>
+                                                    <li role="presentation"><a href="#{{contact.id}}home" aria-controls="home" role="tab" data-toggle="tab">지난스케쥴</a></li>
+                                                    <li role="presentation"><a href="#{{contact.id}}list" aria-controls="list" role="tab" data-toggle="tab">학생리스트</a></li>
+                                                </ul>
+
+                                                <!-- Tab panes -->
+                                                <div class="tab-content">
+                                                    <div role="tabpanel" class="tab-pane" id="{{contact.id}}home">{{contact.p_schedule|linebreaksbr}}</div>
+                                                    <div role="tabpanel" class="tab-pane" id="{{contact.id}}list">
+                                                        <table class="table table-condensed">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th>이름</th>
+                                                                    <th>학원</th>
+                                                                    <th>시작</th>
+                                                                    <th>마침</th>
+                                                                    <th>등원</th>
+                                                                    <th>하원</th>
+                                                                    <th>기타</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                {% for s in students %}
+                                                                <tr>
+                                                                    <td>{{s.name}}</td>
+                                                                    <td>{{s.a_name}}</td>
+                                                                    <td>{{s.stime}}</td>
+                                                                    <td>{{s.etime}}</td>
+                                                                    <td>{{s.onlocation}}</td>
+                                                                    <td>{{s.offlocation}}</td>
+                                                                    <td>{{s.etc}}</td>
+                                                                </tr>
+                                                                {% endfor %}
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                    <div role="tabpanel" class="tab-pane active" id="{{contact.id}}memo">
+                                                        <input type="hidden" class="form-control" name="class" value="memo" />
+                                                        <input type="hidden" class="form-control" name="id" value="{{contact.id}}" />
+                                                        <textarea class="form-control" cols="20" id="{{contact.id}}text" rows="10">{{contact.memo}}</textarea>
+                                                        <br>
+                                                        <button type="button" onclick="doMemo('save','{{contact.id}}')" class="btn btn-primary">저장</button>
+                                                        <button type="button" onclick="doMemo('edit','{{contact.id}}')" class="btn btn-success">수정</button>
+                                                        <button type="button" onclick="doMemo('delete','{{contact.id}}')" class="btn btn-danger">삭제</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <hr>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                </article>
+
+            </div>
+
+        </div>
+    </div>
+    {% else %}
+    <div class="row">
+        <br>
+        <div class="col-sm-4"></div>
+        <div class="col-sm-4" align="center">
+            <a class="btn btn-success" href="/accounts/login">로그인이 필요합니다.</a>
+        </div>
+        <div class="col-sm-4"></div>
+    </div>
+    {% endif %}
+</body>
+<script>
+    function updateSchedule(sid) {
+        var num_check = /^[0-9]*$/;
+        aid = $("#" + sid + "aid").val()
+        gid = $("#" + sid + "gid").val()
+        id = sid
+        a_name = $("#" + sid + "a_name").val()
+        day = $("#" + sid + "day").val()[0]
+        time = $("#" + sid + "time").val()
+        schedule = $("#" + sid + "schedule").val()
+        bid = $("#" + sid + "bid").val()
+        if (time == "") {
+            alert("시간을 입력해주세요.");
+        } else if (num_check.test(time)) {
+            $.ajax({
+                url: "/uSchedule",
+                type: "POST",
+                data: {
+                    what: 'schedule',
+                    id: sid,
+                    aid: aid,
+                    gid: gid,
+                    id: id,
+                    a_name: a_name,
+                    day: day,
+                    time: time,
+                    schedule: schedule,
+                    bid: bid,
+                },
+                success: function(data) {
+                    $("#" + sid + "schedule").val(data)
+                    alert("완료했습니다.")
+                }
+            });
+        } else {
+            alert("시간은 숫자만 입력하세요.");
+        }
+    }
+
+    function saveSchedule(sid) {
+        $.ajax({
+            url: "/saveSchedule",
+            type: "POST",
+            data: {
+                sid: sid,
+            },
+            success: function(data) {
+                alert(data)
+            }
+        });
+    }
+
+    function deleteSchedule(sid) {
+        $.ajax({
+            url: "/deleteSchedule",
+            type: "POST",
+            data: {
+                sid: sid,
+            },
+            success: function(data) {
+                alert(data)
+                window.location.reload();
+            }
+        });
+    }
+
+    function doMemo(clas, mid) {
+        what = "memo";
+        btn = clas;
+        id = mid;
+        memoid = id + 'text'
+        memo = $("#" + memoid).val()
+
+        $.ajax({
+            url: "/uSchedule",
+            type: "POST",
+            data: {
+                what: what,
+                memo: memo,
+                btn: clas,
+                id: id,
+            },
+            success: function(data) {
+                $("#" + memoid).val(data)
+                alert("완료했습니다.")
+            }
+        });
+    }
+</script>
+
+</html>
