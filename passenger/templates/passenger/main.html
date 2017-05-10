@@ -24,7 +24,6 @@
 </head>
 
 <body id="background">
-    {% if user.is_authenticated %}
     <!-- <div class="row" style="background-color: white">
         <h4 style="background-color: white">
             <div class="row">
@@ -206,16 +205,6 @@
         <div class="col-sm-4" id="schedule" align="center"></div>
         <div class="col-sm-4"></div>
     </div>
-    {% else %}
-    <div class="row">
-        <br>
-        <div class="col-sm-4"></div>
-        <div class="col-sm-4" align="center">
-            <a class="btn btn-success" href="/accounts/login">로그인이 필요합니다.</a>
-        </div>
-        <div class="col-sm-4"></div>
-    </div>
-    {% endif %}
 </body>
 <script>
     function getSchedule(gid) {

@@ -3,11 +3,13 @@ from django.shortcuts import render, render_to_response, redirect
 from django.template import RequestContext
 from passenger.models import Student, Academy, Schedule, ShuttleSchedule, Group, ScheduleDate,Branch,Community
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpRequest, HttpResponseRedirect, JsonResponse
 from django.core import serializers
 from passenger.dateSchedule import timeToDate
 import json
 
+@login_required
 def main(request):
     academies = Academy.objects.order_by('-gid')
     groups = Group.objects.order_by('-gid')
