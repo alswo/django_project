@@ -192,7 +192,7 @@ def putSchedule(request):
 def updateSchedule(request):
     if request.method == "GET":
         area = Area.objects.all()
-        return render_to_response('updateSchedule.html',{'area':area,'user':request.user})
+        return render_to_response('supdateSchedule.html',{'area':area,'user':request.user})
 
     elif request.method == "POST":
         updateflag = request.POST.get('updateflag')
@@ -317,7 +317,7 @@ def updateSchedule(request):
 
             academy = Academy.objects.filter(bid=bid)
 
-            return render_to_response('updateSchedule.html',{"academy":academy,"bid":bid,'user':request.user})
+            return render_to_response('supdateSchedule.html',{"academy":academy,"bid":bid,'user':request.user})
 
         elif update == '0':
             iid = request.POST.get('iid')
@@ -338,7 +338,7 @@ def updateSchedule(request):
             except:
                 return HttpResponse("inven delete error:inventory")
 
-            return render_to_response('updateSchedule.html',{"academy":academy,"bid":bid,'user':request.user})
+            return render_to_response('supdateSchedule.html',{"academy":academy,"bid":bid,'user':request.user})
 
         else:
             carflag = request.POST.get('carflag')
@@ -375,4 +375,4 @@ def updateSchedule(request):
                 for i in invens:
                     contacts.extend(Inventory.objects.filter(id = i.id).prefetch_related('scheduletables'))
 
-                return render_to_response('updateSchedule.html',{"time":time,"day":day,"branch":branch,"academy":academy,"carnum": carnum,"bid":bid,"contacts":contacts,'user':request.user})
+                return render_to_response('supdateSchedule.html',{"time":time,"day":day,"branch":branch,"academy":academy,"carnum": carnum,"bid":bid,"contacts":contacts,'user':request.user})

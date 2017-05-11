@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  {% load staticfiles %}
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="">
+  <meta name="author" content="">
+  <meta charset="UTF-8">
+  <title>TAYO</title>
+  <script src="{% static 'js/jquery-1.10.2.js' %}"></script>
+  <script src="{% static 'js/dynamicTable.js' %}"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.3.7/js/tether.min.js"></script>
+  <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+  <script src="{% static 'js/bootstrap.min.js' %}"></script>
+
+  <style>
+    .thstyle2 {
+      text-align: center;
+      width: 26%;
+    }
+  </style>
+  <script>
+    var userAgent = navigator.userAgent.toLowerCase();
+
+    if (userAgent.match('iphone')) {
+      document.write('<link rel="apple-touch-icon" href="/mobile/image/apple-touch-icon.png" />')
+    } else if (userAgent.match('ipad')) {
+      document.write('<link rel="apple-touch-icon" sizes="72*72" href="/mobile/image/apple-touch-icon-ipad.png" />')
+    } else if (userAgent.match('ipod')) {
+      document.write('<link rel="apple-touch-icon" href="/mobile/image/apple-touch-icon.png" />')
+    } else if (userAgent.match('android')) {
+      document.write('<link rel="shortcut icon" href="/mobile/image/favicon.ico" />')
+    } else {
+      document.write('<link rel="shortcut icon" href="/mobile/image/favicon.ico" />')
+    }
+  </script>
+</head>
+
+<body id="background">
+  {% if user.is_authenticated %}
+  <!-- <div class="row" style="background-color: white">
+      <h4 style="background-color: white">
+          <div class="row">
+          <p class="text-center" id="top_logo"style="color:rgb(68,114,179)"><img src = "{% static 'img/tayologo.png' %}" class="img-fluid" alt="Responsive image" width="9%"></img> 안전한 어린이통학 전문 서비스</p>
+          </div>
+      </h4>
+</div> -->
+  <div class="container">
+    <nav class="navbar navbar-default navbar-fixed-top" role="navigation" id="dateNav">
+      <div class="container">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+          <a class="navbar-brand" href="/">
+            <img alt="ShuttleTayo" width="22%" src="{% static 'img/tayologo.png' %}"></img>
+          </a>
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                  <span class="sr-only">Toggle navigation</span>
+                  <span class="icon-bar"></span>
+                  <span class="icon-bar"></span>
+                  <span class="icon-bar"></span>
+              </button>
+        </div>
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+          <ul class="nav navbar-nav navbar-right">
+            <!--
+                  <li>
+                      <a href="dateSchedule?what=single">학원 일짜별 스케쥴 보기</a>
+                  </li>
+                  <li>
+                      <a href="dateSchedule?what=range">구간별 스케쥴 카운팅</a>
+                  </li>
+                  -->
+            <li>
+              <a href="#">반갑습니다 {{user.first_name}}님</a>
+            </li>
+            <li>
+              <a href="logout">Logout</a>
+            </li>
+          </ul>
+        </div>
+        <!-- /.navbar-collapse -->
+      </div>
+      <!-- /.container -->
+    </nav>
+  </div>
+  <br>
+  <br>
+  <br>
+  <div class="row container">
+    <div class="col-md-2"></div>
+    <div class="col-md-2">
+      <label>AREA:</label>
+      <select name="day" class="form-control" form="searchform" id = "areaSelected">
+              <option vlaue="default" selected>지역선택</option>
+          {% for a in area %}
+              <option value="{{a.id}}">{{a.name}}</option>
+          {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-2">
+      <label>BRANCH:</label>
+      <select name="day" class="form-control" form="searchform"  placeholder='지점' id="branch">
+      </select>
+    </div>
+    <div class="col-md-2">
+      <label>DAY:</label>
+      <select name="day" class="form-control" form="searchform">
+                      <option value="월" selected>월</option>
+                      <option value="화">화</option>
+                      <option value="수">수</option>
+                      <option value="목">목</option>
+                      <option value="금">금</option>
+                      <option value="토">토</option>
+      </select>
+    </div>
+    <!--<div class="col-md-3">
+      <label>ACADEMY:</label>
+        <select name="aid" class="form-control" form="searchform">
+                      <option value="" selected>학원</option>
+                      {% for a in academy %}
+                      <option  value="{{a.id}}">{{a.name}}</option>
+                      {% endfor %}
+        </select>
+    </div>-->
+    <div class="col-md-2">
+      <label>TIME:</label>
+      <input type="text" name='time' placeholder='시간' class="form-control" form="searchform" />
+    </div>
+    <div class="col-md-2">
+      <label>SEARCH:</label>
+      <input class="hidden" name="bid" value="{{bid}}" form="searchform" />
+      <form action="updateSchedule" method="post" enctype='application/json' id="searchform">
+        <input type="submit" class="btn btn-success" value="검색">
+      </form>
+    </div>
+  </div>
+  <br>
+  <div class="row">
+    <div class="col-md-12">
+      <div class="col-md-12 table-responsive">
+        <br>
+        <br>
+        <br> {% for c in contacts %}
+        <div class="row table-container">
+          <table class="table table-bordered table-schedule">
+            <thead>
+              <tr>
+                <th class="text-center">시간</th>
+                <th class="text-center thstyle2">주소</th>
+                <th class="text-center thstyle2">이름</th>
+                <th class="text-center">학원선택</th>
+                <th class="text-center">선택학원</th>
+                <th class="text-center">등하원</th>
+              </tr>
+            </thead>
+            <tbody class="table-body">
+              {% for s in c.scheduletables.all %}
+              <tr>
+                <td data-name="time"><input onchange="emptyTempList();" type="text" name="time[]" placeholder="Time" class="form-control" form="scheduleform{{c.id}}" value="{{s.time}}" /></td>
+                <td data-name="addr"><input type="text" name="addr[]" placeholder="Address" class="form-control" form="scheduleform{{c.id}}" value="{{s.addr}}" /></td>
+                <td data-name="addr"><input type="text" name="name[]" placeholder="Name" class="form-control" form="scheduleform{{c.id}}" value="{% for name in s.sname %}{{name}}{% include 'comma.html' %}{% endfor %}" /></td>
+                <td data-name="sel"><select class="form-control" onchange="addAca(this)"><option value="">학원선택</option>{% for a in academy %}<option value = "{{a.id}}">{{a.name}}({{a.id}})</option>{% endfor %}</select></td>
+                <td data-name="academy"><input type="text" name="academy[]" class="form-control" form="scheduleform{{c.id}}" value="{% for aid in s.alist %}{{aid}}{% include 'comma.html' %}{% endfor %}" /></td>
+                <td data-name="load">
+                  {% if s.lflag == 1 %}
+                  <select name="load[]" form="scheduleform{{c.id}}">
+                    <option value="">등하원</option>
+                    <option value="1" selected>등원</option>
+                    <option value="2">하원</option>
+                  </select> {% endif %} {% if s.lflag == 0 %}
+                  <select name="load[]" form="scheduleform{{c.id}}">
+                    <option value="">등하원</option>
+                    <option value="1">등원</option>
+                    <option value="0" selected>하원</option>
+                  </select> {% endif %} {% if s.lflag == 2 %}
+                  <select name="load[]" form="scheduleform{{c.id}}">
+                    <option value="">출발</option>
+                  </select> {% endif %} {% if s.lflag == 3 %}
+                  <select name="load[]" form="scheduleform{{c.id}}">
+                    <option value="">도착</option>
+                  </select> {% endif %}
+                </td>
+                <td data-name="move">
+                  <a href="javascript:void(0)" class="glyphicon glyphicon-chevron-up up"></a>
+                  <a href="javascript:void(0)" class="glyphicon glyphicon-chevron-down down"></a>
+                </td>
+                <td data-name="del"><button name="del" class="btn btn-danger glyphicon glyphicon-remove row-remove"></button></td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          <a class="btn btn-default pull-right addrow" onclick="emptyTempList();">Add Row</a>
+        </div>
+        <br>
+        <div class="row">
+          <div class="col-md-10"></div>
+          <div class="col-md-1">
+            <form action="updateSchedule" method="post" enctype='application/json' id="scheduleform{{c.id}}">
+              <input class="hidden" name="iid" value="{{c.id}}" form="scheduleform{{c.id}}" />
+              <input class="hidden" name="bid" value="{{bid}}" form="scheduleform{{c.id}}" />
+              <input class="hidden" name="update" value="1" form="scheduleform{{c.id}}" />
+              <input type="submit" class="btn btn-success pull-right" value="저장">
+            </form>
+          </div>
+          <div class="col-md-1">
+            <form action="updateSchedule" method="post" id="deleteform{{c.id}}">
+              <input class="hidden" name="iid" value="{{c.id}}" form="deleteform{{c.id}}" />
+              <input class="hidden" name="bid" value="{{bid}}" form="deleteform{{c.id}}" />
+              <input class="hidden" name="update" value="0" form="deleteform{{c.id}}" />
+              <input type="submit" class="btn btn-success" value="삭제">
+            </form>
+          </div>
+        </div>
+        <br>
+        <br> {% endfor %}
+      </div>
+      {% else %}
+      <div class="row">
+        <br>
+        <div class="col-sm-4"></div>
+        <div class="col-sm-4" align="center">
+          <a class="btn btn-success" href="/accounts/login">로그인이 필요합니다.</a>
+        </div>
+        <div class="col-sm-4"></div>
+      </div>
+      {% endif %}
+</body>
+<script>
+  var tempList = new Array();
+
+  function addAca(selected) {
+    tempList.push(selected.value);
+    selected.parentNode.parentNode.children[4].children[0].value = tempList;
+    console.log(selected.parentNode.parentNode.children[4].children[0].value)
+  }
+
+
+  function emptyTempList() {
+    tempList.splice(0, tempList.length);
+  }
+
+  $('.table-container').on('click', '.addrow', function() {
+    $(this).parent().find('.table-body').append(
+      '<tr><td data-name="time"><input onchange="emptyTempList();" type="text" name="time[]" placeholder="Time" class="form-control" form="scheduleform"/></td><td><input type="text" name="addr[]" placeholder="Address" class="form-control" form="scheduleform"/></td><td data-name="name"><input type="text" name="name[]" placeholder="Name" class="form-control" form="scheduleform"/></td><td data-name="sel"><select class="form-control" onchange="addAca(this)"><option value="">학원선택</option>{% for a in academy %}<option value = "{{a.id}}">{{a.name}}({{a.id}})</option>{% endfor %}</select></td><td data-name="academy"><input type="text" name="academy[]" class="form-control" form="scheduleform"/></td><td data-name="load"><select name="load[]" form="scheduleform"><option value="">등하원</option><option value="1">등원</option><option value="0">하원</option></select></td><td data-name="move"><a href="javascript:void(0)" class="glyphicon glyphicon-chevron-up up"></a><a href="javascript:void(0)" class="glyphicon glyphicon-chevron-down down"></a></td><td data-name="del"><button name="del" class="btn btn-danger glyphicon glyphicon-remove row-remove"></button></td></tr>'
+    )
+  });
+
+  $('.table-schedule').on('click', '.up,.down', function() {
+    var row = $(this).parent().parent();
+    if ($(this).is(".up")) {
+      row.each(function() {
+        var previndex = $(this).prev().index();
+        if (previndex >= 0) {
+          var rowindex = $(this).index();
+          $(this).attr("id", previndex);
+          $(this).prev().attr("id", rowindex);
+          $(this).insertBefore($(this).prev());
+        }
+      });
+    } else {
+      $(row.get().reverse()).each(function() {
+        var nextindex = $(this).next().index();
+        if (nextindex >= 0) {
+          var rowindex = $(this).index();
+          $(this).attr("id", nextindex);
+          $(this).next().attr("id", rowindex);
+          $(this).insertAfter($(this).next());
+        }
+      });
+    }
+  });
+
+  $(".table-schedule").on('click', '.row-remove', function(event) {
+    $(this).parent().parent().remove();
+  });
+
+  $('#areaSelected').on('change',function(){
+    // updateflag = 1 -> select area;
+    $.ajax({
+       type: 'POST',
+       url: 'updateSchedule',
+       data: {
+           area: this.value,
+           updateflag: 1,
+         },
+       success: function(data) {
+         console.log();
+      }
+    });
+  })
+</script>
+
+</html>

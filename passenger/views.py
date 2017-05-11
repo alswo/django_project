@@ -1,7 +1,7 @@
 #
 from django.shortcuts import render, render_to_response, redirect
 from django.template import RequestContext
-from passenger.models import Student, Academy, Schedule, ShuttleSchedule, Group, ScheduleDate,Branch,Community
+from passenger.models import Commute, Academy, Schedule, ShuttleSchedule, Group, ScheduleDate,Branch,Community
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpRequest, HttpResponseRedirect, JsonResponse
@@ -35,7 +35,7 @@ def safetyTayo(request):
     if request.method =="GET":
         schedule = request.GET.get('schedule')
         aid = request.GET.get('aid')
-        contacts = Student.objects.filter(aid = aid)
+        contacts = Commute.objects.filter(aid = aid)
 
     return render_to_response('passenger/tayo.html', {"contacts" : contacts, "schedule" : schedule, "aid" : aid,'user':request.user})
 
@@ -168,7 +168,7 @@ def uAca(request):
         aid = request.GET.get('aid')
         day = request.GET.get('day')
         academy = Academy.objects.get(id = aid)
-        students = Student.objects.filter(aid = aid).filter(day = day).order_by('stime')
+        students = Commute.objects.filter(aid = aid).filter(day = day).order_by('stime')
         contacts = ShuttleSchedule.objects.filter(a_name__contains = academy.name).filter(day=day).order_by('time')
         branch = Branch.objects.all()
         academies = Academy.objects.all()
@@ -270,14 +270,14 @@ def studata(request):
     if request.method == "GET":
         if request.GET.get('id'):
             aid = request.GET.get('id')
-            students = Student.objects.filter(aid=aid).order_by('-id')
+            students = Commute.objects.filter(aid=aid).order_by('-id')
             academies = Academy.objects.order_by('-id')
 
             return render_to_response('passenger/studata.html', {"students" : students, "academies" : academies ,'user':request.user})
 
         else:
             academies = Academy.objects.order_by('-id')
-            students = Student.objects.order_by('-id')
+            students = Commute.objects.order_by('-id')
 
             return render_to_response('passenger/studata.html', {"students" : students, "academies" : academies,'user':request.user })
 
@@ -307,12 +307,12 @@ def studata(request):
 
             a_name = Academy.objects.get(id = aid).name
 
-            student = Student(name = name, aid = aid,a_name = a_name, day = day, stime = stime, etime = etime, onlocation = onlocation,
+            student = Commute(name = name, aid = aid,a_name = a_name, day = day, stime = stime, etime = etime, onlocation = onlocation,
                                 offlocation = offlocation, on_lon = on_lon, on_lat = on_lat, off_lon = off_lon, off_lat = off_lat,etc = etc)
 
             student.save()
 
-            students = Student.objects.order_by('id')
+            students = Commute.objects.order_by('id')
             academies = Academy.objects.order_by('-id')
 
             return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
@@ -342,7 +342,7 @@ def studata(request):
                 off_lat = 0
 
             a_name = Academy.objects.get(id = aid).name
-            student = Student.objects.get(id = id)
+            student = Commute.objects.get(id = id)
 
             student.name = name
             student.aid = aid
@@ -360,18 +360,18 @@ def studata(request):
 
             student.save()
 
-            students = Student.objects.order_by('id')
+            students = Commute.objects.order_by('id')
             academies = Academy.objects.order_by('-id')
 
             return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
         elif request.POST.get('class') == 'delete':
             id = request.POST.get('d_sid')
-            student = Student.objects.get(id = id)
+            student = Commute.objects.get(id = id)
             student.delete()
 
             academies = Academy.objects.order_by('-id')
-            students = Student.objects.order_by('-id')
+            students = Commute.objects.order_by('-id')
 
             return render_to_response('passenger/studata.html', {"students": students, "academies" : academies,'user':request.user})
 

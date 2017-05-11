@@ -21,7 +21,7 @@ class Academy(models.Model):
     lat = models.FloatField(null=True, blank=True)
     bid = models.IntegerField()
 
-class Student(models.Model):
+class Commute(models.Model):
     name = models.CharField(max_length = 10)
     a_name = models.CharField(max_length = 50)
     day = models.CharField(max_length = 20)
