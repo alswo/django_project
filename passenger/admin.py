@@ -1,5 +1,5 @@
 from django.contrib import admin
-from passenger.models import Academy, Student, Schedule, ShuttleSchedule, AcademySchedule, Group, PhoneList, ScheduleDate, Branch, StudentInfo,Community
+from passenger.models import Academy, Commute, Schedule, ShuttleSchedule, AcademySchedule, Group, PhoneList, ScheduleDate, Branch, StudentInfo,Community
 
 class ScheduleAdmin(admin.ModelAdmin):
     list_display = ('name', 's_name', 'load','unload')
@@ -36,7 +36,7 @@ admin.site.register(Branch, BranchAdmin)
 admin.site.register(Group, GroupAdmin)
 admin.site.register(Schedule,ScheduleAdmin)
 admin.site.register(Academy,AcademyAdmin)
-admin.site.register(Student)
+admin.site.register(Commute)
 admin.site.register(ShuttleSchedule,ShuttleScheduleAdmin)
 admin.site.register(AcademySchedule,AcademyScheduleAdmin)
 admin.site.register(PhoneList,PhoneListAdmin)
