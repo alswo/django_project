@@ -5,4 +5,5 @@ urlpatterns = patterns('',
     url(r'^putSchedule', views.putSchedule),
     url(r'^getSchedule', views.getSchedule),
     url(r'^todayLoad', views.todayLoad),
+    url(r'^updateSchedule', views.updateSchedule),
 )
