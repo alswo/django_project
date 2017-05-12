@@ -264,6 +264,7 @@ def acaphone(request):
             pnlist.append(academy.name)
         return JsonResponse({"plist" : plist, "pnlist" : pnlist})
 
+@login_required
 @csrf_exempt
 def studata(request):
 

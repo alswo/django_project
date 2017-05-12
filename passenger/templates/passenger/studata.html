@@ -21,7 +21,6 @@
     }
 </style>
 <body>
-{% if user.is_authenticated %}
 <div class="container">
     <div class="row">
         <h2 class="text-center"><a href="/"><img src = "{% static 'img/tayologo.png' %}"style = "width:5%"></img></a> 학원별 학생데이터 관리</h2>
@@ -56,10 +55,12 @@
                     <th class="thstyle">요일</th>
                     <th class="thstyle">수업시작</th>
                     <th class="thstyle">수업끝</th>
+<!--
                     <th class="thstyle">등원 lon</th>
                     <th class="thstyle">등원 lat</th>
                     <th class="thstyle">하원 lon</th>
                     <th class="thstyle">하원 lat</th>
+//-->
                     <th class="thstyle2">등원위치</th>
                     <th class="thstyle2">하원위치</th>
                     <th class="thstyle2">기타사항</th>
@@ -75,10 +76,12 @@
                     <td>{{s.day}}</td>
                     <td>{{s.stime}}</td>
                     <td>{{s.etime}}</td>
+<!--
                     <td>{{s.on_lon}}</td>
                     <td>{{s.on_lat}}</td>
                     <td>{{s.off_lon}}</td>
                     <td>{{s.off_lat}}</td>
+//-->
                     <td>{{s.onlocation}}</td>
                     <td>{{s.offlocation}}</td>
                     <td>{{s.etc}}</td>
@@ -236,16 +239,6 @@
     </div>
     <!-- /.modal-dialog -->
 </div>
-{% else %}
-<div class="row">
-    <br>
-    <div class="col-sm-4"></div>
-    <div class="col-sm-4" align="center">
-        <a class="btn btn-success" href="/accounts/login">로그인이 필요합니다.</a>
-    </div>
-    <div class="col-sm-4"></div>
-</div>
-{% endif %}
 </body>
 <script>
     $(document).ready(function() {
