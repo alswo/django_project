@@ -6,4 +6,6 @@ urlpatterns = patterns('',
     url(r'^getSchedule', views.getSchedule),
     url(r'^todayLoad', views.todayLoad),
     url(r'^updateSchedule', views.updateSchedule),
+    url(r'^updateArea', views.updateArea),
+    url(r'^csmain', views.csmain),
 )
