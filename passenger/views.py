@@ -128,6 +128,7 @@ def academySchedule(request):
 
         return render_to_response('passenger/academySchedule.html', {"contacts" : contacts, "aid" : aid,'user':request.user})
 
+@login_required
 def driverSchedule(request):
     if request.method == "GET":
         gid = request.GET.get('gid')

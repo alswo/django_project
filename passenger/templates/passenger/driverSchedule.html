@@ -28,7 +28,6 @@
     </style>
 </head>
 <body>
-{% if user.is_authenticated %}
 <div class="container">
     <div class="row">
 
@@ -98,16 +97,6 @@
     </div>
 </div>
 </div>
-{% else %}
-<div class="row">
-    <br>
-    <div class="col-sm-4"></div>
-    <div class="col-sm-4" align="center">
-        <a class="btn btn-success" href="/accounts/login">로그인이 필요합니다.</a>
-    </div>
-    <div class="col-sm-4"></div>
-</div>
-{% endif %}
 </body>
 <script>
     function call(alist){
