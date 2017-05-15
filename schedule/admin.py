@@ -2,13 +2,13 @@ from django.contrib import admin
 from schedule.models import Branch, Building, Inventory, ScheduleTable
 from simple_history.admin import SimpleHistoryAdmin
 # Register your models here.
-class BranchAdmin(admin.ModelAdmin):
+class BranchAdmin(SimpleHistoryAdmin):
     list_display = ('bname','id',)
 
 class BuildingAdmin(admin.ModelAdmin):
     list_display = ('name','id',)
 
-class InventoryAdmin(admin.ModelAdmin):
+class InventoryAdmin(SimpleHistoryAdmin):
     list_display = ('__unicode__',)
 
 class ScheduleTableAdmin(SimpleHistoryAdmin):

@@ -15,7 +15,7 @@ class Inventory(models.Model):
     stime = models.IntegerField()
     etime = models.IntegerField()
     #building = models.IntegerField()
-
+    history = HistoricalRecords()
 
     def __unicode__(self):
         return "[{0}] {1} {2}~{3}".format(self.bid, self.day, self.stime, self.etime)
@@ -56,6 +56,8 @@ class InventoryRequest(models.Model):
 class Area(models.Model):
     name = models.CharField(max_length=20)
 
+    history = HistoricalRecords()
+
     def __unicode__(self):
         return self.name
 
@@ -68,6 +70,8 @@ class Branch(models.Model):
     lat = models.FloatField()
     carlist = ArrayField(models.IntegerField())
     alist = ArrayField(models.IntegerField())
+
+    history = HistoricalRecords()
 
 class Building(models.Model):
     branch = Branch.objects.all()
