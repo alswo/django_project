@@ -121,7 +121,7 @@
                     plist = data
                     list = '<br>'
                     for (i=0; i < plist.plist.length; i++){
-                        list += '<button class="btn btn-warning btn-lg btn-block" onclick="document.location.href='+"'tel:"+plist.plist[i]+"'"+'">'+plist.pnlist[i]+'&nbsp&nbsp<span class="glyphicon glyphicon-earphone" aria-hidden="true"></span></button><br>'
+                        list += '<button class="btn btn-warning btn-lg btn-block" onclick="document.location.href='+"'tel:"+plist.plist[i]+"'"+'">'+plist.pnlist[i]+' ('+plist.plist[i]+')'+'&nbsp&nbsp<span class="glyphicon glyphicon-earphone" aria-hidden="true"></span></button><br>'
                     }
                     document.getElementById('acaphone').innerHTML = list
                 }
