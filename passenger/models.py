@@ -4,7 +4,6 @@ from django.db import models
 import datetime
 from simple_history.models import HistoricalRecords
 
-
 class Group(models.Model):
     gname = models.CharField(max_length = 80, null = True, blank = True)
     academies = ArrayField(models.CharField(max_length = 30, null = True, blank = True))
@@ -153,8 +152,8 @@ class StudentInfo(models.Model):
     aname = models.CharField(max_length = 20)
     sname = models.CharField(max_length = 10)
     bname = models.CharField(max_length = 20)
-    phone1 = models.IntegerField()
-    phone2 = models.IntegerField(null=True, blank=True)
+    phone1 = models.IntegerField(null=True, blank=True, default=0)
+    phonelist = ArrayField(models.IntegerField())
     history = HistoricalRecords()
 
 class AcademySchedule(models.Model):

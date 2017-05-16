@@ -15,11 +15,23 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.3.7/js/tether.min.js"></script>
   <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
   <script src="{% static 'js/bootstrap.min.js' %}"></script>
+  <link href="{% static 'css/bootstrap-tagsinput.css' %}" rel="stylesheet">
+  <script src="{% static 'js/bootstrap-tagsinput.js' %}"></script>
 
   <style>
     .thstyle2 {
       text-align: center;
       width: 26%;
+    }
+
+    .thstyle3 {
+      text-align: center;
+      width: 8%;
+    }
+
+    #savedelete,
+    #searchedByCar {
+      display: inline
     }
   </style>
   <script>
@@ -91,10 +103,11 @@
   <br>
   <br>
   <div class="row container">
+    <!-- Button trigger modal -->
     <div class="col-md-2"></div>
     <div class="col-md-2">
       <label>AREA:</label>
-      <select name="day" class="form-control" form="searchform" id = "areaSelected">
+      <select name="area" class="form-control" form="searchform" id="areaSelected">
               <option vlaue="default" selected>지역선택</option>
           {% for a in area %}
               <option value="{{a.id}}">{{a.name}}</option>
@@ -103,7 +116,7 @@
     </div>
     <div class="col-md-2">
       <label>BRANCH:</label>
-      <select name="day" class="form-control" form="searchform"  placeholder='지점' id="branch">
+      <select name="bid" class="form-control" form="searchform" placeholder='지점' id="branch">
       </select>
     </div>
     <div class="col-md-2">
@@ -128,21 +141,47 @@
     </div>-->
     <div class="col-md-2">
       <label>TIME:</label>
-      <input type="text" name='time' placeholder='시간' class="form-control" form="searchform" />
+      <input type="text" name='time' form="searchform" class="form-control" id="timeSerach" />
     </div>
     <div class="col-md-2">
       <label>SEARCH:</label>
-      <input class="hidden" name="bid" value="{{bid}}" form="searchform" />
       <form action="updateSchedule" method="post" enctype='application/json' id="searchform">
-        <input type="submit" class="btn btn-success" value="검색">
+        <input type="hidden" name='updateflag' class="form-control" value="2" form="searchform" />
+        <input type="hidden" name='searchinven' class="form-control" value="1" form="searchform" />
+        <input type="submit" id="carlistSearch" class="btn btn-success" value="검색">
       </form>
     </div>
   </div>
   <br>
+  <br>
   <div class="row">
-    <div class="col-md-12">
+    <div class="col-md-2"></div>
+    <div class="col-md-8" align="center">
+      <input type="hidden" name='bid' class="form-control" value="{{bid}}" form="searchform2" />
+      <input type="hidden" name='day' class="form-control" value="{{day}}" form="searchform2" />
+      <input type="hidden" name='time' class="form-control" value="{{time}}" form="searchform2" />
+      <input type="hidden" name='updateflag' class="form-control" value="2" form="searchform2" />
+      <input type="hidden" name='searchinven' class="form-control" value="2" form="searchform2" />
+      <input type="hidden" name='updateflag' class="form-control" value="2" form="searchform2" />
+      <div class="row">
+        {% for car in carlist %}
+        <form action="updateSchedule" method="post" id="searchedByCar">
+          <input type="hidden" name='bid' class="form-control" value="{{bid}}" />
+          <input type="hidden" name='day' class="form-control" value="{{day}}" />
+          <input type="hidden" name='time' class="form-control" value="{{time}}" />
+          <input type="hidden" name='updateflag' class="form-control" value="2" />
+          <input type="hidden" name='searchinven' class="form-control" value="2" />
+          <input type="hidden" name='updateflag' class="form-control" value="2" />
+          <input type="submit" class="btn btn-primary" name="car" value="{{car.carname}}">
+        </form>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="col-md-2"></div>
+  </div>
+  <div class="row">
+    <div class="col-md-8">
       <div class="col-md-12 table-responsive">
-        <br>
         <br>
         <br> {% for c in contacts %}
         <div class="row table-container">
@@ -152,8 +191,7 @@
                 <th class="text-center">시간</th>
                 <th class="text-center thstyle2">주소</th>
                 <th class="text-center thstyle2">이름</th>
-                <th class="text-center">학원선택</th>
-                <th class="text-center">선택학원</th>
+                <th class="text-center thstyle3">이름추가</th>
                 <th class="text-center">등하원</th>
               </tr>
             </thead>
@@ -162,9 +200,9 @@
               <tr>
                 <td data-name="time"><input onchange="emptyTempList();" type="text" name="time[]" placeholder="Time" class="form-control" form="scheduleform{{c.id}}" value="{{s.time}}" /></td>
                 <td data-name="addr"><input type="text" name="addr[]" placeholder="Address" class="form-control" form="scheduleform{{c.id}}" value="{{s.addr}}" /></td>
-                <td data-name="addr"><input type="text" name="name[]" placeholder="Name" class="form-control" form="scheduleform{{c.id}}" value="{% for name in s.sname %}{{name}}{% include 'comma.html' %}{% endfor %}" /></td>
-                <td data-name="sel"><select class="form-control" onchange="addAca(this)"><option value="">학원선택</option>{% for a in academy %}<option value = "{{a.id}}">{{a.name}}({{a.id}})</option>{% endfor %}</select></td>
-                <td data-name="academy"><input type="text" name="academy[]" class="form-control" form="scheduleform{{c.id}}" value="{% for aid in s.alist %}{{aid}}{% include 'comma.html' %}{% endfor %}" /></td>
+                <td data-name="name" class="inputTd"><input type="text" name="name[]" data-role="tagsinput" class="form-control" form="scheduleform{{c.id}}" value="{% for name in s.sname %}{{name}}{% include 'comma.html' %}{% endfor %}" /></td>
+                <td data-name="addstu"><button class="btn btn-primary glyphicon glyphicon-plus addstudent" data-toggle="modal"></button></td>
+                <td data-name="academy" class="inputAca"><input name="academy[]" type="text" data-role="tagsinput" class="form-control" form="scheduleform{{c.id}}" value="{% for aid in s.alist %}{{aid}}{% include 'comma.html' %}{% endfor %}" /></td>
                 <td data-name="load">
                   {% if s.lflag == 1 %}
                   <select name="load[]" form="scheduleform{{c.id}}">
@@ -192,42 +230,65 @@
               </tr>
               {% endfor %}
             </tbody>
+            <div class="modal fade" id="addstu" role="dialog" aria-labelledby="myModalLabel">
+              <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">Modal title</h4>
+                  </div>
+                  <div class="modal-body">
+                    <select id="academyselect" class="form-control"><option value="">학원선택</option>{% for a in academy %}<option value = "{{a.id}}">{{a.name}}</option>{% endfor %}</select>
+                    <br>
+                    <select id="studentList" class="form-control"></select>
+                    <input type="hidden" id="rowid" value="" />
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary studenttoinput">학생추가</button>
+                  </div>
+                </div>
+              </div>
+            </div>
           </table>
-          <a class="btn btn-default pull-right addrow" onclick="emptyTempList();">Add Row</a>
+          <a id="{{c.id}}" class="btn btn-default pull-right addrow" onclick="emptyTempList();">Add Row</a>
         </div>
         <br>
         <div class="row">
           <div class="col-md-10"></div>
           <div class="col-md-1">
-            <form action="updateSchedule" method="post" enctype='application/json' id="scheduleform{{c.id}}">
+            <form class="savedelete" accept-charset="" action="updateSchedule" method="post" enctype='application/json' id="scheduleform{{c.id}}">
               <input class="hidden" name="iid" value="{{c.id}}" form="scheduleform{{c.id}}" />
               <input class="hidden" name="bid" value="{{bid}}" form="scheduleform{{c.id}}" />
+              <input class="hidden" name='time' value="{{time}}" form="scheduleform{{c.id}}" />
+              <input class="hidden" name='day' value="{{day}}" form="scheduleform{{c.id}}" />
               <input class="hidden" name="update" value="1" form="scheduleform{{c.id}}" />
-              <input type="submit" class="btn btn-success pull-right" value="저장">
+              <input type="submit" class="btn btn-success" value="저장">
             </form>
           </div>
           <div class="col-md-1">
-            <form action="updateSchedule" method="post" id="deleteform{{c.id}}">
+            <form class="savedelete" action="updateSchedule" method="post" id="deleteform{{c.id}}">
               <input class="hidden" name="iid" value="{{c.id}}" form="deleteform{{c.id}}" />
               <input class="hidden" name="bid" value="{{bid}}" form="deleteform{{c.id}}" />
+              <input class="hidden" name='time' value="{{time}}" form="scheduleform{{c.id}}" />
+              <input class="hidden" name='day' value="{{day}}" form="scheduleform{{c.id}}" />
               <input class="hidden" name="update" value="0" form="deleteform{{c.id}}" />
               <input type="submit" class="btn btn-success" value="삭제">
             </form>
           </div>
         </div>
         <br>
-        <br> {% endfor %}
-      </div>
-      {% else %}
-      <div class="row">
-        <br>
-        <div class="col-sm-4"></div>
-        <div class="col-sm-4" align="center">
-          <a class="btn btn-success" href="/accounts/login">로그인이 필요합니다.</a>
+        <br> {% endfor %} {% else %}
+        <div class="row">
+          <br>
+          <div class="col-sm-4"></div>
+          <div class="col-sm-4" align="center">
+            <a class="btn btn-success" href="/accounts/login">로그인이 필요합니다.</a>
+          </div>
+          <div class="col-sm-4"></div>
         </div>
-        <div class="col-sm-4"></div>
-      </div>
-      {% endif %}
+        {% endif %}
+
 </body>
 <script>
   var tempList = new Array();
@@ -243,9 +304,17 @@
     tempList.splice(0, tempList.length);
   }
 
-  $('.table-container').on('click', '.addrow', function() {
+  $(document).on('click', '.addrow', function() {
+    id = $(this).attr('id')
+    console.log(id)
     $(this).parent().find('.table-body').append(
-      '<tr><td data-name="time"><input onchange="emptyTempList();" type="text" name="time[]" placeholder="Time" class="form-control" form="scheduleform"/></td><td><input type="text" name="addr[]" placeholder="Address" class="form-control" form="scheduleform"/></td><td data-name="name"><input type="text" name="name[]" placeholder="Name" class="form-control" form="scheduleform"/></td><td data-name="sel"><select class="form-control" onchange="addAca(this)"><option value="">학원선택</option>{% for a in academy %}<option value = "{{a.id}}">{{a.name}}({{a.id}})</option>{% endfor %}</select></td><td data-name="academy"><input type="text" name="academy[]" class="form-control" form="scheduleform"/></td><td data-name="load"><select name="load[]" form="scheduleform"><option value="">등하원</option><option value="1">등원</option><option value="0">하원</option></select></td><td data-name="move"><a href="javascript:void(0)" class="glyphicon glyphicon-chevron-up up"></a><a href="javascript:void(0)" class="glyphicon glyphicon-chevron-down down"></a></td><td data-name="del"><button name="del" class="btn btn-danger glyphicon glyphicon-remove row-remove"></button></td></tr>'
+      '<tr><td data-name="time"><input onchange="emptyTempList();" type="text" name="time[]" placeholder="Time" class="form-control" form="scheduleform' + id +
+      '"/></td><td><input type="text" name="addr[]" placeholder="Address" class="form-control" form="scheduleform' + id +
+      '"/></td><td data-name="name" class="inputTd"><input type="text" name="name[]" data-role="tagsinput" class="form-control" form="scheduleform' + id + '" value="{% for name in s.sname %}{{name}}{% include '
+      comma.html ' %}{% endfor %}" /></td><td data-name="addstu"><button class="btn btn-primary glyphicon glyphicon-plus addstudent" data-toggle="modal"></button></td><td data-name="academy" class="inputAca"><input name="academy[]" data-role="tagsinput" class="form-control" form="scheduleform' +
+      id + '" value="{% for aid in s.alist %}{{aid}}{% include '
+      comma.html ' %}{% endfor %}" /></td><td data-name="load"><select name="load[]" form="scheduleform' + id +
+      '"><option value="">등하원</option><option value="1">등원</option><option value="0">하원</option></select></td><td data-name="move"><a href="javascript:void(0)" class="glyphicon glyphicon-chevron-up up"></a><a href="javascript:void(0)" class="glyphicon glyphicon-chevron-down down"></a></td><td data-name="del"><button name="del" class="btn btn-danger glyphicon glyphicon-remove row-remove"></button></td></tr>'
     )
   });
 
@@ -278,20 +347,106 @@
     $(this).parent().parent().remove();
   });
 
-  $('#areaSelected').on('change',function(){
+  $('#areaSelected').on('change', function() {
     // updateflag = 1 -> select area;
     $.ajax({
-       type: 'POST',
-       url: 'updateSchedule',
-       data: {
-           area: this.value,
-           updateflag: 1,
-         },
-       success: function(data) {
-         console.log();
+      type: 'POST',
+      url: 'updateSchedule',
+      data: {
+        area: this.value,
+        updateflag: 1,
+      },
+      success: function(data) {
+        console.log(data)
+        tempTag = ""
+        for (i = 0; i < data.length; i++) {
+          tempTag = tempTag + "<option value=" + data[i]['pk'] + ">" + data[i]['fields']['bname'] + "</option>"
+        }
+        document.getElementById('branch').innerHTML = tempTag
       }
     });
   })
+
+  var thisObject;
+  var thisObjectForAca;
+
+  $(document).on('click', '.addstudent', function() {
+    //thisObject -> studentName, thisObjectForAca -> AcademyID
+    thisObject = $(this).parent().prevAll('.inputTd').children();
+    thisObjectForAca = $(this).parent().nextAll('.inputAca').children();
+    console.log(thisObjectForAca);
+    $('#addstu').modal('show');
+  })
+
+  $(document).on('click', '.studenttoinput', function() {
+    selectedAca = $('#academyselect').val()
+    selectedStu = $('#studentList').val()
+
+    if (thisObject[0].nodeName == 'DIV') {
+      temp = thisObject[1].value
+      tempAca = thisObjectForAca[1].value
+
+      if (temp != '') {
+        console.log('1')
+        temp += ',' + selectedStu
+        tempAca += ',' + selectedAca
+        $(thisObject[1]).tagsinput('add', '')
+        $(thisObjectForAca[1]).tagsinput('add', '')
+      } else {
+        console.log('2')
+        temp = selectedStu
+        tempAca = selectedAca
+        $(thisObject[1]).tagsinput('add', '')
+        $(thisObjectForAca[1]).tagsinput('add', '')
+      }
+      $(thisObject[1]).tagsinput('add', temp)
+      $(thisObjectForAca[1]).tagsinput('add', tempAca)
+
+    }
+     else if (thisObject[0].nodeName == 'INPUT') {
+      temp = thisObject[0].value
+
+      if (temp != '') {
+        console.log('1')
+        temp += ',' + selectedStu
+        tempAca += ',' + selectedAca
+      } else {
+        console.log('2')
+        temp = selectedStu
+        tempAca = selectedAca
+        $(thisObject[0]).tagsinput('add', '')
+        $(thisObjectForAca[0]).tagsinput('add', '')
+      }
+      $(thisObject[0]).tagsinput('add', temp)
+      $(thisObjectForAca[0]).tagsinput('add', tempAca)
+    }
+  })
+
+  $('#academyselect').on('change', function() {
+    $.ajax({
+      type: 'POST',
+      url: 'studentLoad',
+      data: {
+        aid: this.value,
+      },
+      success: function(data) {
+        console.log(data)
+        tempTag = ""
+        for (i = 0; i < data.length; i++) {
+          tempTag = tempTag + "<option value=" + data[i]['fields']['sname'] + ">" + data[i]['fields']['sname'] + "</option>"
+        }
+        document.getElementById('studentList').innerHTML = tempTag
+      }
+    });
+  })
+
+  // $('input').tagsinput({
+  //   typeahead: {
+  //     source: function(query) {
+  //       return $.getJSON('citynames.json');
+  //     }
+  //   }
+  // });
 </script>
 
 </html>
