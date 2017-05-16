@@ -1,11 +1,12 @@
 from django.shortcuts import render_to_response, redirect
 from django.template import RequestContext
-from schedule.models import Inventory, ScheduleTable, Building, Branch, InventoryRequest, Area
+from schedule.models import Inventory, ScheduleTable, Building, Branch, InventoryRequest, Area, Car
 from passenger.models import Academy, Group, StudentInfo
 from django.db.models import Q
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse, HttpRequest, HttpResponseRedirect, JsonResponse
 from django.core import serializers
+from simple_history.models import HistoricalRecords
 from passenger.dateSchedule import timeToDate
 from rest_framework.parsers import FormParser
 from django.forms.models import model_to_dict
@@ -157,7 +158,15 @@ def putSchedule(request):
 
             elif 0 < i < len(time) - 1:
                 sidlist = []
-                temp_aca = academy[i].split(',')
+
+                alist_temp = list(set([j for j in academy[i] if j is not None and j != '']))
+                alist_temp2 = ','.join(alist_temp)
+                alist_temp3 = list(set(alist_temp2.split(',')))
+                alist = []
+
+                for a in alist_temp3:
+                    alist.append(int(a))
+
                 temp_name = name2[i].split(',')
                 student = StudentInfo.objects.filter(aid__in=[ a for a in temp_aca])
 
@@ -172,12 +181,12 @@ def putSchedule(request):
                 temp_lflag = [0 for z in range(len(temp_name))]
 
                 anamelist = []
-                for aid in temp_aca:
+                for aid in alist:
                     aname = Academy.objects.get(id = aid)
                     anamelist.append(aname.name)
 
                 try:
-                    stable = ScheduleTable(iid_id = iid, time = time[i], addr = addr[i], alist=temp_aca, anamelist = anamelist, slist=sidlist, sname=temp_name, tflag=temp_lflag, lflag=load[i])
+                    stable = ScheduleTable(iid_id = iid, time = time[i], addr = addr[i], alist=alist, anamelist = anamelist, slist=sidlist, sname=temp_name, tflag=temp_lflag, lflag=load[i])
                     stable.save()
                 except:
                     return HttpResponse(academy[i])
@@ -195,7 +204,11 @@ def updateSchedule(request):
         return render_to_response('supdateSchedule.html',{'area':area,'user':request.user})
 
     elif request.method == "POST":
+        area = Area.objects.all()
+        #updateflag 1(selects branch),2(search inven)
         updateflag = request.POST.get('updateflag')
+        #update 1(update inven,stable),0(delete inven,stable)
+        update = request.POST.get('update')
         #updateflag == 1: selects area for getting branch
         if updateflag == '1':
             areaid = request.POST.get('area')
@@ -204,7 +217,43 @@ def updateSchedule(request):
 
             return HttpResponse(data, content_type="application/json" )
 
-        update = request.POST.get('update')
+        if updateflag == '2':
+            #searchflag -> 1: first searching
+            searchflag = request.POST.get('searchinven')
+            bid = request.POST.get('bid')
+            day = request.POST.get('day')
+            time = int(request.POST.get('time'))
+
+            if searchflag == '1':
+                academy = Academy.objects.filter(bid=bid)
+                branch = Branch.objects.get(id = bid)
+                carlist = Car.objects.filter(branchid=bid)
+
+                invens = Inventory.objects.filter(bid = bid).filter(day = day).filter(etime__gte = time-60, stime__lte = time+60).filter(carnum = carlist[0].carname)
+
+                contacts = []
+
+                for i in invens:
+                    contacts.extend(Inventory.objects.filter(id = i.id).prefetch_related('scheduletables'))
+
+                return render_to_response('supdateSchedule.html',{"area":area,"time":time,"day":day,"carlist": carlist,"bid":bid,"contacts":contacts,'user':request.user})
+
+            if searchflag == '2':
+                carnum = request.POST.get('car')
+                academy = Academy.objects.filter(bid=bid)
+                branch = Branch.objects.get(id = bid)
+                carlist = Car.objects.filter(branchid=bid)
+
+                invens = Inventory.objects.filter(bid = bid).filter(day = day).filter(etime__gte = time-60, stime__lte = time+60).filter(carnum = carnum)
+
+                contacts = []
+
+                for i in invens:
+                    contacts.extend(Inventory.objects.filter(id = i.id).prefetch_related('scheduletables'))
+
+                return render_to_response('supdateSchedule.html',{"area":area,"time":time,"day":day,"branch":branch,"academy":academy,"carlist": carlist,"carnum": carnum,"bid":bid,"contacts":contacts,'user':request.user})
+
+        #update -> 1 : update inven
         if update == '1':
             #day = request.POST.get('day')
             #carnum = request.POST.get('carnum')
@@ -216,6 +265,10 @@ def updateSchedule(request):
             name2 = request.POST.getlist('name[]')
             academy = request.POST.getlist('academy[]')
             load = request.POST.getlist('load[]')
+            #searchTime,day,area remain request data
+            searchTime = request.POST.get('time')
+            day = request.POST.get('day')
+            area = Area.objects.all()
 
             #Check register student
             for i in range(len(time)):
@@ -231,7 +284,7 @@ def updateSchedule(request):
                                 sidlist.append(s.id);
 
                     if len(sidlist) != len(temp_name):
-                        return HttpResponse("Not register student")
+                        return HttpResponse(temp_aca)
 
             try:
                 snum = len(set(name))
@@ -268,12 +321,8 @@ def updateSchedule(request):
             Inventory.objects.filter(id=iid).update(snum = snum,alist=alist, anamelist = anamelist_inven, slist=slist, stime = stime, etime = etime)
 
             #delete stable before updateing stable
-            try:
-                delete_stable = ScheduleTable.objects.filter(iid_id=iid)
-                delete_stable.delete()
-
-            except:
-                return HttpResponse("error delete stable")
+            delete_stable = ScheduleTable.objects.filter(iid_id=iid)
+            delete_stable.delete()
 
             # lflag load -> 1 unload ->0 start -> 2 end -> 3
             for i in range(len(time)):
@@ -308,17 +357,19 @@ def updateSchedule(request):
                         aname = Academy.objects.get(id = aid)
                         anamelist.append(aname.name)
 
-                    try:
-                        stable = ScheduleTable(iid_id = iid, time = time[i], addr = addr[i], alist=temp_aca, anamelist = anamelist, slist=sidlist, sname=temp_name, tflag=temp_lflag, lflag=load[i])
-                        stable.save()
-                    except:
-                        return HttpResponse("error: Save stable")
+                    stable = ScheduleTable(iid_id = iid, time = time[i], addr = addr[i], alist=temp_aca, anamelist = anamelist, slist=sidlist, sname=temp_name, tflag=temp_lflag, lflag=load[i])
+                    stable.save()
 
 
             academy = Academy.objects.filter(bid=bid)
 
-            return render_to_response('supdateSchedule.html',{"academy":academy,"bid":bid,'user':request.user})
+            carlist = Car.objects.filter(branchid=bid)
+            branch = Branch.objects.filter(id = bid)
+            area = Area.objects.all()
 
+            return render_to_response('supdateSchedule.html',{"area":area,"academy":academy,"bid":bid,'user':request.user,'carlist':carlist,'day':day,'time':time,"branch":branch})
+
+        #update -> 0 delete inventory, stable
         elif update == '0':
             iid = request.POST.get('iid')
             bid = request.POST.get('bid')
@@ -340,39 +391,12 @@ def updateSchedule(request):
 
             return render_to_response('supdateSchedule.html',{"academy":academy,"bid":bid,'user':request.user})
 
-        else:
-            carflag = request.POST.get('carflag')
-            bid = request.POST.get('bid')
-            day = request.POST.get('day')
-            time = int(request.POST.get('time'))
-            gid = request.POST.get('gid')
+@csrf_exempt
+def studentLoad(request):
+    if request.method == "POST":
+        aid = request.POST.get('aid')
 
-            if carflag == '1':
-                carnum = Group.objects.filter(gid=gid)
-                academy = Academy.objects.filter(bid=bid)
-                branch = Branch.objects.get(id = bid)
+        stu = StudentInfo.objects.filter(aid = aid)
+        data = serialize('json', stu)
 
-                invens = Inventory.objects.filter(bid = bid).filter(day = day).filter(etime__gte = time-60, stime__lte = time+60).filter(carnum = gid)
-
-                list_invensid = []
-                contacts = []
-
-                for i in invens:
-                    contacts.extend(Inventory.objects.filter(id = i.id).prefetch_related('scheduletables'))
-
-                return render_to_response('updateScheduleCarnum.html',{"time":time,"day":day,"branch":branch,"academy":academy,"carnum": carnum,"bid":bid,"contacts":contacts,'user':request.user})
-
-            else:
-                carnum = Group.objects.filter(bid=bid).order_by('gid')
-                academy = Academy.objects.filter(bid=bid)
-                branch = Branch.objects.get(id = bid)
-
-                invens = Inventory.objects.filter(bid = bid).filter(day = day).filter(etime__gte = time-60, stime__lte = time+60).filter(carnum = carnum[0].gid)
-
-                list_invensid = []
-                contacts = []
-
-                for i in invens:
-                    contacts.extend(Inventory.objects.filter(id = i.id).prefetch_related('scheduletables'))
-
-                return render_to_response('supdateSchedule.html',{"time":time,"day":day,"branch":branch,"academy":academy,"carnum": carnum,"bid":bid,"contacts":contacts,'user':request.user})
+        return HttpResponse(data, content_type="application/json" )

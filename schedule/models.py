@@ -18,8 +18,8 @@ class Inventory(models.Model):
 
 
     def __unicode__(self):
-        return "[{0}] {1} {2}~{3}".format(self.bid, self.day, self.stime, self.etime)
-    
+        return "[{0}] [{1}] {2} {3}~{4}".format(self.bid, self.carnum, self.day, self.stime, self.etime)
+
     class Meta:
         ordering = ['day', 'stime']
 
@@ -37,7 +37,7 @@ class ScheduleTable(models.Model):
     history = HistoricalRecords()
 
     def __unicode__(self):
-        return u"{0} {1} - {2}".format(self.time , self.addr , ",".join(self.sname))
+        return u"{0} {1} {2} - {3}".format(self.time,self.iid, self.addr , ",".join(self.sname))
 
     class Meta:
         ordering = ['iid', 'time']
@@ -68,6 +68,16 @@ class Branch(models.Model):
     lat = models.FloatField()
     carlist = ArrayField(models.IntegerField())
     alist = ArrayField(models.IntegerField())
+
+    def __unicode__(self):
+        return self.bname
+
+class Car(models.Model):
+    carname = models.IntegerField(unique=True)
+    branchid = models.ForeignKey(Branch)
+
+    class Meta:
+        ordering=['carname']
 
 class Building(models.Model):
     branch = Branch.objects.all()
