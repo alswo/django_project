@@ -7,4 +7,5 @@ urlpatterns = patterns('',
     url(r'^todayLoad', views.todayLoad),
     url(r'^updateSchedule', views.updateSchedule),
     url(r'^studentLoad', views.studentLoad),
+    url(r'^getAcaPhone', views.getAcaPhone),
 )

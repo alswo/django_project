@@ -24,4 +24,5 @@ urlpatterns = patterns('',
     url(r'^dateSchedule', views.dateSchedule),
     url(r'^community',views.community),
     url(r'^getAcaButton', views.getAcaButton),
+    url(r'^getDriButton', views.getDriButton),
 )
