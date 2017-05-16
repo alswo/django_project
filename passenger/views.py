@@ -1,7 +1,8 @@
 #
 from django.shortcuts import render, render_to_response, redirect
 from django.template import RequestContext
-from passenger.models import Commute, Academy, Schedule, ShuttleSchedule, Group, ScheduleDate,Branch,Community
+from passenger.models import Commute, Academy, Schedule, ShuttleSchedule, Group, ScheduleDate,Community
+from schedule.models import Branch, Car
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpRequest, HttpResponseRedirect, JsonResponse
@@ -115,6 +116,13 @@ def getAcaButton(request):
         academy = Academy.objects.filter(bid=bid)
 
     return render_to_response('passenger/getAcaButton.html',{"academy":academy})
+
+def getDriButton(request):
+    if request.method == "GET":
+        bid = request.GET.get('bid')
+        carlist = Car.objects.filter(branchid=bid)
+
+    return render_to_response('passenger/getDriButton.html',{"carlist":carlist})
 
 
 @csrf_exempt

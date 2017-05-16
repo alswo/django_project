@@ -9,4 +9,5 @@ urlpatterns = patterns('',
     url(r'^updateArea', views.updateArea),
     url(r'^csmain', views.csmain),
     url(r'^studentLoad', views.studentLoad),
+    url(r'^getAcaPhone', views.getAcaPhone),
 )
