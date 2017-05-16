@@ -49,17 +49,15 @@
                     </ul>
                 </div>
             </div>
-<!--
             <div class="col-md-6">
                 <div class="dropdown">
-			<input type="text" class="form-control" id="tokenfield" value="red,green,blue" />
+			<input type="text" class="form-control" id="tokenfield3" value="" />
                 </div>
                 <div class="dropdown">
 			<input type="text" class="form-control" id="tokenfield2" value="" />
                 </div>
             </div>
             <div class="col-md-5"></div>
-//-->
             <div class="col-md-1 pull-right">
                 <p data-placement="top" data-toggle="tooltip" title="Add"><button class="btn btn-success btn-xs" data-title="Add" data-toggle="modal" data-target="#add" ><span class="glyphicon glyphicon-pencil">ADD</span></button></p>
             </div>
@@ -259,7 +257,7 @@
     <!-- /.modal-dialog -->
 </div>
 </body>
-<script>
+<script type="text/javascript">
     $(document).ready(function() {
         $('#datatable').dataTable();
 
@@ -288,7 +286,20 @@
 
     };
 
-$('#tokenfield')
+$('#tokenfield2').tokenfield({
+  autocomplete: {
+    source: [],
+    delay: 100
+  },
+  showAutocompleteOnFocus: true
+});
+
+
+$('#tokenfield3')
+.on('tokenfield:createdtoken', function(e) {
+	$('#tokenfield2').tokenfield('createToken', 'a');
+	$('#tokenfield2').data('bs.tokenfield').$input.autocomplete({source: ['a', 'b']});
+})
 .tokenfield({
   autocomplete: {
     source: ['red','blue','green','yellow','violet','brown','purple','black','white'],
@@ -297,12 +308,5 @@ $('#tokenfield')
   showAutocompleteOnFocus: true
 });
 
-$('#tokenfield2')
-.tokenfield({
-  autocomplete: {
-    source: ['xxx', 'yyy'],
-    delay: 100
-  },
-  showAutocompleteOnFocus: true
 </script>
-</body>
+</html>

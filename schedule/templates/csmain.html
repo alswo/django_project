@@ -34,7 +34,7 @@
   <header class="main-header">
 
     <!-- Logo -->
-    <a href="index2.html" class="logo">
+    <a href="csmain" class="logo">
       <!-- mini logo for sidebar mini 50x50 pixels -->
       <span class="logo-mini"><b>타요</b></span>
       <!-- logo for regular state and mobile devices -->
@@ -81,13 +81,23 @@
           </a>
         </li>
         <li>
+          <a href="" id='academy'>
+            <i class="fa fa-mortar-board"></i> <span>학원 관리</span>
+          </a>
+        </li>
+        <li>
+          <a href="" id='academyuser'>
+            <i class="fa fa-user"></i> <span>학원 계정 관리</span>
+          </a>
+        </li>
+        <li>
           <a href="" id='student'>
             <i class="fa fa-child"></i> <span>학생 관리</span>
           </a>
         </li>
         <li>
           <a href="" id='commute'>
-            <i class="fa fa-car"></i> <span>등원 정보 관리</span>
+            <i class="fa fa-bus"></i> <span>등원 정보 관리</span>
           </a>
         </li>
         <li>
@@ -336,6 +346,16 @@ $(document).ready(function() {
 		e.preventDefault();
 		$('.content-wrapper').empty();
 		$('.content-wrapper').load('/inventory/updateArea');
+	});
+	$('#academy').on('click', function(e) {
+		e.preventDefault();
+		$('.content-wrapper').empty();
+		$('.content-wrapper').load('/admin/passenger/academy/');
+	});
+	$('#academyuser').on('click', function(e) {
+		e.preventDefault();
+		$('.content-wrapper').empty();
+		$('.content-wrapper').load('/admin/auth/user/');
 	});
 	$('#student').on('click', function(e) {
 		e.preventDefault();
