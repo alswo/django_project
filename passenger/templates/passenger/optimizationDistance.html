@@ -1,56 +1,34 @@
 <!DOCTYPE html>
 <html lang="en" xmlns="http://www.w3.org/1999/html">
+
 <head>
-{% load staticfiles %}
-    <meta charset="UTF-8">
-    <title>TAYO</title>
-    <script src="{% static 'js/jquery-3.1.0.min.js' %}"></script>
-    <script src="https://apis.skplanetx.com/tmap/js?version=1&format=javascript&appKey=9c78e49d-c72c-36a6-8e25-5c249e9291a3
+  {% load staticfiles %}
+  <meta charset="UTF-8">
+  <title>TAYO</title>
+  <script src="{% static 'js/jquery-3.1.0.min.js' %}"></script>
+  <script src="https://apis.skplanetx.com/tmap/js?version=1&format=javascript&appKey=9c78e49d-c72c-36a6-8e25-5c249e9291a3
 "></script>
-    <script type="text/javascript" src="{% static 'js/graph.js' %}"></script>
-    <script type="text/javascript" src="{% static 'js/bootstrap.min.js' %}"></script>
-    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+  <script type="text/javascript" src="{% static 'js/graph.js' %}"></script>
+  <script type="text/javascript" src="{% static 'js/bootstrap.min.js' %}"></script>
+  <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+  <script src="http://dmaps.daum.net/map_js_init/postcode.v2.js"></script>
+
 </head>
-<body  onload="init()">
-<input id="a_name" type="hidden" value={{academy.name}}>
-<input id="lon" type="hidden" value={{academy.lon}}>
-<input id="lat" type="hidden" value={{academy.lat}}>
-<input id="aid" type="hidden" value={{academy.id}}>
-<div class="row">
-    <div class="col-md-8">
-        <div id="map_div" style="width:500px;height:500px;"></div>
+
+<body onload="init()">
+  <input id="a_name" type="hidden" value={{academy.name}}>
+  <input id="lon" type="hidden" value={{academy.lon}}>
+  <input id="lat" type="hidden" value={{academy.lat}}>
+  <input id="aid" type="hidden" value={{academy.id}}>
+  <div class="row">
+    <div class="col-md-7">
+      <div id="map_div" style="width:500px;height:500px;"></div>
     </div>
-    <div class="col-md-4">
-        <div class="row">
-        <ul class="list-group">
-            <br>
-            <h4 align="center">학생 리스트</h4>
-            <br>
-            {% for contact in contacts %}
-            <li class="list-group-item">
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="row">
-                        <div class="students" id="{{contact.id}}">
-                           <a href = "tel:{{contact.m_phone}}" data-toggle="tooltip" title="{{contact.schedule|safe}}">{{contact.s_name}}</a><input type="hidden" value={{contact.l_lon}}> <input type="hidden" value={{contact.l_lat}}> <input type="hidden" value={{contact.u_lon}}> <input type="hidden" value={{contact.u_lat}}> <input type="hidden" value={{contact.load}}>
-                           <input type="hidden" value={{contact.unload}}>
-                        </div>
-                        <div>{{contact.name}}</div>
-                        </div>
-                    </div>
-                    <div class="col-md-6" align="right">
-                        {% if contact.load %}
-                        <button type="button" class="btn btn-primary" onclick="setLoadPosition({{contact.id}});">등원
-                        {% endif %}
-                        {% if contact.unload %}
-                        <button type="button" class="btn btn-success" onclick="setUnloadPosition({{contact.id}});">하원
-                        {% endif %}
-                        <button type="button" class="btn btn-warning">결석
-                    </div>
-                </div>
-            </li>
-            {% endfor %}
-        </ul>
+    <div class="col-md-5">
+      <div class="row">
+        <br>
+          <h4 align="center">좌표 검색</h4>
+          <br>
         </div>
         <div class="row">
             <div class="col-md-6">
@@ -61,368 +39,424 @@
 
         <div class="row">
         <div class="table-responsive">
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Position</th>
-                </tr>
-            </thead>
-            <tbody id="info-marker">
-
-            </tbody>
-        </table>
-        </div>
         <div class="row">
+          <div class="col-md-9">
+              <div class="row">
+                <div class="col-md-3">
+                <button type="button" class="btn btn-info" onclick="sample3_execDaumPostcode()">주소검색</button>
+              </div>
+              <div class="col-md-9">
+                <input type="text" id="sample3_address" class="form-control" placeholder="주소">
+              </div>
+            </div>
+                <br>
+                <div id="wrap" style="display:none;border:1px solid;width:500px;height:300px;margin:5px 0;position:relative">
+                  <img src="//t1.daumcdn.net/localimg/localimages/07/postcode/320/close.png" id="btnFoldWrap" style="cursor:pointer;position:absolute;right:0px;top:-1px;z-index:1" onclick="foldDaumPostcode()" alt="접기 버튼">
+                </div>
+
+              </div>
+              <div class="col-md-3">
+                <button class="btn btn-info glyphicon glyphicon-plus pull-left" onclick="addrToPoi()"></button>
+              </div>
+            </div>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Position</th>
+                </tr>
+              </thead>
+              <tbody id="info-marker">
+
+              </tbody>
+            </table>
+      </div>
+      <div class="row">
         <div class="col-md-5">
         </div>
         <div class="col-md-7">
-        <button type="button" class="btn btn-primary" onclick="getOptimized();">노드계산</button>
-        <button type="button" type="button" class="btn btn-success" data-toggle="modal" data-target="#myModal" onclick="getOpti();">최적동선 찾기</button>
+          <button type="button" class="btn btn-primary" onclick="getOptimized();">노드계산</button>
+          <button type="button" type="button" class="btn btn-success" data-toggle="modal" data-target="#myModal" onclick="getOpti();">최적동선 찾기</button>
         </div>
-        </div>
+      </div>
 
     </div>
-</div>
-<!-- Modal -->
-<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="myModalLabel">동선 결과&nbsp {{schedule}}</h4>
-      </div>
-      <div class="modal-body">
-        <div class="row">
+  </div>
+  <!-- Modal -->
+  <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title" id="myModalLabel">동선 결과 </h4>
+        </div>
+        <div class="modal-body">
+          <div class="row">
             <h3 id="recommand"></h3>
+          </div>
         </div>
-      </div>
-      <hr>
-      <div class="modal-body">
-        <h3>스케쥴 작성하기</h3>
-        <div class="row">
-            <div class="form-group">
-            <div class="col-sm-12">
-                <br>
-                    <div class="row">
-                        <div class="col-xs-4">
-                            <input type="text" class="form-control" placeholder="시간(소팅용)" id="sorting_time">
-                        </div>
-                        <div class="col-xs-4">
-                            <input type="text" class="form-control" placeholder="요일" id="day">
-                        </div>
-                        <div class="col-xs-4">
-                            {% for contact in contacts %}
-                            <input type="hidden" placeholder="탑승자" class="slist" value="{{contact.id}}">
-                            {% endfor %}
-                        </div>
-                    </div>
-                    <br>
-                    <br>
-                    <textarea class="form-control" rows="7" id="writing"></textarea>
-                    <br>
-                    <button class="btn btn-primary" onclick="addSchedule({{gid}})">Submit</button>
-            </div>
-            </div>
+        <hr>
+        <div class="modal-body">
         </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
       </div>
     </div>
   </div>
-</div>
-</div>
+  </div>
 </body>
 <script>
-    markers = []
-    var number = 0;
-    academy_flag = 0;
-    function setVariables(){
-                cLonLat = new Tmap.LonLat(14157347.495401,4518295.6429955);
-                        //중심점 좌표 입니다. EPSG3857 좌표계 형식 입니다.
-                zoom = 16;  // zoom level입니다.  0~19 레벨을 서비스 하고 있습니다.
-                mapW = '500px';  // 지도의 가로 크기 입니다.
-                mapH = '400px';  // 지도의 세로 크기 입니다.
-    }
+  markers = []
+  var number = 0;
+  academy_flag = 0;
 
-     var map;
-     var mapW, mapH;     // 지도의 가로, 세로 크기(Pixel단위) 를 지정 합니다.
-     var cLonLat, zoom;      //중심 좌표와 지도레벨을 정의 합니다.
+  var map;
+  var mapW, mapH; // 지도의 가로, 세로 크기(Pixel단위) 를 지정 합니다.
+  var cLonLat, zoom; //중심 좌표와 지도레벨을 정의 합니다.
 
-     function setVariables(){
-        cLonLat = new Tmap.LonLat(14157347.495401,4518295.6429955);
-            //중심점 좌표 입니다. EPSG3857 좌표계 형식 입니다.
-            zoom = 16;  // zoom level입니다.  0~19 레벨을 서비스 하고 있습니다.
-            mapW = '100%';  // 지도의 가로 크기 입니다.
-            mapH = '600px';  // 지도의 세로 크기 입니다.
-    }
+  function setVariables() {
+    cLonLat = new Tmap.LonLat();
+    //중심점 좌표 입니다. EPSG3857 좌표계 형식 입니다.
+    zoom = 16; // zoom level입니다.  0~19 레벨을 서비스 하고 있습니다.
+    mapW = '100%'; // 지도의 가로 크기 입니다.
+    mapH = '600px'; // 지도의 세로 크기 입니다.
+  }
 
-    function init() {
-        setVariables();
-        map = new Tmap.Map({div:'map_div', width:mapW, height:mapH, animation:true});
-        // div : 지도가 생성될 div의 id값과 같은 값을 옵션으로 정의 합니다.
-        // Tmap,Map 클래스에 대한 상세 사항은 "JavaScript" 하위메뉴인 "기본 기능" 페이지를 참조 해주세요.
-        map.events.register("click", map, onClickMap);
-        map.setCenter(cLonLat,zoom);
-    }
-
-//    function initTmap(){
-//        map = new Tmap.Map({div:'map_div', width:'100%', height:'800px'});
-//        map.events.register("click", map, onClickMap);
-
-//    }
-
-
-    function onClickMap(e){
-        var markerLayer = new Tmap.Layer.Markers();
-        map.addLayer(markerLayer);
-
-        var lonlat = map.getLonLatFromViewPortPx(e.xy);
-        var icon = new Tmap.Icon('https://developers.skplanetx.com/upload/tmap/marker/pin_b_m_a.png');
-
-        var marker = new Tmap.Marker(lonlat, icon);
-        markerLayer.addMarker(marker);
-
-        setTable(marker.lonlat);
-
-        //markers.push(marker);
-    }
-
-    function setTable(position){
-        //marker info table
-        var node_tr = document.createElement('tr');
-        var node_td = document.createElement('td');
-
-
-        node_td.innerText = number+ ' ' + position;
-        var target = document.getElementById('info-marker');
-
-        target.appendChild(node_tr);
-        target.appendChild(node_td);
-
-        number++;
-    }
-
-    var g = new Graph();
-
-    var source = []
-    function getOptimized(){
-        //getWeight(markers[0].lonlat, markers[1].lonlat);
-
-        console.log(markers)
-        for(var i = 0; i <markers.length; i++){
-            g.addNode(markers[i][0].toString());
-        }
-
-        for(var j = 0; j < markers.length; j++){
-            for(var k = j+1; k < markers.length; k++){
-                getWeight(markers[j][1],markers[j][2], markers[k][1],markers[k][2],g.nodes[j],g.nodes[k],function(){
-                    var temp = this.valueOf();
-                    edge_1 = temp[0].toString();
-                    edge_2 = temp[1].toString();
-                    edge_3 = temp[2];
-                    var temp_s = [edge_1, edge_2, edge_3];
-                    source.push(temp_s);
-                    g.addEdge(edge_1, edge_2,edge_3);
-                });
-
-            }
-        }
-    alert("Done")
-    }
-
-    function getOpti(){
-        var source_result = []
-        var result = Prim(g);
-
-        doc = document.getElementById('recommand');
-        var temp = '';
-        console.log(result);
-        var source_j = 0;
-        var source_k = 1;
-
-        var academy = document.getElementById('a_name').value;
-        var a_lon = document.getElementById('lon').value;
-        var a_lat = document.getElementById('lat').value;
-
-        var result_j = 0;
-        result.push(academy);
-
-
-        for(var j = 0; j < result.length - 1; j++){
-            for(var k = 0; k < source.length; k++){
-                if(result[source_j] == source[k][0] && result[source_k] == source[k][1]){
-                    source_result.push(source[k][2])
-                }else if(result[source_j] == source[k][1] && result[source_k] == source[k][0]){
-                    source_result.push(source[k][2])
-                }
-            }
-            source_j++;
-            source_k++;
-        }
-
-        var all_time = 0;
-        for(var i = 0; i < result.length; i++){
-            if(i < result.length -1){
-                temp += ' ' + result[i] + ' ' + '<span class="glyphicon glyphicon-arrow-right" aria-hidden="true"></span>' +'('+source_result[result_j]+')';
-            }
-            else{
-                temp += ' ' + result[i]
-            }
-
-            if(typeof(source_result[result_j]) != "undefined"){
-                all_time += source_result[result_j];
-            }
-            result_j++;
-        }
-        doc.innerHTML = temp+'&nbsp&nbsp'+' <span class="glyphicon glyphicon-time" aria-hidden="true"></span>'+' : '+Math.floor(all_time/60)+'M';
-    }
-
-    var capacity;
-
-    function getWeight(start_lon,start_lat, end_lon, end_lat,j,k, callback) {
-
-        var j = j;
-        var k = k;
-        var startX = start_lon;
-        var startY = start_lat;
-        var endX = end_lon;
-        var endY = end_lat;
-        var urlStr = "https://apis.skplanetx.com/tmap/routes?version=1";
-        urlStr += "&startX=" + startX;
-        urlStr += "&startY=" + startY;
-        urlStr += "&endX=" + endX;
-        urlStr += "&endY=" + endY;
-        urlStr += "&appKey=9c78e49d-c72c-36a6-8e25-5c249e9291a3";
-
-        var xmlHttp = new XMLHttpRequest();
-
-
-        xmlHttp.onreadystatechange = function () {
-            if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
-                capacity = xmlHttp.responseText;
-                jsonObj = JSON.parse(capacity);
-
-                capa = jsonObj.features[0].properties.totalTime;
-
-                capacity = []
-                capacity.push(j);
-                capacity.push(k);
-                capacity.push(capa);
-
-                console.log(capacity);
-                callback.apply(capacity);
-            }else if(xmlHttp.readyState == 4 && xmlHttp.status == 400){
-                capacity = []
-                capacity.push(j);
-                capacity.push(k);
-                capacity.push(0);
-
-                callback.apply(capacity);
-            }
-        }
-
-        xmlHttp.open("GET", urlStr, true); // true for asynchronous
-        xmlHttp.send(null);
-    }
-
-    function setLoadPosition(id){
-        var id = id;
-
-        var a = [];
-        var name = document.getElementById(id).innerText;
-        var l_lon = document.getElementById(id).getElementsByTagName('input')[0].value
-        var l_lat = document.getElementById(id).getElementsByTagName('input')[1].value
-        var location = document.getElementById(id).getElementsByTagName('input')[4].value
-        var academy = document.getElementById('a_name').value;
-        var a_lon = document.getElementById('lon').value;
-        var a_lat = document.getElementById('lat').value;
-        if(academy_flag == 0){
-            a.push(academy,a_lon,a_lat)
-            academy_flag = 1
-            markers.push(a)
-        }
-        var node_tr = document.createElement('tr');
-        var node_td = document.createElement('td');
-
-        node_td.innerText = name + ' ' + location+' ' + l_lon + ' ' + l_lat;
-        var target = document.getElementById('info-marker');
-
-        target.appendChild(node_tr);
-        target.appendChild(node_td);
-
-        var temp = []
-        temp.push(name)
-        temp.push(l_lon)
-        temp.push(l_lat)
-
-        markers.push(temp)
-    }
-    function setUnloadPosition(id){
-        var id = id;
-        var a = [];
-        var name = document.getElementById(id).innerText;
-        var u_lon = document.getElementById(id).getElementsByTagName('input')[2].value
-        var u_lat = document.getElementById(id).getElementsByTagName('input')[3]
-.value
-        var location = document.getElementById(id).getElementsByTagName('input')[5].value
-        var academy = document.getElementById('a_name').value;
-        var a_lon = document.getElementById('lon').value;
-        var a_lat = document.getElementById('lat').value;
-        if(academy_flag == 0){
-            a.push(academy,a_lon,a_lat)
-            markers.push(a)
-            academy_flag = 1
-        }
-        var node_tr = document.createElement('tr');
-        var node_td = document.createElement('td');
-
-        node_td.innerText = name + ' ' +location+' '+ u_lon + ' ' + u_lat;
-        var target = document.getElementById('info-marker');
-
-        target.appendChild(node_tr);
-        target.appendChild(node_td);
-
-        var temp = []
-        temp.push(name)
-        temp.push(u_lon)
-        temp.push(u_lat)
-
-        markers.push(temp)
-    }
-    </script>
-    <script>
-        function addSchedule(gid){
-            a_name = document.getElementById('a_name').value;
-            sorting_time = document.getElementById('sorting_time').value;
-            writing = document.getElementById('writing').value;
-            day = document.getElementById('day').value;
-            aid = document.getElementById('aid').value;
-            slist = document.getElementsByClassName('slist');
-            slists = []
-            for(i = 0 ; i < slist.length; i++){
-                slists.push(slist[i].value)
-            }
-            $.ajax({
-                url: "/addSchedule",
-                type: "POST",
-                data: {
-                        a_name: a_name,
-                        sorting_time: sorting_time,
-                        writing: writing,
-                        day: day,
-                        gid: gid,
-                        aid: aid,
-                        slist: slists,
-                      },
-                success: function(data){
-                        alert(data)
-                }
-            });
-        }
-
-    $(document).ready(function(){
-        $('[data-toggle="tooltip"]').tooltip();
+  function init() {
+    setVariables();
+    map = new Tmap.Map({
+      div: 'map_div',
+      width: mapW,
+      height: mapH,
+      animation: true
     });
-    </script>
+    // div : 지도가 생성될 div의 id값과 같은 값을 옵션으로 정의 합니다.
+    // Tmap,Map 클래스에 대한 상세 사항은 "JavaScript" 하위메뉴인 "기본 기능" 페이지를 참조 해주세요.
+    map.events.register("click", map, onClickMap);
+    map.setCenter(cLonLat, zoom);
+  }
+
+  //    function initTmap(){
+  //        map = new Tmap.Map({div:'map_div', width:'100%', height:'800px'});
+  //        map.events.register("click", map, onClickMap);
+
+  //    }
+
+
+  function onClickMap(e) {
+    var markerLayer = new Tmap.Layer.Markers();
+    map.addLayer(markerLayer);
+
+    var lonlat = map.getLonLatFromViewPortPx(e.xy);
+    var size = new Tmap.Size(21, 25);
+    var offset = new Tmap.Pixel(-(size.w / 2), -size.h);
+    var icon = new Tmap.Icon('https://developers.skplanetx.com/upload/tmap/marker/pin_b_m_a.png',size,offset);
+
+    var marker = new Tmap.Marker(lonlat, icon);
+    markerLayer.addMarker(marker);
+
+    setTable(marker.lonlat);
+
+    //markers.push(marker);
+  }
+
+  function setTable(position) {
+    //marker info table
+    var node_tr = document.createElement('tr');
+    var node_td = document.createElement('td');
+
+
+    node_td.innerText = number + ' ' + position;
+    var target = document.getElementById('info-marker');
+
+    target.appendChild(node_tr);
+    target.appendChild(node_td);
+
+    number++;
+  }
+
+  var g = new Graph();
+
+  var source = []
+
+  function getOptimized() {
+    //getWeight(markers[0].lonlat, markers[1].lonlat);
+    console.log(markers)
+    for (var i = 0; i < markers.length; i++) {
+      g.addNode(markers[i][0].toString());
+    }
+
+    for (var j = 0; j < markers.length; j++) {
+      for (var k = j + 1; k < markers.length; k++) {
+        getWeight(markers[j][1], markers[j][2], markers[k][1], markers[k][2], g.nodes[j], g.nodes[k], function() {
+          var temp = this.valueOf();
+          edge_1 = temp[0].toString();
+          edge_2 = temp[1].toString();
+          edge_3 = temp[2];
+          var temp_s = [edge_1, edge_2, edge_3];
+          source.push(temp_s);
+          g.addEdge(edge_1, edge_2, edge_3);
+        });
+
+      }
+    }
+    alert("Done")
+  }
+
+  function getOpti() {
+    var source_result = []
+    var result = Prim(g);
+
+    doc = document.getElementById('recommand');
+    var temp = '';
+    console.log(result);
+    var source_j = 0;
+    var source_k = 1;
+
+    var academy = document.getElementById('a_name').value;
+    var a_lon = document.getElementById('lon').value;
+    var a_lat = document.getElementById('lat').value;
+
+    var result_j = 0;
+    //result.push(academy);
+
+
+    for (var j = 0; j < result.length - 1; j++) {
+      for (var k = 0; k < source.length; k++) {
+        if (result[source_j] == source[k][0] && result[source_k] == source[k][1]) {
+          source_result.push(source[k][2])
+        } else if (result[source_j] == source[k][1] && result[source_k] == source[k][0]) {
+          source_result.push(source[k][2])
+        }
+      }
+      source_j++;
+      source_k++;
+    }
+
+    var all_time = 0;
+    for (var i = 0; i < result.length; i++) {
+      if (i < result.length - 1) {
+        temp += ' ' + result[i] + ' ' + '<span class="glyphicon glyphicon-arrow-right" aria-hidden="true"></span>' + '(' + source_result[result_j] + ')';
+      } else {
+        temp += ' ' + result[i]
+      }
+
+      if (typeof(source_result[result_j]) != "undefined") {
+        all_time += source_result[result_j];
+      }
+      result_j++;
+    }
+    doc.innerHTML = temp + '&nbsp&nbsp' + ' <span class="glyphicon glyphicon-time" aria-hidden="true"></span>' + ' : ' + Math.floor(all_time / 60) + 'M';
+  }
+
+  function getPoi() {
+
+  }
+
+  function addrToPoi() {
+    var addr = $('#sample3_address').val()
+    var urlStr = "https://apis.skplanetx.com/tmap/geo/fullAddrGeo?addressFlag=F00&format=json&version=1&format=json&appKey=9c78e49d-c72c-36a6-8e25-5c249e9291a3&fullAddr=" + addr
+    var xmlHttp = new XMLHttpRequest();
+    var a = []
+
+    xmlHttp.onreadystatechange = function() {
+      if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
+        capacity = xmlHttp.responseText;
+        jsonObj = JSON.parse(capacity);
+        lon = jsonObj['coordinateInfo']['coordinate'][0]['lon']
+        lat = jsonObj['coordinateInfo']['coordinate'][0]['lat']
+        nlon = jsonObj['coordinateInfo']['coordinate'][0]['newLon']
+        nlat = jsonObj['coordinateInfo']['coordinate'][0]['newLat']
+
+
+        if (lon == '') {
+          //map.setCenter(new Tmap.LonLat(nlon, nlat),30);
+          lonlat = new Tmap.LonLat(nlon, nlat);
+          map.setCenter(lonlat, 30);
+          marker = new Tmap.Layer.Markers("MarkerLayer");
+          map.addLayer(marker);
+
+          var size = new Tmap.Size(21, 25);
+          var offset = new Tmap.Pixel(-(size.w / 2), -size.h);
+          var icon = new Tmap.Icon('https://developers.skplanetx.com/upload/tmap/marker/pin_b_m_a.png', size, offset);
+          var mark = new Tmap.Marker(lonlat, icon);
+          marker.addMarker(mark);
+
+          a.push(addr,nlon,nlat)
+          markers.push(a)
+
+
+        } else {
+          lonlat = new Tmap.LonLat(lon, lat);
+          map.setCenter(lonlat, 30);
+          marker = new Tmap.Layer.Markers("MarkerLayer");
+          map.addLayer(marker);
+
+          var size = new Tmap.Size(21, 25);
+          var offset = new Tmap.Pixel(-(size.w / 2), -size.h);
+          var icon = new Tmap.Icon('https://developers.skplanetx.com/upload/tmap/marker/pin_b_m_a.png', size, offset);
+          var mark = new Tmap.Marker(lonlat, icon);
+          markers.addMarker(mark);
+
+          a.push(addr,lon,lat)
+          markers.push(a)
+        }
+
+
+
+      } else if (xmlHttp.readyState == 4 && xmlHttp.status == 400) {
+        capacity = xmlHttp.responseText;
+        jsonObj = JSON.parse(capacity);
+
+      }
+    }
+
+    xmlHttp.open("GET", urlStr, true); // true for asynchronous
+    xmlHttp.send(null);
+
+  }
+
+  var capacity;
+
+  function getWeight(start_lon, start_lat, end_lon, end_lat, j, k, callback) {
+
+    var j = j;
+    var k = k;
+    var startX = start_lon;
+    var startY = start_lat;
+    var endX = end_lon;
+    var endY = end_lat;
+    var urlStr = "https://apis.skplanetx.com/tmap/routes?version=1";
+    urlStr += "&startX=" + startX;
+    urlStr += "&startY=" + startY;
+    urlStr += "&endX=" + endX;
+    urlStr += "&endY=" + endY;
+    urlStr += "&appKey=9c78e49d-c72c-36a6-8e25-5c249e9291a3";
+
+    var xmlHttp = new XMLHttpRequest();
+
+
+    xmlHttp.onreadystatechange = function() {
+      if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
+        capacity = xmlHttp.responseText;
+        jsonObj = JSON.parse(capacity);
+
+        capa = jsonObj.features[0].properties.totalTime;
+
+        capacity = []
+        capacity.push(j);
+        capacity.push(k);
+        capacity.push(capa);
+
+        console.log(capacity);
+        callback.apply(capacity);
+      } else if (xmlHttp.readyState == 4 && xmlHttp.status == 400) {
+        capacity = []
+        capacity.push(j);
+        capacity.push(k);
+        capacity.push(0);
+
+        callback.apply(capacity);
+      }
+    }
+
+    xmlHttp.open("GET", urlStr, true); // true for asynchronous
+    xmlHttp.send(null);
+  }
+
+</script>
+<script>
+  function addSchedule(gid) {
+    a_name = document.getElementById('a_name').value;
+    sorting_time = document.getElementById('sorting_time').value;
+    writing = document.getElementById('writing').value;
+    day = document.getElementById('day').value;
+    aid = document.getElementById('aid').value;
+    slist = document.getElementsByClassName('slist');
+    slists = []
+    for (i = 0; i < slist.length; i++) {
+      slists.push(slist[i].value)
+    }
+    $.ajax({
+      url: "/addSchedule",
+      type: "POST",
+      data: {
+        a_name: a_name,
+        sorting_time: sorting_time,
+        writing: writing,
+        day: day,
+        gid: gid,
+        aid: aid,
+        slist: slists,
+      },
+      success: function(data) {
+        alert(data)
+      }
+    });
+  }
+
+  $(document).ready(function() {
+    $('[data-toggle="tooltip"]').tooltip();
+  });
+
+
+</script>
+<script>
+  // 우편번호 찾기 찾기 화면을 넣을 element
+  var element_wrap = document.getElementById('wrap');
+
+  function foldDaumPostcode() {
+    // iframe을 넣은 element를 안보이게 한다.
+    element_wrap.style.display = 'none';
+  }
+
+  function sample3_execDaumPostcode() {
+    // 현재 scroll 위치를 저장해놓는다.
+    var currentScroll = Math.max(document.body.scrollTop, document.documentElement.scrollTop);
+    new daum.Postcode({
+      oncomplete: function(data) {
+        // 검색결과 항목을 클릭했을때 실행할 코드를 작성하는 부분.
+
+        // 각 주소의 노출 규칙에 따라 주소를 조합한다.
+        // 내려오는 변수가 값이 없는 경우엔 공백('')값을 가지므로, 이를 참고하여 분기 한다.
+        var fullAddr = data.address; // 최종 주소 변수
+        var extraAddr = ''; // 조합형 주소 변수
+
+        // 기본 주소가 도로명 타입일때 조합한다.
+        if (data.addressType === 'R') {
+          //법정동명이 있을 경우 추가한다.
+          if (data.bname !== '') {
+            extraAddr += data.bname;
+          }
+          // 건물명이 있을 경우 추가한다.
+          if (data.buildingName !== '') {
+            extraAddr += (extraAddr !== '' ? ', ' + data.buildingName : data.buildingName);
+          }
+          // 조합형주소의 유무에 따라 양쪽에 괄호를 추가하여 최종 주소를 만든다.
+          fullAddr += (extraAddr !== '' ? ' (' + extraAddr + ')' : '');
+        }
+
+        // 우편번호와 주소 정보를 해당 필드에 넣는다.
+        document.getElementById('sample3_address').value = fullAddr;
+
+        // iframe을 넣은 element를 안보이게 한다.
+        // (autoClose:false 기능을 이용한다면, 아래 코드를 제거해야 화면에서 사라지지 않는다.)
+        element_wrap.style.display = 'none';
+
+        // 우편번호 찾기 화면이 보이기 이전으로 scroll 위치를 되돌린다.
+        document.body.scrollTop = currentScroll;
+      },
+      // 우편번호 찾기 화면 크기가 조정되었을때 실행할 코드를 작성하는 부분. iframe을 넣은 element의 높이값을 조정한다.
+      onresize: function(size) {
+        element_wrap.style.height = size.height + 'px';
+      },
+      width: '100%',
+      height: '100%'
+    }).embed(element_wrap);
+
+    // iframe을 넣은 element를 보이게 한다.
+    element_wrap.style.display = 'block';
+  }
+</script>
+
 </html>

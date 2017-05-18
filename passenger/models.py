@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 from django.contrib.postgres.fields import ArrayField
+from schedule.models import Branch
 from django.db import models
 import datetime
 from simple_history.models import HistoricalRecords
@@ -146,14 +147,35 @@ class ShuttleSchedule(models.Model):
     memo = models.TextField(null = True, blank = True)
     bid = models.IntegerField(null=True, blank = 1)
 
+class Grade(models.Model):
+    name = models.CharField(max_length = 30)
+
 class StudentInfo(models.Model):
-    aid = models.IntegerField()
-    bid = models.IntegerField()
+    aca = Academy.objects.all()
+    branch = Branch.objects.all()
+    gra = Grade.objects.all()
+
+    ACA = ()
+    BRA = ()
+    GRA = ()
+
+    for a in aca:
+        ACA = ACA + ((a.id, a.name),)
+
+    for b in branch:
+        BRA = BRA + ((b.id, b.bname),)
+
+    for g in gra:
+        GRA = GRA + ((g.name, g.name),)
+
+    aid = models.IntegerField(choices=ACA)
+    bid = models.IntegerField(choices=BRA)
     aname = models.CharField(max_length = 20)
-    sname = models.CharField(max_length = 10)
     bname = models.CharField(max_length = 20)
-    phone1 = models.IntegerField(null=True, blank=True, default=0)
-    phonelist = ArrayField(models.IntegerField())
+    sname = models.CharField(max_length = 10)
+    grade = models.CharField(max_length = 10,choices=GRA, null = True, default = '0')
+    phone1 = models.IntegerField()
+    phonelist = ArrayField(models.IntegerField(null = True, blank = True, default=0))
     history = HistoricalRecords()
 
 class AcademySchedule(models.Model):
@@ -180,12 +202,6 @@ class ScheduleDate(models.Model):
     memo = models.TextField(null = True, blank = True)
     date = models.CharField(max_length = 30)
     today = models.DateField(default=datetime.date.today)
-
-class Branch(models.Model):
-    region = models.CharField(max_length=30,default = '')
-    location = models.CharField(max_length = 30)
-    lon = models.FloatField(null=True, default = 0)
-    lat = models.FloatField(null = True, default = 0)
 
 class Community(models.Model):
     aname = models.CharField(max_length=50)

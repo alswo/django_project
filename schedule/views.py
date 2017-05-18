@@ -30,6 +30,18 @@ def getAcaPhone(request):
 
     return JsonResponse({"phonelist":phonelist})
 
+@csrf_exempt
+def getCarPhone(request):
+    carnum = request.GET.get('carnum')
+    car = Car.objects.get(carname = carnum)
+
+    phonelist = []
+
+    phonelist.append(car.driver)
+    phonelist.append(car.passenger)
+
+    return JsonResponse({"phonelist":phonelist})
+
 
 
 @csrf_exempt

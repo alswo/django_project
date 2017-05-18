@@ -1,5 +1,5 @@
 from django.contrib import admin
-from passenger.models import Commute, Academy, Schedule, ShuttleSchedule, AcademySchedule, Group, PhoneList, ScheduleDate, Branch, StudentInfo,Community
+from passenger.models import Academy, Commute, Schedule, ShuttleSchedule, AcademySchedule, Group, PhoneList, ScheduleDate, StudentInfo,Community,Grade
 from simple_history.admin import SimpleHistoryAdmin
 
 class ScheduleAdmin(admin.ModelAdmin):
@@ -23,11 +23,17 @@ class PhoneListAdmin(admin.ModelAdmin):
 class ScheduleDateAdmin(admin.ModelAdmin):
     list_display = ('a_name', 'day', 'time')
 
-class BranchAdmin(admin.ModelAdmin):
-    list_display = ('id', 'location')
-
 class StudentInfoAdmin(SimpleHistoryAdmin):
     list_display = ('bname', 'aname', 'sname', 'id')
+
+    class Media:
+        js = (
+            'js/jquery-1.11.1.min.js',
+            'js/changedAid.js'
+        )
+
+class GradeAdmin(admin.ModelAdmin):
+    list_display = ('name',)
 
 class CommunityAdmin(admin.ModelAdmin):
     list_display = ('aname','showdate')
@@ -36,7 +42,6 @@ class CommuteAdmin(SimpleHistoryAdmin):
     list_display = ('name','a_name')
 
 
-admin.site.register(Branch, BranchAdmin)
 admin.site.register(Group, GroupAdmin)
 admin.site.register(Schedule,ScheduleAdmin)
 admin.site.register(Academy,AcademyAdmin)
@@ -47,3 +52,4 @@ admin.site.register(ScheduleDate, ScheduleDateAdmin)
 admin.site.register(StudentInfo, StudentInfoAdmin)
 admin.site.register(Community, CommunityAdmin)
 admin.site.register(Commute, CommuteAdmin)
+admin.site.register(Grade,GradeAdmin)
