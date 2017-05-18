@@ -30,7 +30,7 @@
     }
 
     #savedelete,
-    #searchedByCar {
+    .searchedByCar {
       display: inline
     }
   </style>
@@ -165,7 +165,7 @@
       <input type="hidden" name='updateflag' class="form-control" value="2" form="searchform2" />
       <div class="row">
         {% for car in carlist %}
-        <form action="updateSchedule" method="get" id="searchedByCar">
+        <form action="updateSchedule" method="get" class="searchedByCar">
           <input type="hidden" name='bid' class="form-control" value="{{bid}}" />
           <input type="hidden" name='day' class="form-control" value="{{day}}" />
           <input type="hidden" name='time' class="form-control" value="{{time}}" />
@@ -194,11 +194,10 @@
     </div>
     <div class="col-md-2"></div>
   </div>
-  <div class="row">
-    <div class="col-md-8">
-      <div class="col-md-12 table-responsive">
         <br>
         <br> {% for c in contacts %}
+        <div class="col-md-8">
+          <div class="col-md-12 table-responsive">
         <div class="row table-container">
           <table class="table table-bordered table-schedule">
             <thead>
@@ -263,7 +262,6 @@
                     <button type="button" class="btn btn-primary studenttoinput">학생추가</button>
                   </div>
                 </div>
-              </div>
             </div>
           </table>
           <a id="{{c.id}}" class="btn btn-default pull-right addrow" onclick="emptyTempList();">Add Row</a>
@@ -291,9 +289,18 @@
               <input type="submit" class="btn btn-success" value="삭제">
             </form>
           </div>
+          <br>
+          <br>
+          <br>
         </div>
+      </div>
+    </div>
+    <div class="col-md-4"></div>
+  </div>
         <br>
-        <br> {% endfor %} {% else %}
+        <br>
+        {% endfor %}
+        {% else %}
         <div class="row">
           <br>
           <div class="col-sm-4"></div>
@@ -303,7 +310,6 @@
           <div class="col-sm-4"></div>
         </div>
         {% endif %}
-
 </body>
 <script>
   var tempList = new Array();
@@ -453,21 +459,11 @@
     });
   })
 
-
-$('#openBtn').click(function(){
+  $('#openBtn').click(function(){
     $('#myModal').on('show', function () {
 
-	});
-    $('#myModal').modal({show:true})
-});
-
-  // $('input').tagsinput({
-  //   typeahead: {
-  //     source: function(query) {
-  //       return $.getJSON('citynames.json');
-  //     }
-  //   }
-  // });
+	   });
+      $('#myModal').modal({show:true})
+  });
 </script>
-
 </html>

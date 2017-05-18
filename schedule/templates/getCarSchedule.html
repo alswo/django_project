@@ -9,6 +9,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 <style>
+.thstyle3 {
+  text-align: center;
+  width: 22.5%;
+}
+
 function callNumber(num){
     location.href=”tel:”+num;
 }
@@ -40,12 +45,13 @@ function callNumber(num){
                 {% for aname in c.anamelist %}
                 {% for aid in c.alist %}
                   {% if forloop.counter == forloop.parentloop.counter %}
-                      <button type="button" class="btn-xs btn-warning" role="button" data-toggle="collapse" href="#collapseExample{{c.id}}" onclick="getAcaPhone(this, {{aid}},{{c.id}})" aria-expanded="false" aria-controls="collapseExample">{{aname}}</button>
-                      <div class="collapse" id="collapseExample{{c.id}}">
-                      </div>
+                      <button type="button" class="btn-xs btn-warning" role="button" data-toggle="collapse" href="#collapsePhone{{c.id}}" onclick="getAcaPhone(this, {{aid}},{{c.id}})" aria-expanded="false" aria-controls="collapseExample">{{aname}}</button>
+
                   {% endif %}
                 {% endfor %}
                 {% endfor %}
+                <div class="collapse" id="collapsePhone{{c.id}}">
+                </div>
               </div>
               <div class="panel-body">
 
@@ -55,7 +61,7 @@ function callNumber(num){
                     <tr>
                         <th>시간</th>
                         <th>주소</th>
-                        <th>이름</th>
+                        <th class="thstyle3">이름</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -77,6 +83,7 @@ function callNumber(num){
                               {% endif %}
                               <ul class="dropdown-menu pull-right">
                               </ul>
+                              <br>
                             </div>
                             {% endif %}
                             {% endfor %}
@@ -161,7 +168,7 @@ function getAcaPhone(e, aid,fc){
         aid: aid,
       },
       success: function(data) {
-        $('#collapseExample'+fc).html("<br><a class='btn-xs btn-info' href='tel:"+data["phonelist"][0]+"'>전화1</a>&nbsp&nbsp<a class='btn-xs btn-info' href='tel:"+data["phonelist"][1]+"'>전화2</a>");
+        $('#collapsePhone'+fc).html("<br><a class='btn-xs btn-info' href='tel:"+data["phonelist"][0]+"'>전화1</a>&nbsp&nbsp<a class='btn-xs btn-info' href='tel:"+data["phonelist"][1]+"'>전화2</a>");
       }
   });
 

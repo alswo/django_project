@@ -1,5 +1,5 @@
 from django.contrib import admin
-from passenger.models import Academy, Commute, Schedule, ShuttleSchedule, AcademySchedule, Group, PhoneList, ScheduleDate, Branch, StudentInfo,Community
+from passenger.models import Academy, Commute, Schedule, ShuttleSchedule, AcademySchedule, Group, PhoneList, ScheduleDate, StudentInfo,Community,Grade
 
 class ScheduleAdmin(admin.ModelAdmin):
     list_display = ('name', 's_name', 'load','unload')
@@ -22,17 +22,21 @@ class PhoneListAdmin(admin.ModelAdmin):
 class ScheduleDateAdmin(admin.ModelAdmin):
     list_display = ('a_name', 'day', 'time')
 
-class BranchAdmin(admin.ModelAdmin):
-    list_display = ('id', 'location')
-
 class StudentInfoAdmin(admin.ModelAdmin):
     list_display = ('bname', 'aname', 'sname', 'id')
+
+    class Media:
+        js = (
+            'js/jquery-1.11.1.min.js',
+            'js/changedAid.js'
+        )
+
+class GradeAdmin(admin.ModelAdmin):
+    list_display = ('name',)
 
 class CommunityAdmin(admin.ModelAdmin):
     list_display = ('aname','showdate')
 
-
-admin.site.register(Branch, BranchAdmin)
 admin.site.register(Group, GroupAdmin)
 admin.site.register(Schedule,ScheduleAdmin)
 admin.site.register(Academy,AcademyAdmin)
@@ -43,3 +47,4 @@ admin.site.register(PhoneList,PhoneListAdmin)
 admin.site.register(ScheduleDate, ScheduleDateAdmin)
 admin.site.register(StudentInfo, StudentInfoAdmin)
 admin.site.register(Community, CommunityAdmin)
+admin.site.register(Grade,GradeAdmin)

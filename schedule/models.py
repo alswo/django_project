@@ -75,6 +75,8 @@ class Branch(models.Model):
 class Car(models.Model):
     carname = models.IntegerField(unique=True)
     branchid = models.ForeignKey(Branch)
+    driver = models.IntegerField(default=0)
+    passenger = models.IntegerField(default=0)
 
     class Meta:
         ordering=['carname']
