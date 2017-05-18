@@ -16,6 +16,7 @@ from itertools import chain
 from django.core.serializers import serialize
 import operator
 import json
+import logging
 
 @csrf_exempt
 def getAcaPhone(request):
@@ -464,16 +465,17 @@ def updateArea(request):
             areaids = request.POST.getlist('areaid[]')
             names = request.POST.getlist('name[]')
 
+            Area.objects.exclude(id__in=areaids).delete()
             i = 0
             for i in range(len(names)):
-                try:
+                if (areaids[i] == '-1'):
+                    area = Area(name = names[i])
+                    area.save()
+	        else:
             	    area = Area.objects.get(id = areaids[i])
                     area.name = names[i]
                     area.save()
-                except Area.DoesNotExist:
-                    Area(name = names[i]).save()
 
-            Area.objects.exclude(id__in=areaids).delete()
 
             areaList = Area.objects.all()
             return render_to_response('supdateArea.html',{"area":areaList,'user':request.user})
@@ -529,3 +531,11 @@ def csmain(request):
 
     elif request.method == "POST":
         return render_to_response('csmain.html',{'user':request.user})
+
+@login_required
+def test(request):
+    if request.method == "GET":
+        return render_to_response('test.html',{'user':request.user})
+
+    elif request.method == "POST":
+        return render_to_response('test.html',{'user':request.user})

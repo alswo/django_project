@@ -11,6 +11,8 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
+    'schedule',
+    'passenger',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -18,8 +20,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'passenger',
-    'schedule',
     'simple_history',
 ]
 
@@ -40,8 +40,10 @@ ROOT_URLCONF = 'tayo.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
-        'APP_DIRS': True,
+        #'DIRS': [],
+        #'DIRS': [os.path.join(os.path.dirname(__file__),'templates'),],
+        'DIRS': ['/home/ubuntu/work/django_project/templates',],
+        #'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
@@ -49,6 +51,10 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
             ],
+            'loaders': (
+                'django.template.loaders.filesystem.Loader', 
+                'django.template.loaders.app_directories.Loader',
+            ),
         },
     },
 ]
@@ -102,3 +108,4 @@ PROJECT_ROOT = os.path.normpath(os.path.dirname(__file__))
 
 STATIC_ROOT = os.path.join(PROJECT_ROOT, 'static')
 STATIC_URL = '/static/'
+

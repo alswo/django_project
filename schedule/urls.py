@@ -10,4 +10,5 @@ urlpatterns = patterns('',
     url(r'^csmain', views.csmain),
     url(r'^studentLoad', views.studentLoad),
     url(r'^getAcaPhone', views.getAcaPhone),
+    url(r'^test', views.test),
 )

@@ -1,53 +1,14 @@
-<!DOCTYPE html>
-<!--
-<html>
+{% extends 'base.html' %}
+{% block content %}
 
-<head>
-  {% load staticfiles %}
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="">
-  <meta name="author" content="">
-  <meta charset="UTF-8">
-  <title>TAYO</title>
-  <script src="{% static 'js/jquery-1.10.2.js' %}"></script>
-  <script src="{% static 'js/dynamicTable.js' %}"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.3.7/js/tether.min.js"></script>
-  <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
-  <script src="{% static 'js/bootstrap.min.js' %}"></script>
-
-  <style>
-    .thstyle2 {
-      text-align: center;
-      width: 26%;
-    }
-  </style>
-  <script>
-    var userAgent = navigator.userAgent.toLowerCase();
-
-    if (userAgent.match('iphone')) {
-      document.write('<link rel="apple-touch-icon" href="/mobile/image/apple-touch-icon.png" />')
-    } else if (userAgent.match('ipad')) {
-      document.write('<link rel="apple-touch-icon" sizes="72*72" href="/mobile/image/apple-touch-icon-ipad.png" />')
-    } else if (userAgent.match('ipod')) {
-      document.write('<link rel="apple-touch-icon" href="/mobile/image/apple-touch-icon.png" />')
-    } else if (userAgent.match('android')) {
-      document.write('<link rel="shortcut icon" href="/mobile/image/favicon.ico" />')
-    } else {
-      document.write('<link rel="shortcut icon" href="/mobile/image/favicon.ico" />')
-    }
-  </script>
-</head>
-
-//-->
   <div class="row">
     <div class="col-md-12">
       <div class="col-md-12 table-responsive">
         <br>
         <br>
+        <form action="updateArea" method="post" enctype='application/json' id="areaform">
         <div class="box-body">
-          <table class="table table-bordered table-hover">
+          <table class="table table-bordered table-area">
             <thead>
               <tr>
                 <th class="text-center thstyle2">id</th>
@@ -71,10 +32,8 @@
         <div class="row">
           <div class="col-md-10"></div>
           <div class="col-md-1">
-            <form action="updateArea" method="post" enctype='application/json' id="areaform">
               <input class="hidden" name="update" value="1" form="areaform" />
               <input type="submit" class="btn btn-success pull-right" value="저장">
-            </form>
           </div>
           <div class="col-md-1">
             <form action="updateArea" method="post" id="deleteform">
@@ -83,8 +42,11 @@
             </form>
           
         </div>
+        </form>
         <br>
       </div>
+    </div>
+  </div>
 <script>
   var tempList = new Array();
 
@@ -93,9 +55,9 @@
     tempList.splice(0, tempList.length);
   }
 
-  $('.table-container').on('click', '.addrow', function() {
+  $(document).on('click', '.addrow', function() {
     $(this).parent().find('.table-body').append(
-      '<tr><td data-name="areaid"><input type="hidden" name="areaid[]" placeholder="id" class="form-control" form="areaform" value="-1"></td><td data-name="name"><input type="text" name="name[]" placeholder="Name" class="form-control" form="areaform"/></td><a href="javascript:void(0)" class="glyphicon glyphicon-chevron-up up"></a><a href="javascript:void(0)" class="glyphicon glyphicon-chevron-down down"></a></td><td data-name="del"><button name="del" class="btn btn-danger glyphicon glyphicon-remove row-remove"></button></td></tr>'
+      '<tr><td data-name="areaid">-1<input type="hidden" name="areaid[]" placeholder="id" class="form-control" form="areaform" value="-1"></td><td data-name="name"><input type="text" name="name[]" placeholder="Name" class="form-control" form="areaform"/></td><a href="javascript:void(0)" class="glyphicon glyphicon-chevron-up up"></a><a href="javascript:void(0)" class="glyphicon glyphicon-chevron-down down"></a></td><td data-name="del"><button name="del" class="btn btn-danger glyphicon glyphicon-remove row-remove"></button></td></tr>'
     )
   });
 
@@ -130,7 +92,4 @@
 
 </script>
 
-<!--
-</body>
-</html>
-//-->
+{% endblock content %}

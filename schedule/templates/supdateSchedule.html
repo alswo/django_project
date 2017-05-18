@@ -30,7 +30,7 @@
     }
 
     #savedelete,
-    #searchedByCar {
+    .searchedByCar {
       display: inline
     }
   </style>
@@ -65,7 +65,7 @@
       <div class="container">
         <!-- Brand and toggle get grouped for better mobile display -->
         <div class="navbar-header">
-          <a class="navbar-brand" href="/">
+          <a class="navbar-brand" href="/inventory/csmain">
             <img alt="ShuttleTayo" width="22%" src="{% static 'img/tayologo.png' %}"></img>
           </a>
           <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
@@ -165,14 +165,15 @@
       <input type="hidden" name='updateflag' class="form-control" value="2" form="searchform2" />
       <div class="row">
         {% for car in carlist %}
-        <form action="updateSchedule" method="get" id="searchedByCar">
-          <input type="hidden" name='bid' class="form-control" value="{{bid}}" />
-          <input type="hidden" name='day' class="form-control" value="{{day}}" />
-          <input type="hidden" name='time' class="form-control" value="{{time}}" />
-          <input type="hidden" name='updateflag' class="form-control" value="2" />
-          <input type="hidden" name='searchinven' class="form-control" value="2" />
-          <input type="hidden" name='updateflag' class="form-control" value="2" />
-          <input type="submit" class="btn btn-primary" name="car" value="{{car.carname}}">
+        <form class="searchedByCar" action="updateSchedule" method="get" id="searchedByCar{{car.carname}}">
+          <input type="hidden" name='bid' class="form-control" value="{{bid}}" form="searchedByCar{{car.carname}}" />
+          <input type="hidden" name='day' class="form-control" value="{{day}}" form="searchedByCar{{car.carname}}" />
+          <input type="hidden" name='time' class="form-control" value="{{time}}" form="searchedByCar{{car.carname}}" />
+          <input type="hidden" name='updateflag' class="form-control" value="2" form="searchedByCar{{car.carname}}" />
+          <input type="hidden" name='searchinven' class="form-control" value="2" form="searchedByCar{{car.carname}}" />
+          <input type="hidden" name='updateflag' class="form-control" value="2" form="searchedByCar{{car.carname}}" />
+          <input type="hidden" name='car' class="form-control" value="{{car.carname}}" form="searchedByCar{{car.carname}}" />
+          <input type="submit" class="btn btn-primary" name="submit" value="{{car.carname}}" />
         </form>
         {% endfor %}
         <a href="#" class="btn btn-warning" id="openBtn">인벤토리 추가</a>
@@ -266,7 +267,7 @@
               </div>
             </div>
           </table>
-          <a id="{{c.id}}" class="btn btn-default pull-right addrow" onclick="emptyTempList();">Add Row</a>
+          <a id="{{c.id}}" class="btn btn-default pull-right addrow">Add Row</a>
         </div>
         <br>
         <div class="row">
@@ -293,7 +294,9 @@
           </div>
         </div>
         <br>
-        <br> {% endfor %} {% else %}
+        <br> 
+	{% endfor %} 
+	{% else %}
         <div class="row">
           <br>
           <div class="col-sm-4"></div>
@@ -304,7 +307,6 @@
         </div>
         {% endif %}
 
-</body>
 <script>
   var tempList = new Array();
 
@@ -321,6 +323,7 @@
 
   $(document).on('click', '.addrow', function() {
     id = $(this).attr('id')
+    console.log(id)
     $(this).parent().find('.table-body').append(
       '<tr><td data-name="time"><input onchange="emptyTempList();" type="text" name="time[]" placeholder="Time" class="form-control" form="scheduleform' + id +
       '"/></td><td><input type="text" name="addr[]" placeholder="Address" class="form-control" form="scheduleform' + id +
@@ -470,4 +473,5 @@ $('#openBtn').click(function(){
   // });
 </script>
 
+</body>
 </html>

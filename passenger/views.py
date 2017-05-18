@@ -25,6 +25,7 @@ def sturegi(request):
 
 @csrf_exempt
 def schedule(request):
+    academys = None
     if request.method == "POST":
         gid = request.POST.get('gid')
 

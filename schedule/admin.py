@@ -20,7 +20,7 @@ class ScheduleTableAdmin(admin.ModelAdmin):
         return obj.iid.__unicode__()
     inventory_name.admin_order_field = 'inventory'
 
-class AreaAdmin(admin.ModelAdmin):
+class AreaAdmin(SimpleHistoryAdmin):
     list_display = ('name',)
 
 class CarAdmin(admin.ModelAdmin):
