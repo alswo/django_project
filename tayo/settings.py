@@ -42,7 +42,7 @@ TEMPLATES = [
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         #'DIRS': [],
         #'DIRS': [os.path.join(os.path.dirname(__file__),'templates'),],
-        'DIRS': ['/home/ubuntu/work/django_project/templates',],
+        'DIRS': ['/root/workspace/tayo/templates',],
         #'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

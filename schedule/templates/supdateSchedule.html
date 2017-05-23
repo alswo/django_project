@@ -121,16 +121,18 @@
                   <select name="load[]" form="scheduleform{{c.id}}">
                     <option value="">등하원</option>
                     <option value="1" selected>등원</option>
-                    <option value="2">하원</option>
+                    <option value="0">하원</option>
                   </select> {% endif %} {% if s.lflag == 0 %}
                   <select name="load[]" form="scheduleform{{c.id}}">
                     <option value="">등하원</option>
                     <option value="1">등원</option>
                     <option value="0" selected>하원</option>
-                  </select> {% endif %} {% if s.lflag == 2 %}
+                  </select> {% endif %}
+                  {% if s.lflag == 2 %}
                   <select name="load[]" form="scheduleform{{c.id}}">
                     <option value="">출발</option>
-                  </select> {% endif %} {% if s.lflag == 3 %}
+                  </select> {% endif %}
+                  {% if s.lflag == 3 %}
                   <select name="load[]" form="scheduleform{{c.id}}">
                     <option value="">도착</option>
                   </select> {% endif %}

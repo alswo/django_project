@@ -266,6 +266,7 @@ def updateSchedule(request):
         updateflag = request.POST.get('updateflag')
         #update 1(update inven,stable),0(delete inven,stable)
         update = request.POST.get('update')
+
         #updateflag == 1: selects area for getting branch
         if updateflag == '1':
             areaid = request.POST.get('area')
@@ -332,16 +333,14 @@ def updateSchedule(request):
                 if 0 < i < len(time) - 1:
                     sidlist = []
                     temp_aca = academy[i].split(',')
-                    temp_name = name2[i].split(',')
-                    student = StudentInfo.objects.filter(aid__in=[ a for a in temp_aca])
+                    temp_name = [n.strip() for n in name2[i].split(',')]
+                    #student = StudentInfo.objects.filter(aid__in=[ a for a in temp_aca])
 
-                    for s in student:
-                        for k in temp_name:
-                            if s.sname == k:
-                                sidlist.append(s.id);
-
-                    if len(sidlist) != len(temp_name):
-                        return HttpResponse(temp_aca)
+                    for k in temp_name:
+                        if StudentInfo.objects.filter(sname = k).exists():
+                            continue
+                        else:
+                            return HttpResponse("Not Register Student")
 
             try:
                 snum = len(set(name))
@@ -396,15 +395,6 @@ def updateSchedule(request):
                     temp_aca = academy[i].split(',')
                     temp_name = name2[i].split(',')
                     student = StudentInfo.objects.filter(aid__in=[ a for a in temp_aca])
-
-                    for s in student:
-                        for k in temp_name:
-                            if s.sname == k:
-                                sidlist.append(s.id);
-
-                    if len(sidlist) != len(temp_name):
-
-                        return HttpResponse("Not register student")
 
                     temp_lflag = [0 for z in range(len(temp_name))]
 
