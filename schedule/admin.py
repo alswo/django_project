@@ -18,6 +18,7 @@ class ScheduleTableAdmin(admin.ModelAdmin):
 
     def inventory_name(self, obj):
         return obj.iid.__unicode__()
+        
     inventory_name.admin_order_field = 'inventory'
 
 class AreaAdmin(admin.ModelAdmin):

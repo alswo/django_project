@@ -16,13 +16,18 @@
 </head>
 
 <body onload="init()">
-  <input id="a_name" type="hidden" value={{academy.name}}>
-  <input id="lon" type="hidden" value={{academy.lon}}>
-  <input id="lat" type="hidden" value={{academy.lat}}>
-  <input id="aid" type="hidden" value={{academy.id}}>
   <div class="row">
     <div class="col-md-7">
-      <div id="map_div" style="width:500px;height:500px;"></div>
+      <div id="map_div" style="width:400px;height:400px;"></div>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>POI</th>
+          </tr>
+        </thead>
+        <tbody id="view-marker">
+        </tbody>
+      </table>
     </div>
     <div class="col-md-5">
       <div class="row">
@@ -40,7 +45,7 @@
         <div class="row">
         <div class="table-responsive">
         <div class="row">
-          <div class="col-md-9">
+          <div class="col-md-7">
               <div class="row">
                 <div class="col-md-3">
                 <button type="button" class="btn btn-info" onclick="sample3_execDaumPostcode()">주소검색</button>
@@ -55,18 +60,28 @@
                 </div>
 
               </div>
-              <div class="col-md-3">
-                <button class="btn btn-info glyphicon glyphicon-plus pull-left" onclick="addrToPoi()"></button>
+              <div class="col-md-5">
+                <button class="btn btn-success " onclick="addrToPoi('s')">출발</button>
+                <button class="btn btn-danger " onclick="addrToPoi('e')">도착</button>
+                <button class="btn btn-default " onclick="addrToPoi('a')">추가</button>
               </div>
             </div>
             <table class="table">
               <thead>
                 <tr>
-                  <th>Position</th>
+                  <th>위치</th>
+                  <th>위도</th>
+                  <th>경도</th>
+                  <th style="display:none">주소</th>
                 </tr>
               </thead>
               <tbody id="info-marker">
+                <tr id="startPoi" class="success">
 
+                </tr>
+                <tr id="endPoi" class="danger">
+
+                </tr>
               </tbody>
             </table>
       </div>
@@ -167,7 +182,7 @@
 
 
     node_td.innerText = number + ' ' + position;
-    var target = document.getElementById('info-marker');
+    var target = document.getElementById('view-marker');
 
     target.appendChild(node_tr);
     target.appendChild(node_td);
@@ -181,7 +196,21 @@
 
   function getOptimized() {
     //getWeight(markers[0].lonlat, markers[1].lonlat);
-    console.log(markers)
+    infoTemp = []
+    infoLength = $('.markerInfo').length
+
+    infoTemp = $('#markerStart').text().split(':')
+    markers.push(infoTemp)
+
+    for( i = 0 ; i < infoLength; i ++){
+      infoTemp = $('.markerInfo')[i].innerText.split(':')
+      markers.push(infoTemp)
+    }
+
+    infoTemp = $('#markerEnd').text().split(':')
+    infoTemp[0] += "E"
+    markers.push(infoTemp)
+
     for (var i = 0; i < markers.length; i++) {
       g.addNode(markers[i][0].toString());
     }
@@ -200,22 +229,32 @@
 
       }
     }
+    console.log(g)
     alert("Done")
   }
 
   function getOpti() {
     var source_result = []
     var result = Prim(g);
+    //var resultTemp;
+
+    // console.log(g.edges[lastNode])
+    // for(e = 0; e < g.edges[lastNode].length; e++ ){
+    //   if(g.edges[lastNode][e].sink.indexOf("E") != -1){
+    //     resultTemp = [g.edges[lastNode][e].capacity,g.edges[lastNode][e].sink]
+    //   }
+    // }
+    //
+    // result.push(resultTemp)
+
+    result.push(g.nodes[g.nodes.length -1 ])
+
+    console.log(result)
 
     doc = document.getElementById('recommand');
     var temp = '';
-    console.log(result);
     var source_j = 0;
     var source_k = 1;
-
-    var academy = document.getElementById('a_name').value;
-    var a_lon = document.getElementById('lon').value;
-    var a_lat = document.getElementById('lat').value;
 
     var result_j = 0;
     //result.push(academy);
@@ -234,11 +273,12 @@
     }
 
     var all_time = 0;
+
     for (var i = 0; i < result.length; i++) {
       if (i < result.length - 1) {
-        temp += ' ' + result[i] + ' ' + '<span class="glyphicon glyphicon-arrow-right" aria-hidden="true"></span>' + '(' + source_result[result_j] + ')';
+        temp += '<br>' + result[i] + '(' + source_result[result_j] + ')' + '<br>';
       } else {
-        temp += ' ' + result[i]
+        temp += '<br>' + result[i]
       }
 
       if (typeof(source_result[result_j]) != "undefined") {
@@ -253,7 +293,7 @@
 
   }
 
-  function addrToPoi() {
+  function addrToPoi(flag) {
     var addr = $('#sample3_address').val()
     var urlStr = "https://apis.skplanetx.com/tmap/geo/fullAddrGeo?addressFlag=F00&format=json&version=1&format=json&appKey=9c78e49d-c72c-36a6-8e25-5c249e9291a3&fullAddr=" + addr
     var xmlHttp = new XMLHttpRequest();
@@ -262,6 +302,8 @@
     xmlHttp.onreadystatechange = function() {
       if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
         capacity = xmlHttp.responseText;
+        var size = new Tmap.Size(21, 25);
+        var offset = new Tmap.Pixel(-(size.w / 2), -size.h);
         jsonObj = JSON.parse(capacity);
         lon = jsonObj['coordinateInfo']['coordinate'][0]['lon']
         lat = jsonObj['coordinateInfo']['coordinate'][0]['lat']
@@ -276,38 +318,63 @@
           marker = new Tmap.Layer.Markers("MarkerLayer");
           map.addLayer(marker);
 
-          var size = new Tmap.Size(21, 25);
-          var offset = new Tmap.Pixel(-(size.w / 2), -size.h);
+
           var icon = new Tmap.Icon('https://developers.skplanetx.com/upload/tmap/marker/pin_b_m_a.png', size, offset);
           var mark = new Tmap.Marker(lonlat, icon);
           marker.addMarker(mark);
 
-          a.push(addr,nlon,nlat)
-          markers.push(a)
+          temp = []
+          addr1 = addr.split('(')[1].split(')')[0]
 
+          temp.push (addr,addr1,nlon,nlat)
+          //a.push(addr,nlon,nlat)
 
+          tempHtmlStart = "<td>"+addr1+"</td><td class='lon'>"+nlon+"</td><td class='lat'>"+nlat+"</td><td id='markerStart' style='display:none'>"+addr+":"+nlon+":"+nlat+"</td>"
+          tempHtmlEnd = "<td>"+addr1+"</td><td class='lon'>"+nlon+"</td><td class='lat'>"+nlat+"</td><td id='markerEnd' style='display:none'>"+addr+":"+nlon+":"+nlat+"</td>"
+          tempHtmlAdd = "<tr class='addPoi'><td>"+addr+"</td><td>"+nlon+"</td><td>"+nlat+"</td><td class='markerInfo' style='display:none'>"+addr+":"+nlon+":"+nlat+"</td><tr>"
+
+          if (flag == "a"){
+            $('#info-marker').append(tempHtmlAdd)
+          } else if (flag == "s"){
+            $('#startPoi').html(tempHtmlStart)
+          } else if (flag == 'e'){
+            $('#endPoi').html(tempHtmlEnd)
+          }
+
+          //markers.push(a)
         } else {
           lonlat = new Tmap.LonLat(lon, lat);
           map.setCenter(lonlat, 30);
           marker = new Tmap.Layer.Markers("MarkerLayer");
           map.addLayer(marker);
 
-          var size = new Tmap.Size(21, 25);
-          var offset = new Tmap.Pixel(-(size.w / 2), -size.h);
           var icon = new Tmap.Icon('https://developers.skplanetx.com/upload/tmap/marker/pin_b_m_a.png', size, offset);
           var mark = new Tmap.Marker(lonlat, icon);
           markers.addMarker(mark);
 
-          a.push(addr,lon,lat)
-          markers.push(a)
+          temp = []
+          addr1 = addr.split('(')[1].split(')')[0]
+
+          temp.push (addr,addr1,lon,lat)
+          //a.push(addr,nlon,nlat)
+
+          tempHtmlStart = "<td>"+addr1+"</td><td class='lon'>"+lon+"</td><td class='lat'>"+lat+"</td><td id='markerStart' style='display:none'>"+addr+":"+nlon+":"+nlat+"</td>"
+          tempHtmlEnd = "<td>"+addr1+"</td><td class='lon'>"+lon+"</td><td class='lat'>"+lat+"</td><td id='markerEnd' style='display:none'>"+addr+":"+nlon+":"+nlat+"</td>"
+          tempHtmlAdd = "<tr class='addPoi'><td>"+addr+"</td><td>"+lon+"</td><td>"+lat+"</td><td class='markerInfo' style='display:none'>"+addr+":"+nlon+":"+nlat+"</td><tr>"
+
+          if (flag == "a"){
+            $('#info-marker').append(tempHtmlAdd)
+          } else if (flag == "s"){
+            $('#startPoi').html(tempHtmlStart)
+          } else if (flag == 'e'){
+            $('#endPoi').html(tempHtmlEnd)
+          }
+          //markers.push(a)
         }
-
-
 
       } else if (xmlHttp.readyState == 4 && xmlHttp.status == 400) {
         capacity = xmlHttp.responseText;
         jsonObj = JSON.parse(capacity);
-
       }
     }
 
@@ -367,7 +434,6 @@
 </script>
 <script>
   function addSchedule(gid) {
-    a_name = document.getElementById('a_name').value;
     sorting_time = document.getElementById('sorting_time').value;
     writing = document.getElementById('writing').value;
     day = document.getElementById('day').value;
@@ -457,6 +523,98 @@
     // iframe을 넣은 element를 보이게 한다.
     element_wrap.style.display = 'block';
   }
+</script>
+<script>
+var lastNode;
+// Represents an edge from source to sink with capacity
+var Edge = function(source, sink, capacity) {
+    this.source = source;
+    this.sink = sink;
+    this.capacity = capacity;
+};
+
+// Main class to manage the network
+var Graph = function() {
+    this.edges = {};
+    this.nodes = [];
+    this.nodeMap = {};
+
+    // Add a node to the graph
+    this.addNode = function(node) {
+        this.nodes.push(node);
+        this.nodeMap[node] = this.nodes.length-1;
+        this.edges[node] = [];
+    };
+
+    // Add an edge from source to sink with capacity
+    this.addEdge = function(source, sink, capacity) {
+        // Create the two edges = one being the reverse of the other
+        this.edges[source].push(new Edge(source, sink, capacity));
+        this.edges[sink].push(new Edge(sink, source, capacity));
+    };
+
+    // Does edge from source to sink exist?
+    this.edgeExists = function(source, sink) {
+        if(this.edges[source] !== undefined)
+            for(var i=0;i<this.edges[source].length;i++)
+                if(this.edges[source][i].sink == sink)
+                    return this.edges[source][i];
+        return null;
+    };
+};
+
+function Prim(graph) {
+    var result = [];
+    var usedNodes = {};
+
+    // function findMinFirst(g) {
+    //     var min = [0,null];
+    //
+    //     console.log(g)
+    //
+    //     for(var i=0;i<result.length;i++)
+    //         for(var n=0;n<g.edges[result[i]].length;n++)
+    //             if(g.edges[result[i]][n].capacity > min[0] && usedNodes[g.edges[result[i]][n].sink] === undefined)
+    //                 min = [g.edges[result[i]][n].capacity, g.edges[result[i]][n].sink];
+    //     return min[1];
+    // }
+
+    function findMin(g) {
+        var min = [999999,null];
+
+        for(var i=0;i<result.length;i++){
+            for(var n=0;n<g.edges[result[i]].length;n++){
+                    if(g.edges[result[i]][n].sink.indexOf("E") != -1){
+                      continue;
+                    }
+                    else if(g.edges[result[i]][n].capacity < min[0] && usedNodes[g.edges[result[i]][n].sink]  === undefined){
+                      min = [g.edges[result[i]][n].capacity, g.edges[result[i]][n].sink];
+            }
+        }
+      }
+
+        return min[1];
+    }
+
+    // Pick start point
+    var node = g.nodes[0];
+
+    result.push(node);
+    usedNodes[node] = true;
+
+    var min = findMin(g);
+
+    while(min != null) {
+        result.push(min);
+        usedNodes[min] = true;
+
+        min = findMin(g);
+    }
+
+  lastNode = result[result.length - 1];
+  console.log(lastNode);
+  return result;
+};
 </script>
 
 </html>
