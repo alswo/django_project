@@ -3,6 +3,7 @@ from django.contrib.postgres.fields import ArrayField
 from schedule.models import Branch
 from django.db import models
 import datetime
+from simple_history.models import HistoricalRecords
 
 class Group(models.Model):
     gname = models.CharField(max_length = 80, null = True, blank = True)
@@ -20,6 +21,7 @@ class Academy(models.Model):
     lon = models.FloatField(null=True, blank=True)
     lat = models.FloatField(null=True, blank=True)
     bid = models.IntegerField()
+    history = HistoricalRecords()
 
 class Commute(models.Model):
     name = models.CharField(max_length = 10)
@@ -35,6 +37,7 @@ class Commute(models.Model):
     off_lon = models.FloatField(null=True, blank=True, default = 0)
     off_lat = models.FloatField(null=True, blank=True, default = 0)
     etc = models.TextField(null = True, blank = True)
+    history = HistoricalRecords()
 
 class PhoneList(models.Model):
     aca = Academy.objects.all()
@@ -173,6 +176,7 @@ class StudentInfo(models.Model):
     grade = models.CharField(max_length = 10,choices=GRA, null = True, default = '0')
     phone1 = models.IntegerField()
     phonelist = ArrayField(models.IntegerField(null = True, blank = True, default=0))
+    history = HistoricalRecords()
 
 class AcademySchedule(models.Model):
     gid = models.IntegerField()

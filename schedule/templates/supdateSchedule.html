@@ -1,107 +1,6 @@
-<!DOCTYPE html>
-<html>
+{% extends 'admin/base.html' %}
+{% block content %}
 
-<head>
-  {% load staticfiles %}
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="">
-  <meta name="author" content="">
-  <meta charset="UTF-8">
-  <title>TAYO</title>
-  <script src="{% static 'js/jquery-1.10.2.js' %}"></script>
-  <script src="{% static 'js/dynamicTable.js' %}"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.3.7/js/tether.min.js"></script>
-  <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
-  <script src="{% static 'js/bootstrap.min.js' %}"></script>
-  <link href="{% static 'css/bootstrap-tagsinput.css' %}" rel="stylesheet">
-  <script src="{% static 'js/bootstrap-tagsinput.js' %}"></script>
-
-  <style>
-    .thstyle2 {
-      text-align: center;
-      width: 26%;
-    }
-
-    .thstyle3 {
-      text-align: center;
-      width: 8%;
-    }
-
-    #savedelete,
-    .searchedByCar {
-      display: inline
-    }
-  </style>
-  <script>
-    var userAgent = navigator.userAgent.toLowerCase();
-
-    if (userAgent.match('iphone')) {
-      document.write('<link rel="apple-touch-icon" href="/mobile/image/apple-touch-icon.png" />')
-    } else if (userAgent.match('ipad')) {
-      document.write('<link rel="apple-touch-icon" sizes="72*72" href="/mobile/image/apple-touch-icon-ipad.png" />')
-    } else if (userAgent.match('ipod')) {
-      document.write('<link rel="apple-touch-icon" href="/mobile/image/apple-touch-icon.png" />')
-    } else if (userAgent.match('android')) {
-      document.write('<link rel="shortcut icon" href="/mobile/image/favicon.ico" />')
-    } else {
-      document.write('<link rel="shortcut icon" href="/mobile/image/favicon.ico" />')
-    }
-  </script>
-</head>
-
-<body id="background">
-  {% if user.is_authenticated %}
-  <!-- <div class="row" style="background-color: white">
-      <h4 style="background-color: white">
-          <div class="row">
-          <p class="text-center" id="top_logo"style="color:rgb(68,114,179)"><img src = "{% static 'img/tayologo.png' %}" class="img-fluid" alt="Responsive image" width="9%"></img> 안전한 어린이통학 전문 서비스</p>
-          </div>
-      </h4>
-</div> -->
-  <div class="container">
-    <nav class="navbar navbar-default navbar-fixed-top" role="navigation" id="dateNav">
-      <div class="container">
-        <!-- Brand and toggle get grouped for better mobile display -->
-        <div class="navbar-header">
-          <a class="navbar-brand" href="/">
-            <img alt="ShuttleTayo" width="22%" src="{% static 'img/tayologo.png' %}"></img>
-          </a>
-          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
-                  <span class="sr-only">Toggle navigation</span>
-                  <span class="icon-bar"></span>
-                  <span class="icon-bar"></span>
-                  <span class="icon-bar"></span>
-              </button>
-        </div>
-        <!-- Collect the nav links, forms, and other content for toggling -->
-        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-          <ul class="nav navbar-nav navbar-right">
-            <!--
-                  <li>
-                      <a href="dateSchedule?what=single">학원 일짜별 스케쥴 보기</a>
-                  </li>
-                  <li>
-                      <a href="dateSchedule?what=range">구간별 스케쥴 카운팅</a>
-                  </li>
-                  -->
-            <li>
-              <a href="#">반갑습니다 {{user.first_name}}님</a>
-            </li>
-            <li>
-              <a href="logout">Logout</a>
-            </li>
-          </ul>
-        </div>
-        <!-- /.navbar-collapse -->
-      </div>
-      <!-- /.container -->
-    </nav>
-  </div>
-  <br>
-  <br>
-  <br>
   <div class="row container">
     <!-- Button trigger modal -->
     <div class="col-md-2"></div>
@@ -264,7 +163,7 @@
                 </div>
             </div>
           </table>
-          <a id="{{c.id}}" class="btn btn-default pull-right addrow" onclick="emptyTempList();">Add Row</a>
+          <a id="{{c.id}}" class="btn btn-default pull-right addrow">Add Row</a>
         </div>
         <br>
         <div class="row">
@@ -300,17 +199,6 @@
         <br>
         <br>
         {% endfor %}
-        {% else %}
-        <div class="row">
-          <br>
-          <div class="col-sm-4"></div>
-          <div class="col-sm-4" align="center">
-            <a class="btn btn-success" href="/accounts/login">로그인이 필요합니다.</a>
-          </div>
-          <div class="col-sm-4"></div>
-        </div>
-        {% endif %}
-</body>
 <script>
   var tempList = new Array();
 
@@ -327,6 +215,7 @@
 
   $(document).on('click', '.addrow', function() {
     id = $(this).attr('id')
+    console.log(id)
     $(this).parent().find('.table-body').append(
       '<tr><td data-name="time"><input onchange="emptyTempList();" type="text" name="time[]" placeholder="Time" class="form-control" form="scheduleform' + id +
       '"/></td><td><input type="text" name="addr[]" placeholder="Address" class="form-control" form="scheduleform' + id +
@@ -466,4 +355,4 @@
       $('#myModal').modal({show:true})
   });
 </script>
-</html>
+{% endblock content %}

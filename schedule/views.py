@@ -4,6 +4,7 @@ from schedule.models import Inventory, ScheduleTable, Building, Branch, Inventor
 from passenger.models import Academy, Group, StudentInfo
 from django.db.models import Q
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpRequest, HttpResponseRedirect, JsonResponse
 from django.core import serializers
 from simple_history.models import HistoricalRecords
@@ -15,6 +16,7 @@ from itertools import chain
 from django.core.serializers import serialize
 import operator
 import json
+import logging
 
 @csrf_exempt
 def getAcaPhone(request):
@@ -460,3 +462,92 @@ def studentLoad(request):
         data = serialize('json', stu)
 
         return HttpResponse(data, content_type="application/json" )
+
+@csrf_exempt
+@login_required
+def updateArea(request):
+    if request.method == "GET":
+        area = Area.objects.all()
+        return render_to_response('supdateArea.html',{'area':area,'user':request.user})
+
+    elif request.method == "POST":
+        update = request.POST.get('update')
+        # save
+        if update == '1':
+            areaids = request.POST.getlist('areaid[]')
+            names = request.POST.getlist('name[]')
+
+            Area.objects.exclude(id__in=areaids).delete()
+            i = 0
+            for i in range(len(names)):
+                if (areaids[i] == '-1'):
+                    area = Area(name = names[i])
+                    area.save()
+	        else:
+            	    area = Area.objects.get(id = areaids[i])
+                    area.name = names[i]
+                    area.save()
+
+
+            areaList = Area.objects.all()
+            return render_to_response('supdateArea.html',{"area":areaList,'user':request.user})
+
+        # delete
+        elif update == '0':
+            iid = request.POST.get('iid')
+            bid = request.POST.get('bid')
+
+            academy = Academy.objects.filter(bid=bid)
+
+            try:
+                stable  = ScheduleTable.objects.filter(iid_id = iid)
+                stable.delete()
+
+            except:
+                return HttpResponse("inven delete error:stable")
+
+            try:
+                inven = Inventory.objects.get(id = iid)
+                inven.delete()
+            except:
+                return HttpResponse("inven delete error:inventory")
+
+            return render_to_response('supdateSchedule.html',{"academy":academy,"bid":bid,'user':request.user})
+
+        else:
+            bid = request.POST.get('bid')
+            day = request.POST.get('day')
+            time = int(request.POST.get('time'))
+            gid = request.POST.get('gid')
+
+            carnum = Group.objects.filter(bid=bid).order_by('gid')
+            academy = Academy.objects.filter(bid=bid)
+            branch = Branch.objects.get(id = bid)
+
+            invens = Inventory.objects.filter(bid = bid).filter(day = day).filter(etime__gte = time-60, stime__lte = time+60).filter(carnum = carnum[0].gid)
+
+            list_invensid = []
+            contacts = []
+
+            for i in invens:
+                contacts.extend(Inventory.objects.filter(id = i.id).prefetch_related('scheduletables'))
+
+            return render_to_response('supdateSchedule.html',{"time":time,"day":day,"branch":branch,"academy":academy,"carnum": carnum,"bid":bid,"contacts":contacts,'user':request.user})
+
+
+
+@login_required
+def csmain(request):
+    if request.method == "GET":
+        return render_to_response('csmain.html',{'user':request.user})
+
+    elif request.method == "POST":
+        return render_to_response('csmain.html',{'user':request.user})
+
+@login_required
+def test(request):
+    if request.method == "GET":
+        return render_to_response('test.html',{'user':request.user})
+
+    elif request.method == "POST":
+        return render_to_response('test.html',{'user':request.user})

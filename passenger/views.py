@@ -25,6 +25,7 @@ def sturegi(request):
 
 @csrf_exempt
 def schedule(request):
+    academys = None
     if request.method == "POST":
         gid = request.POST.get('gid')
 
@@ -136,6 +137,7 @@ def academySchedule(request):
 
         return render_to_response('passenger/academySchedule.html', {"contacts" : contacts, "aid" : aid,'user':request.user})
 
+@login_required
 def driverSchedule(request):
     if request.method == "GET":
         gid = request.GET.get('gid')
@@ -272,6 +274,7 @@ def acaphone(request):
             pnlist.append(academy.name)
         return JsonResponse({"plist" : plist, "pnlist" : pnlist})
 
+@login_required
 @csrf_exempt
 def studata(request):
 
