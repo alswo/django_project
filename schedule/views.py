@@ -234,6 +234,7 @@ def putSchedule(request):
 def updateSchedule(request):
     if request.method == "GET":
         searchflag = request.GET.get('searchinven')
+
         if searchflag:
             if searchflag == '2':
                 area = Area.objects.all()
@@ -247,7 +248,7 @@ def updateSchedule(request):
                 branch = Branch.objects.get(id = bid)
                 carlist = Car.objects.filter(branchid=bid)
 
-                invens = Inventory.objects.filter(bid = bid).filter(day = day).filter(etime__gte = time-60, stime__lte = time+60).filter(carnum = carnum)
+                invens = Inventory.objects.filter(bid = bid).filter(day = day).filter(etime__gte = time-90, stime__lte = time+90).filter(carnum = carnum)
 
                 contacts = []
 
@@ -266,6 +267,7 @@ def updateSchedule(request):
         updateflag = request.POST.get('updateflag')
         #update 1(update inven,stable),0(delete inven,stable)
         update = request.POST.get('update')
+
 
         #updateflag == 1: selects area for getting branch
         if updateflag == '1':
@@ -287,7 +289,7 @@ def updateSchedule(request):
                 branch = Branch.objects.get(id = bid)
                 carlist = Car.objects.filter(branchid=bid)
 
-                invens = Inventory.objects.filter(bid = bid).filter(day = day).filter(etime__gte = time-60, stime__lte = time+60).filter(carnum = carlist[0].carname)
+                invens = Inventory.objects.filter(bid = bid).filter(day = day).filter(etime__gte = time-90, stime__lte = time+90).filter(carnum = carlist[0].carname)
 
                 contacts = []
 
@@ -313,8 +315,6 @@ def updateSchedule(request):
 
         #update -> 1 : update inven
         if update == '1':
-            #day = request.POST.get('day')
-            #carnum = request.POST.get('carnum')
             iid = request.POST.get('iid')
             bid = request.POST.get('bid')
             time = request.POST.getlist('time[]')
@@ -323,10 +323,16 @@ def updateSchedule(request):
             name2 = request.POST.getlist('name[]')
             academy = request.POST.getlist('academy[]')
             load = request.POST.getlist('load[]')
-            #searchTime,day,area remain request data
-            searchTime = request.POST.get('time')
+
+            #searchTime,day,area,branch for inventory searching and redirection
+            searchTime = request.POST.get('searchTime')
             day = request.POST.get('day')
             area = Area.objects.all()
+            branch = Branch.objects.filter(id = bid)
+            #carlist for searching with carnum and redirection
+            carlist = Car.objects.filter(branchid=bid)
+            #for redirection
+            carnum = request.POST.get('invencar')
 
             #Check register student
             for i in range(len(time)):
@@ -407,26 +413,33 @@ def updateSchedule(request):
                     stable = ScheduleTable(iid_id = iid, time = time[i], addr = addr[i], alist=temp_aca, anamelist = anamelist, slist=sidlist, sname=temp_name, tflag=temp_lflag, lflag=load[i])
                     stable.save()
 
-
+            #redirect
+            carnum = request.POST.get('invencar')
+            area = Area.objects.all()
             academy = Academy.objects.filter(bid=bid)
 
-            carlist = Car.objects.filter(branchid=bid)
-            branch = Branch.objects.filter(id = bid)
-            area = Area.objects.all()
+            invens = Inventory.objects.filter(bid = bid).filter(day = day).filter(etime__gte = int(searchTime)-90, stime__lte = int(searchTime)+90).filter(carnum = carnum)
 
-            return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
-            #return render_to_response('supdateSchedule.html',{"area":area,"academy":academy,"bid":bid,'user':request.user,'carlist':carlist,'day':day,'time':time,"branch":branch})
+            contacts = []
+
+            for i in invens:
+                contacts.extend(Inventory.objects.filter(id = i.id).prefetch_related('scheduletables'))
+
+            return render_to_response('supdateSchedule.html',{"area":area,"time":searchTime,"academy":academy,"day":day,"carlist": carlist,"bid":bid,"contacts":contacts,'user':request.user})
 
         #update -> 0 delete inventory, stable
         elif update == '0':
             iid = request.POST.get('iid')
             bid = request.POST.get('bid')
-            #searchTime,day,area remain request data
-            searchTime = request.POST.get('time')
+            #searchTime,day,area,branch for inventory searching and redirection
+            searchTime = request.POST.get('searchTime')
             day = request.POST.get('day')
             area = Area.objects.all()
-
-            academy = Academy.objects.filter(bid=bid)
+            branch = Branch.objects.filter(id = bid)
+            #carlist for searching with carnum and redirection
+            carlist = Car.objects.filter(branchid=bid)
+            #for redirection
+            carnum = request.POST.get('invencar')
 
             try:
                 stable  = ScheduleTable.objects.filter(iid_id = iid)
@@ -441,7 +454,16 @@ def updateSchedule(request):
             except:
                 return HttpResponse("inven delete error:inventory")
 
-            return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+            #redirect
+            academy = Academy.objects.filter(bid=bid)
+            invens = Inventory.objects.filter(bid = bid).filter(day = day).filter(etime__gte = int(searchTime)-90, stime__lte = int(searchTime)+90).filter(carnum = carnum)
+
+            contacts = []
+
+            for i in invens:
+                contacts.extend(Inventory.objects.filter(id = i.id).prefetch_related('scheduletables'))
+
+            return render_to_response('supdateSchedule.html',{"area":area,"time":searchTime,"academy":academy,"day":day,"carlist": carlist,"bid":bid,"contacts":contacts,'user':request.user})
 
 @csrf_exempt
 def studentLoad(request):
