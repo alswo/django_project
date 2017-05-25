@@ -33,11 +33,29 @@ class ScheduleTable(models.Model):
     sname = ArrayField(models.CharField(max_length = 10,null=True,blank=True),null=True,blank=True)
     tflag = ArrayField(models.IntegerField(null=True,blank=True),null=True,blank=True)
     lflag = models.IntegerField()
-
     history = HistoricalRecords()
 
     def __unicode__(self):
         return u"{0} {1} {2} - {3}".format(self.time,self.iid, self.addr , ",".join(self.sname))
+
+    class Meta:
+        ordering = ['iid', 'time']
+
+
+class HistoryScheduleTable(models.Model):
+    date = models.DateField(auto_now=True)
+    iid = models.ForeignKey(Inventory,related_name='historyscheduletables')
+    carnum = models.IntegerField()
+    time = models.CharField(max_length = 10,null=True,blank=True)
+    addr = models.CharField(max_length = 30,null=True,blank=True)
+    alist = ArrayField(models.IntegerField(null=True,blank=True),null=True,blank=True)
+    academies = models.ManyToManyField('passenger.Academy')
+    members = models.ManyToManyField('passenger.StudentInfo')
+    tflag = ArrayField(models.IntegerField(null=True,blank=True),null=True,blank=True)
+    lflag = models.IntegerField()
+
+    def __unicode__(self):
+        return u"{0} {1} {2}".format(self.time,self.iid, self.addr)
 
     class Meta:
         ordering = ['iid', 'time']

@@ -11,6 +11,7 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
+    'django_crontab',
     'schedule',
     'passenger',
     'django.contrib.admin',
@@ -90,6 +91,10 @@ AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
+]
+
+CRONJOBS = [
+    ('01 22 * * *', 'schedule.cron.store_historyschedule')
 ]
 
 LOGIN_REDIRECT_URL = '/'

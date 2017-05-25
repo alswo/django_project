@@ -11,4 +11,6 @@ urlpatterns = patterns('',
     url(r'^studentLoad', views.studentLoad),
     url(r'^getAcaPhone', views.getAcaPhone),
     url(r'^getCarPhone', views.getCarPhone),
+    url(r'^getHistory', views.getHistory),
+    url(r'^chart', views.chart),
 )

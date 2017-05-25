@@ -1,6 +1,6 @@
 from django.shortcuts import render_to_response, redirect
 from django.template import RequestContext
-from schedule.models import Inventory, ScheduleTable, Building, Branch, InventoryRequest, Area, Car
+from schedule.models import HistoryScheduleTable, Inventory, ScheduleTable, Building, Branch, InventoryRequest, Area, Car
 from passenger.models import Academy, Group, StudentInfo
 from django.db.models import Q
 from django.views.decorators.csrf import csrf_exempt
@@ -14,9 +14,11 @@ from django.forms.models import model_to_dict
 from django.core.exceptions import ObjectDoesNotExist
 from itertools import chain
 from django.core.serializers import serialize
+import datetime
 import operator
 import json
 import logging
+import collections
 
 @csrf_exempt
 def getAcaPhone(request):
@@ -341,7 +343,8 @@ def updateSchedule(request):
                                 sidlist.append(s.id);
 
                     if len(sidlist) != len(temp_name):
-                        return HttpResponse(temp_aca)
+                        #return HttpResponse(temp_aca)
+                        return HttpResponse(len(sidlist))
 
             try:
                 snum = len(set(name))
@@ -534,20 +537,87 @@ def updateArea(request):
 
             return render_to_response('supdateSchedule.html',{"time":time,"day":day,"branch":branch,"academy":academy,"carnum": carnum,"bid":bid,"contacts":contacts,'user':request.user})
 
-
-
+@csrf_exempt
 @login_required
-def csmain(request):
-    if request.method == "GET":
-        return render_to_response('csmain.html',{'user':request.user})
+def getHistory(request):
+    if request.method == 'GET':
+    	aid = request.GET.get('aid')
+    	daterange = request.GET.get('daterange')
+        startdate = request.GET.get('startdate')
+        enddate = request.GET.get('enddate')
+    elif request.method == 'POST':
+    	aid = request.POST.get('aid')
+    	daterange = request.POST.get('daterange')
+        startdate = request.POST.get('startdate')
+        enddate = request.POST.get('enddate')
 
-    elif request.method == "POST":
-        return render_to_response('csmain.html',{'user':request.user})
+    if daterange is not None and daterange != '':
+    	(startdate, enddate) = daterange.split(' - ')
 
+    history = []
+    allacademy = Academy.objects.all()
+
+    if aid is not None and aid != '' and startdate is not None and startdate != '' and enddate is not None and enddate != '':
+        start_date = datetime.date(*map(int, startdate.split('-')))
+        end_date = datetime.date(*map(int, enddate.split('-')))
+        total_days = (end_date - start_date).days + 1
+        for day_number in range(total_days):
+            single_history = {}
+            single_date = (start_date + datetime.timedelta(days = day_number)).strftime('%Y-%m-%d')
+            academiesDictionary = {}
+            schedules = []
+            
+            #return HttpResponse(single_date)
+            iids = HistoryScheduleTable.objects.filter(alist__contains = [aid]).filter(date = single_date).order_by('time').values_list('iid_id', flat=True).distinct()
+            uniq_iids = reduce(lambda x,y: x+[y] if x==[] or x[-1] != y else x, iids, [])
+            for i in uniq_iids:
+                academyset = set()
+                scheduletable = HistoryScheduleTable.objects.filter(date = single_date).filter(iid_id = i)
+                schedules.append(scheduletable)
+                for schedule in scheduletable:
+                    for academy in schedule.academies.all():
+                        academyset.add(academy.name)
+                academiesDictionary[i] = academyset
+
+            single_history['date'] = single_date
+
+            history.append(single_history)
+
+    #return HttpResponse(academy)
+    return render_to_response('getHistory.html', {"history": history, "academy": allacademy, "aid" : aid, 'startdate': startdate, 'enddate': enddate, 'user':request.user})
+
+@csrf_exempt
 @login_required
-def test(request):
-    if request.method == "GET":
-        return render_to_response('test.html',{'user':request.user})
+def analyze(request):
+    if request.method == 'GET':
+    	branch = request.GET.get('branch')
+    	daterange = request.GET.get('daterange')
+        startdate = request.GET.get('startdate')
+        enddate = request.GET.get('enddate')
+    elif request.method == 'POST':
+    	branch = request.POST.get('branch')
+    	daterange = request.POST.get('daterange')
+        startdate = request.POST.get('startdate')
+        enddate = request.POST.get('enddate')
 
-    elif request.method == "POST":
-        return render_to_response('test.html',{'user':request.user})
+    if daterange is not None and daterange != '':
+    	(startdate, enddate) = daterange.split(' - ')
+
+    sharingInventoryArray = collections.defaultdict(dict)
+
+    if branch is not None and branch != '' and startdate is not None and startdate != '' and enddate is not None and enddate != '':
+        start_date = datetime.date(*map(int, startdate.split('-')))
+        end_date = datetime.date(*map(int, enddate.split('-')))
+        total_days = (end_date - start_date).days + 1
+        for day_number in range(total_days):
+            single_date = (start_date + datetime.timedelta(days = day_number)).strftime('%Y-%m-%d')
+            
+            #return HttpResponse(single_date)
+            b = Branch.objects.get(id = branch)
+            for car in b.carlist:
+                sharingInventoryArray[car][single_date] = HistoryScheduleTable.objects.filter(date = single_date).filter(carnum = car).values_list('iid_id', flat=True).distinct().count()
+
+    return HttpResponse(json.dumps(sharingInventoryArray), content_type="application/json")
+
+def chart(request):
+    return render_to_response('chart.html', {'user':request.user})
