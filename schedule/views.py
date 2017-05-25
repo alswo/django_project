@@ -171,11 +171,16 @@ def putSchedule(request):
         stime = int(time[0].split(':')[0] + time[0].split(':')[1])
         etime = int(time[-1].split(':')[0] + time[-1].split(':')[1])
 
-        anamelist_inven = []
+        tempAlist = set()
+        for s in slist:
+            tempAlist.add(s)
 
-        for aname in alist:
-            aca = Academy.objects.get(id = aname)
-            anamelist_inven.append(aca.name)
+        alist = list(tempAlist)
+
+        academyList = Academy.objects.filter(id__in = alist)
+        anamelist_inven = []
+        for a in academyList:
+            anamelist_inven.append(a.name)
 
 
         try:
@@ -186,7 +191,6 @@ def putSchedule(request):
 
 
         iid = inven.id
-
 
         # lflag load -> 1 unload ->0 start -> 2 end -> 3
         for i in range(len(time)):
@@ -363,7 +367,7 @@ def updateSchedule(request):
 
             slist_temp = list(set([i for i in name if i is not None and i != '']))
             slist_temp2 = ','.join(slist_temp)
-            slist_temp3 = list(set(slist_temp2.split(',')))
+            slist_temp3 = [n.strip() for n in list(set(slist_temp2.split(',')))]
             slist = []
 
             studentInfo = StudentInfo.objects.filter(aid__in = [aid for aid in alist]).filter(sname__in = [name for name in slist_temp3])
@@ -374,13 +378,22 @@ def updateSchedule(request):
             stime = int(time[0].split(':')[0] + time[0].split(':')[1])
             etime = int(time[-1].split(':')[0] + time[-1].split(':')[1])
 
+            tempAlist = set()
+            for s in studentInfo:
+                tempAlist.add(s.aid)
+
+            acalist = list(tempAlist)
+
             anamelist_inven = []
 
-            for aname in alist:
-                aca = Academy.objects.get(id = aname)
-                anamelist_inven.append(aca.name)
+            academyList = Academy.objects.filter(id__in = acalist)
 
-            Inventory.objects.filter(id=iid).update(snum = snum,alist=alist, anamelist = anamelist_inven, slist=slist, stime = stime, etime = etime)
+
+            for a in academyList:
+                anamelist_inven.append(a.name)
+
+
+            Inventory.objects.filter(id=iid).update(snum = snum,alist=acalist, anamelist = anamelist_inven, slist=slist, stime = stime, etime = etime)
 
             #delete stable before updateing stable
             delete_stable = ScheduleTable.objects.filter(iid_id=iid)
