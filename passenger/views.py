@@ -43,11 +43,8 @@ def safetyTayo(request):
 
 def opti(request):
     if request.method =="GET":
-        schedule = request.GET.get('schedule')
-        aid = request.GET.get('aid')
-        academy = Academy.objects.get(id = aid)
 
-    return render_to_response('passenger/optimizationDistance.html', {"academy" : academy, "schedule" : schedule,'user':request.user})
+        return render_to_response('passenger/optimizationDistance.html', {'user':request.user})
 
 @csrf_exempt
 def addSchedule(request):

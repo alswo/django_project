@@ -106,6 +106,7 @@
                 <th class="text-center thstyle2">이름</th>
                 <th class="text-center thstyle3">이름추가</th>
                 <th class="text-center">등하원</th>
+                <th class="text-center thstyle4">이동</th>
               </tr>
             </thead>
             <tbody class="table-body">
@@ -121,16 +122,18 @@
                   <select name="load[]" form="scheduleform{{c.id}}">
                     <option value="">등하원</option>
                     <option value="1" selected>등원</option>
-                    <option value="2">하원</option>
+                    <option value="0">하원</option>
                   </select> {% endif %} {% if s.lflag == 0 %}
                   <select name="load[]" form="scheduleform{{c.id}}">
                     <option value="">등하원</option>
                     <option value="1">등원</option>
                     <option value="0" selected>하원</option>
-                  </select> {% endif %} {% if s.lflag == 2 %}
+                  </select> {% endif %}
+                  {% if s.lflag == 2 %}
                   <select name="load[]" form="scheduleform{{c.id}}">
                     <option value="">출발</option>
-                  </select> {% endif %} {% if s.lflag == 3 %}
+                  </select> {% endif %}
+                  {% if s.lflag == 3 %}
                   <select name="load[]" form="scheduleform{{c.id}}">
                     <option value="">도착</option>
                   </select> {% endif %}
@@ -172,9 +175,10 @@
             <form class="savedelete" accept-charset="" action="updateSchedule" method="post" enctype='application/json' id="scheduleform{{c.id}}">
               <input class="hidden" name="iid" value="{{c.id}}" form="scheduleform{{c.id}}" />
               <input class="hidden" name="bid" value="{{bid}}" form="scheduleform{{c.id}}" />
-              <input class="hidden" name='time' value="{{time}}" form="scheduleform{{c.id}}" />
+              <input class="hidden" name='searchTime' value="{{time}}" form="scheduleform{{c.id}}" />
               <input class="hidden" name='day' value="{{day}}" form="scheduleform{{c.id}}" />
               <input class="hidden" name="update" value="1" form="scheduleform{{c.id}}" />
+              <input type="hidden" name="invencar" value="{{c.carnum}}" form="scheduleform{{c.id}}" >
               <input type="submit" class="btn btn-success" value="저장">
             </form>
           </div>
@@ -182,9 +186,10 @@
             <form class="savedelete" action="updateSchedule" method="post" id="deleteform{{c.id}}">
               <input class="hidden" name="iid" value="{{c.id}}" form="deleteform{{c.id}}" />
               <input class="hidden" name="bid" value="{{bid}}" form="deleteform{{c.id}}" />
-              <input class="hidden" name='time' value="{{time}}" form="scheduleform{{c.id}}" />
-              <input class="hidden" name='day' value="{{day}}" form="scheduleform{{c.id}}" />
+              <input class="hidden" name='searchTime' value="{{time}}" form="deleteform{{c.id}}" />
+              <input class="hidden" name='day' value="{{day}}" form="deleteform{{c.id}}" />
               <input class="hidden" name="update" value="0" form="deleteform{{c.id}}" />
+              <input class="hidden" name='invencar' value="{{c.carnum}}" form="deleteform{{c.id}}" />
               <input type="submit" class="btn btn-success" value="삭제">
             </form>
           </div>

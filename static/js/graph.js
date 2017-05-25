@@ -1,3 +1,4 @@
+var lastNode;
 // Represents an edge from source to sink with capacity
 var Edge = function(source, sink, capacity) {
     this.source = source;
@@ -38,28 +39,52 @@ var Graph = function() {
 function Prim(graph) {
     var result = [];
     var usedNodes = {};
-    console.log(graph);
+
+    // function findMinFirst(g) {
+    //     var min = [0,null];
+    //
+    //     console.log(g)
+    //
+    //     for(var i=0;i<result.length;i++)
+    //         for(var n=0;n<g.edges[result[i]].length;n++)
+    //             if(g.edges[result[i]][n].capacity > min[0] && usedNodes[g.edges[result[i]][n].sink] === undefined)
+    //                 min = [g.edges[result[i]][n].capacity, g.edges[result[i]][n].sink];
+    //     return min[1];
+    // }
 
     function findMin(g) {
         var min = [999999,null];
-        for(var i=0;i<result.length;i++)
-            for(var n=0;n<g.edges[result[i]].length;n++)
-                if(g.edges[result[i]][n].capacity < min[0] && usedNodes[g.edges[result[i]][n].sink] === undefined)
-                    min = [g.edges[result[i]][n].capacity, g.edges[result[i]][n].sink];
+
+        for(var i=0;i<result.length;i++){
+            for(var n=0;n<g.edges[result[i]].length;n++){
+                    if(g.edges[result[i]][n].sink.indexOf("E") != -1){
+                      continue;
+                    }
+                    else if(g.edges[result[i]][n].capacity < min[0] && usedNodes[g.edges[result[i]][n].sink]  === undefined){
+                      min = [g.edges[result[i]][n].capacity, g.edges[result[i]][n].sink];
+            }
+        }
+      }
+
         return min[1];
     }
 
-    // Pick random start point
+    // Pick start point
     var node = g.nodes[0];
+
     result.push(node);
     usedNodes[node] = true;
 
     var min = findMin(g);
+
     while(min != null) {
         result.push(min);
         usedNodes[min] = true;
+
         min = findMin(g);
     }
 
-    return result;
+  lastNode = result[result.length - 1];
+  console.log(lastNode);
+  return result;
 };
