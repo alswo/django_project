@@ -13,4 +13,5 @@ urlpatterns = patterns('',
     url(r'^getCarPhone', views.getCarPhone),
     url(r'^getHistory', views.getHistory),
     url(r'^chart', views.chart),
+    url(r'^analyze', views.analyze),
 )
