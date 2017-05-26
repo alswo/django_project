@@ -134,7 +134,7 @@ function emptyTempList(){
 $('.table-container').on('click', '.addrow', function() {
   $(this).parent().find('.table-body').append(
     '<tr><td data-name="time"><input onchange="emptyTempList();" type="text" name="time[]" placeholder="Time" class="form-control" form="scheduleform"/></td><td><input type="text" name="addr[]" placeholder="Address" class="form-control" form="scheduleform"/></td><td data-name="name" class="inputTd"><input type="text" name="name[]" data-role="tagsinput" class="form-control" form="scheduleform" value="{% for name in s.sname %}{{name}}{% include '
-    comma.html ' %}{% endfor %}" /></td><td data-name="addstu"><button class="btn btn-primary glyphicon glyphicon-plus addstudent" data-toggle="modal"></button></td><td data-name="academy" class="inputAca" style="display:none"><input name="academy[]" data-role="tagsinput" class="form-control" form="scheduleform" value="{% for aid in s.alist %}{{aid}}{% include 'comma.html ' %}{% endfor %}" /></td><td data-name="load"><select name="load[]" form="scheduleform"><option value="">등하원</option><option value="1">등원</option><option value="0">하원</option></select></td><td data-name="move"><a href="javascript:void(0)" class="glyphicon glyphicon-chevron-up up"></a><a href="javascript:void(0)" class="glyphicon glyphicon-chevron-down down"></a></td><td data-name="del"><button name="del" class="btn btn-danger glyphicon glyphicon-remove row-remove"></button></td></tr>'
+    comma.html ' %}{% endfor %}" /></td><td data-name="addstu"><button class="btn btn-primary glyphicon glyphicon-plus addstudent" data-toggle="modal"></button></td><td data-name="academy" class="inputAca" style="display:none"><input name="academy[]" data-role="tagsinput" class="form-control" form="scheduleform" value="{% for aid in s.alist %}{{aid}}{% include 'comma.html ' %}{% endfor %}" /></td>                <td data-name="sid" class="inputSid" style="display:none;"><input name="sid[]" type="text" data-role="tagsinput" class="form-control" form="scheduleform" value="{% for sid in s.slist %}{{sid}}{% include 'comma.html' %}{% endfor %}"/></td><td data-name="load"><select name="load[]" form="scheduleform"><option value="">등하원</option><option value="1">등원</option><option value="0">하원</option></select></td><td data-name="move"><a href="javascript:void(0)" class="glyphicon glyphicon-chevron-up up"></a><a href="javascript:void(0)" class="glyphicon glyphicon-chevron-down down"></a></td><td data-name="del"><button name="del" class="btn btn-danger glyphicon glyphicon-remove row-remove"></button></td></tr>'
   )
 });
 
@@ -171,33 +171,43 @@ $(document).on('click', '.addstudent', function() {
   //thisObject -> studentName, thisObjectForAca -> AcademyID
   thisObject = $(this).parent().prevAll('.inputTd').children();
   thisObjectForAca = $(this).parent().nextAll('.inputAca').children();
+  thisObjectForSid = $(this).parent().nextAll('.inputSid').children();
   console.log(thisObjectForAca);
   $('#addstu').modal('show');
 })
 
 $(document).on('click', '.studenttoinput', function() {
   selectedAca = $('#academyselect').val()
-  selectedStu = $('#studentList').val()
+  selectedStu = $('#studentList option:selected').text()
+  selectedSid = $('#studentList option:selected').val()
 
   if (thisObject[0].nodeName == 'DIV') {
     temp = thisObject[1].value
     tempAca = thisObjectForAca[1].value
+    tempSid = thisObjectForSid[1].value
 
     if (temp != '') {
       console.log('1')
       temp += ',' + selectedStu
       tempAca += ',' + selectedAca
+      tempSid += ',' + selectedSid
+
       $(thisObject[1]).tagsinput('add', '')
       $(thisObjectForAca[1]).tagsinput('add', '')
+      $(thisObjectForSid[1]).tagsinput('add', '')
     } else {
       console.log('2')
       temp = selectedStu
       tempAca = selectedAca
+      tempSid = selectedSid
+
       $(thisObject[1]).tagsinput('add', '')
       $(thisObjectForAca[1]).tagsinput('add', '')
+      $(thisObjectForSid[1]).tagsinput('add', '')
     }
     $(thisObject[1]).tagsinput('add', temp)
     $(thisObjectForAca[1]).tagsinput('add', tempAca)
+    $(thisObjectForSid[1]).tagsinput('add', tempSid)
 
   } else if (thisObject[0].nodeName == 'INPUT') {
     temp = thisObject[0].value
@@ -206,15 +216,19 @@ $(document).on('click', '.studenttoinput', function() {
       console.log('1')
       temp += ',' + selectedStu
       tempAca += ',' + selectedAca
+      tempSid += ',' + selectedSid
     } else {
       console.log('2')
       temp = selectedStu
       tempAca = selectedAca
+      tempSid = selectedSid
       $(thisObject[0]).tagsinput('add', '')
       $(thisObjectForAca[0]).tagsinput('add', '')
+      $(thisObjectForSid[0]).tagsinput('add', '')
     }
     $(thisObject[0]).tagsinput('add', temp)
     $(thisObjectForAca[0]).tagsinput('add', tempAca)
+    $(thisObjectForSid[0]).tagsinput('add', tempSid)
   }
 })
 
@@ -229,7 +243,7 @@ $('#academyselect').on('change', function() {
       console.log(data)
       tempTag = ""
       for (i = 0; i < data.length; i++) {
-        tempTag = tempTag + "<option value=" + data[i]['fields']['sname'] + ">" + data[i]['fields']['sname'] + "</option>"
+        tempTag = tempTag + "<option value=" + data[i]['pk'] + ">" + data[i]['fields']['sname'] + "</option>"
       }
       document.getElementById('studentList').innerHTML = tempTag
     }
