@@ -144,6 +144,8 @@ def putSchedule(request):
         name2 = request.POST.getlist('name[]')
         academy = request.POST.getlist('academy[]')
         load = request.POST.getlist('load[]')
+        sid = request.POST.getlist('sid[]')
+
 
         try:
             snum = len(set(name))
@@ -171,11 +173,11 @@ def putSchedule(request):
         stime = int(time[0].split(':')[0] + time[0].split(':')[1])
         etime = int(time[-1].split(':')[0] + time[-1].split(':')[1])
 
-        tempAlist = set()
+        tempSlist = set()
         for s in slist:
-            tempAlist.add(s)
+            tempSlist.add(s)
 
-        alist = list(tempAlist)
+        slist = list(tempSlist)
 
         academyList = Academy.objects.filter(id__in = alist)
         anamelist_inven = []
@@ -327,6 +329,7 @@ def updateSchedule(request):
             name2 = request.POST.getlist('name[]')
             academy = request.POST.getlist('academy[]')
             load = request.POST.getlist('load[]')
+            sid = request.POST.getlist('sid[]')
 
             #searchTime,day,area,branch for inventory searching and redirection
             searchTime = request.POST.get('searchTime')
@@ -368,6 +371,7 @@ def updateSchedule(request):
             slist_temp = list(set([i for i in name if i is not None and i != '']))
             slist_temp2 = ','.join(slist_temp)
             slist_temp3 = [n.strip() for n in list(set(slist_temp2.split(',')))]
+
             slist = []
 
             studentInfo = StudentInfo.objects.filter(aid__in = [aid for aid in alist]).filter(sname__in = [name for name in slist_temp3])
@@ -378,22 +382,16 @@ def updateSchedule(request):
             stime = int(time[0].split(':')[0] + time[0].split(':')[1])
             etime = int(time[-1].split(':')[0] + time[-1].split(':')[1])
 
-            tempAlist = set()
-            for s in studentInfo:
-                tempAlist.add(s.aid)
-
-            acalist = list(tempAlist)
-
             anamelist_inven = []
 
-            academyList = Academy.objects.filter(id__in = acalist)
+            academyList = Academy.objects.filter(id__in = alist)
 
 
             for a in academyList:
                 anamelist_inven.append(a.name)
 
 
-            Inventory.objects.filter(id=iid).update(snum = snum,alist=acalist, anamelist = anamelist_inven, slist=slist, stime = stime, etime = etime)
+            Inventory.objects.filter(id=iid).update(snum = snum,alist=alist, anamelist = anamelist_inven, slist=slist, stime = stime, etime = etime)
 
             #delete stable before updateing stable
             delete_stable = ScheduleTable.objects.filter(iid_id=iid)
@@ -414,6 +412,7 @@ def updateSchedule(request):
                     temp_aca = academy[i].split(',')
                     temp_name = name2[i].split(',')
                     student = StudentInfo.objects.filter(aid__in=[ a for a in temp_aca])
+                    sidtemp = [n.strip() for n in sid[i].split(',')]
 
                     temp_lflag = [0 for z in range(len(temp_name))]
 
@@ -423,7 +422,7 @@ def updateSchedule(request):
                         aname = Academy.objects.get(id = aid)
                         anamelist.append(aname.name)
 
-                    stable = ScheduleTable(iid_id = iid, time = time[i], addr = addr[i], alist=temp_aca, anamelist = anamelist, slist=sidlist, sname=temp_name, tflag=temp_lflag, lflag=load[i])
+                    stable = ScheduleTable(iid_id = iid, time = time[i], addr = addr[i], alist=temp_aca, anamelist = anamelist, slist=sidtemp, sname=temp_name, tflag=temp_lflag, lflag=load[i])
                     stable.save()
 
             #redirect

@@ -31,6 +31,9 @@
   <script src="{% static 'js/dynamicTable.js' %}"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.3.7/js/tether.min.js"></script>
   <script src="{% static 'js/bootstrap.min.js' %}"></script>
+  <script>
+  window.onload = function() { $('body').attr('class','skin-blue sidebar-mini sidebar-collapse') };
+  </script>
 
   <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
   <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -58,6 +61,15 @@
     #savedelete,
     .searchedByCar {
       display: inline
+    }
+    .wrapper {
+      /*min-height: 100%;
+      position: relative;
+      overflow: hidden;*/
+      width: 100%;
+      min-height: 100%;
+      height: auto !important;
+      position: absolute;
     }
   </style>
 
@@ -152,7 +164,7 @@
   </aside>
 
   <!-- Content Wrapper. Contains page content -->
-  <div class="content-wrapper" id="content-wrapper">
+  <div class="content-wrapper" id="content-wrapper" style="min-height: 1000px">
     {% if not is_popup %}
     <!-- Header -->
     <div id="header">
