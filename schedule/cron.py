@@ -1,6 +1,6 @@
 #_*_ coding:utf-8 _*_
 from schedule.models import Inventory,ScheduleTable,HistoryScheduleTable
-from passenger.models import StudentInfo, Academy
+from passenger.models import StudentInfo, Academy, ShuttleSchedule, ScheduleDate
 from passenger.dateSchedule import timeToDate
 import sys
 reload(sys)
@@ -26,3 +26,16 @@ def store_historyschedule():
                 	for aid in scheduletable.alist:
                     	    academy = Academy.objects.get(id=aid)
                     	    hst.academies.add(academy)
+
+
+def store_historyschedule_old():
+	t = timeToDate()
+	dmy = t.timeToDmy()
+	d = t.timeToD()
+	
+	sschedule = ShuttleSchedule.objects.filter(day=d)
+
+	for s in sschedule:
+    		ds = ScheduleDate(a_name = s.a_name, day = s.day, time = s.time,schedule = s.schedule, gid = s.gid, aid = s.aid,slist = s.slist,p_schedule = s.p_schedule, alist = s.alist, memo = s.memo, date = dmy)
+	    	ds.save()
+
