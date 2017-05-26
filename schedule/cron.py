@@ -12,8 +12,6 @@ def store_historyschedule():
 	dmy = t.timeToDmy()
 	d = t.timeToD()
 
-	d = '월'
-
 	inventories = Inventory.objects.filter(day=d).select_related()
 	for inventory in inventories:
 		scheduletables = ScheduleTable.objects.filter(iid_id = inventory.id)

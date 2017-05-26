@@ -44,10 +44,10 @@
     </div>
     <div class="col-md-2">
       <label>SEARCH:</label>
-      <form action="updateSchedule" method="post" enctype='application/json' id="searchform">
+      <form action="updateSchedule" method="post" enctype='application/json' onsubmit="return validateSearchForm()" id="searchform">
         <input type="hidden" name='updateflag' class="form-control" value="2" form="searchform" />
         <input type="hidden" name='searchinven' class="form-control" value="1" form="searchform" />
-        <input type="submit" id="carlistSearch" class="btn btn-success" value="검색">
+        <input type="submit" id="carlistSearch" class="btn btn-success" value="검색" >
       </form>
     </div>
   </div>
@@ -56,9 +56,9 @@
   <div class="row">
     <div class="col-md-2"></div>
     <div class="col-md-8" align="center">
-      <input type="hidden" name='bid' class="form-control" value="{{bid}}" form="searchform2" />
+    <!--  <input type="hidden" name='bid' class="form-control" value="{{bid}}" form="searchform2" />
       <input type="hidden" name='day' class="form-control" value="{{day}}" form="searchform2" />
-      <input type="hidden" name='time' class="form-control" value="{{time}}" form="searchform2" />
+      <input type="hidden" name='time' class="form-control" value="{{time}}" form="searchform2" /> -->
       <input type="hidden" name='updateflag' class="form-control" value="2" form="searchform2" />
       <input type="hidden" name='searchinven' class="form-control" value="2" form="searchform2" />
       <input type="hidden" name='updateflag' class="form-control" value="2" form="searchform2" />
@@ -67,7 +67,7 @@
         <form action="updateSchedule" method="get" class="searchedByCar">
           <input type="hidden" name='bid' class="form-control" value="{{bid}}" />
           <input type="hidden" name='day' class="form-control" value="{{day}}" />
-          <input type="hidden" name='time' class="form-control" value="{{time}}" />
+          <input type="hidden" id = 'forInvenAddCheck' name='time' class="form-control" value="{{time}}" />
           <input type="hidden" name='updateflag' class="form-control" value="2" />
           <input type="hidden" name='searchinven' class="form-control" value="2" />
           <input type="hidden" name='updateflag' class="form-control" value="2" />
@@ -94,8 +94,11 @@
     <div class="col-md-2"></div>
   </div>
         <br>
-        <br> {% for c in contacts %}
-        <div class="col-md-8">
+        <br>
+        {% for c in contacts %}
+        <div class="row">
+        <div class="col-md-1"></div>
+        <div class="col-md-10">
           <div class="col-md-12 table-responsive">
         <div class="row table-container">
           <table class="table table-bordered table-schedule">
@@ -173,7 +176,7 @@
         <div class="row">
           <div class="col-md-10"></div>
           <div class="col-md-1">
-            <form class="savedelete" accept-charset="" action="updateSchedule" method="post" enctype='application/json' id="scheduleform{{c.id}}">
+            <form class="savedelete" accept-charset="" action="updateSchedule" method="post" enctype='application/json' onsubmit="return validateTableForm(this.id)" id="scheduleform{{c.id}}">
               <input class="hidden" name="iid" value="{{c.id}}" form="scheduleform{{c.id}}" />
               <input class="hidden" name="bid" value="{{bid}}" form="scheduleform{{c.id}}" />
               <input class="hidden" name='searchTime' value="{{time}}" form="scheduleform{{c.id}}" />
@@ -199,8 +202,9 @@
           <br>
         </div>
       </div>
-    </div>
-    <div class="col-md-4"></div>
+    <div class="col-md-1"></div>
+  </div>
+</div>
         <br>
         <br>
         {% endfor %}
@@ -336,8 +340,10 @@
         tempAca += ',' + selectedAca
         tempSid += ',' + selectedSid
       } else {
+        console.log('2')
         temp = selectedStu
         tempAca = selectedAca
+        tempSid = selectedSid
         $(thisObject[0]).tagsinput('add', '')
         $(thisObjectForAca[0]).tagsinput('add', '')
         $(thisObjectForSid[0]).tagsinput('add', '')
@@ -367,10 +373,47 @@
   })
 
   $('#openBtn').click(function(){
+    if($('#forInvenAddCheck').val() == undefined){
+      alert("검색 후 사용해주세요.")
+      return false;
+    }
     $('#myModal').on('show', function () {
 
 	   });
       $('#myModal').modal({show:true})
   });
+
+  function validateSearchForm(){
+      var num = /^\d+$/;
+
+      if(document.forms["searchform"]["area"].selectedIndex < 1){
+        alert("지역, 지점을 선택해주세요.")
+        return false;
+      }
+
+      else if(num.test(document.forms["searchform"]["time"].value) == false ){
+        alert("시간은 숫자만 입력해주세요.(예:1500)")
+        return false;
+      }
+  }
+
+  function validateTableForm(e){
+    console.log(e)
+    tableLength = document.forms[e]['time[]'].length
+    tempAddrS = document.forms[e]['addr[]'][0].value
+    tempAddrE = document.forms[e]['addr[]'][tableLength-1].value
+    var timepattern = /([01]\d|2[0-3]):([0-5]\d)/;
+
+    if(tempAddrS != "" || tempAddrE != ""){
+      alert("시작,끝 주소는 반드시 비워주세요.")
+      return false;
+    }
+    tempTime  = document.forms[e]['time[]']
+    for(i = 0 ; i < tableLength; i++){
+      if(timepattern.test(tempTime[i].value) == false){
+        alert(i+1+"번째 로우의 숫자를 정확히 입력해주세요.")
+      }
+    }
+  }
 </script>
 {% endblock content %}

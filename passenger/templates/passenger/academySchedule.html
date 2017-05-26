@@ -40,6 +40,10 @@
                 </div>
                 <div class="timeline-label">
                     <h>{{contact.a_name}}&nbsp{{contact.day}}&nbsp&nbsp&nbsp</h>
+                    {% if contact.gid == 0 %}
+                    <button type="button" class="btn btn-warning btn-xs" onclick="document.location.href='tel:010-3772-9402'">0호 기사님</button>
+                    <button type="button" class="btn btn-warning btn-xs" onclick="document.location.href='tel:010-7490-8211'">0호 동승자님</button>
+                    {% endif %}
                     {% if contact.gid == 1 %}
                         <button type="button" class="btn btn-warning btn-xs" onclick="document.location.href='tel:010-4150-7123'">1호 기사님</button>
                     {% endif %}
