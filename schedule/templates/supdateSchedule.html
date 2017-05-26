@@ -187,7 +187,7 @@
             </form>
           </div>
           <div class="col-md-1">
-            <form class="savedelete" action="updateSchedule" method="post" id="deleteform{{c.id}}">
+            <form class="savedelete" action="updateSchedule" method="post" id="deleteform{{c.id}}" onSubmit="return confirm('정말 삭제 하시겠어요?');">
               <input class="hidden" name="iid" value="{{c.id}}" form="deleteform{{c.id}}" />
               <input class="hidden" name="bid" value="{{bid}}" form="deleteform{{c.id}}" />
               <input class="hidden" name='searchTime' value="{{time}}" form="deleteform{{c.id}}" />
@@ -404,6 +404,11 @@
     tempAddrE = document.forms[e]['addr[]'][tableLength-1].value
     var timepattern = /([01]\d|2[0-3]):([0-5]\d)/;
 
+    if(document.forms[e]["day"].selectedIndex < 1){
+      alert("호차 선택해주세요.")
+      return false;
+    }
+
     if(tempAddrS != "" || tempAddrE != ""){
       alert("시작,끝 주소는 반드시 비워주세요.")
       return false;
@@ -412,7 +417,14 @@
     for(i = 0 ; i < tableLength; i++){
       if(timepattern.test(tempTime[i].value) == false){
         alert(i+1+"번째 로우의 숫자를 정확히 입력해주세요.")
+        return false;
       }
+    }
+
+    tempName  = document.forms[e]['name[]']
+    if(tempName[0].value != "" || tempName[tableLength-1] != ""){
+      alert("시작,끝 이름은 반드시 비워주세요.")
+      return false;
     }
   }
 </script>

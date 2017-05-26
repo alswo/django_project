@@ -89,7 +89,7 @@
                     <a class="btn btn-default pull-right addrow">Add Row</a>
                   </div>
                   <input class="hidden" name="bid" value="{{bid}}" form="scheduleform"/>
-                  <form action="putSchedule" method="post" enctype='application/json' id="scheduleform">
+                  <form action="putSchedule" method="post" enctype='application/json' id="scheduleform" onsubmit="return validateTableForm('scheduleform')">
                       <input type="submit" class="btn btn-success pull-right" >
                   </form>
                 </div>
@@ -115,7 +115,6 @@
                 </div>
             </div>-->
         </div>
-
 </body>
 <script>
 var tempList = new Array();
@@ -249,6 +248,37 @@ $('#academyselect').on('change', function() {
     }
   });
 })
+
+function validateTableForm(e){
+  console.log(e)
+  tableLength = document.forms[e]['time[]'].length
+  tempAddrS = document.forms[e]['addr[]'][0].value
+  tempAddrE = document.forms[e]['addr[]'][tableLength-1].value
+  var timepattern = /([01]\d|2[0-3]):([0-5]\d)/;
+
+  if(document.forms[e]["carnum"].selectedIndex < 1){
+    alert("호차를 선택해주세요.")
+    return false;
+  }
+
+  if(tempAddrS != "" || tempAddrE != ""){
+    alert("시작,끝 주소는 반드시 비워주세요.")
+    return false;
+  }
+  tempTime  = document.forms[e]['time[]']
+  for(i = 0 ; i < tableLength; i++){
+    if(timepattern.test(tempTime[i].value) == false){
+      alert(i+1+"번째 로우의 숫자를 정확히 입력해주세요.")
+      return false;
+    }
+  }
+
+  tempName  = document.forms[e]['name[]']
+  if(tempName[0].value != "" || tempName[tableLength-1] != ""){
+    alert("시작,끝 이름은 반드시 비워주세요.")
+    return false;
+  }
+}
 </script>
 
 </html>
