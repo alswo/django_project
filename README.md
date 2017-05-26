@@ -12,6 +12,6 @@ updateSchedule에서 수정 후 리다이렉트를 위한 소스 코드 수정
 updateSchedule에서 수정 후 리다이렉트를 위한 소스 코드 수정 by lee
 
 2017/5/26
-updateSchedule, putSchedule javascript exception control
-update dashboard view
+1.updateSchedule, putSchedule javascript exception control
+2.update dashboard view
 
