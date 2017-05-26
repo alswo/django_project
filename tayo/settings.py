@@ -1,5 +1,5 @@
 import os
-import os.path 
+import os.path
 import sys
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -43,7 +43,7 @@ TEMPLATES = [
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         #'DIRS': [],
         #'DIRS': [os.path.join(os.path.dirname(__file__),'templates'),],
-        'DIRS': ['/home/ubuntu/work/django_project/templates',],
+        'DIRS': ['/root/workspace/tayo/templates',],
         #'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -53,7 +53,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
             ],
             'loaders': (
-                'django.template.loaders.filesystem.Loader', 
+                'django.template.loaders.filesystem.Loader',
                 'django.template.loaders.app_directories.Loader',
             ),
         },
@@ -113,4 +113,3 @@ PROJECT_ROOT = os.path.normpath(os.path.dirname(__file__))
 
 STATIC_ROOT = os.path.join(PROJECT_ROOT, 'static')
 STATIC_URL = '/static/'
-
