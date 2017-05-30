@@ -82,20 +82,23 @@ function callNumber(num){
                 <tbody>
                     {% for s in c.scheduletables.all %}
                     {% if s.lflag == 1 %}
-                    <tr class="info">
+                    <tr class="alert alert-info">
+                    {% elif s.lflag == 0 %}
+                    <tr class="alert alert-danger">
+                    {% endif %}
+                    {% if s.lflag == 0 or s.lflag == 1 %}
                         <td>{{s.time}}</td>
-                        <td>{{s.addr}}</td>
+                        <td><strong>{{s.addr}}</strong></td>
                         <td>
                           {% for f in s.tflag %}
                             {% for name in s.sname %}
                             {% if forloop.counter == forloop.parentloop.counter %}
                             <div class="dropdown">
-                              {% if f == 0 %}
-                                  <button type="button" id="{{c.id}}{{s.id}}{{forloop.counter}}" class="load btn btn-primary dropdown-toggle" data-toggle="dropdown" onclick="dropdown(this, {{forloop.counter}},{{c.id}},{{s.id}},0);">{{name}}</button>
-                              {% endif %}
-                              {% if f == 1 %}
-                                  <button type="button" id="{{c.id}}{{s.id}}{{forloop.counter}}" class="load btn btn-default dropdown-toggle" data-toggle="dropdown" onclick="dropdown(this, {{forloop.counter}},{{c.id}},{{s.id}},1);">{{name}}</button>
-                              {% endif %}
+                                  <button type="button" id="{{c.id}}{{s.id}}{{forloop.counter}}" class="load btn {% if f == 0 %} btn-primary {% elif f == 2 %} btn-warning blink {% else %} btn-default {% endif %} dropdown-toggle" data-toggle="dropdown" onclick="dropdown(this, {{forloop.counter}},{{c.id}},{{s.id}},{{f}});">
+                                    {% if f == 2 %} <span class="glyphicon glyphicon-ok"> {% endif %}
+                                    {{name}}
+                                    {% if f == 2 %} </span> {% endif %}
+                                  </button>
                               <ul class="dropdown-menu pull-right">
                               </ul>
                               <br>
@@ -106,28 +109,6 @@ function callNumber(num){
                         </td>
                     {% endif %}
                     {% if s.lflag == 0 %}
-                    <tr class="warning">
-                        <td>{{s.time}}</td>
-                        <td>{{s.addr}}</td>
-                        <td>
-                            {% for f in s.tflag %}
-                              {% for name in s.sname %}
-                              {% if forloop.counter == forloop.parentloop.counter %}
-                              <div class="dropdown">
-                                {% if f == 0 %}
-                                    <button type="button" id="{{c.id}}{{s.id}}{{forloop.counter}}" class="load btn btn-primary dropdown-toggle" data-toggle="dropdown" onclick="dropdown(this, {{forloop.counter}},{{c.id}},{{s.id}},0);">{{name}}</button>
-                                {% endif %}
-                                {% if f == 1 %}
-                                    <button type="button" id="{{c.id}}{{s.id}}{{forloop.counter}}" class="load btn btn-default dropdown-toggle" data-toggle="dropdown" onclick="dropdown(this, {{forloop.counter}},{{c.id}},{{s.id}},1);">{{name}}</button>
-                                {% endif %}
-                                <ul class="dropdown-menu pull-right">
-                                </ul>
-                                <br>
-                              </div>
-                              {% endif %}
-                              {% endfor %}
-                            {% endfor %}
-                        </td>
                     </tr>
                     {% endif %}
                     {% if s.lflag == 2 %}
@@ -169,7 +150,6 @@ function dropdown(t,offset,invenid,stableid,choice) {
           }
           else if (chocie == 1){
             $("ul", t.parent).html("<li><a href='#'>"+data['aname']+"</a></li><li><a href='tel:0"+data['phone1']+"'>학생전화</a></li><li><a href='#' class='pphone'></a></li>");
-
           }
         }
     });
@@ -186,8 +166,15 @@ function getAcaPhone(e, aid,fc){
         $('#collapsePhone'+fc).html("<br><a class='btn-xs btn-info' href='tel:"+data["phonelist"][0]+"'>전화1</a>&nbsp&nbsp<a class='btn-xs btn-info' href='tel:"+data["phonelist"][1]+"'>전화2</a>");
       }
   });
-
 }
+
+setInterval(function(){blink()}, 1000);
+                
+function blink() {
+        $(".blink").fadeTo(100, 0.1).fadeTo(200, 1.0);
+}
+
+
 </script>
 
 </html>

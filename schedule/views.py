@@ -395,6 +395,11 @@ def updateSchedule(request):
 
             Inventory.objects.filter(id=iid).update(snum = snum,alist=alist, anamelist = anamelist_inven, slist=slist, stime = stime, etime = etime)
 
+            prev_sidset = set() 
+            slists = ScheduleTable.objects.filter(iid_id=iid).values_list('slist', flat=True).distinct()
+            for slist in slists:
+                prev_sidset.update(map(str, slist))
+
             #delete stable before updateing stable
             delete_stable = ScheduleTable.objects.filter(iid_id=iid)
             delete_stable.delete()
@@ -415,8 +420,12 @@ def updateSchedule(request):
                     temp_name = name2[i].split(',')
                     student = StudentInfo.objects.filter(aid__in=[ a for a in temp_aca])
                     sidtemp = [n.strip() for n in sid[i].split(',')]
+		
+                    newstudents = set(sidtemp).difference(prev_sidset)
+                    # temp_lflag = 2 for new students
+		    temp_lflag = map(lambda x: 2 if x in newstudents else 0, sidtemp)
 
-                    temp_lflag = [0 for z in range(len(temp_name))]
+                    #temp_lflag = [0 for z in range(len(temp_name))]
 
                     anamelist = []
 
