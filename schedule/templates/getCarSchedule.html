@@ -25,6 +25,10 @@ li {
   font-size: 20;
 }
 
+.btn {
+  padding: 1px 1px;
+}
+
 </style>
 
 <script>
@@ -94,10 +98,8 @@ function callNumber(num){
                             {% for name in s.sname %}
                             {% if forloop.counter == forloop.parentloop.counter %}
                             <div class="dropdown">
-                                  <button type="button" id="{{c.id}}{{s.id}}{{forloop.counter}}" class="load btn {% if f == 0 %} btn-primary {% elif f == 2 %} btn-warning blink {% else %} btn-default {% endif %} dropdown-toggle" data-toggle="dropdown" onclick="dropdown(this, {{forloop.counter}},{{c.id}},{{s.id}},{{f}});">
-                                    {% if f == 2 %} <span class="glyphicon glyphicon-ok"> {% endif %}
+                                  <button type="button" id="{{c.id}}{{s.id}}{{forloop.counter}}" class="load btn btn-space {% if f == 0 %} btn-primary {% elif f == 2 %} btn-warning blink {% else %} btn-default {% endif %} dropdown-toggle" data-toggle="dropdown" onclick="dropdown(this, {{forloop.counter}},{{c.id}},{{s.id}},{{f}});">
                                     {{name}}
-                                    {% if f == 2 %} </span> {% endif %}
                                   </button>
                               <ul class="dropdown-menu pull-right">
                               </ul>
