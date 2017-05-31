@@ -7,17 +7,36 @@
     <script src="{% static 'js/bootstrap.min.js' %}"></script>
     <link href="{% static 'css/timeline.css' %}" rel="stylesheet">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-</head>
 <style>
 .thstyle3 {
   text-align: center;
   width: 22.5%;
 }
 
+td {
+  font-size: 22;
+}
+
+li {
+  font-size: 22;
+}
+
+.dropdown-toggle {
+  font-size: 20;
+}
+
+.btn {
+  padding: 1px 1px;
+}
+
+</style>
+
+<script>
 function callNumber(num){
     location.href=”tel:”+num;
 }
-</style>
+</script>
+</head>
 <body>
   <div class="container">
     <br>
@@ -40,12 +59,12 @@ function callNumber(num){
             <div class="panel panel-default">
               <!-- Default panel contents -->
               <div class="panel-heading">
-                <button type="button" class="btn-xs btn-warning">{{c.carnum}}호차</button>
-                <button type="button" class="btn-xs btn-warning">{{c.day}}요일</button>
+                <button type="button" class="btn btn-warning">{{c.carnum}}호차</button>
+                <button type="button" class="btn btn-warning">{{c.day}}요일</button>
                 {% for aname in c.anamelist %}
                 {% for aid in c.alist %}
                   {% if forloop.counter == forloop.parentloop.counter %}
-                      <button type="button" class="btn-xs btn-warning" role="button" data-toggle="collapse" href="#collapsePhone{{c.id}}" onclick="getAcaPhone(this, {{aid}},{{c.id}})" aria-expanded="false" aria-controls="collapseExample">{{aname}}</button>
+                      <button type="button" class="btn btn-warning" role="button" data-toggle="collapse" href="#collapsePhone{{c.id}}" onclick="getAcaPhone(this, {{aid}},{{c.id}})" aria-expanded="false" aria-controls="collapseExample">{{aname}}</button>
 
                   {% endif %}
                 {% endfor %}
@@ -67,20 +86,21 @@ function callNumber(num){
                 <tbody>
                     {% for s in c.scheduletables.all %}
                     {% if s.lflag == 1 %}
-                    <tr class="info">
+                    <tr class="alert alert-info">
+                    {% elif s.lflag == 0 %}
+                    <tr class="alert alert-danger">
+                    {% endif %}
+                    {% if s.lflag == 0 or s.lflag == 1 %}
                         <td>{{s.time}}</td>
-                        <td>{{s.addr}}</td>
+                        <td><strong>{{s.addr}}</strong></td>
                         <td>
                           {% for f in s.tflag %}
                             {% for name in s.sname %}
                             {% if forloop.counter == forloop.parentloop.counter %}
                             <div class="dropdown">
-                              {% if f == 0 %}
-                                  <button type="button" id="{{c.id}}{{s.id}}{{forloop.counter}}" class="load btn-xs btn-primary dropdown-toggle" data-toggle="dropdown" onclick="dropdown(this, {{forloop.counter}},{{c.id}},{{s.id}},0);">{{name}}</button>
-                              {% endif %}
-                              {% if f == 1 %}
-                                  <button type="button" id="{{c.id}}{{s.id}}{{forloop.counter}}" class="load btn-xs btn-default dropdown-toggle" data-toggle="dropdown" onclick="dropdown(this, {{forloop.counter}},{{c.id}},{{s.id}},1);">{{name}}</button>
-                              {% endif %}
+                                  <button type="button" id="{{c.id}}{{s.id}}{{forloop.counter}}" class="load btn btn-space {% if f == 0 %} btn-primary {% elif f == 2 %} btn-warning blink {% else %} btn-default {% endif %} dropdown-toggle" data-toggle="dropdown" onclick="dropdown(this, {{forloop.counter}},{{c.id}},{{s.id}},{{f}});">
+                                    {{name}}
+                                  </button>
                               <ul class="dropdown-menu pull-right">
                               </ul>
                               <br>
@@ -91,28 +111,6 @@ function callNumber(num){
                         </td>
                     {% endif %}
                     {% if s.lflag == 0 %}
-                    <tr class="warning">
-                        <td>{{s.time}}</td>
-                        <td>{{s.addr}}</td>
-                        <td>
-                            {% for f in s.tflag %}
-                              {% for name in s.sname %}
-                              {% if forloop.counter == forloop.parentloop.counter %}
-                              <div class="dropdown">
-                                {% if f == 0 %}
-                                    <button type="button" id="{{c.id}}{{s.id}}{{forloop.counter}}" class="load btn-xs btn-primary dropdown-toggle" data-toggle="dropdown" onclick="dropdown(this, {{forloop.counter}},{{c.id}},{{s.id}},0);">{{name}}</button>
-                                {% endif %}
-                                {% if f == 1 %}
-                                    <button type="button" id="{{c.id}}{{s.id}}{{forloop.counter}}" class="load btn-xs btn-default dropdown-toggle" data-toggle="dropdown" onclick="dropdown(this, {{forloop.counter}},{{c.id}},{{s.id}},1);">{{name}}</button>
-                                {% endif %}
-                                <ul class="dropdown-menu pull-right">
-                                </ul>
-                                <br>
-                              </div>
-                              {% endif %}
-                              {% endfor %}
-                            {% endfor %}
-                        </td>
                     </tr>
                     {% endif %}
                     {% if s.lflag == 2 %}
@@ -154,7 +152,6 @@ function dropdown(t,offset,invenid,stableid,choice) {
           }
           else if (chocie == 1){
             $("ul", t.parent).html("<li><a href='#'>"+data['aname']+"</a></li><li><a href='tel:0"+data['phone1']+"'>학생전화</a></li><li><a href='#' class='pphone'></a></li>");
-
           }
         }
     });
@@ -171,8 +168,15 @@ function getAcaPhone(e, aid,fc){
         $('#collapsePhone'+fc).html("<br><a class='btn-xs btn-info' href='tel:"+data["phonelist"][0]+"'>전화1</a>&nbsp&nbsp<a class='btn-xs btn-info' href='tel:"+data["phonelist"][1]+"'>전화2</a>");
       }
   });
-
 }
+
+setInterval(function(){blink()}, 1000);
+                
+function blink() {
+        $(".blink").fadeTo(100, 0.1).fadeTo(200, 1.0);
+}
+
+
 </script>
 
 </html>

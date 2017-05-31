@@ -43,7 +43,8 @@ TEMPLATES = [
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         #'DIRS': [],
         #'DIRS': [os.path.join(os.path.dirname(__file__),'templates'),],
-        'DIRS': ['/root/workspace/tayo/templates',],
+        'DIRS': [ BASE_DIR + '/templates/',],
+        #'DIRS': ['/root/workspace/tayo/templates',],
         #'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -94,8 +95,9 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 CRONJOBS = [
-    ('01 22 * * *', 'schedule.cron.store_historyschedule'),
-    ('00 21 * * *', 'schedule.cron.store_historyschedule_old')
+    ('01 23 * * *', 'schedule.cron.store_historyschedule'),
+    ('00 21 * * *', 'schedule.cron.store_historyschedule_old'),
+    ('00 22 * * sun', 'schedule.cron.reset_lflag_on_every_schedule')
 ]
 
 #CRONTAB_COMMAND_SUFFIX = '2>&1'
