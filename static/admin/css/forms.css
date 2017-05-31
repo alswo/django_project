@@ -269,9 +269,9 @@ body.popup .submit-row {
     display: block;
     background: #ba2121;
     border-radius: 4px;
-    padding: 10px 15px;
+    padding: 20px 15px;
     height: 15px;
-    line-height: 15px;
+    line-height: 2px;
     color: #fff;
 }
 

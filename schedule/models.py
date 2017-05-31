@@ -86,8 +86,6 @@ class Branch(models.Model):
     location = models.CharField(max_length = 15)
     lon = models.FloatField()
     lat = models.FloatField()
-    carlist = ArrayField(models.IntegerField())
-    alist = ArrayField(models.IntegerField())
 
     history = HistoricalRecords()
     def __unicode__(self):

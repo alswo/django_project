@@ -132,7 +132,7 @@ def putSchedule(request):
         bid = request.GET.get('bid')
         if bid:
             academy = Academy.objects.filter(bid = bid)
-            group = Group.objects.filter(bid = bid)
+            group = Car.objects.filter(branchid = bid)
 
             return render_to_response('putSchedule.html', {"academy" : academy, "bid" : bid, "group" : group,'user':request.user})
 
@@ -207,7 +207,7 @@ def putSchedule(request):
                 stable.save()
 
             elif 0 < i < len(time) - 1:
-                sidlist = []
+                sidtemp = []
                 temp_aca = academy[i].split(',')
                 temp_name = name2[i].split(',')
                 student = StudentInfo.objects.filter(aid__in=[ a for a in temp_aca])
@@ -411,10 +411,14 @@ def updateSchedule(request):
 
                 elif 0 < i < len(time) - 1:
                     sidlist = []
+                    sidtemp = []
                     temp_aca = academy[i].split(',')
-                    temp_name = name2[i].split(',')
-                    student = StudentInfo.objects.filter(aid__in=[ a for a in temp_aca])
-                    sidtemp = [n.strip() for n in sid[i].split(',')]
+                    temp_name = [n.strip() for n in name2[i].split(',')]
+
+                    student = StudentInfo.objects.filter(aid__in=[ a for a in temp_aca]).filter(sname__in=[ stu for stu in temp_name ])
+
+                    for s in student:
+                        sidtemp.append(s.id)
 
                     temp_lflag = [0 for z in range(len(temp_name))]
 
@@ -589,7 +593,7 @@ def getHistory(request):
             single_date = (start_date + datetime.timedelta(days = day_number)).strftime('%Y-%m-%d')
             academiesDictionary = {}
             schedules = []
-            
+
             #return HttpResponse(single_date)
             iids = HistoryScheduleTable.objects.filter(alist__contains = [aid]).filter(date = single_date).order_by('time').values_list('iid_id', flat=True).distinct()
             uniq_iids = reduce(lambda x,y: x+[y] if x==[] or x[-1] != y else x, iids, [])
@@ -634,7 +638,7 @@ def analyze(request):
         total_days = (end_date - start_date).days + 1
         for day_number in range(total_days):
             single_date = (start_date + datetime.timedelta(days = day_number)).strftime('%Y-%m-%d')
-            
+
             #return HttpResponse(single_date)
             b = Branch.objects.get(id = branch)
             for car in b.carlist:

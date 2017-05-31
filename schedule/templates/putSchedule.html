@@ -43,7 +43,7 @@
                             <select name = "carnum" class="form-control" id="{{contact.id}}gid" form="scheduleform">
                               <option value="" selected>호차</option>
                               {% for g in group %}
-                              <option  value="{{g.gid}}">{{g.gname}}</option>
+                              <option  value="{{g.carname}}">{{g.carname}}호</option>
                               {% endfor %}
                             </select>
                         </div>
@@ -274,7 +274,7 @@ function validateTableForm(e){
   }
 
   tempName  = document.forms[e]['name[]']
-  if(tempName[0].value != "" || tempName[tableLength-1] != ""){
+  if(tempName[0].value != "" || tempName[tableLength-1].value != ""){
     alert("시작,끝 이름은 반드시 비워주세요.")
     return false;
   }

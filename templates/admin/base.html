@@ -31,6 +31,7 @@
   <script src="{% static 'js/dynamicTable.js' %}"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.3.7/js/tether.min.js"></script>
   <script src="{% static 'js/bootstrap.min.js' %}"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/typeahead.js/0.11.1/typeahead.bundle.min.js"></script>
   <script>
   window.onload = function() { $('body').attr('class','skin-blue sidebar-mini sidebar-collapse') };
   </script>
@@ -124,6 +125,11 @@
       <ul class="sidebar-menu">
         <li class="header">MAIN NAVIGATION</li>
         <li>
+          <a href="" onclick="window.open( '/opti', 'tayo |동선계산기','width=1500px, height=1000px' ); return false">
+            <i class="fa fa-calculator"></i> <span>동선계산기</span>
+          </a>
+        </li>
+        <li>
           <a href="/inventory/updateArea" id='area'>
             <i class="fa fa-map"></i> <span>지역(Area) 관리</span>
           </a>
@@ -131,6 +137,11 @@
         <li>
           <a href="/admin/schedule/branch" id='branchadmin'>
             <i class="fa fa-map-pin"></i> <span>지점(Branch) 관리</span>
+          </a>
+        </li>
+        <li>
+          <a href="/admin/schedule/car/">
+            <i class="fa fa-bus"></i> <span>차량 관리</span>
           </a>
         </li>
         <li>
@@ -144,13 +155,13 @@
           </a>
         </li>
         <li>
-          <a href="/studata" id='student'>
+          <a href="/admin/passenger/studentinfo/" id='student'>
             <i class="fa fa-child"></i> <span>학생 관리</span>
           </a>
         </li>
         <li>
           <a href="/admin/passenger/commute" id='commute'>
-            <i class="fa fa-bus"></i> <span>등원 정보 관리</span>
+            <i class="fa fa-info"></i> <span>등원 정보 관리</span>
           </a>
         </li>
         <li>

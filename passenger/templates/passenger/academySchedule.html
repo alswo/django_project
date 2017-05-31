@@ -75,6 +75,10 @@
                         <button type="button" class="btn btn-warning btn-xs" onclick="document.location.href='tel:010-3798-9855'">8호 기사님</button>
                         <button type="button" class="btn btn-warning btn-xs" onclick="document.location.href='tel:010-9955-6198'">8호 동승자님</button>
                     {% endif %}
+                    {% if contact.gid == 9 %}
+                        <button type="button" class="btn btn-warning btn-xs" onclick="document.location.href='tel:010-3798-9855'">9호 기사님</button>
+                        <button type="button" class="btn btn-warning btn-xs" onclick="document.location.href='tel:010-7741-9444'">9호 동승자님</button>
+                    {% endif %}
                     <br>
                     <br>
                     <h2>{{contact.schedule|linebreaksbr}}</h2>

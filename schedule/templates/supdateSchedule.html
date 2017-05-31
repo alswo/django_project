@@ -117,7 +117,9 @@
               <tr>
                 <td data-name="time"><input onchange="emptyTempList();" type="text" name="time[]" placeholder="Time" class="form-control" form="scheduleform{{c.id}}" value="{{s.time}}" /></td>
                 <td data-name="addr"><input type="text" name="addr[]" placeholder="Address" class="form-control" form="scheduleform{{c.id}}" value="{{s.addr}}" /></td>
-                <td data-name="name" class="inputTd"><input type="text" name="name[]" data-role="tagsinput" class="form-control" form="scheduleform{{c.id}}" value="{% for name in s.sname %}{{name}}{% include 'comma.html' %}{% endfor %}" /></td>
+                <td data-name="name" class="inputTd">
+                  <input type="text" name="name[]" data-role="tagsinput" class="form-control tInput" form="scheduleform{{c.id}}" value="{% for name in s.sname %}{{name}}{% include 'comma.html' %}{% endfor %}" />
+                </td>
                 <td data-name="addstu"><button class="btn btn-primary glyphicon glyphicon-plus addstudent" data-toggle="modal"></button></td>
                 <td data-name="academy" class="inputAca" style="display:none;"><input name="academy[]" type="text" data-role="tagsinput" class="form-control" form="scheduleform{{c.id}}" value="{% for aid in s.alist %}{{aid}}{% include 'comma.html' %}{% endfor %}" /></td>
                 <td data-name="sid" class="inputSid" style="display:none;"><input name="sid[]" type="text" data-role="tagsinput" class="form-control" form="scheduleform{{c.id}}" value="{% for sid in s.slist %}{{sid}}{% include 'comma.html' %}{% endfor %}" /></td>
@@ -149,6 +151,7 @@
                 <td data-name="del"><button name="del" class="btn btn-danger glyphicon glyphicon-remove row-remove"></button></td>
               </tr>
               {% endfor %}
+
             </tbody>
             <div class="modal fade" id="addstu" role="dialog" aria-labelledby="myModalLabel">
               <div class="modal-dialog" role="document">
@@ -209,6 +212,8 @@
         <br>
         {% endfor %}
 <script>
+
+
   var tempList = new Array();
 
   function addAca(selected) {
@@ -314,18 +319,18 @@
         tempAca += ',' + selectedAca
         tempSid += ',' + selectedSid
 
-        $(thisObject[1]).tagsinput('add', '')
-        $(thisObjectForAca[1]).tagsinput('add', '')
-        $(thisObjectForSid[1]).tagsinput('add', '')
+        $(thisObject[1]).tagsinput('add')
+        $(thisObjectForAca[1]).tagsinput('add')
+        $(thisObjectForSid[1]).tagsinput('add')
 
       } else {
         console.log('2')
         temp = selectedStu
         tempAca = selectedAca
         tempSid = selectedSid
-        $(thisObject[1]).tagsinput('add', '')
-        $(thisObjectForAca[1]).tagsinput('add', '')
-        $(thisObjectForSid[1]).tagsinput('add', '')
+        $(thisObject[1]).tagsinput('add')
+        $(thisObjectForAca[1]).tagsinput('add')
+        $(thisObjectForSid[1]).tagsinput('add')
       }
 
       $(thisObject[1]).tagsinput('add', temp)
@@ -344,9 +349,9 @@
         temp = selectedStu
         tempAca = selectedAca
         tempSid = selectedSid
-        $(thisObject[0]).tagsinput('add', '')
-        $(thisObjectForAca[0]).tagsinput('add', '')
-        $(thisObjectForSid[0]).tagsinput('add', '')
+        $(thisObject[0]).tagsinput('add')
+        $(thisObjectForAca[0]).tagsinput('add')
+        $(thisObjectForSid[0]).tagsinput('add')
       }
       $(thisObject[0]).tagsinput('add', temp)
       $(thisObjectForAca[0]).tagsinput('add', tempAca)
@@ -374,7 +379,7 @@
 
   $('#openBtn').click(function(){
     if($('#forInvenAddCheck').val() == undefined){
-      alert("검색 후 사용해주세요.")
+      alert("검색 후 사용해 주세요.")
       return false;
     }
     $('#myModal').on('show', function () {
@@ -387,12 +392,12 @@
       var num = /^\d+$/;
 
       if(document.forms["searchform"]["area"].selectedIndex < 1){
-        alert("지역, 지점을 선택해주세요.")
+        alert("지역, 지점을 선택해 주세요.")
         return false;
       }
 
       else if(num.test(document.forms["searchform"]["time"].value) == false ){
-        alert("시간은 숫자만 입력해주세요.(예:1500)")
+        alert("시간은 숫자만 입력해 주세요.(예:1500)")
         return false;
       }
   }
@@ -404,11 +409,6 @@
     tempAddrE = document.forms[e]['addr[]'][tableLength-1].value
     var timepattern = /([01]\d|2[0-3]):([0-5]\d)/;
 
-    if(document.forms[e]["day"].selectedIndex < 1){
-      alert("호차 선택해주세요.")
-      return false;
-    }
-
     if(tempAddrS != "" || tempAddrE != ""){
       alert("시작,끝 주소는 반드시 비워주세요.")
       return false;
@@ -416,13 +416,13 @@
     tempTime  = document.forms[e]['time[]']
     for(i = 0 ; i < tableLength; i++){
       if(timepattern.test(tempTime[i].value) == false){
-        alert(i+1+"번째 로우의 숫자를 정확히 입력해주세요.")
+        alert(i+1+"번째 로우의 숫자를 정확히 입력해 주세요.")
         return false;
       }
     }
 
     tempName  = document.forms[e]['name[]']
-    if(tempName[0].value != "" || tempName[tableLength-1] != ""){
+    if(tempName[0].value != "" || tempName[tableLength-1].value != ""){
       alert("시작,끝 이름은 반드시 비워주세요.")
       return false;
     }
