@@ -97,7 +97,9 @@ AUTH_PASSWORD_VALIDATORS = [
 CRONJOBS = [
     ('01 23 * * *', 'schedule.cron.store_historyschedule'),
     ('00 21 * * *', 'schedule.cron.store_historyschedule_old'),
-    ('00 22 * * sun', 'schedule.cron.reset_lflag_on_every_schedule')
+    ('00 22 * * sun', 'schedule.cron.reset_lflag_on_every_schedule'),
+    ('00 23 31 12 *', 'schedule.test.move_schedule'),
+    ('00 23 31 12 *', 'schedule.test.regist_student')
 ]
 
 #CRONTAB_COMMAND_SUFFIX = '2>&1'
