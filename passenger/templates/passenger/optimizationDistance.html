@@ -79,6 +79,14 @@
                 <tr id="startPoi" class="success">
 
                 </tr>
+		<tr id="xx">
+			<td colspan="3">
+				<table class="table">
+				<thead></thead>
+				<tbody id="addPoi"></tbody>
+				</table>
+			</td>
+		</tr>
                 <tr id="endPoi" class="danger">
 
                 </tr>
@@ -124,6 +132,7 @@
   markers = []
   var number = 0;
   academy_flag = 0;
+  var index_number = 0;
 
   var map;
   var mapW, mapH; // 지도의 가로, 세로 크기(Pixel단위) 를 지정 합니다.
@@ -323,17 +332,18 @@
           var mark = new Tmap.Marker(lonlat, icon);
           marker.addMarker(mark);
 
-          temp = []
-          addr1 = addr.split('(')[1].split(')')[0]
+          temp = [];
+          addr1 = addr.split('(')[1].split(')')[0];
 
           //a.push(addr,nlon,nlat)
 
-          tempHtmlStart = "<td>"+addr1+"</td><td class='lon'>"+nlon+"</td><td class='lat'>"+nlat+"</td><td id='markerStart' style='display:none'>"+addr+":"+nlon+":"+nlat+"</td>"
-          tempHtmlEnd = "<td>"+addr1+"</td><td class='lon'>"+nlon+"</td><td class='lat'>"+nlat+"</td><td id='markerEnd' style='display:none'>"+addr+":"+nlon+":"+nlat+"</td>"
-          tempHtmlAdd = "<tr class='addPoi'><td>"+addr+"</td><td>"+nlon+"</td><td>"+nlat+"</td><td class='markerInfo' style='display:none'>"+addr+":"+nlon+":"+nlat+"</td><tr>"
+          tempHtmlStart = "<td>"+addr1+"</td><td class='lon'>"+nlon+"</td><td class='lat'>"+nlat+"</td><td id='markerStart' style='display:none'>"+addr+":"+nlon+":"+nlat+"</td>";
+          tempHtmlEnd = "<td>"+addr1+"</td><td class='lon'>"+nlon+"</td><td class='lat'>"+nlat+"</td><td id='markerEnd' style='display:none'>"+addr+":"+nlon+":"+nlat+"</td>";
+          tempHtmlAdd = "<tr id='addPoi" +  index_number + "'><td data-name='del'><button name='del' id='del' class='btn-xs btn-danger glyphicon glyphicon-remove row-remove' onClick='remove_row(" + index_number + ")'></button></td><td>" +addr1+"</td><td>"+nlon+"</td><td>"+nlat+"</td><td class='markerInfo' style='display:none'>"+addr+":"+nlon+":"+nlat+"</td></tr>";
 
           if (flag == "a"){
-            $('#info-marker').append(tempHtmlAdd)
+            $('#addPoi').append(tempHtmlAdd)
+	    index_number++;
           } else if (flag == "s"){
             $('#startPoi').html(tempHtmlStart)
           } else if (flag == 'e'){
@@ -357,12 +367,12 @@
           temp.push (addr,addr1,lon,lat)
           //a.push(addr,nlon,nlat)
 
-          tempHtmlStart = "<td>"+addr1+"</td><td class='lon'>"+lon+"</td><td class='lat'>"+lat+"</td><td id='markerStart' style='display:none'>"+addr+":"+lon+":"+lat+"</td>"
-          tempHtmlEnd = "<td>"+addr1+"</td><td class='lon'>"+lon+"</td><td class='lat'>"+lat+"</td><td id='markerEnd' style='display:none'>"+addr+":"+lon+":"+lat+"</td>"
-          tempHtmlAdd = "<tr class='addPoi'><td>"+addr+"</td><td>"+lon+"</td><td>"+lat+"</td><td class='markerInfo' style='display:none'>"+addr+":"+lon+":"+lat+"</td><tr>"
+          tempHtmlStart = "<td>"+addr1+"</td><td class='lon'>"+lon+"</td><td class='lat'>"+lat+"</td><td id='markerStart' style='display:none'>"+addr+":"+lon+":"+lat+"</td>";
+          tempHtmlEnd = "<td>"+addr1+"</td><td class='lon'>"+lon+"</td><td class='lat'>"+lat+"</td><td id='markerEnd' style='display:none'>"+addr+":"+lon+":"+lat+"</td>";
+          tempHtmlAdd = "<tr id='addPoi" +  index_number + "'><td data-name='del'><button name='del' id='del' class='btn-xs btn-danger glyphicon glyphicon-remove row-remove' onClick='remove_row(" + index_number + ")'></button></td><td>" +addr1+"</td><td>"+nlon+"</td><td>"+nlat+"</td><td class='markerInfo' style='display:none'>"+addr+":"+nlon+":"+nlat+"</td></tr>";
 
           if (flag == "a"){
-            $('#info-marker').append(tempHtmlAdd)
+            $('#addPoi').append(tempHtmlAdd)
           } else if (flag == "s"){
             $('#startPoi').html(tempHtmlStart)
           } else if (flag == 'e'){
@@ -521,6 +531,10 @@
 
     // iframe을 넣은 element를 보이게 한다.
     element_wrap.style.display = 'block';
+  }
+
+  function remove_row(num) {
+	$('#addPoi' + num).remove();
   }
 </script>
 
