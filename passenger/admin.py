@@ -26,7 +26,7 @@ class ScheduleDateAdmin(admin.ModelAdmin):
 
 class StudentInfoAdmin(SimpleHistoryAdmin):
     fields = ('academySelection','aid','aname','bid','bname','sname','grade','phone1','phonelist')
-    list_display = ('bname', 'aname', 'sname', 'id')
+    list_display = ('__unicode__',)
     form = StudentInfoForm
 
     class Media:

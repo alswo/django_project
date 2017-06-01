@@ -178,6 +178,10 @@ class StudentInfo(models.Model):
     phonelist = ArrayField(models.IntegerField(null = True, blank = True,default=0),default=0)
     history = HistoricalRecords()
 
+    def __unicode__(self):
+        return u"{0} // {1} // {2} // {3}".format(self.bname,",".join(self.aname),self.sname,self.grade)
+
+
 class AcademySchedule(models.Model):
     gid = models.IntegerField()
     aid =  models.CharField(max_length = 20,null = True, blank = True)
