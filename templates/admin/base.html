@@ -155,7 +155,7 @@
           </a>
         </li>
         <li>
-          <a href="/admin/passenger/studentinfo/" id='student'>
+          <a href="/studentInfo" id='student'>
             <i class="fa fa-child"></i> <span>학생 관리</span>
           </a>
         </li>
@@ -470,6 +470,40 @@
 <!-- AdminLTE for demo purposes -->
 <script src="/static/adminlte/dist/js/demo.js"></script>
 </body>
+<script>
+<!-- StudentInfo admin academy selection -->
+$(document).on('change','#branchSelected', function(){
+  $.ajax({
+    type: 'POST',
+    url: '/studentInfo',
+    data: {
+      branch: this.value,
+      flag: 1,
+    },
+    success: function(data) {
+      console.log(data)
+      tempTag = "<option vlaue='default' selected>학원선택</option>"
+      for (i = 0; i < data.length; i++) {
+        tempTag = tempTag + "<option value=" + data[i]['pk'] + ">" + data[i]['fields']['name'] + "</option>"
+      }
+      document.getElementById('academyStuInfo').innerHTML = tempTag
+    }
+  });
+})
+$(document).on('change','#academyStuInfo', function(){
+  aname = $(this).find("option:selected").text()
+  aid = $(this).find("option:selected").val()
+
+  if($('#id_aid').val() == ''){
+    $('#id_aname').val(aname)
+    $('#id_aid').val(aid)
+  }else{
+  $('#id_aname').val($('#id_aname').val() + ','+aname)
+  $('#id_aid').val($('#id_aid').val()+','+aid)
+}
+})
+
+</script>
 <link href="{% static 'css/bootstrap-tagsinput.css' %}" rel="stylesheet">
 <script src="{% static 'js/bootstrap-tagsinput.js' %}"></script>
 </html>

@@ -168,14 +168,14 @@ class StudentInfo(models.Model):
     for g in gra:
         GRA = GRA + ((g.name, g.name),)
 
-    aid = models.IntegerField(choices=ACA)
+    aid = ArrayField(models.IntegerField(null = True, blank = True, default=0),default=0)
     bid = models.IntegerField(choices=BRA)
-    aname = models.CharField(max_length = 20)
+    aname = ArrayField(models.CharField(max_length = 20),default='')
     bname = models.CharField(max_length = 20)
     sname = models.CharField(max_length = 10)
     grade = models.CharField(max_length = 10,choices=GRA, null = True, default = '0')
     phone1 = models.IntegerField()
-    phonelist = ArrayField(models.IntegerField(null = True, blank = True, default=0))
+    phonelist = ArrayField(models.IntegerField(null = True, blank = True,default=0),default=0)
     history = HistoricalRecords()
 
 class AcademySchedule(models.Model):

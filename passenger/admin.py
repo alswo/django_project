@@ -1,6 +1,7 @@
 from django.contrib import admin
 from passenger.models import Academy, Commute, Schedule, ShuttleSchedule, AcademySchedule, Group, PhoneList, ScheduleDate, StudentInfo,Community,Grade
 from simple_history.admin import SimpleHistoryAdmin
+from passenger.forms import StudentInfoForm
 
 class ScheduleAdmin(admin.ModelAdmin):
     list_display = ('name', 's_name', 'load','unload')
@@ -24,7 +25,9 @@ class ScheduleDateAdmin(admin.ModelAdmin):
     list_display = ('a_name', 'day', 'time')
 
 class StudentInfoAdmin(SimpleHistoryAdmin):
+    fields = ('academySelection','aid','aname','bid','bname','sname','grade','phone1','phonelist')
     list_display = ('bname', 'aname', 'sname', 'id')
+    form = StudentInfoForm
 
     class Media:
         js = (

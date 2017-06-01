@@ -7,6 +7,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpRequest, HttpResponseRedirect, JsonResponse
 from django.core import serializers
+from django.core.serializers import serialize
 from passenger.dateSchedule import timeToDate
 import json
 
@@ -274,7 +275,6 @@ def acaphone(request):
 @login_required
 @csrf_exempt
 def studata(request):
-
     if request.method == "GET":
         if request.GET.get('id'):
             aid = request.GET.get('id')
@@ -484,3 +484,19 @@ def community(request):
             contacts = Community.objects.order_by('-id')
 
             return render_to_response('passenger/community.html',{"contacts":contacts,'user':request.user})
+
+@csrf_exempt
+def studentInfo(request):
+    if request.method == "GET":
+        branch = Branch.objects.all()
+
+        return render_to_response('passenger/studentInfo.html',{'branch':branch,'user':request.user})
+
+    elif request.method == "POST":
+        flag = request.POST.get('flag')
+        if flag == '1':
+            bid = request.POST.get('branch')
+            aca = Academy.objects.filter(bid = bid)
+            data = serialize('json', aca)
+
+            return HttpResponse(data, content_type="application/json" )
