@@ -14,4 +14,5 @@ urlpatterns = patterns('',
     url(r'^getHistory', views.getHistory),
     url(r'^chart', views.chart),
     url(r'^analyze', views.analyze),
+    url(r'^reqInventory', views.reqInventory)
 )

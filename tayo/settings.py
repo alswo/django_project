@@ -41,10 +41,7 @@ ROOT_URLCONF = 'tayo.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        #'DIRS': [],
-        #'DIRS': [os.path.join(os.path.dirname(__file__),'templates'),],
-        'DIRS': ['/root/workspace/tayo/templates',],
-        #'APP_DIRS': True,
+        'DIRS': ['/home/ubuntu/lee/venv_tayo/django_project/templates',],
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',

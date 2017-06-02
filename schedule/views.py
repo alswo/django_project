@@ -140,6 +140,7 @@ def putSchedule(request):
         day = request.POST.get('day')
         carnum = request.POST.get('carnum')
         bid = request.POST.get('bid')
+        req = request.POST.get('req')
         time = request.POST.getlist('time[]')
         addr = request.POST.getlist('addr[]')
         name = request.POST.getlist('name[]')
@@ -188,7 +189,7 @@ def putSchedule(request):
 
 
         try:
-            inven = Inventory.objects.create(carnum = carnum, bid = bid, snum = snum, day = day , alist=alist, anamelist = anamelist_inven, slist=slist, stime = stime, etime = etime)
+            inven = Inventory.objects.create(carnum = carnum, bid = bid, snum = snum, day = day , alist=alist, anamelist = anamelist_inven, slist=slist, stime = stime, etime = etime, req=req)
 
         except:
             return HttpResponse("error inventory save")
@@ -648,3 +649,15 @@ def analyze(request):
 
 def chart(request):
     return render_to_response('chart.html', {'user':request.user})
+
+@csrf_exempt
+def reqInventory(request):
+    if request.method == "POST":
+        iid = request.POST.get('iid')
+        req = request.POST.get('req')
+
+        inven = Inventory.objects.get(id=iid)
+        inven.req = req
+        inven.save()
+
+        return HttpResponse(req)
