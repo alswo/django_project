@@ -168,7 +168,7 @@ def putSchedule(request):
         slist_temp3 = list(set(slist_temp2.split(',')))
         slist = []
 
-        studentInfo = StudentInfo.objects.filter(aid__in = [aid for aid in alist]).filter(sname__in = [name for name in slist_temp3])
+        studentInfo = StudentInfo.objects.filter(aid__contains = [aid for aid in alist]).filter(sname__in = [name for name in slist_temp3])
 
         for s in studentInfo:
             slist.append(s.id)
@@ -208,19 +208,15 @@ def putSchedule(request):
                 stable.save()
 
             elif 0 < i < len(time) - 1:
+                sidlist = []
                 sidtemp = []
                 temp_aca = academy[i].split(',')
-                temp_name = name2[i].split(',')
-                student = StudentInfo.objects.filter(aid__in=[ a for a in temp_aca])
+                temp_name = [n.strip() for n in name2[i].split(',')]
+
+                student = StudentInfo.objects.filter(aid__contains=[ a for a in temp_aca]).filter(sname__in=[ stu for stu in temp_name ])
 
                 for s in student:
-                    for k in temp_name:
-                        if s.sname == k:
-                            sidlist.append(s.id);
-
-                if len(sidlist) != len(temp_name):
-
-                    return HttpResponse("Not register student")
+                    sidtemp.append(s.id)
 
                 temp_lflag = [0 for z in range(len(temp_name))]
 
@@ -230,7 +226,7 @@ def putSchedule(request):
                     aname = Academy.objects.get(id = aid)
                     anamelist.append(aname.name)
 
-                stable = ScheduleTable(iid_id = iid, time = time[i], addr = addr[i], alist=temp_aca, anamelist = anamelist, slist=sidlist, sname=temp_name, tflag=temp_lflag, lflag=load[i])
+                stable = ScheduleTable(iid_id = iid, time = time[i], addr = addr[i], alist=temp_aca, anamelist = anamelist, slist=sidtemp, sname=temp_name, tflag=temp_lflag, lflag=load[i])
                 stable.save()
 
         academy = Academy.objects.filter(bid = bid)
@@ -377,7 +373,7 @@ def updateSchedule(request):
 
             slist = []
 
-            studentInfo = StudentInfo.objects.filter(aid__in = [aid for aid in alist]).filter(sname__in = [name for name in slist_temp3])
+            studentInfo = StudentInfo.objects.filter(aid__contains = [aid for aid in alist]).filter(sname__in = [name for name in slist_temp3])
 
             for s in studentInfo:
                 slist.append(s.id)
@@ -416,7 +412,7 @@ def updateSchedule(request):
                     temp_aca = academy[i].split(',')
                     temp_name = [n.strip() for n in name2[i].split(',')]
 
-                    student = StudentInfo.objects.filter(aid__in=[ a for a in temp_aca]).filter(sname__in=[ stu for stu in temp_name ])
+                    student = StudentInfo.objects.filter(aid__contains=[ a for a in temp_aca]).filter(sname__in=[ stu for stu in temp_name ])
 
                     for s in student:
                         sidtemp.append(s.id)
@@ -489,7 +485,7 @@ def studentLoad(request):
     if request.method == "POST":
         aid = request.POST.get('aid')
 
-        stu = StudentInfo.objects.filter(aid = aid)
+        stu = StudentInfo.objects.filter(aid__contains = [aid])
         data = serialize('json', stu)
 
         return HttpResponse(data, content_type="application/json" )
