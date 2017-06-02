@@ -41,7 +41,14 @@ ROOT_URLCONF = 'tayo.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
+<<<<<<< HEAD
         'DIRS': ['/home/ubuntu/lee/venv_tayo/django_project/templates',],
+=======
+        #'DIRS': [],
+        #'DIRS': [os.path.join(os.path.dirname(__file__),'templates'),],
+        'DIRS': [BASE_DIR + '/templates/',],
+        #'APP_DIRS': True,
+>>>>>>> 913a0837039d60188b49c4973c6ceedcdd2d6d1b
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
@@ -91,8 +98,11 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 CRONJOBS = [
-    ('01 22 * * *', 'schedule.cron.store_historyschedule'),
-    ('00 21 * * *', 'schedule.cron.store_historyschedule_old')
+    ('01 23 * * *', 'schedule.cron.store_historyschedule'),
+    ('00 21 * * *', 'schedule.cron.store_historyschedule_old'),
+    ('00 22 * * sun', 'schedule.cron.reset_lflag_on_every_schedule'),
+    ('00 23 31 12 *', 'schedule.test.move_schedule'),
+    ('00 23 31 12 *', 'schedule.test.regist_student')
 ]
 
 #CRONTAB_COMMAND_SUFFIX = '2>&1'
