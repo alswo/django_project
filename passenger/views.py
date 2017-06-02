@@ -4,12 +4,17 @@ from django.template import RequestContext
 from passenger.models import Commute, Academy, Schedule, ShuttleSchedule, Group, ScheduleDate,Community
 from schedule.models import Branch, Car
 from django.views.decorators.csrf import csrf_exempt
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.http import HttpResponse, HttpRequest, HttpResponseRedirect, JsonResponse
 from django.core import serializers
 from django.core.serializers import serialize
 from passenger.dateSchedule import timeToDate
 import json
+
+def is_driver(user):
+    if user:
+        return user.groups.filter(name='driver').count == 0
+    return true
 
 @login_required
 def main(request):
@@ -42,9 +47,10 @@ def safetyTayo(request):
 
     return render_to_response('passenger/tayo.html', {"contacts" : contacts, "schedule" : schedule, "aid" : aid,'user':request.user})
 
+@login_required
+@user_passes_test(is_driver, login_url='/', redirect_field_name=None)
 def opti(request):
     if request.method =="GET":
-
         return render_to_response('passenger/optimizationDistance.html', {'user':request.user})
 
 @csrf_exempt
@@ -422,6 +428,7 @@ def dateSchedule(request):
             return render_to_response('passenger/viewDateSchedule.html', {"contacts": contacts, "count" : count,'user':request.user})
 
 @csrf_exempt
+@login_required
 def community(request):
     if request.method == "GET":
         contacts = Community.objects.order_by('-id')
@@ -486,6 +493,8 @@ def community(request):
             return render_to_response('passenger/community.html',{"contacts":contacts,'user':request.user})
 
 @csrf_exempt
+@login_required
+@user_passes_test(is_driver, login_url='/', redirect_field_name=None)
 def studentInfo(request):
     if request.method == "GET":
         branch = Branch.objects.all()
