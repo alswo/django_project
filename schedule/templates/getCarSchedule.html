@@ -41,13 +41,13 @@ function callNumber(num){
   <div class="container">
     <br>
         <div class="row day" align="center">
-          <button type="button" class="btn btn-danger" onclick="location.href='/'">홈</button>
-          <button type="button" class="btn btn-info" onclick="location.href='getSchedule?car={{car}}&day=월'">월</button>
-          <button type="button" class="btn btn-info" onclick="location.href='getSchedule?car={{car}}&day=화'">화</button>
-          <button type="button" class="btn btn-info" onclick="location.href='getSchedule?car={{car}}&day=수'">수</button>
-          <button type="button" class="btn btn-info" onclick="location.href='getSchedule?car={{car}}&day=목'">목</button>
-          <button type="button" class="btn btn-info" onclick="location.href='getSchedule?car={{car}}&day=금'">금</button>
-          <button type="button" class="btn btn-info" onclick="location.href='getSchedule?car={{car}}&day=토'">토</button>
+          <button type="button" class="btn-sm btn-danger" onclick="location.href='/'">홈</button>
+          <button type="button" class="btn-sm btn-info" onclick="location.href='getSchedule?car={{car}}&day=월'">월</button>
+          <button type="button" class="btn-sm btn-info" onclick="location.href='getSchedule?car={{car}}&day=화'">화</button>
+          <button type="button" class="btn-sm btn-info" onclick="location.href='getSchedule?car={{car}}&day=수'">수</button>
+          <button type="button" class="btn-sm btn-info" onclick="location.href='getSchedule?car={{car}}&day=목'">목</button>
+          <button type="button" class="btn-sm btn-info" onclick="location.href='getSchedule?car={{car}}&day=금'">금</button>
+          <button type="button" class="btn-sm btn-info" onclick="location.href='getSchedule?car={{car}}&day=토'">토</button>
           <!--<button type="button" class="btn btn-primary" onclick="window.print()">출력</button>-->
         </div>
         <br>
@@ -171,7 +171,7 @@ function getAcaPhone(e, aid,fc){
 }
 
 setInterval(function(){blink()}, 1000);
-                
+
 function blink() {
         $(".blink").fadeTo(100, 0.1).fadeTo(200, 1.0);
 }

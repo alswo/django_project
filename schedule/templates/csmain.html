@@ -115,7 +115,7 @@
           </a>
         </li>
         <li>
-          <a href="" id='student'>
+          <a href="/studentInfo" id='student'>
             <i class="fa fa-child"></i> <span>학생 관리</span>
           </a>
         </li>
@@ -384,7 +384,7 @@ $(document).ready(function() {
 	$('#student').on('click', function(e) {
 		e.preventDefault();
 		$('.content-wrapper').empty();
-		$('.content-wrapper').load('/studata');
+		$('.content-wrapper').load('/studentInfo');
 	});
 	$('#commute').on('click', function(e) {
 		e.preventDefault();
