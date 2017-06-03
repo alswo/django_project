@@ -11,10 +11,11 @@ from django.core.serializers import serialize
 from passenger.dateSchedule import timeToDate
 import json
 
-def is_driver(user):
+## return True if the group of user is not driver
+def is_not_driver(user):
     if user:
-        return user.groups.filter(name='driver').count == 0
-    return true
+        return user.groups.filter(name='driver').exists() == False
+    return True
 
 @login_required
 def main(request):
@@ -48,7 +49,7 @@ def safetyTayo(request):
     return render_to_response('passenger/tayo.html', {"contacts" : contacts, "schedule" : schedule, "aid" : aid,'user':request.user})
 
 @login_required
-@user_passes_test(is_driver, login_url='/', redirect_field_name=None)
+@user_passes_test(is_not_driver, login_url='/', redirect_field_name=None)
 def opti(request):
     if request.method =="GET":
         return render_to_response('passenger/optimizationDistance.html', {'user':request.user})
@@ -494,7 +495,7 @@ def community(request):
 
 @csrf_exempt
 @login_required
-@user_passes_test(is_driver, login_url='/', redirect_field_name=None)
+@user_passes_test(is_not_driver, login_url='/', redirect_field_name=None)
 def studentInfo(request):
     if request.method == "GET":
         branch = Branch.objects.all()
