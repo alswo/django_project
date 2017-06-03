@@ -99,7 +99,28 @@
         <div class="row">
         <div class="col-md-1"></div>
         <div class="col-md-10">
-          <div class="col-md-12 table-responsive">
+        <div class="col-md-12 table-responsive">
+          <div class="row">
+            <div class="col-md-8">
+              <textarea class="form-control" rows="4" id="{{c.id}}text">{{c.req}}</textarea>
+            </div>
+            <div class="col-md-1">
+              <div class="row"><button type="button" class="btn btn-success" onclick="reqInventory({{c.id}});">수정</button></div>
+            </div>
+            <div class="col-md-3">
+              <ul class="list-group">
+                 <li class="list-group-item">
+                   학원:
+                 {% for a in c.anamelist %}
+                  {{a}} |
+                 {%endfor%}
+                 </li>
+                 <li class="list-group-item">학생 수: {{c.snum}}</li>
+                 <li class="list-group-item">요일: {{c.day}}</li>
+              </ul>
+            </div>
+          </div>
+        <br>
         <div class="row table-container">
           <table class="table table-bordered table-schedule">
             <thead>
@@ -426,6 +447,22 @@
       alert("시작,끝 이름은 반드시 비워주세요.")
       return false;
     }
+  }
+
+  function reqInventory(iid){
+    var req = $('#'+iid+'text').val();
+    $.ajax({
+      type: 'POST',
+      url: 'reqInventory',
+      data: {
+        iid: iid,
+        req: req,
+      },
+      success: function(data) {
+        $('#'+iid+'text').val(data);
+        alert("Success");
+      }
+    });
   }
 </script>
 {% endblock content %}

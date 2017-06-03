@@ -15,6 +15,7 @@ class Inventory(models.Model):
     stime = models.IntegerField()
     etime = models.IntegerField()
     #building = models.IntegerField()
+    req = models.TextField()
     history = HistoricalRecords()
 
     def __unicode__(self):
