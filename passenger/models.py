@@ -151,20 +151,8 @@ class Grade(models.Model):
     name = models.CharField(max_length = 30)
 
 class StudentInfo(models.Model):
-    aca = Academy.objects.all()
-    branch = Branch.objects.all()
-
-    ACA = ()
-    BRA = ()
-
-    for a in aca:
-        ACA = ACA + ((a.id, a.name),)
-
-    for b in branch:
-        BRA = BRA + ((b.id, b.bname),)
-
     aid = ArrayField(models.IntegerField(null = True, blank = True))
-    bid = models.IntegerField(choices=BRA)
+    bid = models.IntegerField()
     aname = ArrayField(models.CharField(max_length = 20),default='')
     bname = models.CharField(max_length = 20)
     sname = models.CharField(max_length = 10)

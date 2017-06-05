@@ -473,11 +473,15 @@
 <script>
 <!-- StudentInfo admin academy selection -->
 $(document).on('change','#branchSelected', function(){
+  var bname = $("#branchSelected option:selected").text()
+  var bid = $("#branchSelected option:selected").val()
+  $('#id_bid').val(bid)
+  $('#id_bname').val(bname)
   $.ajax({
     type: 'POST',
     url: '/studentInfo',
     data: {
-      branch: this.value,
+      branch: bid,
       flag: 1,
     },
     success: function(data) {
@@ -490,6 +494,7 @@ $(document).on('change','#branchSelected', function(){
     }
   });
 })
+
 $(document).on('change','#academyStuInfo', function(){
   aname = $(this).find("option:selected").text()
   aid = $(this).find("option:selected").val()
