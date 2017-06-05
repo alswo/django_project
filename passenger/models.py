@@ -153,11 +153,9 @@ class Grade(models.Model):
 class StudentInfo(models.Model):
     aca = Academy.objects.all()
     branch = Branch.objects.all()
-    gra = Grade.objects.all()
 
     ACA = ()
     BRA = ()
-    GRA = ()
 
     for a in aca:
         ACA = ACA + ((a.id, a.name),)
@@ -165,15 +163,12 @@ class StudentInfo(models.Model):
     for b in branch:
         BRA = BRA + ((b.id, b.bname),)
 
-    for g in gra:
-        GRA = GRA + ((g.name, g.name),)
-
-    aid = ArrayField(models.IntegerField(null = True, blank = True, default=0),default=0)
+    aid = ArrayField(models.IntegerField(null = True, blank = True))
     bid = models.IntegerField(choices=BRA)
     aname = ArrayField(models.CharField(max_length = 20),default='')
     bname = models.CharField(max_length = 20)
     sname = models.CharField(max_length = 10)
-    grade = models.CharField(max_length = 10,choices=GRA, null = True, default = '0')
+    grade = models.IntegerField(null = True, blank = True)
     phone1 = models.IntegerField()
     phonelist = ArrayField(models.IntegerField(null = True, blank = True,default=0),default=0)
     history = HistoricalRecords()

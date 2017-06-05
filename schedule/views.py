@@ -151,7 +151,7 @@ def putSchedule(request):
 
 
         try:
-            snum = len(set(name))
+            snum = len(set(name)) - 1
             alist_temp = list(set([i for i in academy if i is not None and i != '']))
             alist_temp2 = ','.join(alist_temp)
             alist_temp3 = list(set(alist_temp2.split(',')))
@@ -268,7 +268,7 @@ def updateSchedule(request):
 
     elif request.method == "POST":
         area = Area.objects.all()
-        #updateflag 1(selects branch),2(search inven)
+        #updateflag 1(select branch),2(search inven)
         updateflag = request.POST.get('updateflag')
         #update 1(update inven,stable),0(delete inven,stable)
         update = request.POST.get('update')
@@ -349,7 +349,7 @@ def updateSchedule(request):
                     #student = StudentInfo.objects.filter(aid__in=[ a for a in temp_aca])
 
                     for k in temp_name:
-                        if StudentInfo.objects.filter(sname = k).exists():
+                        if StudentInfo.objects.filter(aid_contains=temp_aca).filter(sname = k).exists():
                             continue
                         else:
                             return HttpResponse("Not Register Student")

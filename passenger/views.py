@@ -48,7 +48,6 @@ def safetyTayo(request):
     return render_to_response('passenger/tayo.html', {"contacts" : contacts, "schedule" : schedule, "aid" : aid,'user':request.user})
 
 @login_required
-@user_passes_test(is_driver, login_url='/', redirect_field_name=None)
 def opti(request):
     if request.method =="GET":
         return render_to_response('passenger/optimizationDistance.html', {'user':request.user})
@@ -494,7 +493,6 @@ def community(request):
 
 @csrf_exempt
 @login_required
-@user_passes_test(is_driver, login_url='/', redirect_field_name=None)
 def studentInfo(request):
     if request.method == "GET":
         branch = Branch.objects.all()
