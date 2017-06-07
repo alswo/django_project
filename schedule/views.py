@@ -344,12 +344,14 @@ def updateSchedule(request):
             for i in range(len(time)):
                 if 0 < i < len(time) - 1:
                     sidlist = []
-                    temp_aca = academy[i].split(',')
+                    temp_aca = [int(a.strip()) for a in academy[i].split(',')]
                     temp_name = [n.strip() for n in name2[i].split(',')]
                     #student = StudentInfo.objects.filter(aid__in=[ a for a in temp_aca])
 
                     for k in temp_name:
-                        if StudentInfo.objects.filter(aid_contains=temp_aca).filter(sname = k).exists():
+                        s = StudentInfo.objects.filter(sname = k)
+                        if s:
+                            if
                             continue
                         else:
                             return HttpResponse("Not Register Student")

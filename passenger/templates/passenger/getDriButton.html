@@ -1,0 +1,5 @@
+{% load staticfiles %}
+{% for c in carlist %}
+<button type="button" class="btn btn-info" onclick="location.href='inventory/getSchedule?car={{c.id}}&day=월'">{{c.carname}}호차</button>
+</div>
+{% endfor %}
