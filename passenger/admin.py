@@ -25,6 +25,7 @@ class ScheduleDateAdmin(admin.ModelAdmin):
     list_display = ('a_name', 'day', 'time')
 
 class StudentInfoAdmin(SimpleHistoryAdmin):
+    search_fields = ['aname','sname']
     fields = ('academySelection','aid','aname','bid','bname','sname','grade','phone1','phonelist')
     list_display = ('__unicode__',)
     form = StudentInfoForm
