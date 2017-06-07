@@ -102,6 +102,30 @@ CRONJOBS = [
     ('00 23 31 12 *', 'schedule.test.regist_student')
 ]
 
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': BASE_DIR + '/logs/debug.log',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['file'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+        '"django_crontab': {
+            'handlers': ['file'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+    },
+}
+
 #CRONTAB_COMMAND_SUFFIX = '2>&1'
 
 LOGIN_REDIRECT_URL = '/'
