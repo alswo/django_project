@@ -230,7 +230,7 @@ def putSchedule(request):
                 stable.save()
 
         academy = Academy.objects.filter(bid = bid)
-        group = Group.objects.filter(bid = bid)
+        group = Car.objects.filter(branchid = bid)
 
         return render_to_response('putSchedule.html', {"academy" : academy, "bid" : bid, "group" : group,'user':request.user})
 
@@ -396,12 +396,11 @@ def updateSchedule(request):
 
             anamelist_inven = []
 
-            academyList = Academy.objects.filter(id__in = alist)
+            academyList = Academy.objects.filter(id__in = acalist)
 
 
             for a in academyList:
                 anamelist_inven.append(a.name)
-
 
             Inventory.objects.filter(id=iid).update(snum = snum,alist=acalist, anamelist = anamelist_inven, slist=slist, stime = stime, etime = etime)
 
