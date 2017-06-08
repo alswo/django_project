@@ -442,6 +442,13 @@
       }
     }
 
+    for(i = 1 ; i < tableLength - 1; i++){
+      if(document.forms[e][i].value == ''){
+        alert(i+1+"번째 로우의 등하원을 선택해 주세요.")
+        return false;
+      }
+    }
+
     tempName  = document.forms[e]['name[]']
     if(tempName[0].value != "" || tempName[tableLength-1].value != ""){
       alert("시작,끝 이름은 반드시 비워주세요.")
