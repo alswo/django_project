@@ -11,10 +11,10 @@ from django.core.serializers import serialize
 from passenger.dateSchedule import timeToDate
 import json
 
-def is_driver(user):
+def is_not_driver(user):
     if user:
-        return user.groups.filter(name='driver').count == 0
-    return true
+        return (user.groups.filter(name='driver').exists() == False)
+    return True
 
 @login_required
 def main(request):
@@ -49,7 +49,7 @@ def safetyTayo(request):
 
 
 @login_required
-@user_passes_test(is_driver, login_url='/', redirect_field_name=None)
+@user_passes_test(is_not_driver, login_url='/', redirect_field_name=None)
 def opti(request):
     if request.method =="GET":
         return render_to_response('passenger/optimizationDistance.html', {'user':request.user})
