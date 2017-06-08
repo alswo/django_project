@@ -349,12 +349,16 @@ def updateSchedule(request):
                     #student = StudentInfo.objects.filter(aid__in=[ a for a in temp_aca])
 
                     for k in temp_name:
-                        s = StudentInfo.objects.filter(sname = k)
-                        if s:
-                            if
-                            continue
+                        sInfo = StudentInfo.objects.filter(sname = k)
+                        if sInfo:
+                            for s in sInfo:
+                                for aid in s.aid:
+                                    if temp_aca.index(aid) >= 0:
+                                        continue
+                                    else:
+                                        return HttpResponse("Not Register Student")
                         else:
-                            return HttpResponse("Not Register Student")
+                            return HttpResponse("Not Register")
 
             try:
                 snum = len(set(name))
@@ -375,10 +379,17 @@ def updateSchedule(request):
 
             slist = []
 
-            studentInfo = StudentInfo.objects.filter(aid__contains = [aid for aid in alist]).filter(sname__in = [name for name in slist_temp3])
+            studentInfo = StudentInfo.objects.filter(bid = bid).filter(sname__in = [name for name in slist_temp3])
+
+            acalist = []
 
             for s in studentInfo:
+                for aid_stu in s.aid:
+                    if alist.index(aid_stu) >= 0:
+                        acalist.append(aid_stu)
                 slist.append(s.id)
+
+            acalist = list(set(acalist))
 
             stime = int(time[0].split(':')[0] + time[0].split(':')[1])
             etime = int(time[-1].split(':')[0] + time[-1].split(':')[1])
@@ -392,7 +403,7 @@ def updateSchedule(request):
                 anamelist_inven.append(a.name)
 
 
-            Inventory.objects.filter(id=iid).update(snum = snum,alist=alist, anamelist = anamelist_inven, slist=slist, stime = stime, etime = etime)
+            Inventory.objects.filter(id=iid).update(snum = snum,alist=acalist, anamelist = anamelist_inven, slist=slist, stime = stime, etime = etime)
 
             #delete stable before updateing stable
             delete_stable = ScheduleTable.objects.filter(iid_id=iid)
