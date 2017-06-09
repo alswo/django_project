@@ -16,7 +16,7 @@ def store_historyschedule():
 	for inventory in inventories:
 		scheduletables = ScheduleTable.objects.filter(iid_id = inventory.id)
 		for scheduletable in scheduletables:
-			hst = HistoryScheduleTable(iid_id=scheduletable.iid_id, carnum=inventory.carnum, time=scheduletable.time, addr=scheduletable.addr, alist=scheduletable.alist, tflag=scheduletable.tflag, lflag=scheduletable.lflag)
+			hst = HistoryScheduleTable(date=dmy, iid_id=scheduletable.iid_id, carnum=inventory.carnum, time=scheduletable.time, addr=scheduletable.addr, alist=scheduletable.alist, tflag=scheduletable.tflag, lflag=scheduletable.lflag)
 			hst.save()
                 	for sid in scheduletable.slist:
                     	    student = StudentInfo.objects.get(id=sid)
