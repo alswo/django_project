@@ -130,7 +130,7 @@ CRONJOBS = [
 
 LOGIN_REDIRECT_URL = '/'
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'ko-kr'
 
 TIME_ZONE = 'Asia/Seoul'
 

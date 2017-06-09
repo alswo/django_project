@@ -20,6 +20,7 @@ import json
 import logging
 import collections
 
+
 @csrf_exempt
 def getAcaPhone(request):
     aid = request.GET.get('aid')
@@ -495,9 +496,10 @@ def updateSchedule(request):
 @csrf_exempt
 def studentLoad(request):
     if request.method == "POST":
-        aid = request.POST.get('aid')
 
-        stu = StudentInfo.objects.filter(aid__contains = [aid])
+        aid = request.POST.get('aid')
+        stu = StudentInfo.objects.filter(aid__contains = [aid]).order_by('sname')
+
         data = serialize('json', stu)
 
         return HttpResponse(data, content_type="application/json" )
