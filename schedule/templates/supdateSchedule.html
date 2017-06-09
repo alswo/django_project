@@ -86,7 +86,7 @@
           <iframe src="putSchedule?bid={{bid}}" width="90%" height="550"></iframe>
         </div>
         <div class="modal-footer">
-          <button class="btn" data-dismiss="modal">OK</button>
+          <button class="btn-danger" data-dismiss="modal" >닫기</button>
         </div>
       </div>
 
@@ -443,7 +443,7 @@
     }
 
     for(i = 1 ; i < tableLength - 1; i++){
-      if(document.forms[e][i].value == ''){
+      if(document.forms[e]['load[]'][i].value == ''){
         alert(i+1+"번째 로우의 등하원을 선택해 주세요.")
         return false;
       }

@@ -27,7 +27,7 @@ class Inventory(models.Model):
 class ScheduleTable(models.Model):
     iid = models.ForeignKey(Inventory,related_name='scheduletables')
     time = models.CharField(max_length = 10,null=True,blank=True)
-    addr = models.CharField(max_length = 30,null=True,blank=True)
+    addr = models.CharField(max_length = 60,null=True,blank=True)
     alist = ArrayField(models.IntegerField(null=True,blank=True),null=True,blank=True)
     anamelist = ArrayField(models.CharField(max_length = 10, null=True, blank=True),null=True, blank=True)
     slist = ArrayField(models.IntegerField(null=True,blank=True),null=True,blank=True)
