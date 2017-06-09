@@ -19,6 +19,10 @@
   text-align: center;
   width: 22.5%;
 }
+
+.panel-danger > .panel-heading {
+	background-color: #D98880 !important
+}
 </style>
 </head>
 <body>
@@ -55,8 +59,10 @@
 		</div>
 		<div class="col-md-3" align="center">
 			<div class="panel panel-default">
+				<label>
 	운행횟수 : {{ total_count }} <br>
 	과금횟수 : {{ uniq_count }} <br>
+				</label>
 			</div>
 		</div>
 		<div class="col-md-8">
@@ -74,9 +80,9 @@
                     <div class="panel-body">
                     {% for timehistory in dailyhistory.timehistory %}
 			{% if timehistory.warning == 1 %}
-                        <div class="panel panel-default">
-			{% else %}
                         <div class="panel panel-danger">
+			{% else %}
+                        <div class="panel panel-default">
 			{% endif %}
                             <div class="panel-heading">
                                 <button type="button" class="btn-xs btn-warning"> {{ timehistory.carnum }} 호차 </button>
