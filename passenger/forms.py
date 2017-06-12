@@ -1,6 +1,7 @@
 from django import forms
 from django.utils.safestring import mark_safe
 from passenger.models import StudentInfo, Branch
+from django.contrib.auth.models import User
 from django.template.loader import render_to_string
 
 class StudentInfoWidget(forms.Widget):

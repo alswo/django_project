@@ -1,7 +1,18 @@
 from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from django.contrib.auth.models import User
+from passenger.models import Profile
 from passenger.models import Academy, Commute, Schedule, ShuttleSchedule, AcademySchedule, Group, PhoneList, ScheduleDate, StudentInfo,Community,Grade
 from simple_history.admin import SimpleHistoryAdmin
 from passenger.forms import StudentInfoForm
+
+class ProfileInline(admin.StackedInline):
+    model = Profile
+    can_delete = False
+    verbose_name_plural = 'profile'
+
+class UserAdmin(BaseUserAdmin):
+    inlines = (ProfileInline, )
 
 class ScheduleAdmin(admin.ModelAdmin):
     list_display = ('name', 's_name', 'load','unload')
@@ -45,7 +56,8 @@ class CommunityAdmin(admin.ModelAdmin):
 class CommuteAdmin(SimpleHistoryAdmin):
     list_display = ('name','a_name')
 
-
+admin.site.unregister(User)
+admin.site.register(User, UserAdmin)
 admin.site.register(Group, GroupAdmin)
 admin.site.register(Schedule,ScheduleAdmin)
 admin.site.register(Academy,AcademyAdmin)
