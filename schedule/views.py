@@ -364,6 +364,8 @@ def updateSchedule(request):
             for a in academyList:
                 anamelist_inven.append(a.name)
 
+            snum = len(slist_temp3)
+
             Inventory.objects.filter(id=iid).update(snum = snum, alist=alist, anamelist = anamelist_inven, slist=slist_temp3, stime = stime, etime = etime)
 
             #delete stable before updateing stable
@@ -407,7 +409,10 @@ def updateSchedule(request):
             area = Area.objects.all()
             academy = Academy.objects.filter(bid=bid)
 
-            invens = Inventory.objects.filter(bid = bid).filter(day = day).filter(etime__gte = int(searchTime)-90, stime__lte = int(searchTime)+90).filter(carnum = carnum)
+            if searchTime == '':
+                invens = Inventory.objects.filter(bid = bid).filter(day = day).filter(carnum = carnum)
+            else:
+                invens = Inventory.objects.filter(bid = bid).filter(day = day).filter(etime__gte = int(searchTime)-90, stime__lte = int(searchTime)+90).filter(carnum = carnum)
 
             contacts = []
 
@@ -445,7 +450,11 @@ def updateSchedule(request):
 
             #redirect
             academy = Academy.objects.filter(bid=bid)
-            invens = Inventory.objects.filter(bid = bid).filter(day = day).filter(etime__gte = int(searchTime)-90, stime__lte = int(searchTime)+90).filter(carnum = carnum)
+
+            if searchTime == '':
+                invens = Inventory.objects.filter(bid = bid).filter(day = day).filter(carnum = carnum)
+            else:
+                invens = Inventory.objects.filter(bid = bid).filter(day = day).filter(etime__gte = int(searchTime)-90, stime__lte = int(searchTime)+90).filter(carnum = carnum)
 
             contacts = []
 
