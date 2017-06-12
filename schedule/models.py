@@ -44,7 +44,8 @@ class ScheduleTable(models.Model):
 
 
 class HistoryScheduleTable(models.Model):
-    date = models.DateField(auto_now=True)
+    #date = models.DateField(auto_now=True)
+    date = models.CharField(max_length=10,null=True,blank=True)
     iid = models.ForeignKey(Inventory,related_name='historyscheduletables')
     carnum = models.IntegerField()
     time = models.CharField(max_length = 10,null=True,blank=True)

@@ -50,3 +50,11 @@ class timeToDate:
         timeDtype = timeList[2]+"-"+timeList[0]+"-"+timeList[1]
 
         return timeDtype
+
+    def setDiffTime(self,diff):
+        self.t = time.localtime(time.mktime(self.t) + diff);
+	return self
+
+    def setLastWeekDay(self):
+        self.setDiffTime(-7*24*60*60)
+	return self
