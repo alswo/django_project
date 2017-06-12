@@ -14,6 +14,7 @@ INSTALLED_APPS = [
     'django_crontab',
     'schedule',
     'passenger',
+    #'optimizer',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -98,8 +99,9 @@ CRONJOBS = [
     ('01 23 * * *', 'schedule.cron.store_historyschedule'),
     ('00 21 * * *', 'schedule.cron.store_historyschedule_old'),
     ('00 22 * * sun', 'schedule.cron.reset_lflag_on_every_schedule'),
-    ('00 23 31 12 *', 'schedule.test.move_schedule'),
-    ('00 23 31 12 *', 'schedule.test.regist_student')
+    ('30 12 * * *', 'schedule.cron.find_update'),
+    #('00 23 31 12 *', 'schedule.test.move_schedule'),
+    #('00 23 31 12 *', 'schedule.test.regist_student')
 ]
 
 #LOGGING = {

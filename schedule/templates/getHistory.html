@@ -1,0 +1,168 @@
+{% load staticfiles %}
+<html>
+<head>
+    <script src="{% static 'js/jquery-1.10.2.js' %}"></script>
+    <script type="text/javascript" src="http://cdn.jsdelivr.net/jquery/1/jquery.min.js"></script>
+    <script type="text/javascript" src="http://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.3.7/js/tether.min.js"></script>
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+    <script src="{% static 'js/bootstrap.min.js' %}"></script>
+    <link href="{% static 'css/timeline.css' %}" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Include Date Range Picker -->
+    <script type="text/javascript" src="http://cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.js"></script>
+    <link rel="stylesheet" type="text/css" href="http://cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.css" />
+<style>
+.thstyle3 {
+  text-align: center;
+  width: 22.5%;
+}
+
+.panel-danger > .panel-heading {
+	background-color: #D98880 !important
+}
+</style>
+</head>
+<body>
+    <div class="container">
+    <br>
+        <form action="getHistory" method="POST">
+        <div class="row" align="center">
+            <div class="col-md-1">
+            </div>
+            <div class="col-md-3">
+                <label>Academy</label> 
+                <select class="form-control" id="aid" name="aid">
+                        {% for aca in academy %}
+                        <option value="{{aca.id}}" {% if aca.id == aid|add:0 %} selected {% endif %}>{{aca.name}}</option>
+                        {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group"> 
+                    <label>Date</label>
+                    <input class="form-control calendar" name="daterange" type="text" id="daterange">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <br>
+                <button class="btn btn-info" onclick="submit()" type="button" value="dateAcademy">적용</button>              
+            </div>
+        </div>
+        </form>
+        <br>
+
+	<div class="row" align="center">
+		<div class="col-md-1">
+		</div>
+		<div class="col-md-3" align="center">
+			<div class="panel panel-default">
+				<label>
+	운행횟수 : {{ total_count }} <br>
+	과금횟수 : {{ uniq_count }} <br>
+				</label>
+			</div>
+		</div>
+		<div class="col-md-8">
+		</div>
+	</div>
+
+        {% for dailyhistory in history %}
+        <div class="row">
+                <div class="col-md-1"></div>
+                <div class="col-md-10 col-xs-12">
+                    <div class="panel panel-primary">
+                        <div class="panel-heading">
+                        <button type="button" class="btn-md btn-primary"> {{ dailyhistory.date}} </button>
+                        </div>
+                    <div class="panel-body">
+                    {% for timehistory in dailyhistory.timehistory %}
+			{% if timehistory.warning == 1 %}
+                        <div class="panel panel-danger">
+			{% else %}
+                        <div class="panel panel-default">
+			{% endif %}
+                            <div class="panel-heading">
+                                <button type="button" class="btn-xs btn-warning"> {{ timehistory.carnum }} 호차 </button>
+                                    {% for academy in timehistory.academies %}
+                                    <button type="button" class="btn-xs btn-warning"> {{ academy }} </button>
+			            {% endfor %}
+                            </div>
+                            <div class="panel-body">
+                                <table class="table table-bordered table-reponsive">
+                                    <thead>
+                                        <tr>
+                                            <th>시간</th>
+                                            <th>주소</th>
+                                            <th class="thstyle3">이름</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for s in timehistory.scheduletable %}
+                                            <tr {% if s.lflag == 1 %} class="info" {% elif s.lflag == 0 %} class="warning" {% endif %}>
+                                                <td> {{ s.time }} </td>
+                                                <td> 
+                                                {% if s.lflag == 2 %} 출발 {% elif s.lflag == 3 %} 도착 {% else %} {{ s.addr }} {% endif %} </td>
+                                                <td> 
+                                                {% for student in s.members.all %}
+                                                    <button type="button" class="load btn-xs btn-primary">
+                                                    {{ student.sname }} </button>
+                                                    <ul class="dropdown-menu pull-right">
+                                                    </ul>
+                                                {% endfor %}
+                                                <br>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>     <!-- panel body //-->
+                        </div>      <!-- panel default //-->
+                    {% endfor %}
+                    </div>
+                    </div>
+                </div>
+                <div class="col-md-1"></div>
+    </div>
+    {% endfor %}
+<script>
+
+function todayLoad(offset,invenid, stableid){
+    var btnid = invenid+''+stableid+''+offset
+    console.log(btnid)
+    $.ajax({
+      url:"/inventory/todayLoad",
+      type:"POST",
+      data:{
+        offset: offset,
+        invenid: invenid,
+        stableid: stableid,
+      },
+      success: function(data){
+          if(data == 0){
+              $("#"+btnid).attr('class','load btn-xs btn-default dropdown-toggle')
+          }
+          else if(data == 1){
+              $("#"+btnid).attr('class','load btn-xs btn-primary dropdown-toggle')
+          }
+      }
+    });
+}
+
+</script>
+
+   <script type="text/javascript">
+         $( function() {
+            $('input[name="daterange"]').daterangepicker(
+            {
+                locale: {
+                    format: 'YYYY-MM-DD'
+                },
+                {% if startdate != None %}startDate: '{{startdate}}',{% endif %}
+                {% if enddate != None %}endDate: '{{enddate}}'{% endif %}
+            });
+         } );
+    </script>
+</html>
