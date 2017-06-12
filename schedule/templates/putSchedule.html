@@ -246,14 +246,13 @@ $(document).on('beforeItemRemove','.inputTd',function(event){
   t = $(this)
   sibling_sid = $(this).siblings('.inputSid')[0].children[1]
   sibling_aca = $(this).siblings('.inputAca')[0].children[0]
-  console.log(sibling_aca)
   // Do some processing here
 
   var before_list = t[0].children[1].value.split(",").map(function(item) {
     return item.trim();
   });
 
-  var delete_index = before_list.indexOf(event.item)
+  var delete_index = before_list.indexOf(event.item.trim())
 
   var before_sid_value = sibling_sid.value
   var before_aca_value = sibling_aca.value
