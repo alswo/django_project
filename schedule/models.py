@@ -75,8 +75,6 @@ class InventoryRequest(models.Model):
 class Area(models.Model):
     name = models.CharField(max_length=20)
 
-    history = HistoricalRecords()
-
     def __unicode__(self):
         return self.name
 
@@ -88,7 +86,6 @@ class Branch(models.Model):
     lon = models.FloatField()
     lat = models.FloatField()
 
-    history = HistoricalRecords()
     def __unicode__(self):
         return self.bname
 
