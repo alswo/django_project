@@ -1,7 +1,9 @@
+# -*- coding: utf-8 -*-
+
 from django.shortcuts import render_to_response, redirect
 from django.template import RequestContext
 from schedule.models import HistoryScheduleTable, Inventory, ScheduleTable, Building, Branch, InventoryRequest, Area, Car
-from passenger.models import Academy, Group, StudentInfo
+from passenger.models import Academy, Group, StudentInfo, Profile
 from django.db.models import Q
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
@@ -95,6 +97,34 @@ def getSchedule(request):
         bid = request.GET.get('bid')
         aid = request.GET.get('aid')
         day = request.GET.get('day')
+        uid = request.user.id
+
+        if request.user.is_staff or day:
+
+            invens = Inventory.objects.filter(bid = bid).filter(alist__contains = [aid]).filter(day = day)
+            list_invensid = []
+            contacts = []
+
+            for i in invens:
+                contacts.extend(Inventory.objects.filter(id = i.id).prefetch_related('scheduletables'))
+
+            return render_to_response('getSchedule.html', {"contacts": contacts, "bid" : bid, "aid" : aid,'user':request.user})
+
+        else:
+            profile = Profile.objects.get(user=request.user)
+            aid = profile.aid
+            bid = profile.bid
+
+            invens = Inventory.objects.filter(bid = bid).filter(alist__contains = [aid]).filter(day='월')
+
+            list_invensid = []
+            contacts = []
+
+            for i in invens:
+                contacts.extend(Inventory.objects.filter(id = i.id).prefetch_related('scheduletables'))
+
+            return render_to_response('getSchedule.html', {"contacts": contacts, "bid" : bid, "aid" : aid,'user':request.user})
+
 
         if car:
             branch = Car.objects.get(id = car)
@@ -108,14 +138,7 @@ def getSchedule(request):
             return render_to_response('getCarSchedule.html', {"contacts": contacts,"car": car, 'user':request.user})
 
 
-        invens = Inventory.objects.filter(bid = bid).filter(alist__contains = [aid]).filter(day = day)
-        list_invensid = []
-        contacts = []
 
-        for i in invens:
-            contacts.extend(Inventory.objects.filter(id = i.id).prefetch_related('scheduletables'))
-
-        return render_to_response('getSchedule.html', {"contacts": contacts, "bid" : bid, "aid" : aid,'user':request.user})
 
 @csrf_exempt
 def putSchedule(request):
