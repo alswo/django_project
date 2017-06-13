@@ -99,7 +99,7 @@ def getSchedule(request):
         day = request.GET.get('day')
         uid = request.user.id
 
-        if request.user.is_staff or day:
+        if request.user.is_staff:
 
             invens = Inventory.objects.filter(bid = bid).filter(alist__contains = [aid]).filter(day = day)
             list_invensid = []
@@ -110,20 +110,31 @@ def getSchedule(request):
 
             return render_to_response('getSchedule.html', {"contacts": contacts, "bid" : bid, "aid" : aid,'user':request.user})
 
-        else:
-            profile = Profile.objects.get(user=request.user)
-            aid = profile.aid
-            bid = profile.bid
+        elif request.user.groups.filter(name__in = ['academy']).exists():
+            if day:
+                invens = Inventory.objects.filter(bid = bid).filter(alist__contains = [aid]).filter(day = day)
+                list_invensid = []
+                contacts = []
 
-            invens = Inventory.objects.filter(bid = bid).filter(alist__contains = [aid]).filter(day='월')
+                for i in invens:
+                    contacts.extend(Inventory.objects.filter(id = i.id).prefetch_related('scheduletables'))
 
-            list_invensid = []
-            contacts = []
+                return render_to_response('getSchedule.html', {"contacts": contacts, "bid" : bid, "aid" : aid,'user':request.user})
 
-            for i in invens:
-                contacts.extend(Inventory.objects.filter(id = i.id).prefetch_related('scheduletables'))
+            else:
+                profile = Profile.objects.get(user=request.user)
+                aid = profile.aid
+                bid = profile.bid
 
-            return render_to_response('getSchedule.html', {"contacts": contacts, "bid" : bid, "aid" : aid,'user':request.user})
+                invens = Inventory.objects.filter(bid = bid).filter(alist__contains = [aid]).filter(day='월')
+
+                list_invensid = []
+                contacts = []
+
+                for i in invens:
+                    contacts.extend(Inventory.objects.filter(id = i.id).prefetch_related('scheduletables'))
+
+                return render_to_response('getSchedule.html', {"contacts": contacts, "bid" : bid, "aid" : aid,'user':request.user})
 
 
         if car:
@@ -136,6 +147,8 @@ def getSchedule(request):
                 contacts.extend(Inventory.objects.filter(id = i.id).prefetch_related('scheduletables'))
 
             return render_to_response('getCarSchedule.html', {"contacts": contacts,"car": car, 'user':request.user})
+
+        return HttpResponse('로그인 후 사용해주세요.')
 
 
 
