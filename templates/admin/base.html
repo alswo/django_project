@@ -472,6 +472,7 @@ $(document).on('change','#branchSelected', function(){
   var bid = $("#branchSelected option:selected").val()
   $('#id_bid').val(bid)
   $('#id_bname').val(bname)
+  $('#id_profile-0-bid').val(bid)
   $.ajax({
     type: 'POST',
     url: '/studentInfo',
@@ -480,7 +481,6 @@ $(document).on('change','#branchSelected', function(){
       flag: 1,
     },
     success: function(data) {
-      console.log(data)
       tempTag = "<option vlaue='default' selected>학원선택</option>"
       for (i = 0; i < data.length; i++) {
         tempTag = tempTag + "<option value=" + data[i]['pk'] + ">" + data[i]['fields']['name'] + "</option>"
@@ -497,10 +497,14 @@ $(document).on('change','#academyStuInfo', function(){
   if($('#id_aid').val() == ''){
     $('#id_aname').val(aname)
     $('#id_aid').val(aid)
-  }else{
+
+  }else if($('#id_profile-0-aid').val() >= 0){
+    $('#id_profile-0-aid').val(aid)
+  }
+  else{
   $('#id_aname').val($('#id_aname').val() + ','+aname)
   $('#id_aid').val($('#id_aid').val()+','+aid)
-}
+  }
 })
 
 </script>

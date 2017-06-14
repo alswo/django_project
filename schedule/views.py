@@ -1,8 +1,9 @@
-#_*_ coding:utf-8 _*_
+# -*- coding: utf-8 -*-
+
 from django.shortcuts import render_to_response, redirect
 from django.template import RequestContext
 from schedule.models import HistoryScheduleTable, Inventory, ScheduleTable, Building, Branch, InventoryRequest, Area, Car
-from passenger.models import Academy, Group, StudentInfo
+from passenger.models import Academy, Group, StudentInfo, Profile
 from django.db.models import Q
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
@@ -20,18 +21,6 @@ import operator
 import json
 import logging
 import collections
-import re
-
-class TimeHistory:
-	def __init__(self):
-		self.carnum = -1
-		self.academies = set()
-		self.scheduletable = list()
-		self.warning = 0
-class DailyHistory:
-	def __init__(self):
-		self.date = ""
-		self.timehistory = list()
 
 
 @csrf_exempt
@@ -108,6 +97,45 @@ def getSchedule(request):
         bid = request.GET.get('bid')
         aid = request.GET.get('aid')
         day = request.GET.get('day')
+        uid = request.user.id
+
+        if request.user.is_staff:
+
+            invens = Inventory.objects.filter(bid = bid).filter(alist__contains = [aid]).filter(day = day)
+            list_invensid = []
+            contacts = []
+
+            for i in invens:
+                contacts.extend(Inventory.objects.filter(id = i.id).prefetch_related('scheduletables'))
+
+            return render_to_response('getSchedule.html', {"contacts": contacts, "bid" : bid, "aid" : aid,'user':request.user})
+
+        elif request.user.groups.filter(name__in = ['academy']).exists():
+            if day:
+                invens = Inventory.objects.filter(bid = bid).filter(alist__contains = [aid]).filter(day = day)
+                list_invensid = []
+                contacts = []
+
+                for i in invens:
+                    contacts.extend(Inventory.objects.filter(id = i.id).prefetch_related('scheduletables'))
+
+                return render_to_response('getSchedule.html', {"contacts": contacts, "bid" : bid, "aid" : aid,'user':request.user})
+
+            else:
+                profile = Profile.objects.get(user=request.user)
+                aid = profile.aid
+                bid = profile.bid
+
+                invens = Inventory.objects.filter(bid = bid).filter(alist__contains = [aid]).filter(day='월')
+
+                list_invensid = []
+                contacts = []
+
+                for i in invens:
+                    contacts.extend(Inventory.objects.filter(id = i.id).prefetch_related('scheduletables'))
+
+                return render_to_response('getSchedule.html', {"contacts": contacts, "bid" : bid, "aid" : aid,'user':request.user})
+
 
         if car:
             branch = Car.objects.get(id = car)
@@ -120,25 +148,10 @@ def getSchedule(request):
 
             return render_to_response('getCarSchedule.html', {"contacts": contacts,"car": car, 'user':request.user})
 
+        return HttpResponse('로그인 후 사용해주세요.')
 
-        invens = Inventory.objects.filter(bid = bid).filter(alist__contains = [aid]).filter(day = day)
-        list_invensid = []
-        contacts = []
 
-        for i in invens:
-            contacts.extend(Inventory.objects.filter(id = i.id).prefetch_related('scheduletables'))
-            # list_invensid.append(i.id)
 
-        # stables = ScheduleTable.objects.filter(iid__in = [iid for iid in list_invensid])
-
-        # for j in invens:
-        #     temp = [j]
-        #     for k in stables:
-        #         if j.id == k.iid:
-        #             temp.append(k)
-        #     contacts.extend(temp)
-
-        return render_to_response('getSchedule.html', {"contacts": contacts, "bid" : bid, "aid" : aid,'user':request.user})
 
 @csrf_exempt
 def putSchedule(request):
@@ -163,9 +176,7 @@ def putSchedule(request):
         load = request.POST.getlist('load[]')
         sid = request.POST.getlist('sid[]')
 
-
         try:
-            snum = len(set(name)) - 1
             alist_temp = list(set([i for i in academy if i is not None and i != '']))
             alist_temp2 = ','.join(alist_temp)
             alist_temp3 = list(set(alist_temp2.split(',')))
@@ -177,24 +188,14 @@ def putSchedule(request):
         except:
             return HttpResponse('error1')
 
-        slist_temp = list(set([i for i in name if i is not None and i != '']))
+        slist_temp = list(set([i for i in sid if i is not None and i != '']))
         slist_temp2 = ','.join(slist_temp)
         slist_temp3 = list(set(slist_temp2.split(',')))
-        slist = []
 
-        studentInfo = StudentInfo.objects.filter(aid__contains = [aid for aid in alist]).filter(sname__in = [name for name in slist_temp3])
-
-        for s in studentInfo:
-            slist.append(s.id)
+        snum = len(slist_temp3)
 
         stime = int(time[0].split(':')[0] + time[0].split(':')[1])
         etime = int(time[-1].split(':')[0] + time[-1].split(':')[1])
-
-        tempSlist = set()
-        for s in slist:
-            tempSlist.add(s)
-
-        slist = list(tempSlist)
 
         academyList = Academy.objects.filter(id__in = alist)
         anamelist_inven = []
@@ -202,12 +203,8 @@ def putSchedule(request):
         for a in academyList:
             anamelist_inven.append(a.name)
 
-        try:
-            inven = Inventory.objects.create(carnum = carnum, bid = bid, snum = snum, day = day , alist=alist, anamelist = anamelist_inven, slist=slist, stime = stime, etime = etime, req=req)
 
-        except:
-            return HttpResponse("error inventory save")
-
+        inven = Inventory.objects.create(carnum = carnum, bid = bid, snum = snum, day = day , alist=alist, anamelist = anamelist_inven, slist=slist_temp3, stime = stime, etime = etime, req=req)
 
         iid = inven.id
 
@@ -261,20 +258,32 @@ def updateSchedule(request):
                 searchflag = request.GET.get('searchinven')
                 bid = request.GET.get('bid')
                 day = request.GET.get('day')
-                time = int(request.GET.get('time'))
+                time = request.GET.get('time')
 
                 academy = Academy.objects.filter(bid=bid)
                 branch = Branch.objects.get(id = bid)
                 carlist = Car.objects.filter(branchid=bid)
 
-                invens = Inventory.objects.filter(bid = bid).filter(day = day).filter(etime__gte = time-90, stime__lte = time+90).filter(carnum = carnum)
+                if time == '':
+                    invens = Inventory.objects.filter(bid = bid).filter(day = day).filter(carnum = carnum)
 
-                contacts = []
+                    contacts = []
 
-                for i in invens:
-                    contacts.extend(Inventory.objects.filter(id = i.id).prefetch_related('scheduletables'))
+                    for i in invens:
+                        contacts.extend(Inventory.objects.filter(id = i.id).prefetch_related('scheduletables'))
 
-                return render_to_response('supdateSchedule.html',{"area":area,"time":time,"day":day,"branch":branch,"academy":academy,"carlist": carlist,"carnum": carnum,"bid":bid,"contacts":contacts,'user':request.user})
+                    return render_to_response('supdateSchedule.html',{"area":area,"time":time,"day":day,"branch":branch,"academy":academy,"carlist": carlist,"carnum": carnum,"bid":bid,"contacts":contacts,'user':request.user})
+
+                else:
+                    time = int(time)
+                    invens = Inventory.objects.filter(bid = bid).filter(day = day).filter(etime__gte = time-90, stime__lte = time+90).filter(carnum = carnum)
+
+                    contacts = []
+
+                    for i in invens:
+                        contacts.extend(Inventory.objects.filter(id = i.id).prefetch_related('scheduletables'))
+
+                    return render_to_response('supdateSchedule.html',{"area":area,"time":time,"day":day,"branch":branch,"academy":academy,"carlist": carlist,"carnum": carnum,"bid":bid,"contacts":contacts,'user':request.user})
 
         area = Area.objects.all()
         return render_to_response('supdateSchedule.html',{'area':area,'user':request.user})
@@ -301,21 +310,33 @@ def updateSchedule(request):
             searchflag = request.POST.get('searchinven')
             bid = request.POST.get('bid')
             day = request.POST.get('day')
-            time = int(request.POST.get('time'))
+            time = request.POST.get('time')
 
             if searchflag == '1':
                 academy = Academy.objects.filter(bid=bid)
                 branch = Branch.objects.get(id = bid)
                 carlist = Car.objects.filter(branchid=bid)
 
-                invens = Inventory.objects.filter(bid = bid).filter(day = day).filter(etime__gte = time-90, stime__lte = time+90).filter(carnum = carlist[0].carname)
+                if time == '':
+                    invens = Inventory.objects.filter(bid = bid).filter(day = day).filter(carnum = carlist[0].carname)
 
-                contacts = []
+                    contacts = []
 
-                for i in invens:
-                    contacts.extend(Inventory.objects.filter(id = i.id).prefetch_related('scheduletables'))
+                    for i in invens:
+                        contacts.extend(Inventory.objects.filter(id = i.id).prefetch_related('scheduletables'))
 
-                return render_to_response('supdateSchedule.html',{"area":area,"time":time,"academy":academy,"day":day,"carlist": carlist,"bid":bid,"contacts":contacts,'user':request.user})
+                    return render_to_response('supdateSchedule.html',{"area":area,"time":time,"academy":academy,"day":day,"carlist": carlist,"bid":bid,"contacts":contacts,'user':request.user})
+
+                else:
+                    time = int(time)
+                    invens = Inventory.objects.filter(bid = bid).filter(day = day).filter(etime__gte = time-90, stime__lte = time+90).filter(carnum = carlist[0].carname)
+
+                    contacts = []
+
+                    for i in invens:
+                        contacts.extend(Inventory.objects.filter(id = i.id).prefetch_related('scheduletables'))
+
+                    return render_to_response('supdateSchedule.html',{"area":area,"time":time,"academy":academy,"day":day,"carlist": carlist,"bid":bid,"contacts":contacts,'user':request.user})
 
             # if searchflag == '2':
             #     carnum = request.POST.get('car')
@@ -354,23 +375,7 @@ def updateSchedule(request):
             #for redirection
             carnum = request.POST.get('invencar')
 
-            #Check register student
-            for i in range(len(time)):
-                if 0 < i < len(time) - 1:
-                    sidlist = []
-                    temp_aca = [int(a.strip()) for a in academy[i].split(',')]
-                    temp_name = [n.strip() for n in name2[i].split(',')]
-                    #student = StudentInfo.objects.filter(aid__in=[ a for a in temp_aca])
-
-                    for k in temp_name:
-                        sInfo = StudentInfo.objects.filter(bid = bid).filter(sname = k).filter(aid__contains = temp_aca)
-                        if sInfo:
-                            continue
-                        else:
-                            return HttpResponse("Not Register")
-
             try:
-                snum = len(set(name))
                 alist_temp = list(set([i for i in academy if i is not None and i != '']))
                 alist_temp2 = ','.join(alist_temp)
                 alist_temp3 = list(set(alist_temp2.split(',')))
@@ -382,44 +387,22 @@ def updateSchedule(request):
             except:
                 return HttpResponse('error1')
 
-            slist_temp = list(set([i for i in name if i is not None and i != '']))
+            slist_temp = list(set([i for i in sid if i is not None and i != '']))
             slist_temp2 = ','.join(slist_temp)
-            slist_temp3 = [n.strip() for n in list(set(slist_temp2.split(',')))]
-
-            slist = []
-
-            studentInfo = StudentInfo.objects.filter(bid = bid).filter(sname__in = [name for name in slist_temp3]).filter(aid__contains = alist)
-
-            acalist = []
-
-            for s in studentInfo:
-                for aid_stu in s.aid:
-                    try:
-                        index_value = alist.index(aid_stu)
-
-                    except ValueError:
-                        index_value = -1
-
-                    if index_value >= 0:
-                        acalist.append(aid_stu)
-                    else:
-                        return HttpResponse("error: academy list append")
-
-
-            acalist = list(set(acalist))
+            slist_temp3 = list(set(slist_temp2.split(',')))
 
             stime = int(time[0].split(':')[0] + time[0].split(':')[1])
             etime = int(time[-1].split(':')[0] + time[-1].split(':')[1])
 
+            academyList = Academy.objects.filter(id__in = alist)
             anamelist_inven = []
-
-            academyList = Academy.objects.filter(id__in = acalist)
-
 
             for a in academyList:
                 anamelist_inven.append(a.name)
 
-            Inventory.objects.filter(id=iid).update(snum = snum,alist=acalist, anamelist = anamelist_inven, slist=slist, stime = stime, etime = etime)
+            snum = len(slist_temp3)
+
+            Inventory.objects.filter(id=iid).update(snum = snum, alist=alist, anamelist = anamelist_inven, slist=slist_temp3, stime = stime, etime = etime)
 
             #delete stable before updateing stable
             delete_stable = ScheduleTable.objects.filter(iid_id=iid)
@@ -436,15 +419,15 @@ def updateSchedule(request):
                     stable.save()
 
                 elif 0 < i < len(time) - 1:
-                    sidlist = []
-                    sidtemp = []
-                    temp_aca = academy[i].split(',')
+                    temp_aca = [a.strip() for a in academy[i].split(',')]
                     temp_name = [n.strip() for n in name2[i].split(',')]
+                    sidlist = [s.strip() for s in sid[i].split(',')]
 
-                    student = StudentInfo.objects.filter(aid__contains=[ a for a in temp_aca]).filter(sname__in=[ stu for stu in temp_name ])
 
-                    for s in student:
-                        sidtemp.append(s.id)
+                    # student = StudentInfo.objects.filter(aid__contains=[ a for a in temp_aca]).filter(sname__in=[ stu for stu in temp_name ])
+                    #
+                    # for s in student:
+                    #     sidtemp.append(s.id)
 
                     temp_lflag = [0 for z in range(len(temp_name))]
 
@@ -454,7 +437,7 @@ def updateSchedule(request):
                         aname = Academy.objects.get(id = aid)
                         anamelist.append(aname.name)
 
-                    stable = ScheduleTable(iid_id = iid, time = time[i], addr = addr[i], alist=temp_aca, anamelist = anamelist, slist=sidtemp, sname=temp_name, tflag=temp_lflag, lflag=load[i])
+                    stable = ScheduleTable(iid_id = iid, time = time[i], addr = addr[i], alist=temp_aca, anamelist = anamelist, slist=sidlist, sname=temp_name, tflag=temp_lflag, lflag=load[i])
                     stable.save()
 
             #redirect
@@ -462,7 +445,10 @@ def updateSchedule(request):
             area = Area.objects.all()
             academy = Academy.objects.filter(bid=bid)
 
-            invens = Inventory.objects.filter(bid = bid).filter(day = day).filter(etime__gte = int(searchTime)-90, stime__lte = int(searchTime)+90).filter(carnum = carnum)
+            if searchTime == '':
+                invens = Inventory.objects.filter(bid = bid).filter(day = day).filter(carnum = carnum)
+            else:
+                invens = Inventory.objects.filter(bid = bid).filter(day = day).filter(etime__gte = int(searchTime)-90, stime__lte = int(searchTime)+90).filter(carnum = carnum)
 
             contacts = []
 
@@ -500,7 +486,11 @@ def updateSchedule(request):
 
             #redirect
             academy = Academy.objects.filter(bid=bid)
-            invens = Inventory.objects.filter(bid = bid).filter(day = day).filter(etime__gte = int(searchTime)-90, stime__lte = int(searchTime)+90).filter(carnum = carnum)
+
+            if searchTime == '':
+                invens = Inventory.objects.filter(bid = bid).filter(day = day).filter(carnum = carnum)
+            else:
+                invens = Inventory.objects.filter(bid = bid).filter(day = day).filter(etime__gte = int(searchTime)-90, stime__lte = int(searchTime)+90).filter(carnum = carnum)
 
             contacts = []
 
@@ -591,13 +581,6 @@ def updateArea(request):
 
             return render_to_response('supdateSchedule.html',{"time":time,"day":day,"branch":branch,"academy":academy,"carnum": carnum,"bid":bid,"contacts":contacts,'user':request.user})
 
-## HH:MM ==> HHMM
-def convertDateFormat(str):
-	ret = str.replace(':', '')
-	#ret.replace(':', '')
-	return int(ret)
-
-
 @csrf_exempt
 @login_required
 def getHistory(request):
@@ -618,54 +601,34 @@ def getHistory(request):
     history = []
     allacademy = Academy.objects.all()
 
-    total_count = 0
-    uniq_count = 0
-
-
     if aid is not None and aid != '' and startdate is not None and startdate != '' and enddate is not None and enddate != '':
         start_date = datetime.date(*map(int, startdate.split('-')))
         end_date = datetime.date(*map(int, enddate.split('-')))
         total_days = (end_date - start_date).days + 1
         for day_number in range(total_days):
+            single_history = {}
             single_date = (start_date + datetime.timedelta(days = day_number)).strftime('%Y-%m-%d')
+            academiesDictionary = {}
             schedules = []
 
             #return HttpResponse(single_date)
             iids = HistoryScheduleTable.objects.filter(alist__contains = [aid]).filter(date = single_date).order_by('time').values_list('iid_id', flat=True).distinct()
             uniq_iids = reduce(lambda x,y: x+[y] if x==[] or x[-1] != y else x, iids, [])
-
-            last_time = 0
-            dailyHistory = DailyHistory()
-            dailyHistory.date = single_date
             for i in uniq_iids:
                 academyset = set()
-                scheduletable = HistoryScheduleTable.objects.filter(date = single_date).order_by('time').filter(iid_id = i)
-                #return HttpResponse(str(len(scheduletable)))
-                if len(scheduletable) > 0:
+                scheduletable = HistoryScheduleTable.objects.filter(date = single_date).filter(iid_id = i)
+                schedules.append(scheduletable)
+                for schedule in scheduletable:
+                    for academy in schedule.academies.all():
+                        academyset.add(academy.name)
+                academiesDictionary[i] = academyset
 
-                    timeHistory = TimeHistory()
-                    timeHistory.scheduletable = scheduletable
-                    timeHistory.carnum = scheduletable[0].carnum
-                    index = 0
-                    for schedule in scheduletable:
-                        for academy in schedule.academies.all():
-		            timeHistory.academies.add(academy.name)
+            single_history['date'] = single_date
 
-                        if (index == 0 and last_time > convertDateFormat(schedule.time)):
-                            timeHistory.warning = 1
-                        last_time = convertDateFormat(schedule.time)
-                        index += 1
+            history.append(single_history)
 
-                    dailyHistory.timehistory.append(timeHistory)
-                    total_count += 1
-                    if (timeHistory.warning != 1):
-                        uniq_count += 1
-            if len(dailyHistory.timehistory) > 0:
-                history.append(dailyHistory)
-    else :
-        return HttpResponse("error occured", "aid = ", aid, "startdate = ", startdate, "enddate = ", enddate)
-
-    return render_to_response('getHistory.html', {"history": history, "academy": allacademy, "aid" : aid, 'total_count': total_count, 'uniq_count': uniq_count, 'startdate': startdate, 'enddate': enddate, 'user':request.user})
+    #return HttpResponse(academy)
+    return render_to_response('getHistory.html', {"history": history, "academy": allacademy, "aid" : aid, 'startdate': startdate, 'enddate': enddate, 'user':request.user})
 
 @csrf_exempt
 @login_required

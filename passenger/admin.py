@@ -1,7 +1,25 @@
 from django.contrib import admin
-from passenger.models import Academy, Commute, Schedule, ShuttleSchedule, AcademySchedule, Group, PhoneList, ScheduleDate, StudentInfo,Community,Grade
+from django.contrib.auth.admin import UserAdmin
+from django.contrib.auth.models import User
+from passenger.models import Academy, Commute, Schedule, ShuttleSchedule, AcademySchedule, Group, PhoneList, ScheduleDate, StudentInfo,Community,Grade,Profile
 from simple_history.admin import SimpleHistoryAdmin
-from passenger.forms import StudentInfoForm
+from passenger.forms import StudentInfoForm, ProfileInfoForm
+
+class ProfileInline(admin.StackedInline):
+    model = Profile
+    can_delete = False
+    fields = ('academySelection','bid','aid','cid')
+    verbose_name_plural = 'Profile'
+    fk_name = 'user'
+    form = ProfileInfoForm
+
+class CustomUserAdmin(UserAdmin):
+    inlines = (ProfileInline, )
+
+    def get_inline_instances(self, request, obj=None):
+        if not obj:
+            return list()
+        return super(CustomUserAdmin, self).get_inline_instances(request, obj)
 
 class ScheduleAdmin(admin.ModelAdmin):
     list_display = ('name', 's_name', 'load','unload')
@@ -30,12 +48,6 @@ class StudentInfoAdmin(SimpleHistoryAdmin):
     list_display = ('__unicode__',)
     form = StudentInfoForm
 
-    class Media:
-        js = (
-            'js/jquery-1.11.1.min.js',
-            'js/changedAid.js'
-        )
-
 class GradeAdmin(admin.ModelAdmin):
     list_display = ('name',)
 
@@ -45,7 +57,8 @@ class CommunityAdmin(admin.ModelAdmin):
 class CommuteAdmin(SimpleHistoryAdmin):
     list_display = ('name','a_name')
 
-
+admin.site.unregister(User)
+admin.site.register(User, CustomUserAdmin)
 admin.site.register(Group, GroupAdmin)
 admin.site.register(Schedule,ScheduleAdmin)
 admin.site.register(Academy,AcademyAdmin)

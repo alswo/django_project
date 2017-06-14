@@ -96,7 +96,7 @@
             </div>
             <br>
             {% endif %}
-            {% if user.is_staff   %}
+            {% if user.is_staff %}
             <button id="dLabel" type="button" class="btn btn-info btn-lg btn-block" data-toggle="modal" data-target="#getschedule">학원용 스케쥴보기(BETA)</button>
             <div class="modal fade" id="getschedule" role="dialog">
                 <div class="modal-dialog">
@@ -111,6 +111,10 @@
                     </div>
                 </div>
             </div>
+            <br>
+            {% endif %}
+            {% if user.username == 'tuntun' %}
+            <button id="dLabel" type="button" class="btn btn-info btn-lg btn-block"  onclick="location.href='/inventory/getSchedule'"data-toggle="modal" data-target="#getschedule">학원용 스케쥴보기(BETA)</button>
             <br>
             {% endif %}
             {% if user.is_staff or user|in_group:"driver" %}

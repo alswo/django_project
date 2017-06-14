@@ -82,7 +82,7 @@
         <h3>인벤토리추가</h3>
       </div>
       <div class="modal-body">
-        <iframe src="putSchedule?bid={{bid}}" width="90%" height="550"></iframe>
+        <iframe src="putSchedule?bid={{bid}}" width="100%" height="750"></iframe>
       </div>
       <div class="modal-footer">
         <button class="btn-danger" data-dismiss="modal">닫기</button>
@@ -380,17 +380,15 @@
       t = $(this)
       sibling_sid = $(this).siblings('.inputSid')[0].children[1]
       sibling_aca = $(this).siblings('.inputAca')[0].children[0]
-      console.log(sibling_aca)
       // Do some processing here
 
       var before_list = t[0].children[1].value.split(",").map(function(item) {
         return item.trim();
       });
-
       console.log(before_list)
       console.log(event.item)
 
-      var delete_index = before_list.indexOf(event.item)
+      var delete_index = before_list.indexOf(event.item.trim())
 
       console.log(before_list)
       console.log(delete_index)
@@ -415,6 +413,9 @@
 
       console.log(before_sid_value)
       console.log(delete_sid)
+
+      console.log(before_aca_value)
+      console.log(delete_aca)
 
       sibling_aca.value = delete_aca.toString()
       sibling_sid.value = delete_sid.toString()
@@ -453,15 +454,16 @@
     });
 
     function validateSearchForm() {
-      var num = /^\d+$/;
+      //var num = /^\d+$/;
 
       if (document.forms["searchform"]["area"].selectedIndex < 1) {
         alert("지역, 지점을 선택해 주세요.")
         return false;
-      } else if (num.test(document.forms["searchform"]["time"].value) == false) {
-        alert("시간은 숫자만 입력해 주세요.(예:1500)")
-        return false;
       }
+      // } else if (num.test(document.forms["searchform"]["time"].value) == false) {
+      //   alert("시간은 숫자만 입력해 주세요.(예:1500)")
+      //   return false;
+      // }
     }
 
     function validateTableForm(e) {
