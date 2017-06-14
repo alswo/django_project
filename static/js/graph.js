@@ -12,6 +12,12 @@ var Graph = function() {
     this.nodes = [];
     this.nodeMap = {};
 
+    this.reset = function() {
+        this.edges = {};
+        this.nodes = [];
+        this.nodeMap = {};
+    };
+
     // Add a node to the graph
     this.addNode = function(node) {
         this.nodes.push(node);
