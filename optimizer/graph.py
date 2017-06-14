@@ -237,30 +237,35 @@ def findMin(aGraph):
     #return result
     return minVertex
 
-def prim(aGraph, start):
+def prim(aGraph, start, end):
     print '''Prim's MST'''
     result = list()
     ## Set the distance for the start node to zero 
     start.set_visited()
     result.append(start.get_id())
+   
+    ## not to visit
+    end.set_visited()
 
     n = findMin(aGraph)
     while (n != None):
         result.append(n.get_id())
         n = findMin(aGraph)
 
+    result.append(end.get_id())
+
     return result
 
 # recursive function
 # travel to adjacent vertex
-def travel(aGraph, vertex, weight, visited):
+def travel(aGraph, vertex, endvertex, weight, visited):
     visitedlist = list()
     visitedlist.extend(visited)
     visitedlist.append(vertex)
 
     resultlist = list()
 
-    if (len(aGraph.get_vertices()) == len(visitedlist)) :
+    if ((len(aGraph.get_vertices())-1)== len(visitedlist)) :
         resultset = ResultSet(visitedlist, weight)
         resultlist.append(resultset)
         return resultlist
@@ -268,8 +273,10 @@ def travel(aGraph, vertex, weight, visited):
     for n in vertex.adjacent:
         if n in visitedlist:
             continue 
+        if n == endvertex:
+            continue
 
-        result = travel(aGraph, n, weight + vertex.get_weight(n), visitedlist)
+        result = travel(aGraph, n, endvertex, weight + vertex.get_weight(n), visitedlist)
         if (result != None):
             resultlist.extend(result)
 
@@ -283,13 +290,20 @@ def cmp_resultset(a, b):
     else:
         return -1
 
-def travelling_salesman(aGraph, start):
+def travelling_salesman(aGraph, start, end):
     # n!
     print '''Travelling Salesman'''
 
     visited = list()
     result = list()
-    resultlist = travel(aGraph, start, 0, visited)
+
+    resultlist = travel(aGraph, start, end, 0, visited)
+    print (len(resultlist))
+
+    for resultset in resultlist:
+        end_vertex = resultset.vertices[len(resultset.vertices)-1]
+        resultset.vertices.append(end)
+        resultset.weight += end_vertex.get_weight(end)
 
     resultlist.sort(cmp_resultset)
     for v in resultlist[0].vertices:
@@ -337,14 +351,8 @@ if __name__ == '__main__':
             print '( %s , %s, %3d)'  % ( vid, wid, v.get_weight(w))
 
             
-    result = prim(g, g.get_vertex('원마을현대힐스테이트'))
-    obj = {}
-    obj['features'] = list()
-
-    for r in result:
-        print r.vertices.get_id(), 
-        obj['features'].append({'viaPointName':r.vertices.get_id()})
+    result = travelling_salesman(g, g.get_vertex('원마을현대힐스테이트'), g.get_vertex('판교도서관'))
     #travelling_salesman(g, g.get_vertex('원마을현대힐스테이트'))
 
-    print(simplejson.dumps(obj))
+    #print(simplejson.dumps(obj))
 
