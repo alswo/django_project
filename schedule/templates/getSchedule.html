@@ -63,7 +63,7 @@ function callNumber(num){
                 <tbody>
                     {% for s in c.scheduletables.all %}
                     {% if s.lflag == 1 %}
-                    <tr class="info">
+                    <tr class="alert alert-info">
                         <td>{{s.time}}</td>
                         <td>{{s.addr}}</td>
                         <td>
@@ -87,7 +87,7 @@ function callNumber(num){
                         </td>
                     {% endif %}
                     {% if s.lflag == 0 %}
-                    <tr class="warning">
+                    <tr class="alert alert-warning">
                         <td>{{s.time}}</td>
                         <td>{{s.addr}}</td>
                         <td>

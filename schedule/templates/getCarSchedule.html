@@ -65,7 +65,6 @@ function callNumber(num){
                 {% for aid in c.alist %}
                   {% if forloop.counter == forloop.parentloop.counter %}
                       <button type="button" class="btn btn-warning" role="button" data-toggle="collapse" href="#collapsePhone{{c.id}}" onclick="getAcaPhone(this, {{aid}},{{c.id}})" aria-expanded="false" aria-controls="collapseExample">{{aname}}</button>
-
                   {% endif %}
                 {% endfor %}
                 {% endfor %}

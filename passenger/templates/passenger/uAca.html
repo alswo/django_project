@@ -139,9 +139,9 @@
                                         <select class="form-control" id="{{contact.id}}bid">
                                           {% for b in branch %}
                                             {% if b.id == contact.bid %}
-                                                <option value="{{b.id}}" selected>{{b.location}}</option>
+                                                <option value="{{b.id}}" selected>{{b.bname}}</option>
                                             {% else %}
-                                                <option value="{{b.id}}">{{b.location}}</option>
+                                                <option value="{{b.id}}">{{b.bname}}</option>
                                             {% endif %}
                                           {% endfor %}
                                         </select>
