@@ -28,19 +28,20 @@ sys.setdefaultencoding('utf-8')
 def getRoute(request):
     g = PoiGraph()
 
-    if request.method == 'POST':
-        received_json_data = json.loads(request.body)
-        g.add_vertex(received_json_data['startName'], received_json_data['startX'], received_json_data['startY'])
-        for viaPoint in received_json_data['viaPoints']:
-            g.add_vertex(viaPoint['viaPointName'], viaPoint['viaPointX'], viaPoint['viaPointY'])
-        g.add_vertex(received_json_data['endName'], received_json_data['endX'], received_json_data['endY'])
-    else:
-        return HttpResponse("This is not a valid request")
+    algorithm = request.GET.get('algorithm')
+
+    received_json_data = json.loads(request.body)
+    g.add_vertex(received_json_data['startName'], received_json_data['startX'], received_json_data['startY'])
+    for viaPoint in received_json_data['viaPoints']:
+        g.add_vertex(viaPoint['viaPointName'], viaPoint['viaPointX'], viaPoint['viaPointY'])
+    g.add_vertex(received_json_data['endName'], received_json_data['endX'], received_json_data['endY'])
      
 
     g.set_everyweight()
-    result = prim(g, g.get_vertex(received_json_data['startName']))
-    #result = travelling_salesman(g, g.get_vertex(received_json_data['startName']))
+    if (algorithm == 'salesman'):
+        result = travelling_salesman(g, g.get_vertex(received_json_data['startName']), g.get_vertex(received_json_data['endName']))
+    else:
+    	result = prim(g, g.get_vertex(received_json_data['startName']), g.get_vertex(received_json_data['endName']))
 
     jsonobj = g.get_json(result)
     return HttpResponse(jsonobj)
