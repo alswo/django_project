@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 from django.shortcuts import render_to_response, redirect
 from django.template import RequestContext
 from schedule.models import HistoryScheduleTable, Inventory, ScheduleTable, Building, Branch, InventoryRequest, Area, Car
@@ -100,7 +99,6 @@ def getSchedule(request):
         uid = request.user.id
 
         if request.user.is_staff:
-
             invens = Inventory.objects.filter(bid = bid).filter(alist__contains = [aid]).filter(day = day)
             list_invensid = []
             contacts = []
@@ -147,10 +145,18 @@ def getSchedule(request):
 
                 return render_to_response('getSchedule.html', {"contacts": contacts, "bid" : bid, "aid" : aid,'user':request.user})
 
+        elif request.user.groups.filter(name__in = ['driver']).exists():
+            branch = Car.objects.get(id = car)
+            invens = Inventory.objects.filter(carnum=car).filter(day = day)
+
+            contacts = []
+
+            for i in invens:
+                contacts.extend(Inventory.objects.filter(id = i.id).prefetch_related('scheduletables'))
+
+            return render_to_response('getCarSchedule.html', {"contacts": contacts,"car": car, 'user':request.user})
 
         return HttpResponse('로그인 후 사용해주세요.')
-
-
 
 
 @csrf_exempt
