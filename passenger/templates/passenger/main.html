@@ -51,7 +51,7 @@
             <button id="dLabel" type="button" class="btn btn-success btn-lg btn-block" data-toggle="dropdown" aria-expanded="true" onclick="location.href='dateSchedule?what=single'">지난 스케줄 보기</button>
             <br>
             {% endif %}
-            {% if user.is_staff%}
+            {% if user.is_staff %}
             <div class="dropdown">
                 <button id="dLabel" type="button" class="btn btn-info btn-lg btn-block" data-toggle="dropdown" aria-expanded="true">호차별 스케줄 관리(Beta)</button>
                 <ul class="dropdown-menu" aria-labelledby="dLabel">
@@ -64,7 +64,7 @@
             </div>
             <br>
             {% endif %}
-            {% if user.is_staff  or user|in_group:"driver"%}
+            {% if user.is_staff %}
             <div class="dropdown">
                 <button id="dLabel" type="button" class="btn btn-info btn-lg btn-block" data-toggle="dropdown" aria-expanded="true">학원별 스케줄 관리(Beta)</button>
                 <ul class="dropdown-menu" aria-labelledby="dLabel">
@@ -96,7 +96,7 @@
             </div>
             <br>
             {% endif %}
-            {% if user.is_staff %}
+            {% if user.is_staff or user|in_group:"driver"%}
             <button id="dLabel" type="button" class="btn btn-info btn-lg btn-block" data-toggle="modal" data-target="#getschedule">학원용 스케쥴보기(BETA)</button>
             <div class="modal fade" id="getschedule" role="dialog">
                 <div class="modal-dialog">
