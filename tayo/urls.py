@@ -6,6 +6,7 @@ urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^', include('passenger.urls')),
     url(r'^inventory/',include('schedule.urls')),
+    url(r'^optimizer/',include('optimizer.urls')),
     url(
         r'^accounts/login/',
         'django.contrib.auth.views.login',
