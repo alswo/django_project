@@ -97,8 +97,9 @@
         <div class="col-md-5">
         </div>
         <div class="col-md-7">
-          <button type="button" class="btn btn-primary" onclick="getOptimized();">노드계산</button>
-          <button type="button" type="button" class="btn btn-success" data-toggle="modal" data-target="#myModal" onclick="getOpti();">최적동선 찾기</button>
+          <!-- button type="button" class="btn btn-primary" onclick="getOptimized();">노드계산</button //-->
+          <!--button type="button" type="button" class="btn btn-success" data-toggle="modal" data-target="#myModal" onclick="getOpti();">최적동선 찾기</button //-->
+          <button type="button" type="button" class="btn btn-success" data-toggle="modal" data-target="#myModal" onclick="getRoute();">최적동선 찾기</button>
         </div>
       </div>
 
@@ -241,8 +242,9 @@
 
       }
     }
-    console.log(g)
-    alert("Done")
+
+    //console.log(jsonObj);
+
   }
 
   function getOpti() {
@@ -300,6 +302,49 @@
     }
     doc.innerHTML = temp + '&nbsp&nbsp' + ' <span class="glyphicon glyphicon-time" aria-hidden="true"></span>' + ' : ' + Math.floor(all_time / 60) + 'M';
   }
+
+  function getRoute() {
+    var jsonObj = {};
+    var vertexInfo;
+
+    vertexInfo = $('#markerStart').text().split(':');
+    jsonObj['startName'] = vertexInfo[0];
+    jsonObj['startX'] = vertexInfo[1];
+    jsonObj['startY'] = vertexInfo[2];
+
+    vertexInfo = $('#markerEnd').text().split(':');
+    jsonObj['endName'] = vertexInfo[0];
+    jsonObj['endX'] = vertexInfo[1];
+    jsonObj['endY'] = vertexInfo[2];
+
+    jsonObj['viaPoints'] = [];
+    for (i=0; i < $('.markerInfo').length; i++) {
+        vertexInfo = $('.markerInfo')[i].innerText.split(':');
+        jsonObj['viaPoints'][i] = {};
+        jsonObj['viaPoints'][i]['viaPointName'] = vertexInfo[0];
+        jsonObj['viaPoints'][i]['viaPointX'] = vertexInfo[1];
+        jsonObj['viaPoints'][i]['viaPointY'] = vertexInfo[2];
+    } 
+
+    $.ajax({
+        url: "http://curtis-tayotayo.edticket.com/optimizer/getRoute",
+        type: "POST",
+        data: JSON.stringify(jsonObj),
+        dataType: "json",
+        success: function (result) {
+            doc = document.getElementById('recommand');
+            appendHtml = "";
+            for (i=0; i < result['features'].length - 1; i++) {
+                appendHtml += '<br>' + result['features'][i]['viaPointName'];
+                appendHtml += '(' + result['features'][i+1]['requiredTime'] + ')<br>';
+            }
+            appendHtml += '<br>' + result['features'][i]['viaPointName'];
+            console.log(result);
+            doc.innerHTML = appendHtml + '&nbsp&nbsp' + ' <span class="glyphicon glyphicon-time" aria-hidden="true"></span> : ' + Math.floor(parseInt(result['properties']['totalTime']) / 60) + 'M';
+        }
+    });
+  }
+
 
   function getPoi() {
 
@@ -411,6 +456,8 @@
     urlStr += "&endX=" + endX;
     urlStr += "&endY=" + endY;
     urlStr += "&appKey=9c78e49d-c72c-36a6-8e25-5c249e9291a3";
+
+
 
     var xmlHttp = new XMLHttpRequest();
 
