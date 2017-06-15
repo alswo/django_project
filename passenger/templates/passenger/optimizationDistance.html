@@ -341,7 +341,8 @@
             appendHtml += '<br>' + result['features'][i]['viaPointName'];
             console.log(result);
             doc.innerHTML = appendHtml + '&nbsp&nbsp' + ' <span class="glyphicon glyphicon-time" aria-hidden="true"></span> : ' + Math.floor(parseInt(result['properties']['totalTime']) / 60) + 'M';
-        }
+        },
+        timeout: 10000            // set timeout to 10 seconds
     });
   }
 
