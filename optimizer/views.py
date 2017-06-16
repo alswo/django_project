@@ -38,7 +38,6 @@ def getRoute(request):
     result = None
 
     algorithm = request.GET.get('algorithm')
-    onlytime = request.GET.get('onlytime')
 
     received_json_data = json.loads(request.body)
 
@@ -50,7 +49,7 @@ def getRoute(request):
 
     g.set_everyweight()
    
-    if (onlytime == 'true'):
+    if (algorithm == 'onlytime'):
         result = list()
         result.append(received_json_data['startName'])
         viaPoints = received_json_data['viaPoints']
@@ -58,11 +57,10 @@ def getRoute(request):
         for viaPoint in viaPoints:
             result.append(viaPoint['viaPointName'])
         result.append(received_json_data['endName'])
+    elif (algorithm == 'salesman'):
+        result = travelling_salesman(g, g.get_vertex(received_json_data['startName']), g.get_vertex(received_json_data['endName']))
     else:
-    	if (algorithm == 'salesman'):
-        	result = travelling_salesman(g, g.get_vertex(received_json_data['startName']), g.get_vertex(received_json_data['endName']))
-    	else:
-    		result = prim(g, g.get_vertex(received_json_data['startName']), g.get_vertex(received_json_data['endName']))
+    	result = prim(g, g.get_vertex(received_json_data['startName']), g.get_vertex(received_json_data['endName']))
 
     jsonobj = g.get_json(result)
     return HttpResponse(jsonobj)

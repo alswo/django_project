@@ -48,24 +48,36 @@
           <div class="col-md-7">
               <div class="row">
                 <div class="col-md-3">
-                <button type="button" class="btn btn-info" onclick="sample3_execDaumPostcode()">주소검색</button>
-              </div>
-              <div class="col-md-9">
-                <input type="text" id="sample3_address" class="form-control" placeholder="주소">
-              </div>
-            </div>
-                <br>
-                <div id="wrap" style="display:none;border:1px solid;width:500px;height:300px;margin:5px 0;position:relative">
-                  <img src="//t1.daumcdn.net/localimg/localimages/07/postcode/320/close.png" id="btnFoldWrap" style="cursor:pointer;position:absolute;right:0px;top:-1px;z-index:1" onclick="foldDaumPostcode()" alt="접기 버튼">
+                  <button type="button" class="btn btn-info" onclick="sample3_execDaumPostcode()">주소검색</button>
                 </div>
+                <div class="col-md-9">
+                  <input type="text" id="sample3_address" class="form-control" placeholder="주소">
+                </div>
+             </div>
+             <br>
+             <div id="wrap" style="display:none;border:1px solid;width:500px;height:300px;margin:5px 0;position:relative">
+                  <img src="//t1.daumcdn.net/localimg/localimages/07/postcode/320/close.png" id="btnFoldWrap" style="cursor:pointer;position:absolute;right:0px;top:-1px;z-index:1" onclick="foldDaumPostcode()" alt="접기 버튼">
+             </div>
 
-              </div>
-              <div class="col-md-5">
+          </div>
+          <div class="col-md-5">
                 <button class="btn btn-success " onclick="addrToPoi('s')">출발</button>
                 <button class="btn btn-danger " onclick="addrToPoi('e')">도착</button>
                 <button class="btn btn-default " onclick="addrToPoi('a')">추가</button>
-              </div>
-            </div>
+          </div>
+        </div>
+        <div class="row form-group">
+          <label class="col-sm-2 control-label text-right">알고리즘</label>
+          <div class="col-sm-5">
+            <select id="algorithm" class="form-control input-sm">
+                <option>선택</option>
+                <option value="prim"> 길찾기 (Prim) </option>
+                <option value="onlytime"> 순서대로 소요시간만 </option>
+                <option value="salesman"> 길찾기 (Travelling-Salesman) </option>
+                <option value="mintime"> 길찾기 (학생들 소요시간 합 최소) </option>
+            </select>
+          </div>
+        </div>
             <table class="table">
               <thead>
                 <tr>
@@ -326,6 +338,7 @@
         vertexInfo = $('.markerInfo')[i].innerText.split(':');
         jsonObj['viaPoints'][i] = {};
         jsonObj['viaPoints'][i]['viaPointName'] = vertexInfo[0];
+        jsonObj['viaPoints'][i]['index'] = i;
         jsonObj['viaPoints'][i]['viaPointX'] = vertexInfo[1];
         jsonObj['viaPoints'][i]['viaPointY'] = vertexInfo[2];
 
@@ -357,7 +370,18 @@
           doc.innerHTML = appendHtml + '&nbsp&nbsp' + ' <span class="glyphicon glyphicon-time" aria-hidden="true"></span> : ' + Math.floor(parseInt(result['properties']['totalTime']) / 60) + 'M';
       }
     };
-    xmlhttp.open("POST", "http://curtis-tayotayo.edticket.com/optimizer/getRoute");
+
+    var e = $('#algorithm');
+    var algorithm;
+    if (e.length >= 1) {
+        var algorithm = e[0].options[e[0].selectedIndex].value;
+    }
+
+    if (!algorithm) {
+        algorithm = "";
+    }
+    console.log("algorithm = " + algorithm);
+    xmlhttp.open("POST", "http://curtis-tayotayo.edticket.com/optimizer/getRoute?algorithm=" + algorithm);
     xmlhttp.setRequestHeader("Content-Type", "application/json");
     xmlhttp.send(JSON.stringify(jsonObj));
 
