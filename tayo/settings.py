@@ -23,11 +23,13 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'simple_history',
+    'corsheaders',
 ]
 
 MIDDLEWARE_CLASSES = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -130,6 +132,8 @@ CRONJOBS = [
 #}
 
 #CRONTAB_COMMAND_SUFFIX = '2>&1'
+
+CORS_ORIGINAL_ALLOW_ALL = True
 
 LOGIN_REDIRECT_URL = '/'
 
