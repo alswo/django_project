@@ -5,7 +5,7 @@
 import requests  
 import json
 #algorithm = ['prim', 'salesman', 'onlytime', 'mintime']
-algorithm = ['mintime']
+algorithm = ['deviation']
 params = {}
 url = "http://curtis-tayotayo.edticket.com/optimizer/getRoute"
 #url = "http://curtis-tayotayo.edticket.com/optimizer/getRoute"

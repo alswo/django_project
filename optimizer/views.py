@@ -20,7 +20,7 @@ import json
 import logging
 import collections
 import sys
-from graph import PoiGraph, prim, travelling_salesman, mintime_passenger
+from graph import PoiGraph, prim, travelling_salesman, mintime_passenger, standard_deviation
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
@@ -63,6 +63,8 @@ def getRoute(request):
         result = travelling_salesman(g, g.get_vertex(received_json_data['startName']), g.get_vertex(received_json_data['endName']))
     elif (algorithm == 'mintime'):
         result = mintime_passenger(g, g.get_vertex(received_json_data['startName']), g.get_vertex(received_json_data['endName']))
+    elif (algorithm == 'deviation'):
+        result = standard_deviation(g, g.get_vertex(received_json_data['startName']), g.get_vertex(received_json_data['endName']))
     else:
     	result = prim(g, g.get_vertex(received_json_data['startName']), g.get_vertex(received_json_data['endName']))
 

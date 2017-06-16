@@ -383,6 +383,57 @@ def mintime_passenger(aGraph, start, end):
 
     return result
 
+## return the average absolute deviation of the list
+def aad (lst):
+    temp = []
+    mean = sum(lst) / float(len(lst))
+    for i in range(len(lst)):
+        temp.append(float(abs(lst[i] - mean)))
+    return sum(temp)/ len(lst)
+
+## return the variance of the list
+def variance(lst):
+    temp = []
+    mean = sum(lst) / float(len(lst))
+    for i in range(len(lst)):
+        temp.append(float(abs(lst[i] - mean)) ** 2)
+
+## return the standard deviation of the list
+def stddev(lst):
+    return variance(lst)**0.5
+
+def standard_deviation(aGraph, start, end):
+    # n!
+    print '''Standard Deviation'''
+
+    visited = list()
+    result = list()
+
+    resultlist = travel(aGraph, start, end, 0, visited)
+
+    # 모든 경우의 route list 를 만듬
+    for resultset in resultlist:
+        next_vertex = end
+        until_weight = 0
+        total_percent = 0
+        percent_list = list()
+        for vertex in reversed(resultset.vertices):
+            deviation = vertex.get_weight(next_vertex) + until_weight - vertex.get_weight(end)
+            percent =  round((deviation *100.0 / vertex.get_weight(end)), 2)
+            percent_list.append(percent)
+            total_percent += percent
+            until_weight += vertex.get_weight(next_vertex)
+            next_vertex = vertex
+
+        resultset.vertices.append(end)
+        resultset.weight = variance(percent_list)
+
+    resultlist.sort(cmp_resultset)
+    for v in resultlist[0].vertices:
+        result.append(v.get_id())
+
+    return result
+
 
 if __name__ == '__main__':
 
@@ -428,7 +479,7 @@ if __name__ == '__main__':
 
             
     #result = travelling_salesman(g, g.get_vertex('원마을현대힐스테이트'), g.get_vertex('판교도서관'))
-    result = mintime_passenger(g, g.get_vertex('A'), g.get_vertex('D'))
+    result = standard_deviation(g, g.get_vertex('A'), g.get_vertex('D'))
     print result
     #travelling_salesman(g, g.get_vertex('원마을현대힐스테이트'))
 
