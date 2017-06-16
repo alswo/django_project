@@ -343,6 +343,27 @@
         return;
     }
 
+    var xmlhttp = new XMLHttpRequest();
+    xmlhttp.onreadystatechange = function() {
+      if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+          var result = JSON.parse(xmlhttp.responseText);
+          doc = document.getElementById('recommand');
+          appendHtml = "";
+          for (i=0; i < result['features'].length - 1; i++) {
+             appendHtml += '<br>' + result['features'][i]['viaPointName'];
+             appendHtml += '(' + result['features'][i+1]['requiredTime'] + ')<br>';
+          }
+          appendHtml += '<br>' + result['features'][i]['viaPointName'];
+          doc.innerHTML = appendHtml + '&nbsp&nbsp' + ' <span class="glyphicon glyphicon-time" aria-hidden="true"></span> : ' + Math.floor(parseInt(result['properties']['totalTime']) / 60) + 'M';
+      }
+    };
+    xmlhttp.open("POST", "http://curtis-tayotayo.edticket.com/optimizer/getRoute");
+    xmlhttp.setRequestHeader("Content-Type", "application/json");
+    xmlhttp.send(JSON.stringify(jsonObj));
+
+
+    return;
+
 
     $.ajax({
         url: "http://curtis-tayotayo.edticket.com/optimizer/getRoute",
