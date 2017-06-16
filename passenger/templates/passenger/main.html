@@ -101,11 +101,22 @@
             <div class="modal fade" id="getschedule" role="dialog">
                 <div class="modal-dialog">
                     <div class="modal-content">
-                        <div class="modal-body">
-                            {% for b in branch %}
-                                <button type="button" class="btn btn-info" onclick="getAcaButton(this,{{b.id}})">{{b.bname}}</button>
-                            {% endfor %}
-                        </div>
+                      {% if user|in_group:"driver" %}
+                      <div class="modal-body">
+                          {% for b in branch %}
+                              {% if user.profile.bid == b.id %}
+                              <button type="button" class="btn btn-info" onclick="getAcaButton(this,{{b.id}})">{{b.bname}}</button>
+                              {% endif %}
+                          {% endfor %}
+                      </div>
+                      {% endif %}
+                      {% if user.is_staff %}
+                      <div class="modal-body">
+                          {% for b in branch %}
+                              <button type="button" class="btn btn-info" onclick="getAcaButton(this,{{b.id}})">{{b.bname}}</button>
+                          {% endfor %}
+                      </div>
+                      {% endif %}
                         <div class="modal-body academypadding" id="specific">
                         </div>
                     </div>

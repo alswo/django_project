@@ -1,4 +1,3 @@
-#
 from django.shortcuts import render, render_to_response, redirect
 from django.template import RequestContext
 from passenger.models import Commute, Academy, Schedule, ShuttleSchedule, Group, ScheduleDate,Community
