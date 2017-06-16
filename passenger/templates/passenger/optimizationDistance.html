@@ -347,6 +347,7 @@
     $.ajax({
         url: "http://curtis-tayotayo.edticket.com/optimizer/getRoute",
         type: "POST",
+        crossDomain: true,
         data: JSON.stringify(jsonObj),
         dataType: "json",
         success: function (result) {
