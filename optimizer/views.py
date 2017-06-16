@@ -31,6 +31,7 @@ def getRoute(request):
     algorithm = request.GET.get('algorithm')
 
     received_json_data = json.loads(request.body)
+
     g.add_vertex(received_json_data['startName'], received_json_data['startX'], received_json_data['startY'])
     for viaPoint in received_json_data['viaPoints']:
         g.add_vertex(viaPoint['viaPointName'], viaPoint['viaPointX'], viaPoint['viaPointY'])

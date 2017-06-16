@@ -197,6 +197,10 @@
     target.appendChild(node_tr);
     target.appendChild(node_td);
 
+    tempHtmlAdd = "<tr id='addPoi" +  index_number + "'><td data-name='del'><button name='del' id='del' class='btn-xs btn-danger glyphicon glyphicon-remove row-remove' onClick='remove_row(" + index_number + ")'></button></td><td id='addr'>" + "<input type='text' name='addr'>" + "</td><td>"+ position.lon + "</td><td>"+ position.lat + "</td><td class='markerInfo' style='display:none'>"+ "???" +":"+position.lon +":"+position.lat+"</td></tr>";
+    $('#addPoi').append(tempHtmlAdd)
+    index_number++;
+
     number++;
   }
 
@@ -324,7 +328,21 @@
         jsonObj['viaPoints'][i]['viaPointName'] = vertexInfo[0];
         jsonObj['viaPoints'][i]['viaPointX'] = vertexInfo[1];
         jsonObj['viaPoints'][i]['viaPointY'] = vertexInfo[2];
+
+        if (jsonObj['viaPoints'][i]['viaPointName'] == '???') {
+            jsonObj['viaPoints'][i]['viaPointName'] = $('.markerInfo')[i].parentNode.childNodes[1].firstChild.value;
+        }
     } 
+
+    console.log(jsonObj);
+    console.log(jsonObj['startName']);
+    console.log(jsonObj['endName']);
+    if (!jsonObj['startName'] || !jsonObj['endName'] ){
+        alert("도착지와 출발지는 꼭 설정하셔야 합니다.");
+        $('#myModal').modal('hide');
+        return;
+    }
+
 
     $.ajax({
         url: "http://curtis-tayotayo.edticket.com/optimizer/getRoute",
@@ -339,8 +357,31 @@
                 appendHtml += '(' + result['features'][i+1]['requiredTime'] + ')<br>';
             }
             appendHtml += '<br>' + result['features'][i]['viaPointName'];
-            console.log(result);
             doc.innerHTML = appendHtml + '&nbsp&nbsp' + ' <span class="glyphicon glyphicon-time" aria-hidden="true"></span> : ' + Math.floor(parseInt(result['properties']['totalTime']) / 60) + 'M';
+        },
+        error: function(error) {
+            console.log("code:" + request.status + "\nmessage:" + request.responseText + "\ndouble error" + error);
+            console.log(jsonObj);
+            $.ajax({
+                url: "http://curtis-tayotayo.edticket.com/optimizer/getRoute",
+                type: "POST",
+                data: JSON.stringify(jsonObj),
+                dataType: "json",
+                success: function (result) {
+                    doc = document.getElementById('recommand');
+                    appendHtml = "";
+                    for (i=0; i < result['features'].length - 1; i++) {
+                        appendHtml += '<br>' + result['features'][i]['viaPointName'];
+                        appendHtml += '(' + result['features'][i+1]['requiredTime'] + ')<br>';
+                    }
+                    appendHtml += '<br>' + result['features'][i]['viaPointName'];
+                    doc.innerHTML = appendHtml + '&nbsp&nbsp' + ' <span class="glyphicon glyphicon-time" aria-hidden="true"></span> : ' + Math.floor(parseInt(result['properties']['totalTime']) / 60) + 'M';
+                },
+                error: function(request, status, error) {
+                    console.log("code:" + request.status + "\nmessage:" + request.responseText + "\ndouble error" + error);
+                    console.log(jsonObj);
+                }
+            });
         },
         timeout: 10000            // set timeout to 10 seconds
     });
@@ -378,7 +419,8 @@
 
 
           var icon = new Tmap.Icon('https://developers.skplanetx.com/upload/tmap/marker/pin_b_m_a.png', size, offset);
-          var mark = new Tmap.Marker(lonlat, icon);
+          var label = new Tmap.Label('B');
+          var mark = new Tmap.Marker(lonlat, icon, label);
           marker.addMarker(mark);
 
           temp = [];
@@ -407,7 +449,8 @@
           map.addLayer(marker);
 
           var icon = new Tmap.Icon('https://developers.skplanetx.com/upload/tmap/marker/pin_b_m_a.png', size, offset);
-          var mark = new Tmap.Marker(lonlat, icon);
+          var label = new Tmap.Label('B');
+          var mark = new Tmap.Markers(lonlat, icon, label);
           marker.addMarker(mark);
 
           temp = []
