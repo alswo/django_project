@@ -94,7 +94,7 @@ class ResultSet:
         self.weight = w
 
 class PoiVertex(Vertex):
-    def __init__(self, node, lon, lat):
+    def __init__(self, node, lon, lat, numpassenger):
         self.id = node
         self.adjacent = {}
         # Set distance to infinity for all nodes
@@ -103,15 +103,16 @@ class PoiVertex(Vertex):
         self.visited = False  
         # Predecessor
         self.previous = None
+        self.numpassenger = int(numpassenger)
 
         self.lon = lon
         self.lat = lat
 
 
 class PoiGraph(Graph):
-    def add_vertex(self, node, lon, lat):
+    def add_vertex(self, node, lon, lat, numpassenger):
         self.num_vertices = self.num_vertices + 1
-        new_vertex = PoiVertex(node, lon, lat)
+        new_vertex = PoiVertex(node, lon, lat, numpassenger)
         self.vert_dict[node] = new_vertex
         return new_vertex
 
@@ -168,7 +169,14 @@ class PoiGraph(Graph):
             obj['properties']['totalTime'] = total_weight
         return json.dumps(obj)
 
+    def get_totalpassenger(self):
+        total_passenger = 0
 
+        for v in self.get_vertices():
+            vertex = self.get_vertex(v)
+            total_passenger += vertex.numpassenger
+
+        return total_passenger
 
 def shortest(v, path):
     ''' make shortest path from v.previous'''
@@ -267,7 +275,13 @@ def travel(aGraph, vertex, endvertex, weight, visited):
 
     resultlist = list()
 
-    if ((len(aGraph.get_vertices())-1)== len(visitedlist)) :
+    
+    ## point name 을 vertex 의 key 로 저장하다보니 start 와 end 가 동일할 경우 처리가 어려움
+    mm = 1
+    if (visitedlist[0] == endvertex):
+        mm = 0
+
+    if ((len(aGraph.get_vertices())-mm)== len(visitedlist)) :
         resultset = ResultSet(visitedlist, weight)
         resultlist.append(resultset)
         return resultlist
@@ -313,6 +327,61 @@ def travelling_salesman(aGraph, start, end):
 
     return result
 
+# recursive function
+# travel to adjacent vertex
+def mintime_travel(aGraph, vertex, endvertex, weight, numpassenger, visited):
+    visitedlist = list()
+    visitedlist.extend(visited)
+    visitedlist.append(vertex)
+
+    resultlist = list()
+
+    ## point name 을 vertex 의 key 로 저장하다보니 start 와 end 가 동일할 경우 처리가 어려움
+    mm = 1
+    if (visitedlist[0] == endvertex):
+        mm = 0
+
+    if ((len(aGraph.get_vertices())-mm)== len(visitedlist)) :
+        resultset = ResultSet(visitedlist, weight)
+        resultlist.append(resultset)
+        return resultlist
+
+    for n in vertex.adjacent:
+        if n in visitedlist:
+            continue 
+        if n == endvertex:
+            continue
+
+        result = mintime_travel(aGraph, n, endvertex, weight + vertex.numpassenger * vertex.get_weight(n), numpassenger + vertex.numpassenger, visitedlist)
+        if (result != None):
+            resultlist.extend(result)
+
+    return resultlist
+
+def mintime_passenger(aGraph, start, end):
+    # n!
+    print '''Mintime Passenger'''
+
+    visited = list()
+    result = list()
+
+    total_passenger = aGraph.get_totalpassenger()
+
+    resultlist = mintime_travel(aGraph, start, end, 0, 0, visited)
+
+    for resultset in resultlist:
+        end_vertex = resultset.vertices[len(resultset.vertices)-1]
+        resultset.vertices.append(end)
+        resultset.weight += total_passenger * end_vertex.get_weight(end)
+        print resultset.weight
+        for v in  resultset.vertices:
+		print v
+
+    resultlist.sort(cmp_resultset)
+    for v in resultlist[0].vertices:
+        result.append(v.get_id())
+
+    return result
 
 
 if __name__ == '__main__':
@@ -338,10 +407,15 @@ if __name__ == '__main__':
 
     g = PoiGraph()
 
-    g.add_vertex('낙원중학교', '14148317.661607', '4494878.084352')
-    g.add_vertex('낙생고등학교', '14148809.322692', '4493197.096773')
-    g.add_vertex('원마을현대힐스테이트', '14148219.329390', '4494726.671574')
-    g.add_vertex('판교도서관', '14147628.099206', '4493893.745713')
+    #g.add_vertex('낙원중학교', '14148317.661607', '4494878.084352', 0)
+    #g.add_vertex('낙생고등학교', '14148809.322692', '4493197.096773', 5)
+    #g.add_vertex('원마을현대힐스테이트', '14148219.329390', '4494726.671574', 1)
+    #g.add_vertex('판교도서관', '14147628.099206', '4493893.745713', 0)
+
+    g.add_vertex('A', '14148317.661607', '4494878.084352', 0)
+    g.add_vertex('B', '14148809.322692', '4493197.096773', 1)
+    g.add_vertex('C', '14148219.329390', '4494726.671574', 10)
+    g.add_vertex('D', '14147628.099206', '4493893.745713', 0)
 
     g.set_everyweight()
 
@@ -353,7 +427,9 @@ if __name__ == '__main__':
             print '( %s , %s, %3d)'  % ( vid, wid, v.get_weight(w))
 
             
-    result = travelling_salesman(g, g.get_vertex('원마을현대힐스테이트'), g.get_vertex('판교도서관'))
+    #result = travelling_salesman(g, g.get_vertex('원마을현대힐스테이트'), g.get_vertex('판교도서관'))
+    result = mintime_passenger(g, g.get_vertex('A'), g.get_vertex('D'))
+    print result
     #travelling_salesman(g, g.get_vertex('원마을현대힐스테이트'))
 
     #print(simplejson.dumps(obj))

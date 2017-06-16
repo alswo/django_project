@@ -78,12 +78,14 @@
             </select>
           </div>
         </div>
+            <form>
             <table class="table">
               <thead>
                 <tr>
                   <th>위치</th>
                   <th>위도</th>
                   <th>경도</th>
+                  <th>탑승자수</th>
                   <th style="display:none">주소</th>
                 </tr>
               </thead>
@@ -92,7 +94,7 @@
 
                 </tr>
 		<tr id="xx">
-			<td colspan="3">
+			<td colspan="4">
 				<table class="table">
 				<thead></thead>
 				<tbody id="addPoi"></tbody>
@@ -104,6 +106,7 @@
                 </tr>
               </tbody>
             </table>
+            </form>
       </div>
       <div class="row">
         <div class="col-md-5">
@@ -209,7 +212,7 @@
     target.appendChild(node_tr);
     target.appendChild(node_td);
 
-    tempHtmlAdd = "<tr id='addPoi" +  index_number + "'><td data-name='del'><button name='del' id='del' class='btn-xs btn-danger glyphicon glyphicon-remove row-remove' onClick='remove_row(" + index_number + ")'></button></td><td id='addr'>" + "<input type='text' name='addr'>" + "</td><td>"+ position.lon + "</td><td>"+ position.lat + "</td><td class='markerInfo' style='display:none'>"+ "???" +":"+position.lon +":"+position.lat+"</td></tr>";
+    tempHtmlAdd = "<tr id='addPoi" +  index_number + "'><td data-name='del'><button name='del' id='del' class='btn-xs btn-danger glyphicon glyphicon-remove row-remove' onClick='remove_row(" + index_number + ")'></button></td><td>" + "<input class='form-control' type='text' name='addr'>" + "</td><td>"+ position.lon + "</td><td>"+ position.lat + "</td><td><input type='text' class='form-control' name='numpassenger' value='1'></td><td class='markerInfo' style='display:none'>"+ "???" +":"+position.lon +":"+position.lat+"</td></tr>";
     $('#addPoi').append(tempHtmlAdd)
     index_number++;
 
@@ -341,15 +344,16 @@
         jsonObj['viaPoints'][i]['index'] = i;
         jsonObj['viaPoints'][i]['viaPointX'] = vertexInfo[1];
         jsonObj['viaPoints'][i]['viaPointY'] = vertexInfo[2];
+        jsonObj['viaPoints'][i]['viaPointNumPassenger'] = $('.markerInfo')[i].parentNode.childNodes[4].firstChild.value;
 
         if (jsonObj['viaPoints'][i]['viaPointName'] == '???') {
             jsonObj['viaPoints'][i]['viaPointName'] = $('.markerInfo')[i].parentNode.childNodes[1].firstChild.value;
         }
+        
     } 
 
     console.log(jsonObj);
-    console.log(jsonObj['startName']);
-    console.log(jsonObj['endName']);
+
     if (!jsonObj['startName'] || !jsonObj['endName'] ){
         alert("도착지와 출발지는 꼭 설정하셔야 합니다.");
         $('#myModal').modal('hide');
@@ -360,6 +364,7 @@
     xmlhttp.onreadystatechange = function() {
       if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
           var result = JSON.parse(xmlhttp.responseText);
+          console.log(xmlhttp.responseText);
           doc = document.getElementById('recommand');
           appendHtml = "";
           for (i=0; i < result['features'].length - 1; i++) {
@@ -385,52 +390,9 @@
     xmlhttp.setRequestHeader("Content-Type", "application/json");
     xmlhttp.send(JSON.stringify(jsonObj));
 
+    console.log(JSON.stringify(jsonObj));
 
     return;
-
-
-    $.ajax({
-        url: "http://curtis-tayotayo.edticket.com/optimizer/getRoute",
-        type: "POST",
-        crossDomain: true,
-        data: JSON.stringify(jsonObj),
-        dataType: "json",
-        success: function (result) {
-            doc = document.getElementById('recommand');
-            appendHtml = "";
-            for (i=0; i < result['features'].length - 1; i++) {
-                appendHtml += '<br>' + result['features'][i]['viaPointName'];
-                appendHtml += '(' + result['features'][i+1]['requiredTime'] + ')<br>';
-            }
-            appendHtml += '<br>' + result['features'][i]['viaPointName'];
-            doc.innerHTML = appendHtml + '&nbsp&nbsp' + ' <span class="glyphicon glyphicon-time" aria-hidden="true"></span> : ' + Math.floor(parseInt(result['properties']['totalTime']) / 60) + 'M';
-        },
-        error: function(error) {
-            console.log("code:" + request.status + "\nmessage:" + request.responseText + "\ndouble error" + error);
-            console.log(jsonObj);
-            $.ajax({
-                url: "http://curtis-tayotayo.edticket.com/optimizer/getRoute",
-                type: "POST",
-                data: JSON.stringify(jsonObj),
-                dataType: "json",
-                success: function (result) {
-                    doc = document.getElementById('recommand');
-                    appendHtml = "";
-                    for (i=0; i < result['features'].length - 1; i++) {
-                        appendHtml += '<br>' + result['features'][i]['viaPointName'];
-                        appendHtml += '(' + result['features'][i+1]['requiredTime'] + ')<br>';
-                    }
-                    appendHtml += '<br>' + result['features'][i]['viaPointName'];
-                    doc.innerHTML = appendHtml + '&nbsp&nbsp' + ' <span class="glyphicon glyphicon-time" aria-hidden="true"></span> : ' + Math.floor(parseInt(result['properties']['totalTime']) / 60) + 'M';
-                },
-                error: function(request, status, error) {
-                    console.log("code:" + request.status + "\nmessage:" + request.responseText + "\ndouble error" + error);
-                    console.log(jsonObj);
-                }
-            });
-        },
-        timeout: 10000            // set timeout to 10 seconds
-    });
   }
 
 
@@ -447,7 +409,7 @@
     xmlHttp.onreadystatechange = function() {
       if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
         capacity = xmlHttp.responseText;
-        console.log(capacity);
+        //console.log(capacity);
         var size = new Tmap.Size(21, 25);
         var offset = new Tmap.Pixel(-(size.w / 2), -size.h);
         jsonObj = JSON.parse(capacity);
@@ -475,9 +437,9 @@
 
           //a.push(addr,nlon,nlat)
 
-          tempHtmlStart = "<td>"+addr1+"</td><td class='lon'>"+nlon+"</td><td class='lat'>"+nlat+"</td><td id='markerStart' style='display:none'>"+addr+":"+nlon+":"+nlat+"</td>";
-          tempHtmlEnd = "<td>"+addr1+"</td><td class='lon'>"+nlon+"</td><td class='lat'>"+nlat+"</td><td id='markerEnd' style='display:none'>"+addr+":"+nlon+":"+nlat+"</td>";
-          tempHtmlAdd = "<tr id='addPoi" +  index_number + "'><td data-name='del'><button name='del' id='del' class='btn-xs btn-danger glyphicon glyphicon-remove row-remove' onClick='remove_row(" + index_number + ")'></button></td><td>" +addr1+"</td><td>"+nlon+"</td><td>"+nlat+"</td><td class='markerInfo' style='display:none'>"+addr+":"+nlon+":"+nlat+"</td></tr>";
+          tempHtmlStart = "<td>"+addr1+"</td><td class='lon'>"+nlon+"</td><td class='lat'>"+nlat+"</td><td>...</td><td id='markerStart' style='display:none'>"+addr+":"+nlon+":"+nlat+"</td>";
+          tempHtmlEnd = "<td>"+addr1+"</td><td class='lon'>"+nlon+"</td><td class='lat'>"+nlat+"</td><td>...</td><td id='markerEnd' style='display:none'>"+addr+":"+nlon+":"+nlat+"</td>";
+          tempHtmlAdd = "<tr id='addPoi" +  index_number + "'><td data-name='del'><button name='del' id='del' class='btn-xs btn-danger glyphicon glyphicon-remove row-remove' onClick='remove_row(" + index_number + ")'></button></td><td>" +addr1+"</td><td>"+nlon+"</td><td>"+nlat+"</td><td><input type='text' class='form-control' name='numpassenger' value='1'></td><td class='markerInfo' style='display:none'>"+addr+":"+nlon+":"+nlat+"</td></tr>";
 
           if (flag == "a"){
             $('#addPoi').append(tempHtmlAdd)
@@ -506,9 +468,9 @@
           temp.push (addr,addr1,lon,lat)
           //a.push(addr,nlon,nlat)
 
-          tempHtmlStart = "<td>"+addr1+"</td><td class='lon'>"+lon+"</td><td class='lat'>"+lat+"</td><td id='markerStart' style='display:none'>"+addr+":"+lon+":"+lat+"</td>";
-          tempHtmlEnd = "<td>"+addr1+"</td><td class='lon'>"+lon+"</td><td class='lat'>"+lat+"</td><td id='markerEnd' style='display:none'>"+addr+":"+lon+":"+lat+"</td>";
-          tempHtmlAdd = "<tr id='addPoi" +  index_number + "'><td data-name='del'><button name='del' id='del' class='btn-xs btn-danger glyphicon glyphicon-remove row-remove' onClick='remove_row(" + index_number + ")'></button></td><td>" +addr1+"</td><td>"+lon+"</td><td>"+lat+"</td><td class='markerInfo' style='display:none'>"+addr+":"+lon+":"+lat+"</td></tr>";
+          tempHtmlStart = "<td>"+addr1+"</td><td class='lon'>"+lon+"</td><td class='lat'>"+lat+"</td><td>...</td><td id='markerStart' style='display:none'>"+addr+":"+lon+":"+lat+"</td>";
+          tempHtmlEnd = "<td>"+addr1+"</td><td class='lon'>"+lon+"</td><td class='lat'>"+lat+"</td><td>...</td><td id='markerEnd' style='display:none'>"+addr+":"+lon+":"+lat+"</td>";
+          tempHtmlAdd = "<tr id='addPoi" +  index_number + "'><td data-name='del'><button name='del' id='del' class='btn-xs btn-danger glyphicon glyphicon-remove row-remove' onClick='remove_row(" + index_number + ")'></button></td><td>" +addr1+"</td><td>"+lon+"</td><td>"+lat+"</td><td><intput type='text' class='form-control' name='numpassenger' value='1'></td><td class='markerInfo' style='display:none'>"+addr+":"+lon+":"+lat+"</td></tr>";
 
           if (flag == "a"){
             $('#addPoi').append(tempHtmlAdd)
