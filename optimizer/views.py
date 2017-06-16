@@ -24,11 +24,21 @@ from graph import PoiGraph, prim, travelling_salesman
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
+def cmp_viapoints(a, b):
+    if a['index'] > b['index']:
+        return 1
+    elif a['index'] == b['index']:
+        return 0
+    else:
+        return -1
+
 @csrf_exempt
 def getRoute(request):
     g = PoiGraph()
+    result = None
 
     algorithm = request.GET.get('algorithm')
+    onlytime = request.GET.get('onlytime')
 
     received_json_data = json.loads(request.body)
 
@@ -39,10 +49,20 @@ def getRoute(request):
      
 
     g.set_everyweight()
-    if (algorithm == 'salesman'):
-        result = travelling_salesman(g, g.get_vertex(received_json_data['startName']), g.get_vertex(received_json_data['endName']))
+   
+    if (onlytime == 'true'):
+        result = list()
+        result.append(received_json_data['startName'])
+        viaPoints = received_json_data['viaPoints']
+        viaPoints.sort(cmp_viapoints)
+        for viaPoint in viaPoints:
+            result.append(viaPoint['viaPointName'])
+        result.append(received_json_data['endName'])
     else:
-    	result = prim(g, g.get_vertex(received_json_data['startName']), g.get_vertex(received_json_data['endName']))
+    	if (algorithm == 'salesman'):
+        	result = travelling_salesman(g, g.get_vertex(received_json_data['startName']), g.get_vertex(received_json_data['endName']))
+    	else:
+    		result = prim(g, g.get_vertex(received_json_data['startName']), g.get_vertex(received_json_data['endName']))
 
     jsonobj = g.get_json(result)
     return HttpResponse(jsonobj)
