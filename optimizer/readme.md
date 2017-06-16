@@ -16,6 +16,7 @@
 |      Name        | DataType                     | Mandatory          | Example    | Default | Description |
 | ---------------- | ---------------------------- | ------------------ | ---------- | ------- | ----------- | 
 | algorithm | `String`            | N | salesman | prim | 길찾기 알고리즘  |
+| onlytime | `String`             | N | true     | false | true 인 경우 algorithm 과 상관없이 주어진 순서에 해당하는 소요시간만 return | 
 
 
 + Request Payload
@@ -30,7 +31,8 @@
 | endY | `String`            | Y | 4494878.084352 |  | 도착지 Y좌표: 위도 |
 | viaPoints | `Node`            | Y |  |  | 경유지 목록 입니다. 목록 전체는 대괄호[] 각각의 리스트는 중괄호{}로 묶습니다. |
 | viaPointName | `String`            | Y | test01 |  | 경유지 명칭 |
-| viaPointX | `String`            | Y | 14148809.322692 |  | 경유지 X좌표 |
+| index | `Number`               | N | 1 | | 경유 순서 (onlytime=true 인 경우에만 사용) |
+| viaPointX | `String`          | Y | 14148809.322692 |  | 경유지 X좌표 |
 | viaPointY | `String`            | Y | 4493197.096773 |  | 경유지 Y좌표 |
 
 + Request Sample Code
