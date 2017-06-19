@@ -74,11 +74,12 @@
                                         </select>
                                         <label>time</label><input type="text" name="time" class="form-control">
                                         <label>Branch</label>
-                                        <select class="form-control" name="bid">
-                                                <option value="1" selected>위례신도시</option>
-                                                <option value="2">미사신도시</option>
-                                                <option value="5">분당</option>
-                                        </select>
+                                          <select class="form-control" name="bid">
+                                        <option value="" selected>지점선택</option>
+                                      {% for b in branch %}
+                                        <option value="{{b.id}}">{{b.bname}}</option>
+                                      {% endfor %}
+                                    </select>
                                         <br>
                                         <textarea class="form-control" cols="20" name="schedule" rows="10"></textarea>
                                     </div>
@@ -285,6 +286,11 @@
     }
 
     function deleteSchedule(sid) {
+      var x = confirm("정말 삭제하세요?");
+      if (x)
+        return true;
+      else
+        return false;
         $.ajax({
             url: "/deleteSchedule",
             type: "POST",
