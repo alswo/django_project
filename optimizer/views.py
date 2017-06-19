@@ -20,28 +20,55 @@ import json
 import logging
 import collections
 import sys
-from graph import PoiGraph, prim, travelling_salesman
+from graph import PoiGraph, prim, travelling_salesman, mintime_passenger, standard_deviation
 reload(sys)
 sys.setdefaultencoding('utf-8')
+
+def cmp_viapoints(a, b):
+    if a['index'] > b['index']:
+        return 1
+    elif a['index'] == b['index']:
+        return 0
+    else:
+        return -1
 
 @csrf_exempt
 def getRoute(request):
     g = PoiGraph()
+    result = None
 
     algorithm = request.GET.get('algorithm')
 
     received_json_data = json.loads(request.body)
-    g.add_vertex(received_json_data['startName'], received_json_data['startX'], received_json_data['startY'])
+
+    g.add_vertex(received_json_data['startName'], received_json_data['startX'], received_json_data['startY'], 0)
     for viaPoint in received_json_data['viaPoints']:
-        g.add_vertex(viaPoint['viaPointName'], viaPoint['viaPointX'], viaPoint['viaPointY'])
-    g.add_vertex(received_json_data['endName'], received_json_data['endX'], received_json_data['endY'])
+        g.add_vertex(viaPoint['viaPointName'], viaPoint['viaPointX'], viaPoint['viaPointY'], viaPoint['viaPointNumPassenger'])
+    g.add_vertex(received_json_data['endName'], received_json_data['endX'], received_json_data['endY'], 0)
      
 
     g.set_everyweight()
-    if (algorithm == 'salesman'):
+
+
+   
+    if (algorithm == 'onlytime'):
+        result = list()
+        result.append(received_json_data['startName'])
+        viaPoints = received_json_data['viaPoints']
+        viaPoints.sort(cmp_viapoints)
+        for viaPoint in viaPoints:
+            result.append(viaPoint['viaPointName'])
+        result.append(received_json_data['endName'])
+    elif (algorithm == 'salesman'):
         result = travelling_salesman(g, g.get_vertex(received_json_data['startName']), g.get_vertex(received_json_data['endName']))
+    elif (algorithm == 'mintime'):
+        result = mintime_passenger(g, g.get_vertex(received_json_data['startName']), g.get_vertex(received_json_data['endName']))
+    elif (algorithm == 'deviation'):
+        result = standard_deviation(g, g.get_vertex(received_json_data['startName']), g.get_vertex(received_json_data['endName']))
     else:
     	result = prim(g, g.get_vertex(received_json_data['startName']), g.get_vertex(received_json_data['endName']))
+
+    #return HttpResponse(result)
 
     jsonobj = g.get_json(result)
     return HttpResponse(jsonobj)
