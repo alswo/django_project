@@ -6,8 +6,7 @@
   <meta charset="UTF-8">
   <title>TAYO</title>
   <script src="{% static 'js/jquery-3.1.0.min.js' %}"></script>
-  <script src="https://apis.skplanetx.com/tmap/js?version=1&format=javascript&appKey=9c78e49d-c72c-36a6-8e25-5c249e9291a3
-"></script>
+  <script src='https://apis.skplanetx.com/tmap/js?version=1&format=javascript&appKey=9c78e49d-c72c-36a6-8e25-5c249e9291a3'></script>
   <script type="text/javascript" src="{% static 'js/graph.js' %}"></script>
   <script type="text/javascript" src="{% static 'js/bootstrap.min.js' %}"></script>
   <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
@@ -113,9 +112,9 @@
         <div class="col-md-5">
         </div>
         <div class="col-md-7">
-          <button type="button" class="btn btn-primary" onclick="getOptimized();">노드계산</button>
-          <button type="button" type="button" class="btn btn-success" data-toggle="modal" data-target="#myModal" onclick="getOpti();">최적동선 찾기</button>
-          <!--button type="button" type="button" class="btn btn-success" data-toggle="modal" data-target="#myModal" onclick="getRoute();">최적동선 찾기</button//-->
+          <!-- button type="button" class="btn btn-primary" onclick="getOptimized();">노드계산</button>
+          <button type="button" class="btn btn-success" data-toggle="modal" data-target="#myModal" onclick="getOpti();">최적동선 찾기</button //-->
+          <button type="button" class="btn btn-success" data-toggle="modal" data-target="#myModal" onclick="getRoute();">최적동선 찾기</button-->
         </div>
       </div>
 
@@ -213,8 +212,7 @@
     target.appendChild(node_tr);
     target.appendChild(node_td);
 
-    //tempHtmlAdd = "<tr id='addPoi" +  index_number + "'><td data-name='del'><button name='del' id='del' class='btn-xs btn-danger glyphicon glyphicon-remove row-remove' onClick='remove_row(" + index_number + ")'></button></td><td>" + "<input class='form-control' type='text' name='addr'>" + "</td><td>"+ position.lon + "</td><td>"+ position.lat + "</td><td><input type='text' class='form-control' name='numpassenger' value='1'></td><td class='markerInfo' style='display:none'>"+ "???" +":"+position.lon +":"+position.lat+"</td></tr>";
-    tempHtmlAdd = "<tr><td data-name='del'><button name='del' id='del' class='btn-xs btn-danger glyphicon glyphicon-remove row-remove'></button></td><td><input class='form-control' type='text' name='addr'></td><td>11</td><td>22</td><td><input type='text' class='form-control' name='numpassenger' value='1'></td><td class='markerInfo' style='display:none'>???</td></tr>";
+    tempHtmlAdd = "<tr id='addPoi" +  index_number + "'><td data-name='del'><button name='del' id='del' class='btn-xs btn-danger glyphicon glyphicon-remove row-remove' onClick='remove_row(" + index_number + ")'></button></td><td>" + "<input class='form-control' type='text' name='addr'>" + "</td><td>"+ Math.round(position.lon) + "</td><td>"+ Math.round(position.lat) + "</td><td><input type='text' class='form-control' name='numpassenger' value='1'></td><td class='markerInfo' style='display:none'>"+ "???" +":"+position.lon +":"+position.lat+"</td></tr>";
     $('#addPoi').append(tempHtmlAdd)
     index_number++;
 
@@ -440,9 +438,9 @@
 
           //a.push(addr,nlon,nlat)
 
-          tempHtmlStart = "<td>"+addr1+"</td><td class='lon'>"+nlon+"</td><td class='lat'>"+nlat+"</td><td>...</td><td id='markerStart' style='display:none'>"+addr+":"+nlon+":"+nlat+"</td>";
-          tempHtmlEnd = "<td>"+addr1+"</td><td class='lon'>"+nlon+"</td><td class='lat'>"+nlat+"</td><td>...</td><td id='markerEnd' style='display:none'>"+addr+":"+nlon+":"+nlat+"</td>";
-          tempHtmlAdd = "<tr id='addPoi" +  index_number + "'><td data-name='del'><button name='del' id='del' class='btn-xs btn-danger glyphicon glyphicon-remove row-remove' onClick='remove_row(" + index_number + ")'></button></td><td>" +addr1+"</td><td>"+nlon+"</td><td>"+nlat+"</td><td><input type='text' class='form-control' name='numpassenger' value='1'></td><td class='markerInfo' style='display:none'>"+addr+":"+nlon+":"+nlat+"</td></tr>";
+          tempHtmlStart = "<td>"+addr1+"</td><td class='lon'>"+Math.round(nlon)+"</td><td class='lat'>"+Math.round(nlat)+"</td><td>...</td><td id='markerStart' style='display:none'>"+addr+":"+nlon+":"+nlat+"</td>";
+          tempHtmlEnd = "<td>"+addr1+"</td><td class='lon'>"+Math.round(nlon)+"</td><td class='lat'>"+Math.round(nlat)+"</td><td>...</td><td id='markerEnd' style='display:none'>"+addr+":"+nlon+":"+nlat+"</td>";
+          tempHtmlAdd = "<tr id='addPoi" +  index_number + "'><td data-name='del'><button name='del' id='del' class='btn-xs btn-danger glyphicon glyphicon-remove row-remove' onClick='remove_row(" + index_number + ")'></button></td><td>" +addr1+"</td><td>"+Math.round(nlon)+"</td><td>"+Math.round(nlat)+"</td><td><input type='text' class='form-control' name='numpassenger' value='1'></td><td class='markerInfo' style='display:none'>"+addr+":"+nlon+":"+nlat+"</td></tr>";
 
           if (flag == "a"){
             $('#addPoi').append(tempHtmlAdd)
@@ -471,9 +469,9 @@
           temp.push (addr,addr1,lon,lat)
           //a.push(addr,nlon,nlat)
 
-          tempHtmlStart = "<td>"+addr1+"</td><td class='lon'>"+lon+"</td><td class='lat'>"+lat+"</td><td>...</td><td id='markerStart' style='display:none'>"+addr+":"+lon+":"+lat+"</td>";
-          tempHtmlEnd = "<td>"+addr1+"</td><td class='lon'>"+lon+"</td><td class='lat'>"+lat+"</td><td>...</td><td id='markerEnd' style='display:none'>"+addr+":"+lon+":"+lat+"</td>";
-          tempHtmlAdd = "<tr id='addPoi" +  index_number + "'><td data-name='del'><button name='del' id='del' class='btn-xs btn-danger glyphicon glyphicon-remove row-remove' onClick='remove_row(" + index_number + ")'></button></td><td>" +addr1+"</td><td>"+lon+"</td><td>"+lat+"</td><td><intput type='text' class='form-control' name='numpassenger' value='1'></td><td class='markerInfo' style='display:none'>"+addr+":"+lon+":"+lat+"</td></tr>";
+          tempHtmlStart = "<td>"+addr1+"</td><td class='lon'>"+Math.round(lon)+"</td><td class='lat'>"+Math.round(lat)+"</td><td>...</td><td id='markerStart' style='display:none'>"+addr+":"+lon+":"+lat+"</td>";
+          tempHtmlEnd = "<td>"+addr1+"</td><td class='lon'>"+Math.round(lon)+"</td><td class='lat'>"+Math.round(lat)+"</td><td>...</td><td id='markerEnd' style='display:none'>"+addr+":"+lon+":"+lat+"</td>";
+          tempHtmlAdd = "<tr id='addPoi" +  index_number + "'><td data-name='del'><button name='del' id='del' class='btn-xs btn-danger glyphicon glyphicon-remove row-remove' onClick='remove_row(" + index_number + ")'></button></td><td>" +addr1+"</td><td>"+Math.round(lon)+"</td><td>"+Math.round(lat)+"</td><td><intput type='text' class='form-control' name='numpassenger' value='1'></td><td class='markerInfo' style='display:none'>"+addr+":"+lon+":"+lat+"</td></tr>";
 
           if (flag == "a"){
             $('#addPoi').append(tempHtmlAdd)
