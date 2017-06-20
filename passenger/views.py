@@ -426,10 +426,16 @@ def dateSchedule(request):
             toD = t.timeToDtype(toDate)
             fromD = t.timeToDtype(fromDate)
             a_name = Academy.objects.get(id = aid).name
+            contacts2 = []
 
+            a_name.strip()
             contacts = ScheduleDate.objects.filter(today__range=[fromD,toD]).filter(a_name__contains = a_name).order_by('today','-time')
-            count = len(contacts)
-            return render_to_response('passenger/viewDateSchedule.html', {"contacts": contacts, "count" : count,'user':request.user})
+            for contact in contacts:
+                anames = contact.a_name.strip().split('&')
+                if (a_name in anames):
+                    contacts2.append(contact)
+            count = len(contacts2)
+            return render_to_response('passenger/viewDateSchedule.html', {"contacts": contacts2, "count" : count,'user':request.user})
 
 @csrf_exempt
 @login_required
