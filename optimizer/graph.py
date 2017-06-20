@@ -418,8 +418,12 @@ def standard_deviation(aGraph, start, end):
         total_percent = 0
         percent_list = list()
         for vertex in reversed(resultset.vertices):
-            deviation = vertex.get_weight(next_vertex) + until_weight - vertex.get_weight(end)
-            percent =  round((deviation *100.0 / vertex.get_weight(end)), 2)
+            if (vertex == end):
+                deviation = 0
+                percent = 0
+            else:
+                deviation = vertex.get_weight(next_vertex) + until_weight - vertex.get_weight(end)
+                percent =  round((deviation *100.0 / vertex.get_weight(end)), 2)
             percent_list.append(percent)
             total_percent += percent
             until_weight += vertex.get_weight(next_vertex)
@@ -479,7 +483,7 @@ if __name__ == '__main__':
 
             
     #result = travelling_salesman(g, g.get_vertex('원마을현대힐스테이트'), g.get_vertex('판교도서관'))
-    result = standard_deviation(g, g.get_vertex('A'), g.get_vertex('D'))
+    result = standard_deviation(g, g.get_vertex('A'), g.get_vertex('A'))
     print result
     #travelling_salesman(g, g.get_vertex('원마을현대힐스테이트'))
 

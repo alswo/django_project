@@ -213,7 +213,8 @@
     target.appendChild(node_tr);
     target.appendChild(node_td);
 
-    tempHtmlAdd = "<tr id='addPoi" +  index_number + "'><td data-name='del'><button name='del' id='del' class='btn-xs btn-danger glyphicon glyphicon-remove row-remove' onClick='remove_row(" + index_number + ")'></button></td><td>" + "<input class='form-control' type='text' name='addr'>" + "</td><td>"+ position.lon + "</td><td>"+ position.lat + "</td><td><input type='text' class='form-control' name='numpassenger' value='1'></td><td class='markerInfo' style='display:none'>"+ "???" +":"+position.lon +":"+position.lat+"</td></tr>";
+    //tempHtmlAdd = "<tr id='addPoi" +  index_number + "'><td data-name='del'><button name='del' id='del' class='btn-xs btn-danger glyphicon glyphicon-remove row-remove' onClick='remove_row(" + index_number + ")'></button></td><td>" + "<input class='form-control' type='text' name='addr'>" + "</td><td>"+ position.lon + "</td><td>"+ position.lat + "</td><td><input type='text' class='form-control' name='numpassenger' value='1'></td><td class='markerInfo' style='display:none'>"+ "???" +":"+position.lon +":"+position.lat+"</td></tr>";
+    tempHtmlAdd = "<tr><td data-name='del'><button name='del' id='del' class='btn-xs btn-danger glyphicon glyphicon-remove row-remove'></button></td><td><input class='form-control' type='text' name='addr'></td><td>11</td><td>22</td><td><input type='text' class='form-control' name='numpassenger' value='1'></td><td class='markerInfo' style='display:none'>???</td></tr>";
     $('#addPoi').append(tempHtmlAdd)
     index_number++;
 
