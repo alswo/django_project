@@ -69,9 +69,10 @@
                                 <label>Branch</label>
                                 <label>Branch</label>
                                 <select class="form-control" name="bid">
-                                        <option value="1" selected>위례신도시</option>
-                                        <option value="2">미사신도시</option>
-                                        <option value="5">분당</option>
+                                        <option value="" selected>지점선택</option>
+                                      {% for b in branch %}
+                                        <option value="{{b.id}}">{{b.bname}}</option>
+                                      {% endfor %}
                                 </select>
                               </select>
                                <br>
@@ -211,6 +212,13 @@
     }
 
     function deleteSchedule(sid){
+
+      var x = confirm("정말 삭제하세요?");
+      if (x)
+        return true;
+      else
+        return false;
+
        $.ajax({
                 url: "/deleteSchedule",
                 type: "POST",
