@@ -138,8 +138,13 @@ def academySchedule(request):
         academy = Academy.objects.get(id = aid)
         bid = academy.bid
         contacts = ShuttleSchedule.objects.filter(bid=bid).filter(a_name__contains = academy.name).filter(day=day).order_by('time')
+        contacts2 = []
 
-        return render_to_response('passenger/academySchedule.html', {"contacts" : contacts, "aid" : aid,'user':request.user})
+        for contact in contacts:
+            if (len(contact.schedule) != 0):
+                contacts2.append(contact)
+
+        return render_to_response('passenger/academySchedule.html', {"contacts" : contacts2, "aid" : aid,'user':request.user})
 
 @login_required
 def driverSchedule(request):
