@@ -109,8 +109,7 @@ def find_update():
 					msg += "\t\t신규 {" + inventory.day + "} [" + scheduletable.time + "] : " + scheduletable.addr + "\n"
 				else :
 					msg += "\t\t변경 {" + inventory.day + "} [" + scheduletable.time + "] : " + scheduletable.addr + "\n"
-		notice_to_student(sid, msg)
-				
-			
+                if (msg != ""):
+		    notice_to_student(sid, msg)
 
 	notice_to_student(0, "end")
