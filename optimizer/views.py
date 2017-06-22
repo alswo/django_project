@@ -43,7 +43,11 @@ def getRoute(request):
 
     g.add_vertex(received_json_data['startName'], received_json_data['startX'], received_json_data['startY'], 0)
     for viaPoint in received_json_data['viaPoints']:
-        g.add_vertex(viaPoint['viaPointName'], viaPoint['viaPointX'], viaPoint['viaPointY'], viaPoint['viaPointNumPassenger'])
+        if 'viaPoints' not in viaPoint:
+            numPassenger = '1'
+        else:
+            numPassenger = viaPoint['viaPointNumPassenger']
+        g.add_vertex(viaPoint['viaPointName'], viaPoint['viaPointX'], viaPoint['viaPointY'], numPassenger)
     g.add_vertex(received_json_data['endName'], received_json_data['endX'], received_json_data['endY'], 0)
      
 

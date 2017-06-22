@@ -423,7 +423,10 @@ def standard_deviation(aGraph, start, end):
                 percent = 0
             else:
                 deviation = vertex.get_weight(next_vertex) + until_weight - vertex.get_weight(end)
-                percent =  round((deviation *100.0 / vertex.get_weight(end)), 2)
+                if (vertex.get_weight(end) == 0):
+                    percent = 1
+                else:
+                    percent =  round((deviation *100.0 / vertex.get_weight(end)), 2)
             percent_list.append(percent)
             total_percent += percent
             until_weight += vertex.get_weight(next_vertex)
