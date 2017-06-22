@@ -471,7 +471,7 @@
 
           tempHtmlStart = "<td>"+addr1+"</td><td class='lon'>"+Math.round(lon)+"</td><td class='lat'>"+Math.round(lat)+"</td><td>...</td><td id='markerStart' style='display:none'>"+addr+":"+lon+":"+lat+"</td>";
           tempHtmlEnd = "<td>"+addr1+"</td><td class='lon'>"+Math.round(lon)+"</td><td class='lat'>"+Math.round(lat)+"</td><td>...</td><td id='markerEnd' style='display:none'>"+addr+":"+lon+":"+lat+"</td>";
-          tempHtmlAdd = "<tr id='addPoi" +  index_number + "'><td data-name='del'><button name='del' id='del' class='btn-xs btn-danger glyphicon glyphicon-remove row-remove' onClick='remove_row(" + index_number + ")'></button></td><td>" +addr1+"</td><td>"+Math.round(lon)+"</td><td>"+Math.round(lat)+"</td><td><intput type='text' class='form-control' name='numpassenger' value='1'></td><td class='markerInfo' style='display:none'>"+addr+":"+lon+":"+lat+"</td></tr>";
+          tempHtmlAdd = "<tr id='addPoi" +  index_number + "'><td data-name='del'><button name='del' id='del' class='btn-xs btn-danger glyphicon glyphicon-remove row-remove' onClick='remove_row(" + index_number + ")'></button></td><td>" +addr1+"</td><td>"+Math.round(lon)+"</td><td>"+Math.round(lat)+"</td><td><input type='text' class='form-control' name='numpassenger' value='1'></td><td class='markerInfo' style='display:none'>"+addr+":"+lon+":"+lat+"</td></tr>";
 
           if (flag == "a"){
             $('#addPoi').append(tempHtmlAdd)
