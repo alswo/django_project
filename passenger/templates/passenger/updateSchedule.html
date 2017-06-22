@@ -212,24 +212,24 @@
     }
 
     function deleteSchedule(sid){
-
       var x = confirm("정말 삭제하세요?");
-      if (x)
-        return true;
-      else
+      if (x){
+        $.ajax({
+               url: "/deleteSchedule",
+               type: "POST",
+               data: {
+                       sid: sid,
+                     },
+               success: function(data){
+                       alert(data)
+                       window.location.reload();
+               }
+           });
+      }
+      else{
         return false;
+      }
 
-       $.ajax({
-                url: "/deleteSchedule",
-                type: "POST",
-                data: {
-                        sid: sid,
-                      },
-                success: function(data){
-                        alert(data)
-                        window.location.reload();
-                }
-            });
     }
 
     function driverSchedule(sid){

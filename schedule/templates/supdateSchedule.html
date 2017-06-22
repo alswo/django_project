@@ -418,9 +418,11 @@
         return false;
       }
 
-      else if(num.test(document.forms["searchform"]["time"].value) == false ){
-        alert("시간은 숫자만 입력해 주세요.(예:1500)")
-        return false;
+      else if(document.forms["searchform"]["time"].value != '' ){
+        if(num.test(document.forms["searchform"]["time"].value) == false ){
+          alert("시간은 숫자만 입력해 주세요.(예:1500)")
+          return false;
+        }
       }
   }
 

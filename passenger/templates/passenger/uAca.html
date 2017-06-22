@@ -287,10 +287,7 @@
 
     function deleteSchedule(sid) {
       var x = confirm("정말 삭제하세요?");
-      if (x)
-        return true;
-      else
-        return false;
+      if (x){
         $.ajax({
             url: "/deleteSchedule",
             type: "POST",
@@ -302,6 +299,11 @@
                 window.location.reload();
             }
         });
+      }
+      else{
+        return false;
+      }
+
     }
 
     function doMemo(clas, mid) {
