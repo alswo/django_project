@@ -921,7 +921,7 @@ def setRealtimeLocation(request):
         schedule_time = request.GET.get('schedule_time')
         t = timeToDate()
         today = t.timeToYmd()
-        current_time = t.timeToHM()
+        current_time = t.timeToHMS()
 
         RealtimeLocation.objects.create(carnum=carnum, schedule_time=schedule_time, date=today, departure_time=current_time)
 
