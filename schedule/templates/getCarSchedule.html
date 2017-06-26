@@ -7,6 +7,7 @@
     <script src="{% static 'js/bootstrap.min.js' %}"></script>
     <link href="{% static 'css/timeline.css' %}" rel="stylesheet">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <style>
 .thstyle3 {
   text-align: center;
@@ -23,6 +24,14 @@ li {
 
 .dropdown-toggle {
   font-size: 20;
+}
+
+.departure-button {
+  font-size: 20;
+  background-color: #FFFFFF;
+  border: 2px solid #1DAD68; /* Green */
+  color: #1DAD68;
+  opacity: 1.0;
 }
 
 .btn {
@@ -90,7 +99,7 @@ function callNumber(num){
                     <tr class="alert alert-danger">
                     {% endif %}
                     {% if s.lflag == 0 or s.lflag == 1 %}
-                        <td>{{s.time}}</td>
+                        <td><button type="button" class="load btn btn-space departure-button" id="departurebutton{{c.id}}_{{forloop.counter}}" onclick="setRealtimeLocation(this, {{c.carnum}}, '{{s.time}}');" disabled>{{s.time}}</button></td>
                         <td><strong>{{s.addr}}</strong></td>
                         <td>
                           {% for f in s.tflag %}
@@ -114,14 +123,14 @@ function callNumber(num){
                     {% endif %}
                     {% if s.lflag == 2 %}
                     <tr>
-                        <td>{{s.time}}</td>
+                        <td><button type="button" class="load btn btn-space departure-button" id="departurebutton{{c.id}}_{{forloop.counter}}" onclick="setRealtimeLocation(this, {{c.carnum}}, '{{s.time}}');">{{s.time}}</button></td>
                         <td>출발</td>
                         <td></td>
                     </tr>
                     {% endif %}
                     {% if s.lflag == 3 %}
                     <tr>
-                        <td>{{s.time}}</td>
+                        <td><button type="button" class="load btn btn-space departure-button" id="departurebutton{{c.id}}_{{forloop.counter}}" onclick="setRealtimeLocation(this, {{c.carnum}}, '{{s.time}}');" disabled>{{s.time}}</button></td>
                         <td>도착</td>
                         <td></td>
                     </tr>
@@ -173,6 +182,100 @@ setInterval(function(){blink()}, 1000);
 
 function blink() {
         $(".blink").fadeTo(100, 0.1).fadeTo(200, 1.0);
+}
+
+// equivalent to $(document).ready()
+$(function () {
+   var postindex = -1;
+   if ("{{realtimelocation.schedule_time}}" == "") {
+      return;
+   }
+   $(".departure-button").each(function(i, obj) {
+      if (obj.innerHTML <= "{{realtimelocation.schedule_time}}") {
+          if (obj.innerHTML == "{{realtimelocation.schedule_time}}") {
+              obj.innerHTML += " <i class=\"fa fa-bus\"></i>";
+              postindex = i;
+          }
+          obj.style.backgroundColor = 'rgb(29, 173, 104)';
+          obj.style.color = "#FFFFFF";
+          obj.style.opacity = 1.0;
+          obj.disabled = true;
+      }
+      else if (postindex != -1 && i == postindex + 1) {
+          obj.disabled = false;
+      }
+   });
+});
+
+var curtime;
+function setRealtimeLocation(element, carnum, schedule_time) {
+   var elementid = element.id;
+   var elementids = elementid.split('_');
+   var opacity_ratio = 1.0;
+   var bgcolor = 'rgb(29, 173, 104)';
+
+   // 이미 click 된 상태면 return
+   if (element.style.backgroundColor == bgcolor) {
+       if (Date.now() >= lastfiretime + 10000) {
+           return;
+       }
+       element.style.backgroundColor = '#FFFFFF';
+       element.style.color = "#1DAD68";
+       element.style.opacity = opacity_ratio;
+       element.innerHTML = element.innerHTML.replace(" <i class=\"fa fa-bus\"></i>", "");
+
+       elem = document.getElementById(elementids[0] + '_' + (parseInt(elementids[1]) - 1));
+       if (elem) {
+           elem.innerHTML += " <i class=\"fa fa-bus\"></i>";
+       }
+       clearTimeout(curtime);
+
+       elem = document.getElementById(elementids[0] + '_' + (parseInt(elementids[1]) + 1));
+       if (elem) {
+           elem.disabled = true;
+       }
+       return;
+   }
+   
+   // 앞의 정류장들이 모두 click 되어야 진행
+   for (i=1; i<elementids[1]; i++) {
+       if (document.getElementById(elementids[0] + '_' + i).style.backgroundColor != bgcolor) {
+           return;
+       }
+   }
+
+   var i=0;
+   for (i=1; i<elementids[1]; i++) {
+       elem = document.getElementById(elementids[0] + '_' + i);
+       if (elem.style.backgroundColor == bgcolor) {
+           elem.innerHTML = elem.innerHTML.replace(" <i class=\"fa fa-bus\"></i>", "");
+           elem.disabled = true;
+       }
+   }
+   if (element.style.backgroundColor != bgcolor) {
+       element.style.backgroundColor = bgcolor;
+       element.style.color = "#FFFFFF";
+       element.style.opacity = opacity_ratio;
+       element.innerHTML += " <i class=\"fa fa-bus\"></i>";
+   }
+   elem = document.getElementById(elementids[0] + '_' + (i + 1));
+   if (elem) {
+       elem.disabled = false;
+   }
+
+   curtime = setTimeout(function() {
+       $.ajax({
+           url: "/inventory/setRealtimeLocation",
+           type: "GET",
+           data: {
+               carnum: carnum,
+               schedule_time: schedule_time,
+           },
+           success: function(data) {
+           }
+       });
+   }, 12000);
+   lastfiretime = Date.now();
 }
 
 
