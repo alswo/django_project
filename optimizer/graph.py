@@ -145,9 +145,9 @@ class PoiGraph(Graph):
 
                 self.add_edge(v, n, weight)
 
-    def get_json(self, routes):
+    def get_json(self, objparam, routes):
         total_weight = 0
-        obj = {}
+        obj = objparam
         obj['features'] = list()
         obj['properties'] = {}
         obj['type'] = "FeatureCollection"

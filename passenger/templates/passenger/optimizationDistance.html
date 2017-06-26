@@ -153,6 +153,7 @@
   var map;
   var mapW, mapH; // 지도의 가로, 세로 크기(Pixel단위) 를 지정 합니다.
   var cLonLat, zoom; //중심 좌표와 지도레벨을 정의 합니다.
+  var routeLayer;
 
   function setVariables() {
     cLonLat = new Tmap.LonLat();
@@ -342,9 +343,10 @@
         vertexInfo = $('.markerInfo')[i].innerText.split(':');
         jsonObj['viaPoints'][i] = {};
         jsonObj['viaPoints'][i]['viaPointName'] = vertexInfo[0];
+        jsonObj['viaPoints'][i]['viaPointId'] = vertexInfo[0];
         jsonObj['viaPoints'][i]['index'] = i;
-        jsonObj['viaPoints'][i]['viaPointX'] = vertexInfo[1];
-        jsonObj['viaPoints'][i]['viaPointY'] = vertexInfo[2];
+        jsonObj['viaPoints'][i]['viaX'] = vertexInfo[1];
+        jsonObj['viaPoints'][i]['viaY'] = vertexInfo[2];
         jsonObj['viaPoints'][i]['viaPointNumPassenger'] = $('.markerInfo')[i].parentNode.childNodes[4].firstChild.value;
 
         if (jsonObj['viaPoints'][i]['viaPointName'] == '???') {
@@ -374,6 +376,39 @@
           }
           appendHtml += '<br>' + result['features'][i]['viaPointName'];
           doc.innerHTML = appendHtml + '&nbsp&nbsp' + ' <span class="glyphicon glyphicon-time" aria-hidden="true"></span> : ' + Math.floor(parseInt(result['properties']['totalTime']) / 60) + 'M';
+
+
+          jsonObj['viaPoints'] = [];
+          var passList = "";
+          for (i=0; i < result['features'].length - 1; i++) {
+              result['features'][i]['viaPointName']
+              for (j=0; j < $('.markerInfo').length; j++) {
+                  vertexInfo = $('.markerInfo')[j].innerText.split(':');
+                  if (result['features'][i]['viaPointName'] === vertexInfo[0]
+                      || result['features'][i]['viaPointName'] === $('.markerInfo')[j].parentNode.childNodes[1].firstChild.value) {
+                      passList += vertexInfo[1] + "," + vertexInfo[2] + ",A,0_";
+                  }
+              }
+          }
+
+          var urlStr = 'https://apis.skplanetx.com/tmap/multiViaPointRoute?version=1&format=xml';
+          urlStr += "&startX=" + jsonObj['startX'];
+          urlStr += "&startY=" + jsonObj['startY'];
+          urlStr += "&endX=" + jsonObj['endX'];
+          urlStr += "&endY=" + jsonObj['endY'];
+          urlStr += "&appKey=9c78e49d-c72c-36a6-8e25-5c249e9291a3&reqCoordType=EPSG3857";
+          urlStr += "&passList=" + passList;
+          var xmlObj = new Tmap.Format.KML({extractStyles:true, extractAttributes:true});
+          prtcl = new Tmap.Protocol.HTTP({
+              url: urlStr,
+              format: xmlObj
+          });
+          if (routeLayer) {
+              map.removeLayer(routeLayer, false);
+          }
+          routeLayer = new Tmap.Layer.Vector("route", {protocol:prtcl, strategies:[new Tmap.Strategy.Fixed()]});
+          routeLayer.events.register("featuresadded", routeLayer, onDrawnFeatures);
+          map.addLayer(routeLayer);
       }
     };
 
@@ -387,7 +422,7 @@
         algorithm = "";
     }
     console.log("algorithm = " + algorithm);
-    xmlhttp.open("POST", "http://curtis-tayotayo.edticket.com/optimizer/getRoute?algorithm=" + algorithm);
+    xmlhttp.open("POST", "/optimizer/getRoute?algorithm=" + algorithm);
     xmlhttp.setRequestHeader("Content-Type", "application/json");
     xmlhttp.send(JSON.stringify(jsonObj));
 
@@ -395,6 +430,11 @@
 
     return;
   }
+
+//경로 그리기 후 해당영역으로 줌
+function onDrawnFeatures(e){
+    map.zoomToExtent(this.getDataExtent());
+}
 
 
   function getPoi() {
