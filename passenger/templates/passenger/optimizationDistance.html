@@ -311,7 +311,7 @@
 
     for (var i = 0; i < result.length; i++) {
       if (i < result.length - 1) {
-        temp += '<br>' + result[i] + '(' + source_result[result_j] + ')' + '<br>';
+        temp += '<br>' + result[i] + '(' + Math.floor(source_result[result_j] / 6) / 10 + ' M)' + '<br>';
       } else {
         temp += '<br>' + result[i]
       }
@@ -372,7 +372,7 @@
           appendHtml = "";
           for (i=0; i < result['features'].length - 1; i++) {
              appendHtml += '<br>' + result['features'][i]['viaPointName'];
-             appendHtml += '(' + result['features'][i+1]['requiredTime'] + ')<br>';
+             appendHtml += '(' + Math.floor(result['features'][i+1]['requiredTime'] / 6) / 10 + ' M)<br>';
           }
           appendHtml += '<br>' + result['features'][i]['viaPointName'];
           doc.innerHTML = appendHtml + '&nbsp&nbsp' + ' <span class="glyphicon glyphicon-time" aria-hidden="true"></span> : ' + Math.floor(parseInt(result['properties']['totalTime']) / 60) + 'M';
