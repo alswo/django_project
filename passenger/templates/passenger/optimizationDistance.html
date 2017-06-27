@@ -153,6 +153,7 @@
   var map;
   var mapW, mapH; // 지도의 가로, 세로 크기(Pixel단위) 를 지정 합니다.
   var cLonLat, zoom; //중심 좌표와 지도레벨을 정의 합니다.
+  var routeLayer;
 
   function setVariables() {
     cLonLat = new Tmap.LonLat();
@@ -310,7 +311,7 @@
 
     for (var i = 0; i < result.length; i++) {
       if (i < result.length - 1) {
-        temp += '<br>' + result[i] + '(' + source_result[result_j] + ')' + '<br>';
+        temp += '<br>' + result[i] + '(' + Math.floor(source_result[result_j] / 6) / 10 + ' M)' + '<br>';
       } else {
         temp += '<br>' + result[i]
       }
@@ -342,9 +343,10 @@
         vertexInfo = $('.markerInfo')[i].innerText.split(':');
         jsonObj['viaPoints'][i] = {};
         jsonObj['viaPoints'][i]['viaPointName'] = vertexInfo[0];
+        jsonObj['viaPoints'][i]['viaPointId'] = vertexInfo[0];
         jsonObj['viaPoints'][i]['index'] = i;
-        jsonObj['viaPoints'][i]['viaPointX'] = vertexInfo[1];
-        jsonObj['viaPoints'][i]['viaPointY'] = vertexInfo[2];
+        jsonObj['viaPoints'][i]['viaX'] = vertexInfo[1];
+        jsonObj['viaPoints'][i]['viaY'] = vertexInfo[2];
         jsonObj['viaPoints'][i]['viaPointNumPassenger'] = $('.markerInfo')[i].parentNode.childNodes[4].firstChild.value;
 
         if (jsonObj['viaPoints'][i]['viaPointName'] == '???') {
@@ -370,10 +372,43 @@
           appendHtml = "";
           for (i=0; i < result['features'].length - 1; i++) {
              appendHtml += '<br>' + result['features'][i]['viaPointName'];
-             appendHtml += '(' + result['features'][i+1]['requiredTime'] + ')<br>';
+             appendHtml += '(' + Math.floor(result['features'][i+1]['requiredTime'] / 6) / 10 + ' M)<br>';
           }
           appendHtml += '<br>' + result['features'][i]['viaPointName'];
           doc.innerHTML = appendHtml + '&nbsp&nbsp' + ' <span class="glyphicon glyphicon-time" aria-hidden="true"></span> : ' + Math.floor(parseInt(result['properties']['totalTime']) / 60) + 'M';
+
+
+          jsonObj['viaPoints'] = [];
+          var passList = "";
+          for (i=0; i < result['features'].length - 1; i++) {
+              result['features'][i]['viaPointName']
+              for (j=0; j < $('.markerInfo').length; j++) {
+                  vertexInfo = $('.markerInfo')[j].innerText.split(':');
+                  if (result['features'][i]['viaPointName'] === vertexInfo[0]
+                      || result['features'][i]['viaPointName'] === $('.markerInfo')[j].parentNode.childNodes[1].firstChild.value) {
+                      passList += vertexInfo[1] + "," + vertexInfo[2] + ",A,0_";
+                  }
+              }
+          }
+
+          var urlStr = 'https://apis.skplanetx.com/tmap/multiViaPointRoute?version=1&format=xml';
+          urlStr += "&startX=" + jsonObj['startX'];
+          urlStr += "&startY=" + jsonObj['startY'];
+          urlStr += "&endX=" + jsonObj['endX'];
+          urlStr += "&endY=" + jsonObj['endY'];
+          urlStr += "&appKey=9c78e49d-c72c-36a6-8e25-5c249e9291a3&reqCoordType=EPSG3857";
+          urlStr += "&passList=" + passList;
+          var xmlObj = new Tmap.Format.KML({extractStyles:true, extractAttributes:true});
+          prtcl = new Tmap.Protocol.HTTP({
+              url: urlStr,
+              format: xmlObj
+          });
+          if (routeLayer) {
+              map.removeLayer(routeLayer, false);
+          }
+          routeLayer = new Tmap.Layer.Vector("route", {protocol:prtcl, strategies:[new Tmap.Strategy.Fixed()]});
+          routeLayer.events.register("featuresadded", routeLayer, onDrawnFeatures);
+          map.addLayer(routeLayer);
       }
     };
 
@@ -387,7 +422,7 @@
         algorithm = "";
     }
     console.log("algorithm = " + algorithm);
-    xmlhttp.open("POST", "http://curtis-tayotayo.edticket.com/optimizer/getRoute?algorithm=" + algorithm);
+    xmlhttp.open("POST", "/optimizer/getRoute?algorithm=" + algorithm);
     xmlhttp.setRequestHeader("Content-Type", "application/json");
     xmlhttp.send(JSON.stringify(jsonObj));
 
@@ -395,6 +430,11 @@
 
     return;
   }
+
+//경로 그리기 후 해당영역으로 줌
+function onDrawnFeatures(e){
+    map.zoomToExtent(this.getDataExtent());
+}
 
 
   function getPoi() {
@@ -471,7 +511,7 @@
 
           tempHtmlStart = "<td>"+addr1+"</td><td class='lon'>"+Math.round(lon)+"</td><td class='lat'>"+Math.round(lat)+"</td><td>...</td><td id='markerStart' style='display:none'>"+addr+":"+lon+":"+lat+"</td>";
           tempHtmlEnd = "<td>"+addr1+"</td><td class='lon'>"+Math.round(lon)+"</td><td class='lat'>"+Math.round(lat)+"</td><td>...</td><td id='markerEnd' style='display:none'>"+addr+":"+lon+":"+lat+"</td>";
-          tempHtmlAdd = "<tr id='addPoi" +  index_number + "'><td data-name='del'><button name='del' id='del' class='btn-xs btn-danger glyphicon glyphicon-remove row-remove' onClick='remove_row(" + index_number + ")'></button></td><td>" +addr1+"</td><td>"+Math.round(lon)+"</td><td>"+Math.round(lat)+"</td><td><intput type='text' class='form-control' name='numpassenger' value='1'></td><td class='markerInfo' style='display:none'>"+addr+":"+lon+":"+lat+"</td></tr>";
+          tempHtmlAdd = "<tr id='addPoi" +  index_number + "'><td data-name='del'><button name='del' id='del' class='btn-xs btn-danger glyphicon glyphicon-remove row-remove' onClick='remove_row(" + index_number + ")'></button></td><td>" +addr1+"</td><td>"+Math.round(lon)+"</td><td>"+Math.round(lat)+"</td><td><input type='text' class='form-control' name='numpassenger' value='1'></td><td class='markerInfo' style='display:none'>"+addr+":"+lon+":"+lat+"</td></tr>";
 
           if (flag == "a"){
             $('#addPoi').append(tempHtmlAdd)

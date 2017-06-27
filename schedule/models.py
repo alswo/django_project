@@ -111,3 +111,9 @@ class Building(models.Model):
     name = models.CharField(max_length=20)
     lon = models.FloatField()
     lat = models.FloatField()
+
+class RealtimeLocation(models.Model):
+    carnum = models.IntegerField()
+    date = models.CharField(max_length=10)
+    schedule_time = models.CharField(max_length=10)
+    departure_time = models.CharField(max_length=10)

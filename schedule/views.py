@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from django.shortcuts import render_to_response, redirect
 from django.template import RequestContext
-from schedule.models import HistoryScheduleTable, Inventory, ScheduleTable, Building, Branch, InventoryRequest, Area, Car
+from schedule.models import HistoryScheduleTable, Inventory, ScheduleTable, Building, Branch, InventoryRequest, Area, Car, RealtimeLocation
 from passenger.models import Academy, Group, StudentInfo, Profile
 from django.db.models import Q
 from django.views.decorators.csrf import csrf_exempt
@@ -98,6 +98,10 @@ def getSchedule(request):
         day = request.GET.get('day')
         uid = request.user.id
 
+        t = timeToDate()
+        today = t.timeToYmd()
+        realtimelocation = RealtimeLocation.objects.filter(date=today, carnum=car).order_by('schedule_time').last()
+
         if request.user.is_staff:
             invens = Inventory.objects.filter(bid = bid).filter(alist__contains = [aid]).filter(day = day)
             list_invensid = []
@@ -115,7 +119,7 @@ def getSchedule(request):
                 for i in invens:
                     contacts.extend(Inventory.objects.filter(id = i.id).prefetch_related('scheduletables'))
 
-                return render_to_response('getCarSchedule.html', {"contacts": contacts,"car": car, 'user':request.user})
+                return render_to_response('getCarSchedule.html', {"contacts": contacts,"car": car, 'user':request.user, 'realtimelocation':realtimelocation})
 
             return render_to_response('getSchedule.html', {"contacts": contacts, "bid" : bid, "aid" : aid,'user':request.user})
 
@@ -154,7 +158,7 @@ def getSchedule(request):
             for i in invens:
                 contacts.extend(Inventory.objects.filter(id = i.id).prefetch_related('scheduletables'))
 
-            return render_to_response('getCarSchedule.html', {"contacts": contacts,"car": car, 'user':request.user})
+            return render_to_response('getCarSchedule.html', {"contacts": contacts,"car": car, 'user':request.user, 'realtimelocation':realtimelocation})
 
         return HttpResponse('로그인 후 사용해주세요.')
 
@@ -910,3 +914,77 @@ def reqInventory(request):
         inven.save()
 
         return HttpResponse(req)
+
+def setRealtimeLocation(request):
+    if request.method == "GET":
+        carnum = request.GET.get('carnum')
+        schedule_time = request.GET.get('schedule_time')
+        t = timeToDate()
+        today = t.timeToYmd()
+        current_time = t.timeToHMS()
+
+        RealtimeLocation.objects.create(carnum=carnum, schedule_time=schedule_time, date=today, departure_time=current_time)
+
+        return HttpResponse("success")
+
+## time format : HH:MM
+def get_difference(time1, time2):
+    timevar1 = time1.split(':')
+    timevar2 = time2.split(':')
+
+    return int(timevar2[0]) * 60 + int(timevar2[1]) - (int(timevar1[0]) * 60 + int(timevar1[1]))
+
+def format_hm(time):
+    return (time[:2] + ':' + time[2:])
+
+def getRealtimeLocation(request):
+    if request.method == "GET":
+        t = timeToDate()
+        d = t.timeToD()
+        today = t.timeToYmd()
+        rawhm = t.timeToRawHM()
+        hm = t.timeToHM()
+        rawhm = int(request.GET.get('rawhm'))
+        hm = request.GET.get('hm')
+        sid = request.GET.get('sid')
+        sname = request.GET.get('sname')
+        carnum = -1
+        iid = ""
+        siid = ""
+        #expected_time = "00:00"
+
+        if (sname and len(sname) > 0):
+            sids = StudentInfo.objects.filter(sname = sname).values('id')
+            if (len(sids) <= 0):
+                return HttpResponse("해당 사용자가 존재하지 않습니다.")
+            sid = sids[0]['id']
+        else:
+            return HttpResponse("파라미터가 유효하지 않습니다.")
+
+        today_inventories = Inventory.objects.filter(day=d)
+        today_inventory_ids = today_inventories.values('id')
+        scheduletables = ScheduleTable.objects.filter(iid_id__in = today_inventory_ids).filter(slist__contains = [sid]).order_by('-time')
+        if (len(scheduletables) <= 0):
+            return HttpResponse("해당 사용자는 오늘 스케쥴이 없습니다.")
+
+        ## 마지막 스케쥴도 지났으면 (desc order 인 것 주의)
+        if (Inventory.objects.get(id = scheduletables.first().iid_id).etime < rawhm):
+            return HttpResponse("오늘 운행 스케쥴이 종료되었습니다.")
+
+        for scheduletable in scheduletables:
+            inventory = Inventory.objects.get(id = scheduletable.iid_id)
+            format_etime = format_hm(str(inventory.etime))
+            if (inventory.etime > rawhm):
+                ## inventory 중간에 있으면.. 
+                if (inventory.stime < rawhm):
+                    carnum = inventory.carnum
+                    expected_time = scheduletable.time
+                    realtimelocation = RealtimeLocation.objects.filter(date=today, carnum=carnum, departure_time__lte=format_etime).order_by('schedule_time').last()
+                    waittime = get_difference(hm, expected_time) + get_difference(realtimelocation.schedule_time, realtimelocation.departure_time) - 1
+                    return HttpResponse(str(waittime) + "분 후 도착합니다.")
+                ## 다음 inventory 로..
+                else: 
+                    continue
+            ## inventory 사이에..
+            else:
+                return HttpResponse("다음 스케쥴이 아직 시작되지 않았습니다.")

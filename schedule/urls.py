@@ -15,5 +15,7 @@ urlpatterns = patterns('',
     url(r'^getHistory', views.getHistory),
     url(r'^chart', views.chart),
     url(r'^analyze', views.analyze),
-    url(r'^reqInventory', views.reqInventory)
+    url(r'^reqInventory', views.reqInventory),
+    url(r'^setRealtimeLocation', views.setRealtimeLocation),
+    url(r'^getRealtimeLocation', views.getRealtimeLocation)
 )
