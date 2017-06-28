@@ -53,6 +53,18 @@ def opti(request):
     if request.method =="GET":
         return render_to_response('passenger/optimizationDistance.html', {'user':request.user})
 
+@login_required
+@user_passes_test(is_not_driver, login_url='/', redirect_field_name=None)
+def opti_0613(request):
+    if request.method =="GET":
+        return render_to_response('passenger/optimizationDistance.0613.html', {'user':request.user})
+
+@login_required
+@user_passes_test(is_not_driver, login_url='/', redirect_field_name=None)
+def opti_0428(request):
+    if request.method =="GET":
+        return render_to_response('passenger/optimizationDistance.0428.html', {'user':request.user})
+
 @csrf_exempt
 def addSchedule(request):
     if request.method == "POST":
@@ -497,6 +509,7 @@ def community(request):
             c = Community(aname=aname, complain=complain, plan=plan,showdate = toDate,clike=0,dlike=0,disuser=[],disuserid=[],likeuserid=[],likeuser=[])
 
             c.save()
+
 
             contacts = Community.objects.order_by('-id')
 
