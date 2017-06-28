@@ -429,7 +429,7 @@ def dateSchedule(request):
 
         if what == "single":
             a_name = Academy.objects.get(id = aid).name
-            contacts = ScheduleDate.objects.filter(date=date).filter(a_name__contains = a_name).order_by('today','-time')
+            contacts = ScheduleDate.objects.filter(date=date).filter(a_name__contains = a_name).order_by('today','time')
 
             return render_to_response('passenger/viewDateSchedule.html', {"contacts": contacts, "count" : count,'user':request.user})
 
@@ -441,7 +441,7 @@ def dateSchedule(request):
             contacts2 = []
 
             a_name.strip()
-            contacts = ScheduleDate.objects.filter(today__range=[fromD,toD]).filter(a_name__contains = a_name).order_by('today','-time')
+            contacts = ScheduleDate.objects.filter(today__range=[fromD,toD]).filter(a_name__contains = a_name).order_by('today','time')
             for contact in contacts:
                 anames = contact.a_name.strip().split('&')
                 if (a_name in anames):
