@@ -14,10 +14,18 @@
     <!-- Include Date Range Picker -->
     <script type="text/javascript" src="http://cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.js"></script>
     <link rel="stylesheet" type="text/css" href="http://cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.css" />
+    <script type="text/javascript" src="{% static 'js/plugins/pdfmake.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/plugins/vfs_fonts.js' %}"></script>
 <style>
 .thstyle3 {
   text-align: center;
   width: 22.5%;
+}
+
+.remove-td {
+  text-align: center;
+  vertical-align: middle !important; 
+  width: 7%;
 }
 
 .panel-danger > .panel-heading {
@@ -26,7 +34,7 @@
 </style>
 </head>
 <body>
-    <div class="container">
+    <div class="container" id='report'>
     <br>
         <form action="getHistory" method="POST">
         <div class="row" align="center">
@@ -59,35 +67,58 @@
 		</div>
 		<div class="col-md-3" align="center">
 			<div class="panel panel-default">
-				<label>
-	운행횟수 : {{ total_count }} <br>
-	과금횟수 : {{ uniq_count }} <br>
-				</label>
+	운행횟수 : <span id="total_count">{{ total_count }}</span><br>
+	예상 과금횟수 : <span id="uniq_count">{{ uniq_count }}</span><br>
 			</div>
 		</div>
-		<div class="col-md-8">
+		<div class="col-md-3" align="left">
+	X 이용요금
+	<select class="selectpicker price_item" id="per_amount">
+		<option>11,000원</option>
+		<option>12,500원</option>
+	</select> 
+	<br>
+	X ( - 특별할인 )
+	<select type="text" id="discount_rate" class="price_item"> 
+		<option>0%</option>
+		<option>5%</option>
+		<option>10%</option>
+		<option>15%</option>
+		<option>20%</option>
+		<option>25%</option>
+		<option>30%</option>
+	</select> 
+	
+		</div>
+		<div class="col-md-3" align="right">
+	= 이용요금 : <span id="pay_amount"></span> 원
+		</div>
+		<div class="col-md-1" align="right">
+			<button type="button" id='pdfdown' class="btn-md btn-primary">PDF <span class="glyphicon glyphicon-download-alt"></span></button>
+		</div>
+		<div class="col-md-1">
 		</div>
 	</div>
 
         {% for dailyhistory in history %}
-        <div class="row">
+        <div class="row dailyhistory">
                 <div class="col-md-1"></div>
                 <div class="col-md-10 col-xs-12">
                     <div class="panel panel-primary">
                         <div class="panel-heading">
-                        <button type="button" class="btn-md btn-primary"> {{ dailyhistory.date}} </button>
+                        <button type="button" class="btn-md btn-primary dailyhistory.date"> {{ dailyhistory.date}} </button>
                         </div>
                     <div class="panel-body">
                     {% for timehistory in dailyhistory.timehistory %}
 			{% if timehistory.warning == 1 %}
-                        <div class="panel panel-danger">
+                        <div class="panel panel-danger timehistory">
 			{% else %}
-                        <div class="panel panel-default">
+                        <div class="panel panel-default timehistory">
 			{% endif %}
                             <div class="panel-heading">
-                                <button type="button" class="btn-xs btn-warning"> {{ timehistory.carnum }} 호차 </button>
+                                <button type="button" class="btn-xs btn-warning timehistoryinfo"> {{ timehistory.carnum }}호차 </button>
                                     {% for academy in timehistory.academies %}
-                                    <button type="button" class="btn-xs btn-warning"> {{ academy }} </button>
+                                    <button type="button" class="btn-xs btn-warning timehistoryinfo"> {{ academy }} </button>
 			            {% endfor %}
                             </div>
                             <div class="panel-body">
@@ -97,23 +128,29 @@
                                             <th>시간</th>
                                             <th>주소</th>
                                             <th class="thstyle3">이름</th>
+					    <th class="remove-td">삭제</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {% for s in timehistory.scheduletable %}
-                                            <tr {% if s.lflag == 1 %} class="info" {% elif s.lflag == 0 %} class="warning" {% endif %}>
-                                                <td> {{ s.time }} </td>
-                                                <td> 
+                                            <tr {% if s.lflag == 1 %} class="info scheduletable" {% elif s.lflag == 0 %} class="warning scheduletable" {% else %} class="scheduletable" {% endif %}>
+                                                <td class="s.time"> {{ s.time }} </td>
+                                                <td class="s.addr"> 
                                                 {% if s.lflag == 2 %} 출발 {% elif s.lflag == 3 %} 도착 {% else %} {{ s.addr }} {% endif %} </td>
                                                 <td> 
                                                 {% for student in s.members.all %}
-                                                    <button type="button" class="load btn-xs btn-primary">
+                                                    <button type="button" class="load btn-xs btn-primary student.sname" id='student.sname'>
                                                     {{ student.sname }} </button>
                                                     <ul class="dropdown-menu pull-right">
                                                     </ul>
                                                 {% endfor %}
                                                 <br>
                                                 </td>
+						{% if s.lflag == 2 %}
+						<td class="remove-td" rowspan="{{ timehistory.scheduletable|length }}">
+							<button class="btn-xs btn-danger glyphicon glyphicon-remove table-remove"></button>
+						</td>
+						{% endif %}
                                             </tr>
                                         {% endfor %}
                                     </tbody>
@@ -127,7 +164,116 @@
                 <div class="col-md-1"></div>
     </div>
     {% endfor %}
-<script>
+
+<script type="text/javascript">
+/**
+ * Module for displaying "Waiting for..." dialog using Bootstrap
+ *
+ * @author Eugene Maslovich <ehpc@em42.ru>
+ */
+
+var waitingDialog = waitingDialog || (function ($) {
+    'use strict';
+
+	// Creating modal dialog's DOM
+	var $dialog = $(
+		'<div class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-hidden="true" style="padding-top:100px; overflow-y:visible;">' +
+		'<div class="modal-dialog modal-m">' +
+		'<div class="modal-content">' +
+			'<div class="modal-header"><h3 style="margin:0;"></h3></div>' +
+			'<div class="modal-body">' +
+				'<div class="progress progress-striped active" style="margin-bottom:0;"><div class="progress-bar" style="width: 100%"></div></div>' +
+			'</div>' +
+		'</div></div></div>');
+
+	return {
+		/**
+		 * Opens our dialog
+		 * @param message Custom message
+		 * @param options Custom options:
+		 * 				  options.dialogSize - bootstrap postfix for dialog size, e.g. "sm", "m";
+		 * 				  options.progressType - bootstrap postfix for progress bar type, e.g. "success", "warning".
+		 */
+		show: function (message, options) {
+			// Assigning defaults
+			if (typeof options === 'undefined') {
+				options = {};
+			}
+			if (typeof message === 'undefined') {
+				message = 'Loading';
+			}
+			var settings = $.extend({
+				dialogSize: 'm',
+				progressType: '',
+				onHide: null // This callback runs after the dialog was hidden
+			}, options);
+
+			// Configuring dialog
+			$dialog.find('.modal-dialog').attr('class', 'modal-dialog').addClass('modal-' + settings.dialogSize);
+			$dialog.find('.progress-bar').attr('class', 'progress-bar');
+			if (settings.progressType) {
+				$dialog.find('.progress-bar').addClass('progress-bar-' + settings.progressType);
+			}
+			$dialog.find('h3').text(message);
+			// Adding callbacks
+			if (typeof settings.onHide === 'function') {
+				$dialog.off('hidden.bs.modal').on('hidden.bs.modal', function (e) {
+					settings.onHide.call($dialog);
+				});
+			}
+			// Opening dialog
+			$dialog.modal();
+		},
+		/**
+		 * Closes dialog
+		 */
+		hide: function () {
+			$dialog.modal('hide');
+		}
+	};
+
+})(jQuery);
+
+
+
+
+
+
+
+
+
+
+function numberWithCommas(x) {
+	x = x.toString();
+	var pattern = /(-?\d+)(\d{3})/;
+	while (pattern.test(x)) {
+		x = x.replace(pattern, "$1,$2");
+	}
+	return x;
+}
+
+function numberWithoutCommas(x) {
+	var ret = parseInt(x.replace(/\D+/g,''));
+	return ret;
+}
+
+// 화면 로딩 이후에 바로 보여주기 위해
+$( function() {
+	calculate();
+} );
+
+$(".price_item").on('change', function() {
+	calculate();
+});
+
+function calculate() {
+	var per_amount = $('#per_amount')[0];
+	var per_amount_value = numberWithoutCommas(per_amount.options[per_amount.selectedIndex].value);
+	var discount_rate = $('#discount_rate')[0];
+	var discount_rate_value = numberWithoutCommas(discount_rate.options[discount_rate.selectedIndex].value);
+	$('#pay_amount')[0].innerText = numberWithCommas(numberWithoutCommas($('#total_count')[0].innerText) * per_amount_value * (100 - discount_rate_value)/ 100);
+	return null;
+}
 
 function todayLoad(offset,invenid, stableid){
     var btnid = invenid+''+stableid+''+offset
@@ -151,10 +297,8 @@ function todayLoad(offset,invenid, stableid){
     });
 }
 
-</script>
 
-   <script type="text/javascript">
-         $( function() {
+$( function() {
             $('input[name="daterange"]').daterangepicker(
             {
                 locale: {
@@ -163,6 +307,107 @@ function todayLoad(offset,invenid, stableid){
                 {% if startdate != None %}startDate: '{{startdate}}',{% endif %}
                 {% if enddate != None %}endDate: '{{enddate}}'{% endif %}
             });
-         } );
-    </script>
+} );
+
+function findUpClass(el, classname) {
+	while (el.parentNode) {
+		el = el.parentNode;
+		if ($(el).hasClass(classname)) {
+			return el;
+		}
+	}
+	return null;
+}
+
+$(".table-remove").click(function(event) {
+	var timehistory = findUpClass(event.target, "timehistory");
+	timehistory.parentElement.removeChild(timehistory);
+	if ($(timehistory).hasClass("panel-default")) {
+		$('#uniq_count')[0].innerHTML = $.trim($('#uniq_count')[0].innerHTML) - 1;
+	}
+	$('#total_count')[0].innerHTML = $.trim($('#total_count')[0].innerHTML) - 1;
+	calculate();
+});
+
+
+$("#pdfdown").click(function() {
+	waitingDialog.show(); 
+	setTimeout(function () {
+		waitingDialog.hide();
+	}, 4000);
+
+	var pay_amount = $("#pay_amount")[0].innerText;
+	var per_amount = $('#per_amount')[0];
+	var per_amount_value = per_amount.options[per_amount.selectedIndex].value;
+	var discount_rate = $('#discount_rate')[0];
+	var discount_rate_value = discount_rate.options[discount_rate.selectedIndex].value;
+	var ride_count = $('#total_count')[0].innerHTML;
+	var str = "";
+	var dd = {};
+	dd['style'] = { header: { fontSize: 22, bold: true} };
+	dd['content'] = [];
+
+	dd['content'].push({text: "<{{aname}} {{startdate}} ~ {{enddate}} 이용내역>\n\n", fontSize: 15, bold: true, alignment: 'center'});
+	dd['content'].push({text: "총 " + ride_count + "회 운행\n\n", fontSize: 12, bold: true});
+	dd['content'].push({text: '이용료: ('  + per_amount_value + ' x ' + ride_count + ') = ' + pay_amount + '원\n', fontSize: 12});
+	if (discount_rate_value != '0%') {
+		dd['content'].push({text: '{{aname}} 특별할인 ' + discount_rate_value + '\n', fontSize: 12});
+	}
+	dd['content'].push({text: '\n결제금액: ' + pay_amount + '원 \n\n', fontSize: 13, bold: true});
+	dd['content'].push({text: '입금계좌: 우리은행 1005-603-067444 주식회사 에티켓\n\n\n', fontSize: 13, bold: true});
+	var dailyhistory = document.getElementsByClassName("dailyhistory");
+	for (var i=0; i<dailyhistory.length; i++) {
+		var timehistory = dailyhistory[i].getElementsByClassName("timehistory");
+		var datestr = dailyhistory[i].getElementsByClassName("dailyhistory.date")[0].innerHTML;
+		dd['content'].push({text: datestr, fontSize: 12, bold: true});
+		
+		for (var j=0; j<timehistory.length; j++) {
+			var timetable = {};
+			timetable['body'] = [];
+			timetable['headerRows'] = 1;
+			timetable['widths'] = [50, 300, 100];
+			timetable['body'].push(['시간', '주소', '이름']);
+			var timehistoryinfo = timehistory[j].getElementsByClassName("timehistoryinfo");
+			var timehistoryinfostr = "";
+			for (var k=0; k<timehistoryinfo.length; k++) {
+				timehistoryinfostr += timehistoryinfo[k].innerHTML + " ";
+			}
+			dd['content'].push({text: timehistoryinfostr});
+
+			var scheduletable = timehistory[j].getElementsByClassName("scheduletable");
+			for (var k=0; k<scheduletable.length; k++) {
+				var rows = [];
+				var studentnames = "";
+				var fillColor = "";
+				rows[0] = {'text': $.trim(scheduletable[k].getElementsByClassName("s.time")[0].innerHTML), 'fillColor': '#eeeeee'};
+				if (scheduletable[k].classList.contains("info")) {
+					fillColor = '#CBDAF6';
+				}
+				else if (scheduletable[k].classList.contains("warning")) {
+					fillColor = '#F1F6CB';
+				}
+				rows[1] = {'text': $.trim(scheduletable[k].getElementsByClassName("s.addr")[0].innerHTML), 'fillColor': fillColor};
+				var students = scheduletable[k].getElementsByClassName("student.sname");
+				for (var l=0; l<students.length; l++) {
+					studentnames += $.trim(students[l].innerHTML);
+					if (l < students.length -1) {
+						studentnames += ", ";
+					}
+				}
+				rows[2] = studentnames;
+				timetable['body'].push(rows);
+			}
+			dd['content'].push({table: timetable});
+			dd['content'].push({text: '   \n'});
+		}
+		dd['content'].push({text: '   \n'});
+	}
+
+	var filename = "{{ startdate }}_{{ enddate }}_{{ aname }}.pdf";
+	pdfMake.createPdf(dd).download(filename);
+
+});
+
+</script>
+
 </html>
