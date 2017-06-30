@@ -853,6 +853,7 @@ def getHistory(request):
 
     total_count = 0
     uniq_count = 0
+    aname = ""
 
 
     if aid is not None and aid != '' and startdate is not None and startdate != '' and enddate is not None and enddate != '':

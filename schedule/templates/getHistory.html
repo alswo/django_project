@@ -28,6 +28,10 @@
   width: 7%;
 }
 
+.etc {
+  background-color: #E1E5E8;
+}
+
 .panel-danger > .panel-heading {
 	background-color: #D98880 !important
 }
@@ -36,65 +40,85 @@
 <body>
     <div class="container" id='report'>
     <br>
-        <form action="getHistory" method="POST">
         <div class="row" align="center">
             <div class="col-md-1">
             </div>
-            <div class="col-md-3">
-                <label>Academy</label> 
-                <select class="form-control" id="aid" name="aid">
-                        {% for aca in academy %}
-                        <option value="{{aca.id}}" {% if aca.id == aid|add:0 %} selected {% endif %}>{{aca.name}}</option>
-                        {% endfor %}
-                </select>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group"> 
-                    <label>Date</label>
-                    <input class="form-control calendar" name="daterange" type="text" id="daterange">
-                </div>
-            </div>
-            <div class="col-md-3">
-                <br>
-                <button class="btn btn-info" onclick="submit()" type="button" value="dateAcademy">적용</button>              
+	    <div class="col-md-10">
+	    	<div class="panel panel-info">
+			<div class="panel-heading">
+			검색 조건
+			</div>
+			<div class="panel-body">
+        			<form action="getHistory" method="POST">
+            			<div class="col-md-5">
+                			<label>학원</label> 
+                			<select class="form-control" id="aid" name="aid">
+                        			{% for aca in academy %}
+                        			<option value="{{aca.id}}" {% if aca.id == aid|add:0 %} selected {% endif %}>{{aca.name}}</option>
+                        			{% endfor %}
+                			</select>
+            			</div>
+            			<div class="col-md-5">
+                    			<label>기간</label>
+                    			<input class="form-control calendar" name="daterange" type="text" id="daterange">
+            			</div>
+            			<div class="col-md-2" align="right">
+                			<br>
+                			<button class="btn btn-info" onclick="submit()" type="button" value="dateAcademy">적용</button>              
+            			</div>
+        			</form>
+			</div>
+	    	</div>
+	    </div>
+            <div class="col-md-1">
             </div>
         </div>
-        </form>
-        <br>
-
 	<div class="row" align="center">
 		<div class="col-md-1">
 		</div>
-		<div class="col-md-3" align="center">
-			<div class="panel panel-default">
-	운행횟수 : <span id="total_count">{{ total_count }}</span><br>
-	예상 과금횟수 : <span id="uniq_count">{{ uniq_count }}</span><br>
+		<div class="col-md-10">
+			<div class="panel panel-info">
+                        	<div class="panel-heading">
+				운행횟수 및 요금
+				</div>
+				
+                        	<div class="panel-body">
+					<div class="col-md-5" align="center">
+				총운행횟수 : <span id="total_count"></span><br>
+						<div class="etc">
+				정상(<span id="normal_count"></span>) + 2배(<span id="double_count"></span>) + 동승자없음(<span id="nopassenger_count"></span>)<br>
+				예상 과금횟수 : <span id="uniq_count">{{ uniq_count }}</span><br>
+						</div>
+					</div>
+					<div class="col-md-3" align="left">
+				X 운행요금
+				<select class="selectpicker price_item" id="per_amount">
+					<option>11,000원</option>
+					<option>12,500원</option>
+				</select> 
+				<br>
+				X ( - 특별할인 )
+				<select class="selectpicker price_item" id="discount_rate"> 
+					<option>0%</option>
+					<option>5%</option>
+					<option>10%</option>
+					<option>15%</option>
+					<option>20%</option>
+					<option>25%</option>
+					<option>30%</option>
+				</select> 
+				<br>
+			
+					</div>
+					<span id="calculate_amount" style="display: none"></span>
+					<div class="col-md-2" align="right">
+				= 이용요금 <br>: <span id="pay_amount"></span> 원
+					</div>
+					<div class="col-md-2" align="right">
+						<button type="button" id='pdfdown' class="btn-md btn-info">PDF <span class="glyphicon glyphicon-download-alt"></span></button>
+					</div>
+				</div>
 			</div>
-		</div>
-		<div class="col-md-3" align="left">
-	X 이용요금
-	<select class="selectpicker price_item" id="per_amount">
-		<option>11,000원</option>
-		<option>12,500원</option>
-	</select> 
-	<br>
-	X ( - 특별할인 )
-	<select type="text" id="discount_rate" class="price_item"> 
-		<option>0%</option>
-		<option>5%</option>
-		<option>10%</option>
-		<option>15%</option>
-		<option>20%</option>
-		<option>25%</option>
-		<option>30%</option>
-	</select> 
-	
-		</div>
-		<div class="col-md-3" align="right">
-	= 이용요금 : <span id="pay_amount"></span> 원
-		</div>
-		<div class="col-md-1" align="right">
-			<button type="button" id='pdfdown' class="btn-md btn-primary">PDF <span class="glyphicon glyphicon-download-alt"></span></button>
 		</div>
 		<div class="col-md-1">
 		</div>
@@ -103,7 +127,7 @@
         {% for dailyhistory in history %}
         <div class="row dailyhistory">
                 <div class="col-md-1"></div>
-                <div class="col-md-10 col-xs-12">
+                <div class="col-md-10">
                     <div class="panel panel-primary">
                         <div class="panel-heading">
                         <button type="button" class="btn-md btn-primary dailyhistory.date"> {{ dailyhistory.date}} </button>
@@ -116,10 +140,22 @@
                         <div class="panel panel-default timehistory">
 			{% endif %}
                             <div class="panel-heading">
-                                <button type="button" class="btn-xs btn-warning timehistoryinfo"> {{ timehistory.carnum }}호차 </button>
-                                    {% for academy in timehistory.academies %}
-                                    <button type="button" class="btn-xs btn-warning timehistoryinfo"> {{ academy }} </button>
-			            {% endfor %}
+				<div class="row">
+					<div class="col-xs-8">
+                                		<button type="button" class="btn-xs btn-warning timehistoryinfo"> {{ timehistory.carnum }}호차 </button>
+                                    		{% for academy in timehistory.academies %}
+                                    		<button type="button" class="btn-xs btn-warning timehistoryinfo"> {{ academy }} </button>
+			            		{% endfor %}
+					</div>
+					<div class="col-xs-4" align="right">
+						<select class="selectpicker price_item priceoption">
+							<option>선택</option>
+							<option>X 2 (가격 2배)</option>
+							<option>동승자 없음</option>
+						</select>
+						<button class="btn-xs btn-danger glyphicon glyphicon-remove table-remove"></button>
+					</div>
+				</div>
                             </div>
                             <div class="panel-body">
                                 <table class="table table-bordered table-reponsive">
@@ -128,7 +164,6 @@
                                             <th>시간</th>
                                             <th>주소</th>
                                             <th class="thstyle3">이름</th>
-					    <th class="remove-td">삭제</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -146,11 +181,6 @@
                                                 {% endfor %}
                                                 <br>
                                                 </td>
-						{% if s.lflag == 2 %}
-						<td class="remove-td" rowspan="{{ timehistory.scheduletable|length }}">
-							<button class="btn-xs btn-danger glyphicon glyphicon-remove table-remove"></button>
-						</td>
-						{% endif %}
                                             </tr>
                                         {% endfor %}
                                     </tbody>
@@ -234,15 +264,6 @@ var waitingDialog = waitingDialog || (function ($) {
 
 })(jQuery);
 
-
-
-
-
-
-
-
-
-
 function numberWithCommas(x) {
 	x = x.toString();
 	var pattern = /(-?\d+)(\d{3})/;
@@ -267,11 +288,35 @@ $(".price_item").on('change', function() {
 });
 
 function calculate() {
+	var normal_count = 0;
+	var double_count = 0;
+	var nopassenger_count = 0;
+
+	var priceoptions = $('.priceoption');
+	for (i=0; i<priceoptions.length; i++) {
+		priceoption_value = $.trim(priceoptions[i].options[priceoptions[i].selectedIndex].value);
+		if (priceoption_value === "X 2 (가격 2배)") {
+			double_count++;
+		}
+		else if (priceoption_value === "동승자 없음") {
+			nopassenger_count++;
+		}
+		else {
+			normal_count++;
+		}
+	}
+
 	var per_amount = $('#per_amount')[0];
 	var per_amount_value = numberWithoutCommas(per_amount.options[per_amount.selectedIndex].value);
 	var discount_rate = $('#discount_rate')[0];
 	var discount_rate_value = numberWithoutCommas(discount_rate.options[discount_rate.selectedIndex].value);
-	$('#pay_amount')[0].innerText = numberWithCommas(numberWithoutCommas($('#total_count')[0].innerText) * per_amount_value * (100 - discount_rate_value)/ 100);
+
+	$('#normal_count')[0].innerText = numberWithCommas(normal_count);
+	$('#double_count')[0].innerText = numberWithCommas(double_count);
+	$('#nopassenger_count')[0].innerText = numberWithCommas(nopassenger_count);
+	$('#total_count')[0].innerText = numberWithCommas(normal_count + double_count + nopassenger_count);
+	$('#calculate_amount')[0].innerText = numberWithCommas(normal_count * per_amount_value + double_count * 2 * per_amount_value + nopassenger_count * (per_amount_value - 3000));
+	$('#pay_amount')[0].innerText = numberWithCommas((normal_count * per_amount_value + double_count * 2 * per_amount_value + nopassenger_count * (per_amount_value - 3000) )* (100 - discount_rate_value)/ 100);
 	return null;
 }
 
@@ -325,7 +370,7 @@ $(".table-remove").click(function(event) {
 	if ($(timehistory).hasClass("panel-default")) {
 		$('#uniq_count')[0].innerHTML = $.trim($('#uniq_count')[0].innerHTML) - 1;
 	}
-	$('#total_count')[0].innerHTML = $.trim($('#total_count')[0].innerHTML) - 1;
+	$('#normal_count')[0].innerHTML = $.trim($('#normal_count')[0].innerHTML) - 1;
 	calculate();
 });
 
@@ -337,19 +382,46 @@ $("#pdfdown").click(function() {
 	}, 4000);
 
 	var pay_amount = $("#pay_amount")[0].innerText;
+	var calculate_amount = $("#calculate_amount")[0].innerText;
 	var per_amount = $('#per_amount')[0];
 	var per_amount_value = per_amount.options[per_amount.selectedIndex].value;
 	var discount_rate = $('#discount_rate')[0];
 	var discount_rate_value = discount_rate.options[discount_rate.selectedIndex].value;
-	var ride_count = $('#total_count')[0].innerHTML;
+	var normal_count = $('#normal_count')[0].innerText;
+	var double_count = $('#double_count')[0].innerText;
+	var nopassenger_count = $('#nopassenger_count')[0].innerText;
+	var total_count = parseInt(normal_count) + parseInt(double_count) + parseInt(nopassenger_count);
 	var str = "";
 	var dd = {};
 	dd['style'] = { header: { fontSize: 22, bold: true} };
 	dd['content'] = [];
 
-	dd['content'].push({text: "<{{aname}} {{startdate}} ~ {{enddate}} 이용내역>\n\n", fontSize: 15, bold: true, alignment: 'center'});
-	dd['content'].push({text: "총 " + ride_count + "회 운행\n\n", fontSize: 12, bold: true});
-	dd['content'].push({text: '이용료: ('  + per_amount_value + ' x ' + ride_count + ') = ' + pay_amount + '원\n', fontSize: 12});
+	dd['content'].push({text: "<{{aname}} {{startdate}} ~ {{enddate}} 이용내역>", fontSize: 15, bold: true, alignment: 'center'});
+	dd['content'].push({text: "\n\n총 " + total_count + "회 운행", fontSize: 12, bold: true});
+	if (normal_count > 0) {
+		dd['content'].push({text: "-- 정상: " + normal_count + "회 운행", fontSize: 11});
+		if (str != "") {
+			str += " + ";
+		}
+		str += '(' + per_amount_value + ' x ' + normal_count + ') ';
+	}
+	if (double_count > 0) {
+		dd['content'].push({text: "-- X2: " + double_count + "회 운행", fontSize: 11});
+		if (str != "") {
+			str += " + ";
+		}
+		per_amount_value = numberWithCommas(numberWithoutCommas(per_amount_value) * 2);
+		str += '(' + per_amount_value + ' x ' + double_count + ') ';
+	}
+	if (nopassenger_count > 0) {
+		dd['content'].push({text: "-- 동승자없이: : " + nopassenger_count + "회 운행", fontSize: 11});
+		if (str != "") {
+			str += " + ";
+		}
+		per_amount_value = numberWithCommas(numberWithoutCommas(per_amount_value) - 3000);
+		str += '(' + per_amount_value + ' x ' + nopassenger_count + ') ';
+	}
+	dd['content'].push({text: '\n\n이용료: ' + str + ' = ' + calculate_amount + '원\n', fontSize: 12});
 	if (discount_rate_value != '0%') {
 		dd['content'].push({text: '{{aname}} 특별할인 ' + discount_rate_value + '\n', fontSize: 12});
 	}
