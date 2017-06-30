@@ -143,7 +143,7 @@
                   <input type="text" name="name[]" data-role="tagsinput" class="form-control tInput" form="scheduleform{{c.id}}" value="{% for name in s.sname %}{{name}}{% include 'comma.html' %}{% endfor %}" />
                 </td>
                 <td data-name="addstu"><button class="btn btn-primary glyphicon glyphicon-plus addstudent" data-toggle="modal"></button></td>
-                <td data-name="academy" class="inputAca" style="display:none;"><input name="academy[]" type="text" data-role="tagsinput" class="form-control" form="scheduleform{{c.id}}" value="{% for aid in s.alist %}{{aid}}{% include 'comma.html' %}{% endfor %}" /></td>
+                <td data-name="academy" class="inputAcaU" style="display:none;"><input name="academy[]" type="text" data-role="tagsinput" class="form-control" form="scheduleform{{c.id}}" value="{% for aid in s.alist %}{{aid}}{% include 'comma.html' %}{% endfor %}" /></td>
                 <td data-name="sid" class="inputSid" style="display:none;"><input name="sid[]" type="text" data-role="tagsinput" class="form-control" form="scheduleform{{c.id}}" value="{% for sid in s.slist %}{{sid}}{% include 'comma.html' %}{% endfor %}" /></td>
                 <td data-name="load">
                   {% if s.lflag == 1 %}
@@ -256,7 +256,7 @@
       '<tr><td data-name="time"><input onchange="emptyTempList();" type="text" name="time[]" placeholder="Time" class="form-control" form="scheduleform' + id +
       '"/></td><td><input type="text" name="addr[]" placeholder="Address" class="form-control" form="scheduleform' + id +
       '"/></td><td data-name="name" class="inputTd"><input type="text" name="name[]" data-role="tagsinput" class="form-control" form="scheduleform' + id + '" value="{% for name in s.sname %}{{name}}{% include '
-      comma.html ' %}{% endfor %}" /></td><td data-name="addstu"><button class="btn btn-primary glyphicon glyphicon-plus addstudent" data-toggle="modal"></button></td><td data-name="academy" class="inputAca" style="display:none"><input name="academy[]" data-role="tagsinput" class="form-control" form="scheduleform' +
+      comma.html ' %}{% endfor %}" /></td><td data-name="addstu"><button class="btn btn-primary glyphicon glyphicon-plus addstudent" data-toggle="modal"></button></td><td data-name="academy" class="inputAcaU" style="display:none"><input name="academy[]" data-role="tagsinput" class="form-control" form="scheduleform' +
       id + '" value="{% for aid in s.alist %}{{aid}}{% include '
       comma.html ' %}{% endfor %}" /></td>                <td data-name="sid" class="inputSid" style="display:none;"><input name="sid[]" type="text" data-role="tagsinput" class="form-control" form="scheduleform' +id+ '" value="{% for sid in s.slist %}{{sid}}{% include 'comma.html' %}{% endfor %}" /></td><td data-name="load"><select name="load[]" form="scheduleform' + id +
       '"><option value="">등하원</option><option value="1">등원</option><option value="0">하원</option></select></td><td data-name="move"><a href="javascript:void(0)" class="glyphicon glyphicon-chevron-up up"></a><a href="javascript:void(0)" class="glyphicon glyphicon-chevron-down down"></a></td><td data-name="del"><button name="del" class="btn btn-danger glyphicon glyphicon-remove row-remove"></button></td></tr>'
@@ -318,7 +318,7 @@
   $(document).on('click', '.addstudent', function() {
     //thisObject -> studentName, thisObjectForAca -> AcademyID
     thisObject = $(this).parent().prevAll('.inputTd').children();
-    thisObjectForAca = $(this).parent().nextAll('.inputAca').children();
+    thisObjectForAca = $(this).parent().nextAll('.inputAcaU').children();
     thisObjectForSid = $(this).parent().nextAll('.inputSid').children();
     console.log(thisObjectForAca);
     $('#addstu').modal('show');
@@ -477,5 +477,40 @@
       }
     });
   }
+
+  $(document).on('beforeItemRemove','.inputTd',function(event){
+    t = $(this)
+    sibling_sid = $(this).siblings('.inputSid')[0].children[1]
+    sibling_aca = $(this).siblings('.inputAcaU')[0].children[1]
+    // Do some processing here
+
+    var before_list = t[0].children[1].value.split(",").map(function(item) {
+      return item.trim();
+    });
+
+    var delete_index = before_list.indexOf(event.item.trim())
+
+    var before_sid_value = sibling_sid.value
+    var before_aca_value = sibling_aca.value
+
+    var delete_sid = before_sid_value.split(',').map(function(item){
+      return item.trim()
+    });
+    var delete_aca = before_aca_value.split(',').map(function(item){
+      return item.trim()
+    });
+
+    if (delete_index == -1) {
+      delete_sid.splice(0, 1);
+      delete_aca.splice(0, 1);
+    } else {
+      delete_sid.splice(delete_index, 1);
+      delete_aca.splice(delete_index, 1);
+    }
+
+    sibling_aca.value = delete_aca.toString()
+    sibling_sid.value = delete_sid.toString()
+
+  });
 </script>
 {% endblock content %}
