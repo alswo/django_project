@@ -112,9 +112,10 @@
 					</div>
 					<span id="calculate_amount" style="display: none"></span>
 					<div class="col-md-2" align="right">
-				= 이용요금 <br>: <span id="pay_amount"></span> 원
+				= 이용요금 <br>: <span id="pay_amount"></span> 원<br>
 					</div>
 					<div class="col-md-2" align="right">
+						<button type="button" class="btn-md btn-info" id="add-memo">Memo <span class="glyphicon glyphicon-pencil"></span></button><br><br>
 						<button type="button" id='pdfdown' class="btn-md btn-info">PDF <span class="glyphicon glyphicon-download-alt"></span></button>
 					</div>
 				</div>
@@ -122,6 +123,9 @@
 		</div>
 		<div class="col-md-1">
 		</div>
+	</div>
+
+	<div class="row" align="center" id="memodiv">
 	</div>
 
         {% for dailyhistory in history %}
@@ -374,6 +378,26 @@ $(".table-remove").click(function(event) {
 	calculate();
 });
 
+$("#add-memo").click(function(event) {
+	$('#memodiv')[0].innerHTML = `
+		<div class="col-md-1">
+		</div>
+		<div class="col-md-10">
+			<div class="panel panel-info form-group">
+                        	<div class="panel-heading">
+				메모
+				</div>
+				
+                        	<div class="panel-body">
+				<textarea class="form-control" rows="5" id="memo"></textarea>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-1">
+		</div>
+		`;
+});
+
 
 $("#pdfdown").click(function() {
 	waitingDialog.show(); 
@@ -391,6 +415,7 @@ $("#pdfdown").click(function() {
 	var double_count = $('#double_count')[0].innerText;
 	var nopassenger_count = $('#nopassenger_count')[0].innerText;
 	var total_count = parseInt(normal_count) + parseInt(double_count) + parseInt(nopassenger_count);
+	var memo = $('#memo')[0].value;
 	var str = "";
 	var dd = {};
 	dd['style'] = { header: { fontSize: 22, bold: true} };
@@ -398,6 +423,10 @@ $("#pdfdown").click(function() {
 
 	dd['content'].push({text: "<{{aname}} {{startdate}} ~ {{enddate}} 이용내역>", fontSize: 15, bold: true, alignment: 'center'});
 	dd['content'].push({text: "\n\n총 " + total_count + "회 운행", fontSize: 12, bold: true});
+
+        if (memo) {
+		dd['content'].push({text: memo + '\n\n', fontSize: 11});
+	}
 	if (normal_count > 0) {
 		dd['content'].push({text: "-- 정상: " + normal_count + "회 운행", fontSize: 11});
 		if (str != "") {
@@ -426,6 +455,8 @@ $("#pdfdown").click(function() {
 		dd['content'].push({text: '{{aname}} 특별할인 ' + discount_rate_value + '\n', fontSize: 12});
 	}
 	dd['content'].push({text: '\n결제금액: ' + pay_amount + '원 \n\n', fontSize: 13, bold: true});
+
+
 	dd['content'].push({text: '입금계좌: 우리은행 1005-603-067444 주식회사 에티켓\n\n\n', fontSize: 13, bold: true});
 	var dailyhistory = document.getElementsByClassName("dailyhistory");
 	for (var i=0; i<dailyhistory.length; i++) {
