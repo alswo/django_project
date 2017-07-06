@@ -33,9 +33,6 @@
   <script src="{% static 'js/bootstrap.min.js' %}"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/typeahead.js/0.11.1/typeahead.bundle.min.js"></script>
   <script src="http://code.jquery.com/ui/1.11.1/jquery-ui.js"></script>
-  <script>
-  window.onload = function() { $('body').attr('class','skin-blue sidebar-mini sidebar-collapse') };
-  </script>
 
   <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
   <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -80,9 +77,7 @@
   </style>
 
 </head>
-<body class="{% if is_popup %}popup {% endif %}{% block bodyclass %}{% endblock %} hold-transition skin-blue sidebar-mini"
-  data-admin-utc-offset="{% now "Z" %}">
-
+<body class="skin-blue sidebar-mini sidebar-collapse" data-admin-utc-offset="{% now "Z" %}">
 <div class="wrapper">
 
   <header class="main-header">

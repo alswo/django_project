@@ -249,15 +249,25 @@
     </div>
   </div>
   <br>
-  <br> {% for c in contacts %}
+  <br>
+  {% for c in contacts %}
   <div class="row">
     <div class="col-md-1"></div>
     <div class="col-md-10" style="background-color:rgb(201, 214, 222); height: auto; width: 100%; border-radius: 25px;">
       <div class="col-md-12 table-responsive">
-        <br><br>
+        <br>
+        <div class="row">
+          <div class="col-md-5">
+          </div>
+          <div class="col-md-2 text-center" style="background-color:white; border-radius:25px;">
+            <h3 style="font-family: 'Lucida Console'; font-weight: bold; color:rgb(77,77,77)">{{c.stime}} - {{c.etime}}</h3>
+          </div>
+          <div class="col-md-5">
+          </div>
+        </div>
+        <br>
         <div class="row">
           <div class="row">
-            {{c.stime}}
           </div>
           <div class="col-md-8">
             <textarea class="form-control" style="border-radius: 15px;" rows="4" id="{{c.id}}text">{{c.req}}</textarea>
