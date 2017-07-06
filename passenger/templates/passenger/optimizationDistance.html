@@ -6,6 +6,7 @@
   <meta charset="UTF-8">
   <title>TAYO</title>
   <script src="{% static 'js/jquery-3.1.0.min.js' %}"></script>
+  <script src="{% static 'js/jquery-ui.js' %}"></script>
   <script src='https://apis.skplanetx.com/tmap/js?version=1&format=javascript&appKey=9c78e49d-c72c-36a6-8e25-5c249e9291a3'></script>
   <script type="text/javascript" src="{% static 'js/graph.js' %}"></script>
   <script type="text/javascript" src="{% static 'js/bootstrap.min.js' %}"></script>
@@ -311,7 +312,7 @@
 
     for (var i = 0; i < result.length; i++) {
       if (i < result.length - 1) {
-        temp += '<br>' + result[i] + '(' + source_result[result_j] + ')' + '<br>';
+        temp += '<br>' + result[i] + '(' + Math.floor(source_result[result_j] / 6) / 10 + ' M)' + '<br>';
       } else {
         temp += '<br>' + result[i]
       }
@@ -372,7 +373,7 @@
           appendHtml = "";
           for (i=0; i < result['features'].length - 1; i++) {
              appendHtml += '<br>' + result['features'][i]['viaPointName'];
-             appendHtml += '(' + result['features'][i+1]['requiredTime'] + ')<br>';
+             appendHtml += '(' + Math.floor(result['features'][i+1]['requiredTime'] / 6) / 10 + ' M)<br>';
           }
           appendHtml += '<br>' + result['features'][i]['viaPointName'];
           doc.innerHTML = appendHtml + '&nbsp&nbsp' + ' <span class="glyphicon glyphicon-time" aria-hidden="true"></span> : ' + Math.floor(parseInt(result['properties']['totalTime']) / 60) + 'M';
@@ -680,6 +681,26 @@ function onDrawnFeatures(e){
   function remove_row(num) {
 	$('#addPoi' + num).remove();
   }
+
+  var fixHelperModified = function(e, tr) {
+	var $originals = tr.children();
+	var $helper = tr.clone();
+ 	$helper.children().each(function(index) {
+		$(this).width($originals.eq(index).width());
+	});
+	return $helper;
+  };
+
+  var updateIndex = function(e, ui) {
+  	$('tr', ui.item.parent()).each(function (i) {
+		console.log($(this));
+	});
+  };
+
+  $('#addPoi').sortable({
+	helper: fixHelperModified,
+	stop: updateIndex
+  }).disableSelection();
 </script>
 
 </html>

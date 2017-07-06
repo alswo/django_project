@@ -18,6 +18,31 @@ class timeToDate:
 
         return dmy
 
+    def timeToHM(self):
+        fmt ="%H:%M"
+        dmy = time.strftime(fmt,self.t)
+
+        return dmy
+
+    def timeToHMS(self):
+        fmt ="%H:%M:%S"
+        dmy = time.strftime(fmt,self.t)
+
+        return dmy
+
+    def timeToRawHM(self):
+        fmt ="%H%M"
+        dmy = time.strftime(fmt,self.t)
+
+        return dmy
+
+    def timeToRawHMS(self):
+        fmt ="%H%M%S"
+        dmy = time.strftime(fmt,self.t)
+
+        return dmy
+
+
     def timeToD(self):
         d = "%a"
         day = time.strftime(d,self.t)

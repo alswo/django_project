@@ -8,7 +8,12 @@
     <script src="{% static 'js/bootstrap.min.js' %}"></script>
     <link href="{% static 'css/bootstrap-tagsinput.css' %}" rel="stylesheet">
     <script src="{% static 'js/bootstrap-tagsinput.js' %}"></script>
+<<<<<<< HEAD
     <script src="http://code.jquery.com/ui/1.11.1/jquery-ui.js"></script>
+=======
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/css/bootstrap-select.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/js/bootstrap-select.min.js"></script>
+>>>>>>> c4a416ee77e4bf331ac8cda6d3431948c23fac65
     <style>
     .thstyle2 {
       text-align: center;
@@ -165,8 +170,11 @@
                           <div class="modal-body">
                             <select id="academyselect" class="form-control"><option value="">학원선택</option>{% for a in academy %}<option value = "{{a.id}}">{{a.name}}</option>{% endfor %}</select>
                             <br>
-                            <select id="studentList" class="form-control"></select>
+                            <!-- select id="studentList" class="form-control"></select //-->
+			    <div class="row-fluid">
+                            <select id="studentList" class="selectpicker" data-live-search="ture"></select>
                             <input type="hidden" id="rowid" value="" />
+			    </div>
                           </div>
                           <div class="modal-footer">
                             <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -356,12 +364,13 @@ $('#academyselect').on('change', function() {
       aid: this.value,
     },
     success: function(data) {
-      console.log(data)
-      tempTag = ""
+      console.log(data);
+      tempTag = "";
       for (i = 0; i < data.length; i++) {
-        tempTag = tempTag + "<option value=" + data[i]['pk'] + ">" + data[i]['fields']['sname'] + "</option>"
+        tempTag = tempTag + "<option value=\"" + data[i]['pk'] + "\">" + data[i]['fields']['sname'] + "</option>"
       }
-      document.getElementById('studentList').innerHTML = tempTag
+      document.getElementById('studentList').innerHTML = tempTag;
+      $('#studentList').selectpicker('refresh');
     }
   });
 })

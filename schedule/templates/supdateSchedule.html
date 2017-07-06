@@ -667,6 +667,7 @@
       sibling_sid.value = delete_sid.toString()
 
     });
+<<<<<<< HEAD
 
     $( ".table-body" ).sortable({
 	     update: function( event, ui ){
@@ -677,3 +678,42 @@
         });
   </script>
   {% endblock content %}
+=======
+  }
+    $(document).on('beforeItemRemove','.inputTd',function(event){
+    t = $(this)
+    sibling_sid = $(this).siblings('.inputSid')[0].children[1]
+    sibling_aca = $(this).siblings('.inputAcaU')[0].children[1]
+    // Do some processing here
+
+    var before_list = t[0].children[1].value.split(",").map(function(item) {
+      return item.trim();
+    });
+
+    var delete_index = before_list.indexOf(event.item.trim())
+
+    var before_sid_value = sibling_sid.value
+    var before_aca_value = sibling_aca.value
+
+    var delete_sid = before_sid_value.split(',').map(function(item){
+      return item.trim()
+    });
+    var delete_aca = before_aca_value.split(',').map(function(item){
+      return item.trim()
+    });
+
+    if (delete_index == -1) {
+      delete_sid.splice(0, 1);
+      delete_aca.splice(0, 1);
+    } else {
+      delete_sid.splice(delete_index, 1);
+      delete_aca.splice(delete_index, 1);
+    }
+
+    sibling_aca.value = delete_aca.toString()
+    sibling_sid.value = delete_sid.toString()
+
+  });
+</script>
+{% endblock content %}
+>>>>>>> c4a416ee77e4bf331ac8cda6d3431948c23fac65

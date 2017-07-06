@@ -21,6 +21,18 @@ import operator
 import json
 import logging
 import collections
+import re
+
+class TimeHistory:
+	def __init__(self):
+		self.carnum = -1
+		self.academies = set()
+		self.scheduletable = list()
+		self.warning = 0
+class DailyHistory:
+	def __init__(self):
+		self.date = ""
+		self.timehistory = list()
 
 
 @csrf_exempt
@@ -1796,6 +1808,7 @@ def updateArea(request):
 
             return render_to_response('supdateSchedule.html',{"time":time,"day":day,"branch":branch,"academy":academy,"carnum": carnum,"bid":bid,"contacts":contacts,'user':request.user})
 
+
 @csrf_exempt
 @login_required
 def getHistory(request):
@@ -1814,36 +1827,66 @@ def getHistory(request):
     	(startdate, enddate) = daterange.split(' - ')
 
     history = []
-    allacademy = Academy.objects.all()
+    allacademy = Academy.objects.all().order_by('name')
+
+    total_count = 0
+    uniq_count = 0
+    aname = ""
+
 
     if aid is not None and aid != '' and startdate is not None and startdate != '' and enddate is not None and enddate != '':
         start_date = datetime.date(*map(int, startdate.split('-')))
         end_date = datetime.date(*map(int, enddate.split('-')))
         total_days = (end_date - start_date).days + 1
+	aname = Academy.objects.get(pk=aid).name
         for day_number in range(total_days):
-            single_history = {}
             single_date = (start_date + datetime.timedelta(days = day_number)).strftime('%Y-%m-%d')
-            academiesDictionary = {}
             schedules = []
 
             #return HttpResponse(single_date)
             iids = HistoryScheduleTable.objects.filter(alist__contains = [aid]).filter(date = single_date).order_by('time').values_list('iid_id', flat=True).distinct()
             uniq_iids = reduce(lambda x,y: x+[y] if x==[] or x[-1] != y else x, iids, [])
+
+            last_time = 0
+            dailyHistory = DailyHistory()
+            dailyHistory.date = single_date
             for i in uniq_iids:
                 academyset = set()
-                scheduletable = HistoryScheduleTable.objects.filter(date = single_date).filter(iid_id = i)
-                schedules.append(scheduletable)
-                for schedule in scheduletable:
-                    for academy in schedule.academies.all():
-                        academyset.add(academy.name)
-                academiesDictionary[i] = academyset
+                scheduletable = HistoryScheduleTable.objects.filter(date = single_date).order_by('time').filter(iid_id = i)
+                #return HttpResponse(str(len(scheduletable)))
+                if len(scheduletable) > 0:
 
-            single_history['date'] = single_date
+                    timeHistory = TimeHistory()
+                    timeHistory.scheduletable = scheduletable
+                    timeHistory.carnum = scheduletable[0].carnum
+                    index = 0
+                    for schedule in scheduletable:
+                        for academy in schedule.academies.all():
+		            timeHistory.academies.add(academy.name)
 
-            history.append(single_history)
+                        if (index == 0 and last_time > convertDateFormat(schedule.time)):
+                            timeHistory.warning = 1
+                        last_time = convertDateFormat(schedule.time)
+                        index += 1
 
-    #return HttpResponse(academy)
-    return render_to_response('getHistory.html', {"history": history, "academy": allacademy, "aid" : aid, 'startdate': startdate, 'enddate': enddate, 'user':request.user})
+                    dailyHistory.timehistory.append(timeHistory)
+                    total_count += 1
+                    if (timeHistory.warning != 1):
+                        uniq_count += 1
+            if len(dailyHistory.timehistory) > 0:
+                history.append(dailyHistory)
+    #else :
+        #return HttpResponse("error occured", "aid = ", aid, "startdate = ", startdate, "enddate = ", enddate)
+
+    return render_to_response('getHistory.html', {"history": history, "academy": allacademy, "aid" : aid, 'aname': aname, 'total_count': total_count, 'uniq_count': uniq_count, 'startdate': startdate, 'enddate': enddate, 'user':request.user})
+
+
+## HH:MM ==> HHMM
+def convertDateFormat(str):
+	ret = str.replace(':', '')
+	#ret.replace(':', '')
+	return int(ret)
+
 
 @csrf_exempt
 @login_required
