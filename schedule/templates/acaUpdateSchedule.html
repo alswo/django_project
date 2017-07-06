@@ -252,11 +252,15 @@
   <br> {% for c in contacts %}
   <div class="row">
     <div class="col-md-1"></div>
-    <div class="col-md-10">
+    <div class="col-md-10" style="background-color:rgb(201, 214, 222); height: auto; width: 100%; border-radius: 25px;">
       <div class="col-md-12 table-responsive">
+        <br><br>
         <div class="row">
+          <div class="row">
+            {{c.stime}}
+          </div>
           <div class="col-md-8">
-            <textarea class="form-control" rows="4" id="{{c.id}}text">{{c.req}}</textarea>
+            <textarea class="form-control" style="border-radius: 15px;" rows="4" id="{{c.id}}text">{{c.req}}</textarea>
           </div>
           <div class="col-md-1">
             {% if c.get_cname == 'editedinven' %}
@@ -288,8 +292,8 @@
                 <th class="text-center thstyle2">주소</th>
                 <th class="text-center thstyle2">이름</th>
                 <th class="text-center thstyle3">이름추가</th>
-                <th class="text-center">등하원</th>
-                <th class="text-center thstyle4">이동</th>
+                <th class="text-center thstyle3">등하원</th>
+                <th class="text-center thstyle3">삭제</th>
               </tr>
             </thead>
             <tbody class="table-body">
@@ -321,10 +325,6 @@
                   <select name="load[]" form="scheduleform{{c.id}}">
                       <option value="">도착</option>
                     </select> {% endif %}
-                </td>
-                <td data-name="move">
-                  <a href="javascript:void(0)" class="glyphicon glyphicon-chevron-up up"></a>
-                  <a href="javascript:void(0)" class="glyphicon glyphicon-chevron-down down"></a>
                 </td>
                 <td data-name="del"><button name="del" class="btn btn-danger glyphicon glyphicon-remove row-remove"></button></td>
               </tr>
