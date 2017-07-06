@@ -33,7 +33,7 @@ def store_historyschedule_old():
 	t = timeToDate()
 	dmy = t.timeToDmy()
 	d = t.timeToD()
-	
+
 	sschedule = ShuttleSchedule.objects.filter(day=d)
 
 	for s in sschedule:
@@ -59,7 +59,7 @@ def notice_to_student(sid, msg):
 	except StudentInfo.DoesNotExist:
 		name = "none"
 
-	#print name + "[" + str(sid) + "] : " + msg 
+	#print name + "[" + str(sid) + "] : " + msg
 	return
 
 def find_update():
@@ -113,3 +113,87 @@ def find_update():
 		    notice_to_student(sid, msg)
 
 	notice_to_student(0, "end")
+
+def weekly_update():
+	#copy week1 -> OG inven
+	invenEditedWeek1 = Inventory.objects.filter(week1 = 1)
+	for iw1 in invenEditedWeek1:
+		editedInvensWeek1 = iw1.editedinvens.all().filter(week = 1)
+		tempInven = Inventory.objects.get(id = iw1.id)
+
+		for eiw1 in editedInvensWeek1:
+			tempInven.carnum = eiw1.carnum
+			tempInven.bid = eiw1.bid
+			tempInven.snum = eiw1.snum
+			tempInven.day = eiw1.day
+			tempInven.alist = eiw1.alist
+			tempInven.anamelist = eiw1.anamelist
+			tempInven.slist = eiw1.slist
+			tempInven.stime = eiw1.stime
+			tempInven.etime = eiw1.etime
+			tempInven.scheduletables.all().delete()
+			tempInven.save()
+
+			editedScheduleTablesWeek1 = eiw1.editedscheduletables.all()
+
+			for estw1 in editedScheduleTablesWeek1:
+				stable = ScheduleTable(iid = tempInven, time = estw1.time, addr = estw1.addr, alist=estw1.alist, anamelist=estw1.anamelist,slist=estw1.slist,sname=estw1.sname, tflag=estw1.tflag, lflag=estw1.lflag)
+				stable.save()
+
+
+	Inventory.objects.filter(week1=1,week2=1,week3=1,editedinvens=None).delete()
+
+	createdInvenWeek1 = EditedInven.objects.filter(week=1).filter(iid_id = None)
+	for ciw1 in createdInvenWeek1:
+		createdScheduleTablesWeek1 = ciw1.editedscheduletables.all()
+
+		inven = Inventory.objects.create(carnum = ciw1.carnum, bid = ciw1.bid, snum = ciw1.snum, day = ciw1.day , alist=ciw1.alist, anamelist = ciw1.anamelist, slist=ciw1.slist, stime = ciw1.stime, etime = ciw1.etime, req=ciw1.req, week1 = 1, week2 = 1, week3 = 1)
+
+		for cstw1 in createdScheduleTablesWeek1:
+			ScheduleTable.objects.create(iid = inven, time = cstw1.time, addr = cstw1.addr, alist=cstw1.alist, anamelist=cstw1.anamelist,slist=cstw1.slist,sname=cstw1.sname, tflag=cstw1.tflag, lflag=cstw1.lflag)
+
+	#week1 editedInven, createdInven delete(include referenced tables)
+	EditedInven.objects.filter(week=1).prefetch_related('editedscheduletables').delete()
+
+
+	EditedInven.objects.filter(week=2).update(week=1)
+	EditedInven.objects.filter(week=3).update(week=2)
+
+
+	editedInvenWeek2 = EditedInven.objects.filter(week=2)
+
+	for eiw2 in editedInvenWeek2:
+		createInvenWeek3 = EditedInven.objects.create(carnum = eiw2.carnum, bid = eiw2.bid, snum = eiw2.snum, iid = eiw2.iid,day = eiw2.day, alist =eiw2.alist, anamelist = eiw2.anamelist, slist = eiw2.slist, stime = eiw2.stime, etime = eiw2.etime, req = eiw2.req, week = 3)
+
+		editedScheduleTablesWeek2 = eiw2.editedscheduletables.all()
+
+		for estw2 in editedScheduleTablesWeek2:
+			EditedScheduleTable.objects.create(ieid = createInvenWeek3, time = estw2.time, addr = estw2.addr, alist = estw2.alist, anamelist = estw2.anamelist, slist = estw2.slist, sname = estw2.sname, tflag = estw2.tflag, lflag = estw2.lflag)
+
+
+	#Inventory week3 -> week2, week2 -> week1, week1->week
+	ivenAllWeek1 = Inventory.objects.filter(week1 = 1)
+
+	for ia in ivenAllWeek1:
+	 	tempInven = Inventory.objects.get(id = ia.id)
+	 	tempInven.week1 = 1
+	 	tempInven.week2 = 1
+	 	tempInven.week3 = 1
+	 	tempInven.save()
+
+	ivenAllWeek2 = Inventory.objects.filter(week2 = 1)
+
+	for ia in ivenAllWeek2:
+	 	tempInven = Inventory.objects.get(id = ia.id)
+		tempInven.week1 = 1
+		tempInven.week2 = 1
+	 	tempInven.week3 = 1
+	 	tempInven.save()
+
+	ivenAllWeek2 = Inventory.objects.filter(week3 = 1)
+
+	for ia in ivenAllWeek2:
+	 	tempInven = Inventory.objects.get(id = ia.id)
+		tempInven.week2 = 1
+	 	tempInven.week3 = 1
+	 	tempInven.save()
