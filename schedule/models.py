@@ -1,7 +1,7 @@
 from __future__ import unicode_literals
 
 from django.db import models
-from django.contrib.postgres.fields import ArrayField
+from django.contrib.postgres.fields import ArrayField, JSONField
 from simple_history.models import HistoricalRecords
 
 class Inventory(models.Model):
@@ -14,6 +14,9 @@ class Inventory(models.Model):
     slist = ArrayField(models.IntegerField())
     stime = models.IntegerField()
     etime = models.IntegerField()
+    week1 = models.IntegerField()
+    week2 = models.IntegerField()
+    week3 = models.IntegerField()
     #building = models.IntegerField()
     req = models.TextField()
     history = HistoricalRecords()
@@ -42,6 +45,43 @@ class ScheduleTable(models.Model):
     class Meta:
         ordering = ['iid', 'time']
 
+class EditedInven(models.Model):
+    carnum = models.IntegerField()
+    bid = models.IntegerField()
+    snum = models.IntegerField()
+    iid = models.ForeignKey(Inventory,related_name='editedinvens', null = True)
+    day = models.CharField(max_length=5)
+    alist = ArrayField(models.IntegerField())
+    anamelist = ArrayField(models.CharField(max_length = 10, default={'none'}),default={'none'})
+    slist = ArrayField(models.IntegerField())
+    stime = models.IntegerField()
+    etime = models.IntegerField()
+    week = models.IntegerField()
+    req = models.TextField()
+
+    def __unicode__(self):
+        return "[{0}] [{1}] {2} {3}~{4}".format(self.bid, self.carnum, self.day, self.stime, self.etime)
+
+    def get_cname(self):
+        class_name = 'editedinven'
+        return class_name
+
+class EditedScheduleTable(models.Model):
+    ieid = models.ForeignKey(EditedInven,related_name='editedscheduletables')
+    time = models.CharField(max_length = 10,null=True,blank=True)
+    addr = models.CharField(max_length = 60,null=True,blank=True)
+    alist = ArrayField(models.IntegerField(null=True,blank=True),null=True,blank=True)
+    anamelist = ArrayField(models.CharField(max_length = 10, null=True, blank=True),null=True, blank=True)
+    slist = ArrayField(models.IntegerField(null=True,blank=True),null=True,blank=True)
+    sname = ArrayField(models.CharField(max_length = 10,null=True,blank=True),null=True,blank=True)
+    tflag = ArrayField(models.IntegerField(null=True,blank=True),null=True,blank=True)
+    lflag = models.IntegerField()
+
+    def __unicode__(self):
+        return u"{0} {1} {2} - {3}".format(self.time,self.ieid, self.addr , ",".join(self.sname))
+
+    class Meta:
+        ordering = ['ieid', 'time']
 
 class HistoryScheduleTable(models.Model):
     #date = models.DateField(auto_now=True)
