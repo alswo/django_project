@@ -512,5 +512,12 @@
     sibling_sid.value = delete_sid.toString()
 
   });
+  $( ".table-body" ).sortable({
+     update: function( event, ui ){
+       $(this).children().each(function(index) {
+            $(this).find('td')
+          });
+        }
+      });
 </script>
 {% endblock content %}
