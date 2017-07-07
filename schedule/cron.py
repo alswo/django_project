@@ -1,5 +1,5 @@
 #_*_ coding:utf-8 _*_
-from schedule.models import Inventory,ScheduleTable,HistoryScheduleTable
+from schedule.models import Inventory,ScheduleTable,HistoryScheduleTable, EditedInven, EditedScheduleTable
 from passenger.models import StudentInfo, Academy, ShuttleSchedule, ScheduleDate
 from passenger.dateSchedule import timeToDate
 from schedule.models import Inventory, ScheduleTable, EditedInven, EditedScheduleTable
