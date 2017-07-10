@@ -111,6 +111,14 @@ def getSchedule(request):
         day = request.GET.get('day')
         uid = request.user.id
 
+
+	t = timeToDate()
+        today = t.timeToYmd()
+        realtimelocation = RealtimeLocation.objects.filter(date=today, carnum=car).order_by('schedule_time').last()
+
+
+	#return HttpResponse(realtimelocation.schedule_time);
+
         if request.user.is_staff:
             invens = Inventory.objects.filter(bid = bid).filter(alist__contains = [aid]).filter(day = day)
             list_invensid = []
@@ -128,7 +136,7 @@ def getSchedule(request):
                 for i in invens:
                     contacts.extend(Inventory.objects.filter(id = i.id).prefetch_related('scheduletables'))
 
-                return render_to_response('getCarSchedule.html', {"contacts": contacts,"car": car, 'user':request.user})
+                return render_to_response('getCarSchedule.html', {"contacts": contacts,"car": car, 'user':request.user, 'realtimelocation':realtimelocation})
 
             return render_to_response('getSchedule.html', {"contacts": contacts, "bid" : bid, "aid" : aid,'user':request.user})
 
@@ -167,7 +175,7 @@ def getSchedule(request):
             for i in invens:
                 contacts.extend(Inventory.objects.filter(id = i.id).prefetch_related('scheduletables'))
 
-            return render_to_response('getCarSchedule.html', {"contacts": contacts,"car": car, 'user':request.user})
+            return render_to_response('getCarSchedule.html', {"contacts": contacts,"car": car, 'user':request.user, 'realtimelocation':realtimelocation})
 
         return HttpResponse('로그인 후 사용해주세요.')
 
