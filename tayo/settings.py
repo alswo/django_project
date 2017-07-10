@@ -72,17 +72,6 @@ WSGI_APPLICATION = 'tayo.wsgi.application'
 # https://docs.djangoproject.com/en/1.9/ref/settings/#databases
 
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'tayo',
-        'USER': 'postgres',
-        'PASSWORD': 'beclear048@',
-        'HOST': 'localhost',
-        'PORT': '5432',
-    }
-}
-
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -152,3 +141,8 @@ PROJECT_ROOT = os.path.normpath(os.path.dirname(__file__))
 
 STATIC_ROOT = os.path.join(PROJECT_ROOT, 'static')
 STATIC_URL = '/static/'
+
+try:
+	from local_settings import *
+except ImportError as e:
+	pass
