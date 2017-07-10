@@ -1940,9 +1940,31 @@ def reqInventory(request):
             eInven.req = req
             eInven.save()
 
-<<<<<<< HEAD
         return HttpResponse(req)
-=======
+
+
+def setRealtimeLocation(request):
+    if request.method == "GET":
+        carnum = request.GET.get('carnum')
+        schedule_time = request.GET.get('schedule_time')
+        t = timeToDate()
+        today = t.timeToYmd()
+        current_time = t.timeToHMS()
+
+        RealtimeLocation.objects.create(carnum=carnum, schedule_time=schedule_time, date=today, departure_time=current_time)
+
+        return HttpResponse("success")
+
+## time format : HH:MM
+def get_difference(time1, time2):
+    timevar1 = time1.split(':')
+    timevar2 = time2.split(':')
+
+    return int(timevar2[0]) * 60 + int(timevar2[1]) - (int(timevar1[0]) * 60 + int(timevar1[1]))
+
+def format_hm(time):
+    return (time[:2] + ':' + time[2:])
+
 def getRealtimeLocation(request):
     if request.method == "GET":
         t = timeToDate()
@@ -1950,6 +1972,7 @@ def getRealtimeLocation(request):
         today = t.timeToYmd()
         rawhm = t.timeToRawHM()
         hm = t.timeToHM()
+        rawhm = int(request.GET.get('rawhm'))
         hm = request.GET.get('hm')
         sid = request.GET.get('sid')
         sname = request.GET.get('sname')
@@ -1958,20 +1981,13 @@ def getRealtimeLocation(request):
         siid = ""
         #expected_time = "00:00"
 
-	if (sid and len(sid) > 0):
-		pass;
-        elif (sname and len(sname) > 0):
+        if (sname and len(sname) > 0):
             sids = StudentInfo.objects.filter(sname = sname).values('id')
             if (len(sids) <= 0):
                 return HttpResponse("해당 사용자가 존재하지 않습니다.")
             sid = sids[0]['id']
         else:
             return HttpResponse("파라미터가 유효하지 않습니다.")
-
-	if (request.GET.get('rawhm')):
-        	rawhm = int(request.GET.get('rawhm'))
-		
-		
 
         today_inventories = Inventory.objects.filter(day=d)
         today_inventory_ids = today_inventories.values('id')
@@ -1987,7 +2003,7 @@ def getRealtimeLocation(request):
             inventory = Inventory.objects.get(id = scheduletable.iid_id)
             format_etime = format_hm(str(inventory.etime))
             if (inventory.etime > rawhm):
-                ## inventory 중간에 있으면..
+                ## inventory 중간에 있으면.. 
                 if (inventory.stime < rawhm):
                     carnum = inventory.carnum
                     expected_time = scheduletable.time
@@ -1995,9 +2011,8 @@ def getRealtimeLocation(request):
                     waittime = get_difference(hm, expected_time) + get_difference(realtimelocation.schedule_time, realtimelocation.departure_time) - 1
                     return HttpResponse(str(waittime) + "분 후 도착합니다.")
                 ## 다음 inventory 로..
-                else:
+                else: 
                     continue
             ## inventory 사이에..
             else:
                 return HttpResponse("다음 스케쥴이 아직 시작되지 않았습니다.")
->>>>>>> b40d69f0a4ce2bd0ff9ba4e8c9db4a1e0e28eb00
