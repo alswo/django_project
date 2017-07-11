@@ -71,7 +71,6 @@ WSGI_APPLICATION = 'tayo.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.9/ref/settings/#databases
 
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
@@ -102,8 +101,8 @@ CRONJOBS = [
     ('01 23 * * *', 'schedule.cron.store_historyschedule'),
     ('00 21 * * *', 'schedule.cron.store_historyschedule_old'),
     ('00 22 * * sun', 'schedule.cron.reset_lflag_on_every_schedule'),
-    ('00 30 * * sun', 'schedule.cron.weekly_update'),
-    ('30 12 * * *', 'schedule.cron.find_update'),
+    ('30 23 * * sun', 'schedule.cron.weekly_update'),
+    ('30 12 * * *', 'schedule.cron.find_update')
     #('00 23 31 12 *', 'schedule.test.move_schedule'),
     #('00 23 31 12 *', 'schedule.test.regist_student')
 ]
