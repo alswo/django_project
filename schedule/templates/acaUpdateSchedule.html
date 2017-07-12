@@ -306,8 +306,8 @@
                   <input type="text" name="name[]" data-role="tagsinput" class="form-control tInput" form="scheduleform{{c.id}}" value="{% for name in s.sname %}{{name}}{% include 'comma.html' %}{% endfor %}" />
                 </td>
                 <td data-name="addstu"><button class="btn btn-primary glyphicon glyphicon-plus addstudent" data-toggle="modal"></button></td>
-                <td data-name="academy" class="inputAcaU" style="display:none;"><input name="academy[]" type="text" data-role="tagsinput" class="form-control" form="scheduleform{{c.id}}" value="{% for aid in s.alist %}{{aid}}{% include 'comma.html' %}{% endfor %}" /></td>
-                <td data-name="sid" class="inputSid" style="display:none;"><input name="sid[]" type="text" data-role="tagsinput" class="form-control" form="scheduleform{{c.id}}" value="{% for sid in s.slist %}{{sid}}{% include 'comma.html' %}{% endfor %}" /></td>
+                <td data-name="academy" class="inputAcaU" style="display:none;"><input name="academy[]" type="text" class="form-control" form="scheduleform{{c.id}}" value="{% for aid in s.alist %}{{aid}}{% include 'comma.html' %}{% endfor %}" /></td>
+                <td data-name="sid" class="inputSid" style="display:none;"><input name="sid[]" type="text" class="form-control" form="scheduleform{{c.id}}" value="{% for sid in s.slist %}{{sid}}{% include 'comma.html' %}{% endfor %}" /></td>
                 <td data-name="load">
                   {% if s.lflag == 1 %}
                   <select name="load[]" form="scheduleform{{c.id}}">
@@ -337,8 +337,8 @@
                   <input type="text" name="name[]" data-role="tagsinput" class="form-control tInput" form="scheduleform{{c.id}}" value="{% for name in es.sname %}{{name}}{% include 'comma.html' %}{% endfor %}" />
                 </td>
                 <td data-name="addstu"><button class="btn btn-primary glyphicon glyphicon-plus addstudent" data-toggle="modal"></button></td>
-                <td data-name="academy" class="inputAcaU" style="display:none;"><input name="academy[]" type="text" data-role="tagsinput" class="form-control" form="scheduleform{{c.id}}" value="{% for aid in es.alist %}{{aid}}{% include 'comma.html' %}{% endfor %}" /></td>
-                <td data-name="sid" class="inputSid" style="display:none;"><input name="sid[]" type="text" data-role="tagsinput" class="form-control" form="scheduleform{{c.id}}" value="{% for sid in es.slist %}{{sid}}{% include 'comma.html' %}{% endfor %}" /></td>
+                <td data-name="academy" class="inputAcaU" style="display:none;"><input name="academy[]" type="text" class="form-control" form="scheduleform{{c.id}}" value="{% for aid in es.alist %}{{aid}}{% include 'comma.html' %}{% endfor %}" /></td>
+                <td data-name="sid" class="inputSid" style="display:none;"><input name="sid[]" type="text" class="form-control" form="scheduleform{{c.id}}" value="{% for sid in es.slist %}{{sid}}{% include 'comma.html' %}{% endfor %}" /></td>
                 <td data-name="load">
                   {% if es.lflag == 1 %}
                   <select name="load[]" form="scheduleform{{c.id}}">
@@ -397,7 +397,6 @@
                 <input class="hidden" name='aca' value="{{aid}}" form="scheduleform{{c.id}}" />
                 <input class="hidden" name='areaid' value="{{areaid}}" form="scheduleform{{c.id}}" />
                 <input class="hidden" name='day' value="{{day}}" form="scheduleform{{c.id}}" />
-                <input class="hidden" name='carnum' value="{{carnum}}" form="scheduleform{{c.id}}" />
                 <input class="hidden" name='week' value="{{week}}" form="scheduleform{{c.id}}" />
                 <input class="hidden" name="update" value="1" form="scheduleform{{c.id}}" />
                 <input type="hidden" name="carnum" value="{{c.carnum}}" form="scheduleform{{c.id}}">
@@ -411,7 +410,6 @@
                 <input class="hidden" name='aca' value="{{aid}}" form="deleteform{{c.id}}" />
                 <input class="hidden" name='areaid' value="{{areaid}}" form="deleteform{{c.id}}" />
                 <input class="hidden" name='day' value="{{day}}" form="deleteform{{c.id}}" />
-                <input class="hidden" name='carnum' value="{{carnum}}" form="deleteform{{c.id}}" />
                 <input class="hidden" name='week' value="{{week}}" form="deleteform{{c.id}}" />
                 <input class="hidden" name="update" value="0" form="deleteform{{c.id}}" />
                 <input class="hidden" name='carnum' value="{{c.carnum}}" form="deleteform{{c.id}}" />
@@ -533,6 +531,7 @@
 
       $(document).on('click', '.addstudent', function() {
         //thisObject -> studentName, thisObjectForAca -> AcademyID
+        a = $(this)
         thisObject = $(this).parent().prevAll('.inputTd').children();
         thisObjectForAca = $(this).parent().nextAll('.inputAcaU').children();
         thisObjectForSid = $(this).parent().nextAll('.inputSid').children();
@@ -547,9 +546,8 @@
 
         if (thisObject[0].nodeName == 'DIV') {
           temp = thisObject[1].value
-          tempAca = thisObjectForAca[1].value
-          tempSid = thisObjectForSid[1].value
-
+          tempAca = thisObjectForAca[0].value
+          tempSid = thisObjectForSid[0].value
 
           if (temp != '') {
             console.log('1')
@@ -558,8 +556,8 @@
             tempSid += ',' + selectedSid
 
             $(thisObject[1]).tagsinput('add')
-            $(thisObjectForAca[1]).tagsinput('add')
-            $(thisObjectForSid[1]).tagsinput('add')
+            //$(thisObjectForAca[0]).tagsinput('add')
+            //$(thisObjectForSid[0]).tagsinput('add')
 
           } else {
             console.log('2')
@@ -567,13 +565,13 @@
             tempAca = selectedAca
             tempSid = selectedSid
             $(thisObject[1]).tagsinput('add')
-            $(thisObjectForAca[1]).tagsinput('add')
-            $(thisObjectForSid[1]).tagsinput('add')
+            //$(thisObjectForAca[0]).tagsinput('add')
+            //$(thisObjectForSid[0]).tagsinput('add')
           }
 
           $(thisObject[1]).tagsinput('add', temp)
-          $(thisObjectForAca[1]).tagsinput('add', tempAca)
-          $(thisObjectForSid[1]).tagsinput('add', tempSid)
+          $(thisObjectForAca[0]).val(tempAca)
+          $(thisObjectForSid[0]).val(tempSid)
 
         } else if (thisObject[0].nodeName == 'INPUT') {
           temp = thisObject[0].value
@@ -692,10 +690,12 @@
 
       $(document).on('beforeItemRemove', '.inputTd', function(event) {
         t = $(this)
-        sibling_sid = $(this).siblings('.inputSid')[0].children[1]
-        sibling_aca = $(this).siblings('.inputAcaU')[0].children[1]
-        // Do some processing here
+        sibling_sid = $(this)[0].parentNode.children[5].children[0]
+        sibling_aca = $(this)[0].parentNode.children[4].children[0]
 
+        // Do some processing here
+        console.log(sibling_sid)
+        console.log(sibling_aca)
         var before_list = t[0].children[1].value.split(",").map(function(item) {
           return item.trim();
         });
@@ -704,6 +704,8 @@
 
         var before_sid_value = sibling_sid.value
         var before_aca_value = sibling_aca.value
+        console.log(before_sid_value)
+        console.log(before_aca_value)
 
         var delete_sid = before_sid_value.split(',').map(function(item) {
           return item.trim()
@@ -711,6 +713,9 @@
         var delete_aca = before_aca_value.split(',').map(function(item) {
           return item.trim()
         });
+
+        console.log(delete_sid)
+        console.log(delete_aca)
 
         if (delete_index == -1) {
           delete_sid.splice(0, 1);
