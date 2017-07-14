@@ -111,6 +111,14 @@ def getSchedule(request):
         day = request.GET.get('day')
         uid = request.user.id
 
+
+	t = timeToDate()
+        today = t.timeToYmd()
+        realtimelocation = RealtimeLocation.objects.filter(date=today, carnum=car).order_by('schedule_time').last()
+
+
+	#return HttpResponse(realtimelocation.schedule_time);
+
         if request.user.is_staff:
             invens = Inventory.objects.filter(bid = bid).filter(alist__contains = [aid]).filter(day = day)
             list_invensid = []
@@ -128,7 +136,7 @@ def getSchedule(request):
                 for i in invens:
                     contacts.extend(Inventory.objects.filter(id = i.id).prefetch_related('scheduletables'))
 
-                return render_to_response('getCarSchedule.html', {"contacts": contacts,"car": car, 'user':request.user})
+                return render_to_response('getCarSchedule.html', {"contacts": contacts,"car": car, 'user':request.user, 'realtimelocation':realtimelocation})
 
             return render_to_response('getSchedule.html', {"contacts": contacts, "bid" : bid, "aid" : aid,'user':request.user})
 
@@ -167,7 +175,7 @@ def getSchedule(request):
             for i in invens:
                 contacts.extend(Inventory.objects.filter(id = i.id).prefetch_related('scheduletables'))
 
-            return render_to_response('getCarSchedule.html', {"contacts": contacts,"car": car, 'user':request.user})
+            return render_to_response('getCarSchedule.html', {"contacts": contacts,"car": car, 'user':request.user, 'realtimelocation':realtimelocation})
 
         return HttpResponse('로그인 후 사용해주세요.')
 
@@ -371,7 +379,7 @@ def putSchedule(request):
         academy = Academy.objects.filter(bid = bid)
         group = Car.objects.filter(branchid = bid)
 
-        return render_to_response('putSchedule.html', {"academy" : academy, "bid" : bid, "group" : group,'user':request.user})
+        return render_to_response('putSchedule.html', {"academy" : academy, "bid" : bid, "week": week, "group" : group,'user':request.user})
 
 
 @csrf_exempt
@@ -2336,6 +2344,28 @@ def reqInventory(request):
             eInven.save()
 
         return HttpResponse(req)
+
+def setRealtimeLocation(request):
+    if request.method == "GET":
+        carnum = request.GET.get('carnum')
+        schedule_time = request.GET.get('schedule_time')
+        t = timeToDate()
+        today = t.timeToYmd()
+        current_time = t.timeToHMS()
+
+        RealtimeLocation.objects.create(carnum=carnum, schedule_time=schedule_time, date=today, departure_time=current_time)
+
+        return HttpResponse("success")
+
+## time format : HH:MM
+def get_difference(time1, time2):
+    timevar1 = time1.split(':')
+    timevar2 = time2.split(':')
+
+    return int(timevar2[0]) * 60 + int(timevar2[1]) - (int(timevar1[0]) * 60 + int(timevar1[1]))
+
+def format_hm(time):
+    return (time[:2] + ':' + time[2:])
 
 def getRealtimeLocation(request):
     if request.method == "GET":
