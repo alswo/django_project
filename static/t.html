@@ -1,0 +1,387 @@
+  <html>
+    <head>
+<meta charset="utf-8">
+      <style>
+         #map {
+          height: 100px;
+          width: 100%;
+         }
+
+	#top_bar {
+          height: 200px;
+          width: 100%;
+	  float: top;
+	}
+
+	#left_bar {
+	  position: fixed;
+	  top: 200px;
+	  left: 0px;
+          width: 300px;
+	  height: 500px;
+	  float: left;
+	  overflow: scroll;
+	}
+
+	#content {
+	  position: fixed;
+	  top: 200px;
+	  left: 300px;
+	  //width: 90%;
+	  overflow: scroll;
+	}
+
+	#search_result {
+	}
+
+	button.phonenumber {
+		margin: 5px 0;
+	}
+      </style>
+<script src="/static/js/jquery-3.1.0.min.js"></script>
+    <link rel="stylesheet" href="/static/css/jquery-ui.css">
+    <script src="/static/js/jquery-ui.js"></script>
+
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+    <script src="/static/js/bootstrap.min.js"></script>
+    <script src="http://dmaps.daum.net/map_js_init/postcode.v2.js"></script>
+    <!-- services 라이브러리 불러오기 -->
+<!-- 라이브러리 -->
+  <script type="text/javascript" src="http://apis.daum.net/maps/maps3.js?apikey=df6af02ef0921fda82ecbfd508cfcfdf&libraries=services"></script>
+
+<link rel="stylesheet" href="/static/css/jquery.timepicker.css">
+<script type="text/javascript" src="/static/js/jquery.timepicker.min.js"></script>
+
+<link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
+<script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
+<script src="/static/js/plugins/proj4.js"></script>
+
+</head>
+<body>
+	<h3>학원 원장님 입력</h3>
+	<div id="top_bar">
+		<table class="table">
+			<thead>
+				<td>수업명</td>
+				<td>요일</td>
+				<td>등/하원</td>
+				<td>시간</td>
+			</thead>
+			<tbody>
+				<tr>
+					<td><input type="text" class="form-control"></td>
+					<td><select class="form-control"><option>월</option><option>화</option><option>수</option><option>목</option><option>금</option><option>토</option>
+					<td><select class="form-control"><option>등원</option><option>하원</option></select></td>
+					<td><input class="timeform" type="text" data-time-format="H:i"></td>
+				</tr>
+			</tbody>
+		</table>
+		<form action="javascript:search();">
+	지역 검색 : <input type="text" id="query" autocomplete=off> <button type="submit">검색</button>
+	<!-- input type="checkbox" checked data-toggle="toggle" data-on="검색 위치 선택" data-off="직접 위치 선택" data-onstyle="success" data-offstyle="danger" //-->
+		</form>
+	</div>
+	<div id="left_bar"> 
+		<table class="table">
+			<thead></thead>
+			<tbody id="result_tbody"></tbody>
+		</table>
+	</div>
+	<div id="content">
+      		<div id="map"></div>
+		<!-- button type="button" class="btn btn-info" onclick="sample3_execDaumPostcode()">주소검색</button //-->
+		<div id="wrap" style="display:none;border:1px solid;width:500px;height:300px;margin:5px 0;position:relative">
+			<!-- img src="http://t1.daumcdn.net/localimg/localimages/07/postcode/320/close.png" id="btnFoldWrap" style="cursor:pointer;position:absolute;right:0px;top:-1px;z-index:1" onclick="foldDaumPostcode()" alt="접기 버튼" //-->
+  		</div>
+		<div id="gmarker" style="width:20px;height:20px;cursor:move"></div>
+		<table class="table">
+			<thead>
+				<td>이름</td>
+				<td>나이</td>
+				<td>전화번호</td>
+				<td>위치</td>
+			</thead>
+			<tbody>
+				<tr>
+					<td><input type="text" class="form-control input-sm"></td>
+					<td><select class="from-control"><option>6세</option><option>7세</option><option>8세</option></select></td>
+					<td><div class="input-group"><input type="text" class="form-control input-sm phonenumber"><span class="input-group-btn input-group-btn-sm"><button class="btn btn-sm phone-add">추가</button></span></div></td>
+					<td><div class="dropzone" style="width:200px;height:30px;border:1px solid red;font-size:70%;">지도에서 끌어와주세요.</div></td>
+				</tr>
+				<tr>
+					<td><input type="text" class="form-control input-sm"></td>
+					<td><select class="from-control"><option>6세</option><option>7세</option><option>8세</option></select></td>
+					<td><div class="input-group"><input type="text" class="form-control input-sm phonenumber"><span class="input-group-btn input-group-btn-sm"><button class="btn btn-sm phone-add">추가</button></span></div></td>
+					<td><div class="dropzone" style="width:200px;height:30px;border:1px solid red;font-size:70%;">지도에서 끌어와주세요.</div></td>
+				</tr>
+				<tr>
+					<td><input type="text" class="form-control input-sm"></td>
+					<td><select class="from-control"><option>6세</option><option>7세</option><option>8세</option></select></td>
+					<td><div class="input-group"><input type="text" class="form-control input-sm phonenumber"><span class="input-group-btn input-group-btn-sm"><button class="btn btn-sm phone-add">추가</button></span></div></td>
+					<td><div class="dropzone" style="width:200px;height:30px;border:1px solid red;font-size:70%;">지도에서 끌어와주세요.</div></td>
+				</tr>
+			</tbody>
+		</table>
+		aaa
+	</div>
+
+<script>
+	var map;
+    	var bounds;
+
+	// 우편번호 찾기 찾기 화면을 넣을 element
+	var element_wrap = document.getElementById('wrap');
+	var gDrag = {
+		jq: $('#gmarker'),
+		item: {},
+		status: 0,
+		y: 0,
+		x: 0
+	};
+	var markers = [];
+	var last_infowindow;
+	var labels = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+	var labelIndex = 0;
+
+	function initMap() {
+		var uluru = {lat: 37.394798, lng: 127.111135};
+		map = new google.maps.Map(document.getElementById('map'), {
+			zoom: 17,
+			draggable: true,
+			center: uluru,
+			//mapTypeId: "OSM",
+		});
+
+	     daumMapType = new google.maps.ImageMapType({
+                getTileUrl: function(coord, zoom) {
+                    // See above example if you need smooth wrapping at 180th meridian
+
+			var x = coord.x - parseInt(110879/Math.pow(2, (17-zoom)));
+			var y = -(coord.y - parseInt(52761/Math.pow(2, (17-zoom))));
+
+
+		    console.log("[" + coord.x + ":" + coord.y + "] >> [" + x + ":" + y + "]");
+			//if (y < 0 || y >= scale) return null;
+                    console.log("http://map3.daumcdn.net/map_2d/2jap/L" + (20-zoom) + "/" + y + "/" + x + ".png");
+                    return "http://map3.daumcdn.net/map_2d/2jap/L" + (20-zoom) + "/" + y + "/" + x + ".png";
+                },
+                tileSize: new google.maps.Size(256, 256),
+                name: "OpenStreetMap",
+                maxZoom: 17,
+		isPng: true,
+            });
+
+	var daumProjection = "+proj=tmerc +lat_0=38 +lon_0=127 +k=1 +x_0=200000 +y_0=500000 +ellps=GRS80 +units=m +no_defs";
+		//daumMapType.projection = {
+			//fromLatLngToPoint: function(latLng) {
+				//var transformed = proj4("EPSG:4326", daumProjection, [latLng.lng(), latLng.lat()]);
+				//return new google.maps.Point(transformed[0], transformed[1]);
+			//},
+			//fromPointToLatLng: function(point, noWrap) {
+				//var transformed = proj4(daumProjection, "EPSG:4326", [point.x, point.y]);
+				//return new google.maps.LatLng(transformed[1], transformed[0], noWrap);
+			//}
+		//};
+		//map.mapTypes.set("OSM", daumMapType);
+		//map.setMapTypeId("OSM");
+
+		google.maps.event.addListener(map, 'click', function(e) {
+			var geocoder = new daum.maps.services.Geocoder();
+			geocoder.coord2addr(new daum.maps.LatLng(e.latLng.lat(), e.latLng.lng()), function(status, result) {
+				if (status === daum.maps.services.Status.OK) {
+					placeMarker(e.latLng, map, result[0].fullName);
+				}
+			});
+		});
+
+		$(".dropzone").droppable({
+			accept: "#gmarker",
+			activeClass: "drophere",
+			hoverClass: "dropaccept",
+			drop: function(event, ui, item){
+				gDrag.status = 1;
+				$(this).addClass("ui-state-highlight").html(gDrag.item.title);
+			}
+		});
+
+		gDrag.jq.draggable({
+			start: function(event, ui){
+					gDrag.jq.html('<img src="https://mts.googleapis.com/vt/icon/name=icons/spotlight/spotlight-poi.png" />');
+					gDrag.item.setVisible(true);
+				},
+			stop: function(event, ui){
+				gDrag.jq.html('');
+				if(gDrag.status){
+					//gDrag.item.setVisible(false);
+				}else{
+					gDrag.item.setVisible(true);
+				}
+			},
+		});
+			
+		$(document).mousemove(function(event){
+			gDrag.x = event.pageX;
+			gDrag.y = event.pageY;
+            	});
+			
+
+        }
+
+	$(function() {
+		$('.timeform').timepicker({'scrollDefault': '14:00'});
+	});
+
+
+	function placeMarker(position, map, text) {
+		var marker = new google.maps.Marker({
+			position: position,
+			map: map,
+			draggable: false,
+			raiseOnDrag: false,
+			label: {
+				text: labels[labelIndex++ % labels.length],
+			},
+			title: text,
+		});
+
+		google.maps.event.addListener(marker, 'mouseover', function(e) {
+			if (!gDrag.jq.hasClass('ui-draggable-dragging')) {
+				gDrag.item = this;
+				gDrag.jq.offset({ 
+					top: gDrag.y - 10,
+	     	     			left: gDrag.x - 10
+				});
+			}
+		});
+
+		markers.push(marker);
+
+		if (!bounds) {
+			bounds = new google.maps.LatLngBounds();
+			bounds.extend(position);
+			map.setCenter(position);
+		}
+		else {
+			//bounds.extend(position);
+			//map.fitBounds(bounds);		// auto-zoom
+			//map.panToBounds(bounds);	// auto-center
+		}
+
+		return (markers.length-1);
+	}
+
+	function foldDaumPostcode() {
+	// iframe을 넣은 element를 안보이게 한다.
+		element_wrap.style.display = 'none';
+	}
+
+    function sample3_execDaumPostcode() {
+      // 현재 scroll 위치를 저장해놓는다.
+      var currentScroll = Math.max(document.body.scrollTop, document.documentElement.scrollTop);
+      new daum.Postcode({
+        oncomplete: function(data) {
+          // 검색결과 항목을 클릭했을때 실행할 코드를 작성하는 부분.
+
+          // 각 주소의 노출 규칙에 따라 주소를 조합한다.
+          // 내려오는 변수가 값이 없는 경우엔 공백('')값을 가지므로, 이를 참고하여 분기 한다.
+          var fullAddr = data.address; // 최종 주소 변수
+          var extraAddr = ''; // 조합형 주소 변수
+
+          // 기본 주소가 도로명 타입일때 조합한다.
+          if (data.addressType === 'R') {
+            //법정동명이 있을 경우 추가한다.
+            if (data.bname !== '') { 
+		extraAddr += data.bname; 
+	    } 
+	    // 건물명이 있을 경우 추가한다.  
+	    if (data.buildingName !== '') { 
+		extraAddr += (extraAddr !== '' ? ', ' + data.buildingName : data.buildingName);
+            }
+            // 조합형주소의 유무에 따라 양쪽에 괄호를 추가하여 최종 주소를 만든다.
+            fullAddr += (extraAddr !== '' ? ' (' + extraAddr + ')' : '');
+          }
+
+          // 우편번호와 주소 정보를 해당 필드에 넣는다.
+          //document.getElementById('sample3_address').value = fullAddr;
+          var geocoder = new daum.maps.services.Geocoder();
+
+          var addr2coord = function(status, result) {
+            if (status == daum.maps.services.Status.OK) {
+		var position = new google.maps.LatLng(result.addr[0].lat, result.addr[0].lng);
+		placeMarker(position, map, fullAddr);
+            }
+          }
+
+          geocoder.addr2coord(data.address, addr2coord);
+
+          // iframe을 넣은 element를 안보이게 한다.
+          // (autoClose:false 기능을 이용한다면, 아래 코드를 제거해야 화면에서 사라지지 않는다.)
+          element_wrap.style.display = 'none';
+
+          // 우편번호 찾기 화면이 보이기 이전으로 scroll 위치를 되돌린다.
+          document.body.scrollTop = currentScroll;
+        },
+        // 우편번호 찾기 화면 크기가 조정되었을때 실행할 코드를 작성하는 부분. iframe을 넣은 element의 높이값을 조정한다.
+        onresize: function(size) {
+          element_wrap.style.height = size.height + 'px';
+        },
+        width: '100%',
+        height: '100%'
+      }).embed(element_wrap);
+
+      // iframe을 넣은 element를 보이게 한다.
+      element_wrap.style.display = 'block';
+    }
+
+	function search() {
+		var url = 'http://apis.daum.net/local/v1/search/keyword.json';
+		url += '?apikey=' + 'df6af02ef0921fda82ecbfd508cfcfdf'
+				+ '&query=' + encodeURIComponent($('#query').val())
+				+ '&callback=' + '?'
+
+		$('.search_result_tr').remove();
+		labelIndex = 0;
+
+		$.getJSON(url,function(data) {
+				for (var i=0; i<data['channel']['info']['count']; i++) {
+					var html = "<tr class='search_result_tr'><td><a href='javascript:void(0)' class='search_result' id='search_result" + i + "'>" 
+					+ labels[labelIndex % labels.length] + " " + data['channel']['item'][i]['title']
+					+ "</a></td></tr>";
+					$('#result_tbody').append(html);
+					$('#search_result' + i).data("lat", data['channel']['item'][i]['latitude']);
+					$('#search_result' + i).data("lon", data['channel']['item'][i]['longitude']);
+					$('#search_result' + i).data("title", data['channel']['item'][i]['title']);
+
+					var position = new google.maps.LatLng(data['channel']['item'][i]['latitude'], data['channel']['item'][i]['longitude']);
+					var index = placeMarker(position, map, data['channel']['item'][i]['title']);
+					$('#search_result' + i).data("index", index);
+
+					$('#search_result' + i).on('click', function(event) {
+						var infowindow = new google.maps.InfoWindow({
+							content: $(this).data('title'),
+						});	
+						position = new google.maps.LatLng($(this).data('lat'), $(this).data('lon'));
+						map.setCenter(position);
+						if (last_infowindow) {
+							last_infowindow.close();
+						}
+						infowindow.open(map, markers[$(this).data('index')]);
+						last_infowindow = infowindow;
+					});
+				}
+			}
+		);
+	}
+
+	$('.phone-add').on('click', function(event) {
+		$(this).parent().parent().parent().append("<button class='btn btn-xs btn-success phonenumber'><span class='glyphicon glyphicon-phone'></span>" + $(this).parent().siblings(".phonenumber").val() + "</button> ");
+		$(this).parent().siblings(".phonenumber").val("");
+	});
+
+      </script>
+      <script async defer
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBaGGxx6F0oPYs8wS6tqYbh3ZJKzD8GMbI&callback=initMap">
+      </script>
+
+    </body>
+  </html>
