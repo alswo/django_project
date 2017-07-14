@@ -221,7 +221,7 @@
 <div class="row">
   <div class="col-md-1"></div>
   <div class="col-md-10" style="background-color:rgb(201, 214, 222); height: auto; width: 100%; border-radius: 25px;">
-    <div class="col-md-12 table-responsive">
+    <div class="col-md-12">
       <br>
       <div class="row">
         <div class="col-md-5">
@@ -250,7 +250,7 @@
           {% endif %}
         </div>
         <div class="col-md-3">
-          <ul class="list-group">
+          <ul class="list-group" style="margin:0px">
             <li class="list-group-item">
               학원: {% for a in c.anamelist %} {{a}} | {%endfor%}
             </li>
@@ -260,11 +260,11 @@
         </div>
       </div>
       <br>
-      <div class="row table-container">
-        <table class="table table-bordered table-schedule">
+      <div class="row">
+        <table class="table table-bordered table-schedule" style="margin:4px">
           <thead>
             <tr>
-              <th class="text-center">시간</th>
+              <th class="text-center thstyle4">시간</th>
               <th class="text-center thstyle2">주소</th>
               <th class="text-center thstyle2">이름</th>
               <th class="text-center thstyle3">이름추가</th>
@@ -275,15 +275,15 @@
           <tbody class="table-body">
             {% if c.scheduletables %} {% for s in c.scheduletables.all %}
             <tr>
-              <td data-name="time"><input onchange="emptyTempList();" type="text" name="time[]" placeholder="Time" class="form-control" form="scheduleform{{c.id}}" value="{{s.time}}" /></td>
-              <td data-name="addr"><input type="text" name="addr[]" placeholder="Address" class="form-control" form="scheduleform{{c.id}}" value="{{s.addr}}" /></td>
-              <td data-name="name" class="inputTd">
-                <input type="text" name="name[]" data-role="tagsinput" class="form-control tInput" form="scheduleform{{c.id}}" value="{% for name in s.sname %}{{name}}{% include 'comma.html' %}{% endfor %}" />
+              <td data-name="time" class="tdstyle4"><input onchange="emptyTempList();" type="text" name="time[]" placeholder="Time" class="form-control inputstyle" form="scheduleform{{c.id}}" value="{{s.time}}" /></td>
+              <td data-name="addr" class="tdstyle2"><input type="text" name="addr[]" placeholder="Address" class="form-control inputstyle" form="scheduleform{{c.id}}" value="{{s.addr}}" /></td>
+              <td data-name="name" class="inputTd tdstyle2">
+                <input type="text" name="name[]" data-role="tagsinput" class="form-control tInput inputstyle" form="scheduleform{{c.id}}" value="{% for name in s.sname %}{{name}}{% include 'comma.html' %}{% endfor %}" />
               </td>
-              <td data-name="addstu" class="text-center"><button class="btn btn-primary glyphicon glyphicon-plus addstudent" data-toggle="modal"></button></td>
+              <td data-name="addstu" class="text-center tdstyle3"><button class="btn btn-primary glyphicon glyphicon-plus addstudent" data-toggle="modal"></button></td>
+              <td data-name="sid" class="inputSid" style="display:none;"><input name="sid[]" type="text" data-role="tagsinput" class="form-control" form="scheduleform{{c.id}}" value="{% for sid in s.slist %}{{sid}}{% include 'comma.html' %}{% endfor %}" /></td>
               <td data-name="academy" class="inputAcaU" style="display:none;"><input name="academy[]" type="text" class="form-control" form="scheduleform{{c.id}}" value="{% for aid in s.alist %}{{aid}}{% include 'comma.html' %}{% endfor %}" /></td>
-              <td data-name="sid" class="inputSid" style="display:none;"><input name="sid[]" type="text" class="form-control" form="scheduleform{{c.id}}" value="{% for sid in s.slist %}{{sid}}{% include 'comma.html' %}{% endfor %}" /></td>
-              <td data-name="load" class="text-center">
+              <td data-name="load" class="text-center tdstyle3">
                 {% if s.lflag == 1 %}
                 <select name="load[]" form="scheduleform{{c.id}}">
                     <option value="">등하원</option>
@@ -302,19 +302,19 @@
                     <option value="">도착</option>
                   </select> {% endif %}
               </td>
-              <td data-name="del" class="text-center"><button name="del" class="btn btn-danger glyphicon glyphicon-remove row-remove"></button></td>
+              <td data-name="del" class="text-center tdstyle3"><button name="del" class="btn btn-danger glyphicon glyphicon-remove row-remove"></button></td>
             </tr>
             {% endfor %} {% elif c.editedscheduletables %} {% for es in c.editedscheduletables.all %}
             <tr>
-              <td data-name="time"><input onchange="emptyTempList();" type="text" name="time[]" placeholder="Time" class="form-control" form="scheduleform{{c.id}}" value="{{es.time}}" /></td>
-              <td data-name="addr"><input type="text" name="addr[]" placeholder="Address" class="form-control" form="scheduleform{{c.id}}" value="{{es.addr}}" /></td>
-              <td data-name="name" class="inputTd">
+              <td data-name="time" class="tdstyle4"><input onchange="emptyTempList();" type="text" name="time[]" placeholder="Time" class="form-control" form="scheduleform{{c.id}}" value="{{es.time}}" /></td>
+              <td data-name="addr" class="tdstyle2"><input type="text" name="addr[]" placeholder="Address" class="form-control" form="scheduleform{{c.id}}" value="{{es.addr}}" /></td>
+              <td data-name="name" class="inputTd tdstyle2">
                 <input type="text" name="name[]" data-role="tagsinput" class="form-control tInput" form="scheduleform{{c.id}}" value="{% for name in es.sname %}{{name}}{% include 'comma.html' %}{% endfor %}" />
               </td>
-              <td data-name="addstu" class="text-center"><button class="btn btn-primary glyphicon glyphicon-plus addstudent" data-toggle="modal"></button></td>
+              <td data-name="addstu" class="text-center tdstyle3"><button class="btn btn-primary glyphicon glyphicon-plus addstudent" data-toggle="modal"></button></td>
               <td data-name="academy" class="inputAcaU" style="display:none;"><input name="academy[]" type="text" class="form-control" form="scheduleform{{c.id}}" value="{% for aid in es.alist %}{{aid}}{% include 'comma.html' %}{% endfor %}" /></td>
               <td data-name="sid" class="inputSid" style="display:none;"><input name="sid[]" type="text" class="form-control" form="scheduleform{{c.id}}" value="{% for sid in es.slist %}{{sid}}{% include 'comma.html' %}{% endfor %}" /></td>
-              <td data-name="load" class="text-center">
+              <td data-name="load" class="text-center tdstyle3">
                 {% if es.lflag == 1 %}
                 <select name="load[]" form="scheduleform{{c.id}}">
                     <option value="">등하원</option>
@@ -333,7 +333,7 @@
                     <option value="">도착</option>
                   </select> {% endif %}
               </td>
-              <td data-name="del" class="text-center"><button name="del" class="btn btn-danger glyphicon glyphicon-remove row-remove"></button></td>
+              <td data-name="del" class="text-center tdstyle3"><button name="del" class="btn btn-danger glyphicon glyphicon-remove row-remove"></button></td>
             </tr>
             {% endfor %} {% endif %}
           </tbody>
@@ -357,10 +357,9 @@
               </div>
             </div>
         </table>
-        <a id="{{c.id}}" class="btn btn-default pull-right addrow">Add Row</a>
-        </div>
-        <br>
-        <div class="row pull-right">
+        <!-- /div //-->
+        <!-- br //-->
+        <!-- div class="row pull-right" //-->
             <form class="savedelete submitForm" accept-charset="" action="updateSchedule" method="post" enctype='application/json' onsubmit="return validateTableForm(this.id)" id="scheduleform{{c.id}}">
               <input class="hidden" name="week" value="{{week}}" form="scheduleform{{c.id}}" />
               <input class="hidden" name="iid" value="{{c.id}}" form="scheduleform{{c.id}}" />
@@ -370,7 +369,7 @@
               <input class="hidden" name='day' value="{{day}}" form="scheduleform{{c.id}}" />
               <input class="hidden" name="update" value="1" form="scheduleform{{c.id}}" />
               <input type="hidden" name="carnum" value="{{c.carnum}}" form="scheduleform{{c.id}}">
-              <button type="submit" class="btn btn-success">저장</button>
+              <button type="submit" class="btn btn-success pull-right">저장</button>
             </form>
             {% if c.get_cname == 'editedinven' or week == 0 %}
             <form class="savedelete submitForm" action="updateSchedule" method="post" id="deleteform{{c.id}}" onSubmit="return confirm('정말 삭제 하시겠어요?');">
@@ -386,13 +385,14 @@
             </form>
             {% else %}
             {% endif %}
+        <a id="{{c.id}}" class="btn btn-default pull-right addrow">Add Row</a>
           <br>
           <br>
           <br>
         </div>
       </div>
-      <div class="col-md-1"></div>
     </div>
+    <div class="col-md-1"></div>
   </div>
   <br>
   <br>
@@ -688,7 +688,15 @@
          $(this).children().each(function(index) {
               $(this).find('td')
             });
-          }
+          },
+	    //helper: function(event, tr) {
+              //var $originals = tr.children();
+              //var $helper = tr.clone();
+              //$helper.children().each(function(index) {
+		//$(this).width($originals.eq(index).width());
+	      //});
+	      //return $helper;
+	  //},
         });
   </script>
   {% endblock content %}

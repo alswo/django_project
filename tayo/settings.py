@@ -71,17 +71,6 @@ WSGI_APPLICATION = 'tayo.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.9/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'tayo',
-        'USER': 'postgres',
-        'PASSWORD': 'beclear048@',
-        'HOST': 'localhost',
-        'PORT': '5432',
-    }
-}
-
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -107,31 +96,6 @@ CRONJOBS = [
     #('00 23 31 12 *', 'schedule.test.regist_student')
 ]
 
-#LOGGING = {
-    #'version': 1,
-    #'disable_existing_loggers': False,
-    #'handlers': {
-        #'file': {
-            #'level': 'DEBUG',
-            #'class': 'logging.FileHandler',
-            #'filename': BASE_DIR + '/logs/debug.log',
-        #},
-    #},
-    #'loggers': {
-        #'django': {
-            #'handlers': ['file'],
-            #'level': 'DEBUG',
-            #'propagate': True,
-        #},
-        #'"django_crontab': {
-            #'handlers': ['file'],
-            #'level': 'DEBUG',
-            #'propagate': True,
-        #},
-    #},
-#}
-
-#CRONTAB_COMMAND_SUFFIX = '2>&1'
 
 CORS_ORIGIN_ALLOW_ALL = True
 

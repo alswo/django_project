@@ -2,3 +2,5 @@
 migrations/
 *.swp
 local_settings.py
+logs/
+logs/*

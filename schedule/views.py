@@ -2374,7 +2374,7 @@ def getRealtimeLocation(request):
         today = t.timeToYmd()
         rawhm = t.timeToRawHM()
         hm = t.timeToHM()
-        rawhm = int(request.GET.get('rawhm'))
+        #rawhm = int(request.GET.get('rawhm'))
         hm = request.GET.get('hm')
         sid = request.GET.get('sid')
         sname = request.GET.get('sname')
@@ -2383,13 +2383,13 @@ def getRealtimeLocation(request):
         siid = ""
         #expected_time = "00:00"
 
-        if (sname and len(sname) > 0):
-            sids = StudentInfo.objects.filter(sname = sname).values('id')
-            if (len(sids) <= 0):
-                return HttpResponse("해당 사용자가 존재하지 않습니다.")
-            sid = sids[0]['id']
-        else:
-            return HttpResponse("파라미터가 유효하지 않습니다.")
+        #if (sid and len(sid) > 0):
+            #sids = StudentInfo.objects.get(id = sid)
+            #if (len(sids) <= 0):
+                #return HttpResponse("해당 사용자가 존재하지 않습니다.")
+        #else:
+            #return HttpResponse("파라미터가 유효하지 않습니다.")
+
 
         today_inventories = Inventory.objects.filter(day=d)
         today_inventory_ids = today_inventories.values('id')
