@@ -379,7 +379,7 @@ def putSchedule(request):
         academy = Academy.objects.filter(bid = bid)
         group = Car.objects.filter(branchid = bid)
 
-        return render_to_response('putSchedule.html', {"academy" : academy, "bid" : bid, "group" : group,'user':request.user})
+        return render_to_response('putSchedule.html', {"academy" : academy, "bid" : bid, "week": week, "group" : group,'user':request.user})
 
 
 @csrf_exempt
@@ -2409,7 +2409,7 @@ def getRealtimeLocation(request):
             inventory = Inventory.objects.get(id = scheduletable.iid_id)
             format_etime = format_hm(str(inventory.etime))
             if (inventory.etime > rawhm):
-                ## inventory 중간에 있으면.. 
+                ## inventory 중간에 있으면..
                 if (inventory.stime < rawhm):
                     carnum = inventory.carnum
                     expected_time = scheduletable.time
@@ -2417,7 +2417,7 @@ def getRealtimeLocation(request):
                     waittime = get_difference(hm, expected_time) + get_difference(realtimelocation.schedule_time, realtimelocation.departure_time) - 1
                     return HttpResponse(str(waittime) + "분 후 도착합니다.")
                 ## 다음 inventory 로..
-                else: 
+                else:
                     continue
             ## inventory 사이에..
             else:

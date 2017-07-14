@@ -1,0 +1,330 @@
+<html>
+<head>
+    {% load staticfiles %}
+    <script src="{% static 'js/jquery-1.10.2.js' %}"></script>
+    <script src="{% static 'js/dynamicTable.js' %}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.3.7/js/tether.min.js"></script>
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+    <script src="{% static 'js/bootstrap.min.js' %}"></script>
+    <link href="{% static 'css/bootstrap-tagsinput.css' %}" rel="stylesheet">
+    <script src="{% static 'js/bootstrap-tagsinput.js' %}"></script>
+    <style>
+    .thstyle2 {
+      text-align: center;
+      width: 26%;
+    }
+
+    .thstyle3 {
+      text-align: center;
+      width: 8.5%;
+    }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="col-md-12 table-responsive">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label>DAY:</label>
+                            <select name = "day" class="form-control" id="{{contact.id}}gid" form="scheduleform">
+                              <option value="월" selected>월</option>
+                              <option value="화">화</option>
+                              <option value="수">수</option>
+                              <option value="목">목</option>
+                              <option value="금">금</option>
+                              <option value="토">토</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label>CAR:</label>
+                            <select name = "carnum" class="form-control" id="{{contact.id}}gid" form="scheduleform">
+                              <option value="" selected>호차</option>
+                              {% for g in group %}
+                              <option  value="{{g.carname}}">{{g.carname}}호</option>
+                              {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                        </div>
+                    </div>
+                    <br>
+                    <div class="table-container">
+                    <p>요청사항</p>
+                    <textarea class="form-control" rows="4" name="req" form="scheduleform"></textarea>
+                    <br>
+                    <table class="table table-bordered table-schedule">
+                        <thead>
+                            <tr>
+                              <th class="text-center">시간</th>
+                              <th class="text-center thstyle2">주소</th>
+                              <th class="text-center thstyle2">이름</th>
+                              <th class="text-center thstyle3">이름추가</th>
+                              <th class="text-center">등하원</th>
+                            </tr>
+                        </thead>
+                        <tbody class="table-body">
+
+                        </tbody>
+                    </table>
+                    <div class="modal fade" id="addstu" role="dialog" aria-labelledby="myModalLabel">
+                      <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            <h4 class="modal-title" id="myModalLabel">Modal title</h4>
+                          </div>
+                          <div class="modal-body">
+                            <select id="academyselect" class="form-control"><option value="">학원선택</option>{% for a in academy %}<option value = "{{a.id}}">{{a.name}}</option>{% endfor %}</select>
+                            <br>
+                            <select id="studentList" class="form-control"></select>
+                            <input type="hidden" id="rowid" value="" />
+                          </div>
+                          <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-primary studenttoinput">학생추가</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <a class="btn btn-default pull-right addrow">Add Row</a>
+                  </div>
+                  <input class="hidden" name="bid" value="{{bid}}" form="scheduleform"/>
+                  <form action="putSchedule" method="post" enctype='application/json' id="scheduleform" onsubmit="return validateTableForm('scheduleform')">
+                      <input type="submit" class="btn btn-success pull-right" >
+                  </form>
+                </div>
+            </div>
+            <!-- <div id="recommand_inven" class="col-md-3">
+                <div class="row affix bg-info">
+                    <h3 align="center">인벤토리추천</h3>
+                    <br>
+                    <label for="exampleInputEmail1">요일</label>
+                    <select class="form-control" id="{{contact.id}}gid">
+                        <option value="" selected>월</option>
+                        <option value="">화</option>
+                        <option value="">수</option>
+                        <option value="">목</option>
+                        <option value="">금</option>
+                        <option value="">토</option>
+                      </select>
+                    <label for="exampleInputEmail1">시작시간</label>
+                    <input type="email" class="form-control" placeholder="시작시간">
+
+                    <br>
+                    <a class="btn btn-default pull-right">검색</a>
+                </div>
+            </div>-->
+        </div>
+</body>
+<script>
+var tempList = new Array();
+
+function addAca(selected) {
+    tempList.push(selected.value);
+    selected.parentNode.parentNode.children[4].children[0].value = tempList;
+    console.log(selected.parentNode.parentNode.children[4].children[0].value)
+}
+
+
+function emptyTempList(){
+    tempList.splice(0,tempList.length);
+}
+
+$('.table-container').on('click', '.addrow', function() {
+  $(this).parent().find('.table-body').append(
+    '<tr><td data-name="time"><input onchange="emptyTempList();" type="text" name="time[]" placeholder="Time" class="form-control" form="scheduleform"/></td><td><input type="text" name="addr[]" placeholder="Address" class="form-control" form="scheduleform"/></td><td data-name="name" class="inputTd"><input type="text" name="name[]" data-role="tagsinput" class="form-control" form="scheduleform" value="{% for name in s.sname %}{{name}}{% include '
+    comma.html ' %}{% endfor %}" /></td><td data-name="addstu"><button class="btn btn-primary glyphicon glyphicon-plus addstudent" data-toggle="modal"></button></td><td data-name="academy" class="inputAca" style="display:none"><input name="academy[]" class="form-control" form="scheduleform" value="{% for aid in s.alist %}{{aid}}{% include 'comma.html ' %}{% endfor %}" /></td><td data-name="sid" class="inputSid" style="display:none;"><input name="sid[]" type="text" data-role="tagsinput" class="form-control" form="scheduleform" value="{% for sid in s.slist %}{{sid}}{% include 'comma.html' %}{% endfor %}"/></td><td data-name="load"><select name="load[]" form="scheduleform"><option value="">등하원</option><option value="1">등원</option><option value="0">하원</option></select></td><td data-name="move"><a href="javascript:void(0)" class="glyphicon glyphicon-chevron-up up"></a><a href="javascript:void(0)" class="glyphicon glyphicon-chevron-down down"></a></td><td data-name="del"><button name="del" class="btn btn-danger glyphicon glyphicon-remove row-remove"></button></td></tr>'
+  )
+});
+
+$('.table-schedule').on('click','.up,.down',function() {
+  var row = $(this).parent().parent();
+      if ($(this).is(".up")) {
+          row.each(function(){
+              var previndex=$(this).prev().index();
+              if(previndex>=0){
+                  var rowindex=$(this).index();
+                  $(this).attr("id",previndex);
+                  $(this).prev().attr("id",rowindex);
+                  $(this).insertBefore($(this).prev());
+              }
+          });
+      } else {
+          $(row.get().reverse()).each(function(){
+              var nextindex=$(this).next().index();
+              if(nextindex>=0){
+                  var rowindex=$(this).index();
+                  $(this).attr("id",nextindex);
+                  $(this).next().attr("id",rowindex);
+                  $(this).insertAfter($(this).next());
+              }
+          });
+      }
+});
+
+$(".table-schedule").on('click','.row-remove', function(event) {
+    $(this).parent().parent().remove();
+});
+
+var thisObject;
+var thisObjectForAca;
+
+$(document).on('click', '.addstudent', function() {
+  //thisObject -> studentName, thisObjectForAca -> AcademyID
+  thisObject = $(this).parent().prevAll('.inputTd').children();
+  thisObjectForAca = $(this).parent().nextAll('.inputAca').children();
+  thisObjectForSid = $(this).parent().nextAll('.inputSid').children();
+  console.log(thisObjectForAca);
+  $('#addstu').modal('show');
+})
+
+$(document).on('click', '.studenttoinput', function() {
+  selectedAca = $('#academyselect').val()
+  selectedStu = $('#studentList option:selected').text()
+  selectedSid = $('#studentList option:selected').val()
+
+  if (thisObject[0].nodeName == 'DIV') {
+    temp = thisObject[1].value
+    tempAca = thisObjectForAca[0].value
+    tempSid = thisObjectForSid[1].value
+
+    if (temp != '') {
+      console.log('1')
+      temp += ',' + selectedStu
+      tempAca += ',' + selectedAca
+      tempSid += ',' + selectedSid
+
+      $(thisObject[1]).tagsinput('add')
+      $(thisObjectForAca[0]).val(tempAca)
+      $(thisObjectForSid[1]).tagsinput('add')
+
+    } else {
+      console.log('2')
+      temp = selectedStu
+      tempAca = selectedAca
+      tempSid = selectedSid
+
+      $(thisObject[1]).tagsinput('add')
+      $(thisObjectForAca[0]).val(tempAca)
+      $(thisObjectForSid[1]).tagsinput('add')
+    }
+
+    $(thisObject[1]).tagsinput('add', temp)
+    $(thisObjectForSid[1]).tagsinput('add', tempSid)
+
+  } else if (thisObject[0].nodeName == 'INPUT') {
+    temp = thisObject[0].value
+    tempAca = thisObjectForAca[0].value
+    tempSid = thisObjectForSid[0].value
+
+    if (temp != '') {
+      console.log('1')
+      temp += ',' + selectedStu
+      tempAca += ',' + selectedAca
+      tempSid += ',' + selectedSid
+
+      $(thisObjectForAca[0]).val(tempAca)
+    } else {
+      console.log('2')
+      temp = selectedStu
+      tempAca = selectedAca
+      tempSid = selectedSid
+
+      $(thisObject[0]).tagsinput('add')
+      $(thisObjectForAca[0]).val(tempAca)
+      $(thisObjectForSid[0]).tagsinput('add')
+    }
+    $(thisObject[0]).tagsinput('add', temp)
+    $(thisObjectForSid[0]).tagsinput('add', tempSid)
+  }
+})
+
+$(document).on('beforeItemRemove','.inputTd',function(event){
+  t = $(this)
+  sibling_sid = $(this).siblings('.inputSid')[0].children[1]
+  sibling_aca = $(this).siblings('.inputAca')[0].children[0]
+  // Do some processing here
+
+  var before_list = t[0].children[1].value.split(",").map(function(item) {
+    return item.trim();
+  });
+
+  var delete_index = before_list.indexOf(event.item.trim())
+
+  var before_sid_value = sibling_sid.value
+  var before_aca_value = sibling_aca.value
+
+  var delete_sid = before_sid_value.split(',').map(function(item) {
+    return item.trim()
+  });
+  var delete_aca = before_aca_value.split(',').map(function(item) {
+    return item.trim()
+  });
+
+  if (delete_index == -1) {
+    delete_sid.splice(0, 1);
+    delete_aca.splice(0, 1);
+  } else {
+    delete_sid.splice(delete_index, 1);
+    delete_aca.splice(delete_index, 1);
+  }
+
+  sibling_aca.value = delete_aca.toString()
+  sibling_sid.value = delete_sid.toString()
+
+});
+
+$('#academyselect').on('change', function() {
+  $.ajax({
+    type: 'POST',
+    url: 'studentLoad',
+    data: {
+      aid: this.value,
+    },
+    success: function(data) {
+      console.log(data)
+      tempTag = ""
+      for (i = 0; i < data.length; i++) {
+        tempTag = tempTag + "<option value=" + data[i]['pk'] + ">" + data[i]['fields']['sname'] + "</option>"
+      }
+      document.getElementById('studentList').innerHTML = tempTag
+    }
+  });
+})
+
+function validateTableForm(e){
+  console.log(e)
+  tableLength = document.forms[e]['time[]'].length
+  tempAddrS = document.forms[e]['addr[]'][0].value
+  tempAddrE = document.forms[e]['addr[]'][tableLength-1].value
+  var timepattern = /([01]\d|2[0-3]):([0-5]\d)/;
+
+  if(document.forms[e]["carnum"].selectedIndex < 1){
+    alert("호차를 선택해주세요.")
+    return false;
+  }
+
+  if(tempAddrS != "" || tempAddrE != ""){
+    alert("시작,끝 주소는 반드시 비워주세요.")
+    return false;
+  }
+  tempTime  = document.forms[e]['time[]']
+  for(i = 0 ; i < tableLength; i++){
+    if(timepattern.test(tempTime[i].value) == false){
+      alert(i+1+"번째 로우의 숫자를 정확히 입력해주세요.")
+      return false;
+    }
+  }
+
+  tempName  = document.forms[e]['name[]']
+  if(tempName[0].value != "" || tempName[tableLength-1].value != ""){
+    alert("시작,끝 이름은 반드시 비워주세요.")
+    return false;
+  }
+}
+</script>
+
+</html>
