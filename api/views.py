@@ -126,3 +126,49 @@ def getRealtimeLocation(request):
         	return HttpResponse(msg)
 	else:
 		return JsonResponse({'code': 202, 'msg': msg})
+
+
+def getSchedulesForStudent(request):
+    if request.method == "GET":
+	max_diff = 10
+        t = timeToDate()
+        d = t.timeToD()
+        today = t.timeToYmd()
+        rawhm = t.timeToRawHM()
+        hm = t.timeToHM()
+        sid = request.GET.get('sid')
+        carnum = -1
+        iid = ""
+        siid = ""
+	sname = ""
+	msg = ""
+	debug = request.GET.get('debug')
+	if (debug):
+		debug = 1
+	else:
+		debug = 0
+
+        if (sid and len(sid) > 0):
+	    try:
+            	student = StudentInfo.objects.get(id = sid)
+		sname = student.sname
+	    except StudentInfo.DoesNotExist:
+                return HttpResponse("해당 사용자가 존재하지 않습니다.")
+        else:
+            return HttpResponse("파라미터가 유효하지 않습니다.")
+
+	if (debug == 1):
+        	rawhm = int(request.GET.get('rawhm'))
+        	hm = request.GET.get('hm')
+		today = request.GET.get('today')
+		d = request.GET.get('d')
+
+        scheduletables = ScheduleTable.objects.filter(slist__contains = [sid]).select_related()
+	#return HttpResponse(scheduletables.query)
+
+	msg = ""
+        for scheduletable in scheduletables:
+		msg += scheduletable.time + " : " + scheduletable.addr + " : " + scheduletable.inventory.carnum + " : " + scheduletable.inventory.day + "\n"
+
+	return HttpResponse(msg)
+		
