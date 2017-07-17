@@ -19,6 +19,7 @@ class Inventory(models.Model):
     week3 = models.IntegerField()
     #building = models.IntegerField()
     req = models.TextField()
+    memo = models.TextField(null=True,blank=True)
     history = HistoricalRecords()
 
     def __unicode__(self):
@@ -31,6 +32,7 @@ class ScheduleTable(models.Model):
     iid = models.ForeignKey(Inventory,related_name='scheduletables')
     time = models.CharField(max_length = 10,null=True,blank=True)
     addr = models.CharField(max_length = 60,null=True,blank=True)
+    req = models.CharField(max_length = 20,null=True,blank=True)
     alist = ArrayField(models.IntegerField(null=True,blank=True),null=True,blank=True)
     anamelist = ArrayField(models.CharField(max_length = 10, null=True, blank=True),null=True, blank=True)
     slist = ArrayField(models.IntegerField(null=True,blank=True),null=True,blank=True)
