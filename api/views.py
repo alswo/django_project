@@ -186,7 +186,7 @@ def getSchedulesForStudent(request):
 		if scheduletable.lflag == 1:
 			data['lflag'] = '등원'
 		else:
-			data['lflga'] = '하원'
+			data['lflag'] = '하원'
 
 		if scheduletable.iid.day in msg['schedules'].keys():
 			pass
