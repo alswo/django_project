@@ -1,1118 +1,387 @@
+  <html>
+    <head>
+<meta charset="utf-8">
+      <style>
+         #map {
+          height: 100px;
+          width: 100%;
+         }
 
-<!DOCTYPE html>
+	#top_bar {
+          height: 200px;
+          width: 100%;
+	  float: top;
+	}
 
-<html lang="ko-kr" >
-<head>
-  
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title>셔틀타요 | Dashboard</title>
-<link rel="stylesheet" type="text/css" href="/static/admin/css/base.css" />
+	#left_bar {
+	  position: fixed;
+	  top: 200px;
+	  left: 0px;
+          width: 300px;
+	  height: 500px;
+	  float: left;
+	  overflow: scroll;
+	}
 
+	#content {
+	  position: fixed;
+	  top: 200px;
+	  left: 300px;
+	  //width: 90%;
+	  overflow: scroll;
+	}
 
+	#search_result {
+	}
 
-<meta name="robots" content="NONE,NOARCHIVE" />
-  <!-- Tell the browser to be responsive to screen width -->
-  <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
-  <!-- Bootstrap 3.3.6 -->
-  <link rel="stylesheet" href="/static/adminlte/bootstrap/css/bootstrap.min.css">
-  <!-- Font Awesome -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.5.0/css/font-awesome.min.css">
-  <!-- Ionicons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/2.0.1/css/ionicons.min.css">
-  <!-- jvectormap -->
-  <link rel="stylesheet" href="/static/adminlte/plugins/jvectormap/jquery-jvectormap-1.2.2.css">
-  <!-- Theme style -->
-  <link rel="stylesheet" href="/static/adminlte/dist/css/AdminLTE.min.css">
-  <!-- AdminLTE Skins. Choose a skin from the css/skins
-       folder instead of downloading all of them to reduce the load. -->
-  <link rel="stylesheet" href="/static/adminlte/dist/css/skins/_all-skins.min.css">
+	button.phonenumber {
+		margin: 5px 0;
+	}
+      </style>
+<script src="/static/js/jquery-3.1.0.min.js"></script>
+    <link rel="stylesheet" href="/static/css/jquery-ui.css">
+    <script src="/static/js/jquery-ui.js"></script>
 
-  <script src="/static/js/jquery-1.10.2.js"></script>
-  <script src="/static/js/dynamicTable.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.3.7/js/tether.min.js"></script>
-  <script src="/static/js/bootstrap.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/typeahead.js/0.11.1/typeahead.bundle.min.js"></script>
-  <script>
-  window.onload = function() { $('body').attr('class','skin-blue sidebar-mini sidebar-collapse') };
-  </script>
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+    <script src="/static/js/bootstrap.min.js"></script>
+    <script src="http://dmaps.daum.net/map_js_init/postcode.v2.js"></script>
+    <!-- services 라이브러리 불러오기 -->
+<!-- 라이브러리 -->
+  <script type="text/javascript" src="http://apis.daum.net/maps/maps3.js?apikey=df6af02ef0921fda82ecbfd508cfcfdf&libraries=services"></script>
 
-  <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
-  <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-  <!--[if lt IE 9]>
-  <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
-  <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-  <![endif]-->
+<link rel="stylesheet" href="/static/css/jquery.timepicker.css">
+<script type="text/javascript" src="/static/js/jquery.timepicker.min.js"></script>
 
-  <style>
-    .thstyle2 {
-      text-align: center;
-      width: 26%;
-    }
-
-    .thstyle3 {
-      text-align: center;
-      width: 8%;
-    }
-
-    .thstyle4 {
-      text-align: center;
-      width: 2%;
-    }
-
-    #savedelete,
-    .searchedByCar {
-      display: inline
-    }
-    .wrapper {
-      /*min-height: 100%;
-      position: relative;
-      overflow: hidden;*/
-      width: 100%;
-      min-height: 100%;
-      height: auto !important;
-      position: absolute;
-    }
-  </style>
+<link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
+<script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
+<script src="/static/js/plugins/proj4.js"></script>
 
 </head>
-<body class=" hold-transition skin-blue sidebar-mini"
-  data-admin-utc-offset="32400">
+<body>
+	<h3>학원 원장님 입력</h3>
+	<div id="top_bar">
+		<table class="table">
+			<thead>
+				<td>수업명</td>
+				<td>요일</td>
+				<td>등/하원</td>
+				<td>시간</td>
+			</thead>
+			<tbody>
+				<tr>
+					<td><input type="text" class="form-control"></td>
+					<td><select class="form-control"><option>월</option><option>화</option><option>수</option><option>목</option><option>금</option><option>토</option>
+					<td><select class="form-control"><option>등원</option><option>하원</option></select></td>
+					<td><input class="timeform" type="text" data-time-format="H:i"></td>
+				</tr>
+			</tbody>
+		</table>
+		<form action="javascript:search();">
+	지역 검색 : <input type="text" id="query" autocomplete=off> <button type="submit">검색</button>
+	<!-- input type="checkbox" checked data-toggle="toggle" data-on="검색 위치 선택" data-off="직접 위치 선택" data-onstyle="success" data-offstyle="danger" //-->
+		</form>
+	</div>
+	<div id="left_bar"> 
+		<table class="table">
+			<thead></thead>
+			<tbody id="result_tbody"></tbody>
+		</table>
+	</div>
+	<div id="content">
+      		<div id="map"></div>
+		<!-- button type="button" class="btn btn-info" onclick="sample3_execDaumPostcode()">주소검색</button //-->
+		<div id="wrap" style="display:none;border:1px solid;width:500px;height:300px;margin:5px 0;position:relative">
+			<!-- img src="http://t1.daumcdn.net/localimg/localimages/07/postcode/320/close.png" id="btnFoldWrap" style="cursor:pointer;position:absolute;right:0px;top:-1px;z-index:1" onclick="foldDaumPostcode()" alt="접기 버튼" //-->
+  		</div>
+		<div id="gmarker" style="width:20px;height:20px;cursor:move"></div>
+		<table class="table">
+			<thead>
+				<td>이름</td>
+				<td>나이</td>
+				<td>전화번호</td>
+				<td>위치</td>
+			</thead>
+			<tbody>
+				<tr>
+					<td><input type="text" class="form-control input-sm"></td>
+					<td><select class="from-control"><option>6세</option><option>7세</option><option>8세</option></select></td>
+					<td><div class="input-group"><input type="text" class="form-control input-sm phonenumber"><span class="input-group-btn input-group-btn-sm"><button class="btn btn-sm phone-add">추가</button></span></div></td>
+					<td><div class="dropzone" style="width:200px;height:30px;border:1px solid red;font-size:70%;">지도에서 끌어와주세요.</div></td>
+				</tr>
+				<tr>
+					<td><input type="text" class="form-control input-sm"></td>
+					<td><select class="from-control"><option>6세</option><option>7세</option><option>8세</option></select></td>
+					<td><div class="input-group"><input type="text" class="form-control input-sm phonenumber"><span class="input-group-btn input-group-btn-sm"><button class="btn btn-sm phone-add">추가</button></span></div></td>
+					<td><div class="dropzone" style="width:200px;height:30px;border:1px solid red;font-size:70%;">지도에서 끌어와주세요.</div></td>
+				</tr>
+				<tr>
+					<td><input type="text" class="form-control input-sm"></td>
+					<td><select class="from-control"><option>6세</option><option>7세</option><option>8세</option></select></td>
+					<td><div class="input-group"><input type="text" class="form-control input-sm phonenumber"><span class="input-group-btn input-group-btn-sm"><button class="btn btn-sm phone-add">추가</button></span></div></td>
+					<td><div class="dropzone" style="width:200px;height:30px;border:1px solid red;font-size:70%;">지도에서 끌어와주세요.</div></td>
+				</tr>
+			</tbody>
+		</table>
+		aaa
+	</div>
 
-<div class="wrapper">
-
-  <header class="main-header">
-
-    <!-- Logo -->
-    <a href="/inventory/csmain" class="logo">
-      <!-- mini logo for sidebar mini 50x50 pixels -->
-      <span class="logo-mini"><b>타요</b></span>
-      <!-- logo for regular state and mobile devices -->
-      <span class="logo-lg"><img alt="ShuttleTayo" width="22%" src="/static/img/tayologo.png"></img><b>셔틀타요</b></span>
-    </a>
-
-    <!-- Header Navbar: style can be found in header.less -->
-    <nav class="navbar navbar-static-top">
-      <!-- Sidebar toggle button-->
-      <a href="#" class="sidebar-toggle" data-toggle="offcanvas" role="button">
-        <span class="sr-only">Toggle navigation</span>
-      </a>
-      <!-- Navbar Right Menu -->
-      <div class="navbar-custom-menu">
-        <ul class="nav navbar-nav">
-          <!-- Control Sidebar Toggle Button -->
-          <li>
-            <a href="/"><h5>www.edticket.com</h5>
-            </a>
-          </li>
-        </ul>
-      </div>
-    </nav>
-  </header>
-  <!-- Left side column. contains the logo and sidebar -->
-  <aside class="main-sidebar">
-    <!-- sidebar: style can be found in sidebar.less -->
-    <section class="sidebar">
-      <!-- Sidebar user panel -->
-      <div class="user-panel">
-        <div class="pull-left image">
-          <img src="/static/adminlte/dist/img/user2-160x160.jpg" class="img-circle" alt="User Image">
-        </div>
-        <div class="pull-left info">
-          <p> Changkuk 님 </p>
-        </div>
-      </div>
-      <!-- sidebar menu: : style can be found in sidebar.less -->
-      <ul class="sidebar-menu">
-        <li class="header">MAIN NAVIGATION</li>
-        <li>
-          <a href="" onclick="window.open('/opti', 'tayo |동선계산기','width=1500px, height=1000px' );">
-            <i class="fa fa-calculator"></i> <span>동선계산기</span>
-          </a>
-        </li>
-        <li>
-          <a href="/inventory/updateArea" id='area'>
-            <i class="fa fa-map"></i> <span>지역(Area) 관리</span>
-          </a>
-        </li>
-        <li>
-          <a href="/admin/schedule/branch" id='branchadmin'>
-            <i class="fa fa-map-pin"></i> <span>지점(Branch) 관리</span>
-          </a>
-        </li>
-        <li>
-          <a href="/admin/schedule/car/">
-            <i class="fa fa-bus"></i> <span>차량 관리</span>
-          </a>
-        </li>
-        <li>
-          <a href="/admin/passenger/academy/" id='academy'>
-            <i class="fa fa-mortar-board"></i> <span>학원 관리</span>
-          </a>
-        </li>
-        <li>
-          <a href="/admin/auth/user/" id='academyuser'>
-            <i class="fa fa-user"></i> <span>학원 계정 관리</span>
-          </a>
-        </li>
-        <li>
-          <a href="/admin/passenger/studentinfo/" id='student'>
-            <i class="fa fa-child"></i> <span>학생 관리</span>
-          </a>
-        </li>
-        <li>
-          <a href="/admin/passenger/commute" id='commute'>
-            <i class="fa fa-info"></i> <span>등원 정보 관리</span>
-          </a>
-        </li>
-        <li>
-          <a href="/inventory/updateSchedule" id='schedule'>
-            <i class="fa fa-calendar-o"></i> <span>스케쥴 관리</span>
-          </a>
-        </li>
-      </ul>
-    </section>
-    <!-- /.sidebar -->
-  </aside>
-
-  <!-- Content Wrapper. Contains page content -->
-  <div class="content-wrapper" id="content-wrapper" style="min-height: 1000px">
-    
-    <!-- Header -->
-    <div id="header">
-        <div id="branding">
-        
-        </div>
-        
-        
-        
-        
-    </div>
-    <!-- END Header -->
-    
-    <div class="breadcrumbs">
-    <a href="/admin/">홈</a>
-    
-    </div>
-    
-    
-
-
-    
-        
-    
-
-    <!-- Content -->
-    <div id="content" class="colM">
-        
-        
-        
-
-<div class="row container">
-  <!-- Button trigger modal -->
-  <div class="col-md-2"></div>
-  <div class="col-md-2">
-    <label>AREA:</label>
-    <select name="area" class="form-control" form="searchform" id="areaSelected">
-              <option vlaue="default" selected>지역선택</option>
-          
-              <option value="1">경기동부</option>
-          
-              <option value="2">경기서부</option>
-          
-              <option value="3">부산 남구</option>
-          
-      </select>
-  </div>
-  <div class="col-md-2">
-    <label>BRANCH:</label>
-    <select name="bid" class="form-control" form="searchform" placeholder='지점' id="branch">
-      </select>
-  </div>
-  <div class="col-md-2">
-    <label>DAY:</label>
-    <select name="day" class="form-control" form="searchform">
-                      <option value="월" selected>월</option>
-                      <option value="화">화</option>
-                      <option value="수">수</option>
-                      <option value="목">목</option>
-                      <option value="금">금</option>
-                      <option value="토">토</option>
-      </select>
-  </div>
-  <!--<div class="col-md-3">
-      <label>ACADEMY:</label>
-        <select name="aid" class="form-control" form="searchform">
-                      <option value="" selected>학원</option>
-                      
-                      <option  value="31">UNSW</option>
-                      
-                      <option  value="34">미사마루지</option>
-                      
-        </select>
-    </div>-->
-  <div class="col-md-2">
-    <label>TIME:</label>
-    <input type="text" name='time' form="searchform" class="form-control" id="timeSerach" />
-  </div>
-  <div class="col-md-2">
-    <label>SEARCH:</label>
-    <form action="updateSchedule" method="post" enctype='application/json' onsubmit="return validateSearchForm()" id="searchform">
-      <input type="hidden" name='updateflag' class="form-control" value="2" form="searchform" />
-      <input type="hidden" name='searchinven' class="form-control" value="1" form="searchform" />
-      <input type="submit" id="carlistSearch" class="btn btn-success" value="검색">
-    </form>
-  </div>
-</div>
-<br>
-<br>
-<div class="row">
-  <div class="col-md-2"></div>
-  <div class="col-md-8" align="center">
-    <!--  <input type="hidden" name='bid' class="form-control" value="2" form="searchform2" />
-      <input type="hidden" name='day' class="form-control" value="월" form="searchform2" />
-      <input type="hidden" name='time' class="form-control" value="1400" form="searchform2" /> -->
-    <input type="hidden" name='updateflag' class="form-control" value="2" form="searchform2" />
-    <input type="hidden" name='searchinven' class="form-control" value="2" form="searchform2" />
-    <input type="hidden" name='updateflag' class="form-control" value="2" form="searchform2" />
-    <div class="row">
-      
-      <form action="updateSchedule" method="get" class="searchedByCar">
-        <input type="hidden" name='bid' class="form-control" value="2" />
-        <input type="hidden" name='day' class="form-control" value="월" />
-        <input type="hidden" id='forInvenAddCheck' name='time' class="form-control" value="1400" />
-        <input type="hidden" name='updateflag' class="form-control" value="2" />
-        <input type="hidden" name='searchinven' class="form-control" value="2" />
-        <input type="hidden" name='updateflag' class="form-control" value="2" />
-        <input type="submit" class="btn btn-primary" name="car" value="8">
-      </form>
-      
-      <a href="#" class="btn btn-warning" id="openBtn">인벤토리 추가</a>
-    </div>
-
-    <div id="myModal" class="modal fade" tabindex="-1" role="dialog">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal">×</button>
-        <h3>인벤토리추가</h3>
-      </div>
-      <div class="modal-body">
-        <iframe src="putSchedule?bid=2" width="90%" height="550"></iframe>
-      </div>
-      <div class="modal-footer">
-        <button class="btn-danger" data-dismiss="modal">닫기</button>
-      </div>
-    </div>
-
-  </div>
-  <div class="col-md-2"></div>
-</div>
-<br>
-<br> 
-<div class="row">
-  <div class="col-md-1"></div>
-  <div class="col-md-10">
-    <div class="col-md-12 table-responsive">
-      <div class="row">
-        <div class="col-md-8">
-          <textarea class="form-control" rows="4" id="295text">*황인석 010-9035-7648
-*이송현 010-2911-9129
-*최효재 010-9016-7733
-*권승우 010-2979-2425</textarea>
-        </div>
-        <div class="col-md-1">
-          <div class="row"><button type="button" class="btn btn-success" onclick="reqInventory(295);">수정</button></div>
-        </div>
-        <div class="col-md-3">
-          <ul class="list-group">
-            <li class="list-group-item">
-              학원:  미사마루지 | 
-            </li>
-            <li class="list-group-item">학생 수: 5</li>
-            <li class="list-group-item">요일: 월</li>
-          </ul>
-        </div>
-      </div>
-      <br>
-      <div class="row table-container">
-        <table class="table table-bordered table-schedule">
-          <thead>
-            <tr>
-              <th class="text-center">시간</th>
-              <th class="text-center thstyle2">주소</th>
-              <th class="text-center thstyle2">이름</th>
-              <th class="text-center thstyle3">이름추가</th>
-              <th class="text-center">등하원</th>
-              <th class="text-center thstyle4">이동</th>
-            </tr>
-          </thead>
-          <tbody class="table-body">
-            
-            <tr>
-              <td data-name="time"><input onchange="emptyTempList();" type="text" name="time[]" placeholder="Time" class="form-control" form="scheduleform295" value="14:00" /></td>
-              <td data-name="addr"><input type="text" name="addr[]" placeholder="Address" class="form-control" form="scheduleform295" value="" /></td>
-              <td data-name="name" class="inputTd">
-                <input type="text" name="name[]" data-role="tagsinput" class="form-control tInput" form="scheduleform295" value="" />
-              </td>
-              <td data-name="addstu"><button class="btn btn-primary glyphicon glyphicon-plus addstudent" data-toggle="modal"></button></td>
-              <td data-name="academy" class="inputAca" style="display:none;"><input name="academy[]" type="text" data-role="tagsinput" class="form-control" form="scheduleform295" value="" /></td>
-              <td data-name="sid" class="inputSid" style="display:none;"><input name="sid[]" type="text" data-role="tagsinput" class="form-control" form="scheduleform295" value="" /></td>
-              <td data-name="load">
-                  
-                <select name="load[]" form="scheduleform295">
-                    <option value="">출발</option>
-                  </select>  
-              </td>
-              <td data-name="move">
-                <a href="javascript:void(0)" class="glyphicon glyphicon-chevron-up up"></a>
-                <a href="javascript:void(0)" class="glyphicon glyphicon-chevron-down down"></a>
-              </td>
-              <td data-name="del"><button name="del" class="btn btn-danger glyphicon glyphicon-remove row-remove"></button></td>
-            </tr>
-            
-            <tr>
-              <td data-name="time"><input onchange="emptyTempList();" type="text" name="time[]" placeholder="Time" class="form-control" form="scheduleform295" value="14:20" /></td>
-              <td data-name="addr"><input type="text" name="addr[]" placeholder="Address" class="form-control" form="scheduleform295" value="천현동 은행아파트 상가" /></td>
-              <td data-name="name" class="inputTd">
-                <input type="text" name="name[]" data-role="tagsinput" class="form-control tInput" form="scheduleform295" value="황인석 
-" />
-              </td>
-              <td data-name="addstu"><button class="btn btn-primary glyphicon glyphicon-plus addstudent" data-toggle="modal"></button></td>
-              <td data-name="academy" class="inputAca" style="display:none;"><input name="academy[]" type="text" data-role="tagsinput" class="form-control" form="scheduleform295" value="34 
-" /></td>
-              <td data-name="sid" class="inputSid" style="display:none;"><input name="sid[]" type="text" data-role="tagsinput" class="form-control" form="scheduleform295" value="8 
-" /></td>
-              <td data-name="load">
-                
-                <select name="load[]" form="scheduleform295">
-                    <option value="">등하원</option>
-                    <option value="1" selected>등원</option>
-                    <option value="0">하원</option>
-                  </select>    
-              </td>
-              <td data-name="move">
-                <a href="javascript:void(0)" class="glyphicon glyphicon-chevron-up up"></a>
-                <a href="javascript:void(0)" class="glyphicon glyphicon-chevron-down down"></a>
-              </td>
-              <td data-name="del"><button name="del" class="btn btn-danger glyphicon glyphicon-remove row-remove"></button></td>
-            </tr>
-            
-            <tr>
-              <td data-name="time"><input onchange="emptyTempList();" type="text" name="time[]" placeholder="Time" class="form-control" form="scheduleform295" value="14:30" /></td>
-              <td data-name="addr"><input type="text" name="addr[]" placeholder="Address" class="form-control" form="scheduleform295" value="우남아파트 정문" /></td>
-              <td data-name="name" class="inputTd">
-                <input type="text" name="name[]" data-role="tagsinput" class="form-control tInput" form="scheduleform295" value="이송현 
-" />
-              </td>
-              <td data-name="addstu"><button class="btn btn-primary glyphicon glyphicon-plus addstudent" data-toggle="modal"></button></td>
-              <td data-name="academy" class="inputAca" style="display:none;"><input name="academy[]" type="text" data-role="tagsinput" class="form-control" form="scheduleform295" value="34 
-" /></td>
-              <td data-name="sid" class="inputSid" style="display:none;"><input name="sid[]" type="text" data-role="tagsinput" class="form-control" form="scheduleform295" value="9 
-" /></td>
-              <td data-name="load">
-                
-                <select name="load[]" form="scheduleform295">
-                    <option value="">등하원</option>
-                    <option value="1" selected>등원</option>
-                    <option value="0">하원</option>
-                  </select>    
-              </td>
-              <td data-name="move">
-                <a href="javascript:void(0)" class="glyphicon glyphicon-chevron-up up"></a>
-                <a href="javascript:void(0)" class="glyphicon glyphicon-chevron-down down"></a>
-              </td>
-              <td data-name="del"><button name="del" class="btn btn-danger glyphicon glyphicon-remove row-remove"></button></td>
-            </tr>
-            
-            <tr>
-              <td data-name="time"><input onchange="emptyTempList();" type="text" name="time[]" placeholder="Time" class="form-control" form="scheduleform295" value="14:40" /></td>
-              <td data-name="addr"><input type="text" name="addr[]" placeholder="Address" class="form-control" form="scheduleform295" value="10단지 더샵 1차" /></td>
-              <td data-name="name" class="inputTd">
-                <input type="text" name="name[]" data-role="tagsinput" class="form-control tInput" form="scheduleform295" value="최효재 
-" />
-              </td>
-              <td data-name="addstu"><button class="btn btn-primary glyphicon glyphicon-plus addstudent" data-toggle="modal"></button></td>
-              <td data-name="academy" class="inputAca" style="display:none;"><input name="academy[]" type="text" data-role="tagsinput" class="form-control" form="scheduleform295" value="34 
-" /></td>
-              <td data-name="sid" class="inputSid" style="display:none;"><input name="sid[]" type="text" data-role="tagsinput" class="form-control" form="scheduleform295" value="10 
-" /></td>
-              <td data-name="load">
-                
-                <select name="load[]" form="scheduleform295">
-                    <option value="">등하원</option>
-                    <option value="1" selected>등원</option>
-                    <option value="0">하원</option>
-                  </select>    
-              </td>
-              <td data-name="move">
-                <a href="javascript:void(0)" class="glyphicon glyphicon-chevron-up up"></a>
-                <a href="javascript:void(0)" class="glyphicon glyphicon-chevron-down down"></a>
-              </td>
-              <td data-name="del"><button name="del" class="btn btn-danger glyphicon glyphicon-remove row-remove"></button></td>
-            </tr>
-            
-            <tr>
-              <td data-name="time"><input onchange="emptyTempList();" type="text" name="time[]" placeholder="Time" class="form-control" form="scheduleform295" value="14:43" /></td>
-              <td data-name="addr"><input type="text" name="addr[]" placeholder="Address" class="form-control" form="scheduleform295" value="5단지 후문 새싹정류장" /></td>
-              <td data-name="name" class="inputTd">
-                <input type="text" name="name[]" data-role="tagsinput" class="form-control tInput" form="scheduleform295" value="권승우 
-" />
-              </td>
-              <td data-name="addstu"><button class="btn btn-primary glyphicon glyphicon-plus addstudent" data-toggle="modal"></button></td>
-              <td data-name="academy" class="inputAca" style="display:none;"><input name="academy[]" type="text" data-role="tagsinput" class="form-control" form="scheduleform295" value="34 
-" /></td>
-              <td data-name="sid" class="inputSid" style="display:none;"><input name="sid[]" type="text" data-role="tagsinput" class="form-control" form="scheduleform295" value="23 
-" /></td>
-              <td data-name="load">
-                
-                <select name="load[]" form="scheduleform295">
-                    <option value="">등하원</option>
-                    <option value="1" selected>등원</option>
-                    <option value="0">하원</option>
-                  </select>    
-              </td>
-              <td data-name="move">
-                <a href="javascript:void(0)" class="glyphicon glyphicon-chevron-up up"></a>
-                <a href="javascript:void(0)" class="glyphicon glyphicon-chevron-down down"></a>
-              </td>
-              <td data-name="del"><button name="del" class="btn btn-danger glyphicon glyphicon-remove row-remove"></button></td>
-            </tr>
-            
-            <tr>
-              <td data-name="time"><input onchange="emptyTempList();" type="text" name="time[]" placeholder="Time" class="form-control" form="scheduleform295" value="14:50" /></td>
-              <td data-name="addr"><input type="text" name="addr[]" placeholder="Address" class="form-control" form="scheduleform295" value="" /></td>
-              <td data-name="name" class="inputTd">
-                <input type="text" name="name[]" data-role="tagsinput" class="form-control tInput" form="scheduleform295" value="" />
-              </td>
-              <td data-name="addstu"><button class="btn btn-primary glyphicon glyphicon-plus addstudent" data-toggle="modal"></button></td>
-              <td data-name="academy" class="inputAca" style="display:none;"><input name="academy[]" type="text" data-role="tagsinput" class="form-control" form="scheduleform295" value="" /></td>
-              <td data-name="sid" class="inputSid" style="display:none;"><input name="sid[]" type="text" data-role="tagsinput" class="form-control" form="scheduleform295" value="" /></td>
-              <td data-name="load">
-                   
-                <select name="load[]" form="scheduleform295">
-                    <option value="">도착</option>
-                  </select> 
-              </td>
-              <td data-name="move">
-                <a href="javascript:void(0)" class="glyphicon glyphicon-chevron-up up"></a>
-                <a href="javascript:void(0)" class="glyphicon glyphicon-chevron-down down"></a>
-              </td>
-              <td data-name="del"><button name="del" class="btn btn-danger glyphicon glyphicon-remove row-remove"></button></td>
-            </tr>
-            
-
-          </tbody>
-          <div class="modal fade" id="addstu" role="dialog" aria-labelledby="myModalLabel">
-            <div class="modal-dialog" role="document">
-              <div class="modal-content">
-                <div class="modal-header">
-                  <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                  <h4 class="modal-title" id="myModalLabel">Modal title</h4>
-                </div>
-                <div class="modal-body">
-                  <select id="academyselect" class="form-control"><option value="">학원선택</option><option value = "31">UNSW</option><option value = "34">미사마루지</option></select>
-                  <br>
-                  <select id="studentList" class="form-control"></select>
-                  <input type="hidden" id="rowid" value="" />
-                </div>
-                <div class="modal-footer">
-                  <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                  <button type="button" class="btn btn-primary studenttoinput">학생추가</button>
-                </div>
-              </div>
-            </div>
-        </table>
-        <a id="295" class="btn btn-default pull-right addrow">Add Row</a>
-        </div>
-        <br>
-        <div class="row">
-          <div class="col-md-10"></div>
-          <div class="col-md-1">
-            <form class="savedelete" accept-charset="" action="updateSchedule" method="post" enctype='application/json' onsubmit="return validateTableForm(this.id)" id="scheduleform295">
-              <input class="hidden" name="iid" value="295" form="scheduleform295" />
-              <input class="hidden" name="bid" value="2" form="scheduleform295" />
-              <input class="hidden" name='searchTime' value="1400" form="scheduleform295" />
-              <input class="hidden" name='day' value="월" form="scheduleform295" />
-              <input class="hidden" name="update" value="1" form="scheduleform295" />
-              <input type="hidden" name="invencar" value="8" form="scheduleform295">
-              <input type="submit" class="btn btn-success" value="저장">
-            </form>
-          </div>
-          <div class="col-md-1">
-            <form class="savedelete" action="updateSchedule" method="post" id="deleteform295" onSubmit="return confirm('정말 삭제 하시겠어요?');">
-              <input class="hidden" name="iid" value="295" form="deleteform295" />
-              <input class="hidden" name="bid" value="2" form="deleteform295" />
-              <input class="hidden" name='searchTime' value="1400" form="deleteform295" />
-              <input class="hidden" name='day' value="월" form="deleteform295" />
-              <input class="hidden" name="update" value="0" form="deleteform295" />
-              <input class="hidden" name='invencar' value="8" form="deleteform295" />
-              <input type="submit" class="btn btn-success" value="삭제">
-            </form>
-          </div>
-          <br>
-          <br>
-          <br>
-        </div>
-      </div>
-      <div class="col-md-1"></div>
-    </div>
-  </div>
-  <br>
-  <br> 
-  <script>
-    var tempList = new Array();
-
-    function addAca(selected) {
-      tempList.push(selected.value);
-      selected.parentNode.parentNode.children[4].children[0].value = tempList;
-      console.log(selected.parentNode.parentNode.children[4].children[0].value)
-    }
-
-
-    function emptyTempList() {
-      tempList.splice(0, tempList.length);
-    }
-
-    $(document).on('click', '.addrow', function() {
-      id = $(this).attr('id')
-      console.log(id)
-      $(this).parent().find('.table-body').append(
-        '<tr><td data-name="time"><input onchange="emptyTempList();" type="text" name="time[]" placeholder="Time" class="form-control" form="scheduleform' + id +
-        '"/></td><td><input type="text" name="addr[]" placeholder="Address" class="form-control" form="scheduleform' + id +
-        '"/></td><td data-name="name" class="inputTd"><input type="text" name="name[]" data-role="tagsinput" class="form-control" form="scheduleform' + id + '" value="" /></td><td data-name="addstu"><button class="btn btn-primary glyphicon glyphicon-plus addstudent" data-toggle="modal"></button></td><td data-name="academy" class="inputAca" style="display:none"><input name="academy[]" data-role="tagsinput" class="form-control" form="scheduleform' +
-        id + '" value="" /></td>                <td data-name="sid" class="inputSid" style="display:none;"><input name="sid[]" type="text" data-role="tagsinput" class="form-control" form="scheduleform' + id +
-        '" value="" /></td><td data-name="load"><select name="load[]" form="scheduleform' + id +
-        '"><option value="">등하원</option><option value="1">등원</option><option value="0">하원</option></select></td><td data-name="move"><a href="javascript:void(0)" class="glyphicon glyphicon-chevron-up up"></a><a href="javascript:void(0)" class="glyphicon glyphicon-chevron-down down"></a></td><td data-name="del"><button name="del" class="btn btn-danger glyphicon glyphicon-remove row-remove"></button></td></tr>'
-      )
-    });
-
-    $('.table-schedule').on('click', '.up,.down', function() {
-      var row = $(this).parent().parent();
-      if ($(this).is(".up")) {
-        row.each(function() {
-          var previndex = $(this).prev().index();
-          if (previndex >= 0) {
-            var rowindex = $(this).index();
-            $(this).attr("id", previndex);
-            $(this).prev().attr("id", rowindex);
-            $(this).insertBefore($(this).prev());
-          }
-        });
-      } else {
-        $(row.get().reverse()).each(function() {
-          var nextindex = $(this).next().index();
-          if (nextindex >= 0) {
-            var rowindex = $(this).index();
-            $(this).attr("id", nextindex);
-            $(this).next().attr("id", rowindex);
-            $(this).insertAfter($(this).next());
-          }
-        });
-      }
-    });
-
-    $(".table-schedule").on('click', '.row-remove', function(event) {
-      $(this).parent().parent().remove();
-    });
-
-    $('#areaSelected').on('change', function() {
-      // updateflag = 1 -> select area;
-      $.ajax({
-        type: 'POST',
-        url: 'updateSchedule',
-        data: {
-          area: this.value,
-          updateflag: 1,
-        },
-        success: function(data) {
-          console.log(data)
-          tempTag = ""
-          for (i = 0; i < data.length; i++) {
-            tempTag = tempTag + "<option value=" + data[i]['pk'] + ">" + data[i]['fields']['bname'] + "</option>"
-          }
-          document.getElementById('branch').innerHTML = tempTag
-        }
-      });
-    })
-
-    var thisObject;
-    var thisObjectForAca;
-
-    $(document).on('click', '.addstudent', function() {
-      //thisObject -> studentName, thisObjectForAca -> AcademyID
-      thisObject = $(this).parent().prevAll('.inputTd').children();
-      thisObjectForAca = $(this).parent().nextAll('.inputAca').children();
-      thisObjectForSid = $(this).parent().nextAll('.inputSid').children();
-      console.log(thisObjectForAca);
-      $('#addstu').modal('show');
-    })
-
-    $(document).on('click', '.studenttoinput', function() {
-      selectedAca = $('#academyselect').val()
-      selectedStu = $('#studentList option:selected').text()
-      selectedSid = $('#studentList option:selected').val()
-
-      if (thisObject[0].nodeName == 'DIV') {
-        temp = thisObject[1].value
-        tempAca = thisObjectForAca[1].value
-        tempSid = thisObjectForSid[1].value
-
-
-        if (temp != '') {
-          console.log('1')
-          temp += ',' + selectedStu
-          tempAca += ',' + selectedAca
-          tempSid += ',' + selectedSid
-
-          $(thisObject[1]).tagsinput('add')
-          $(thisObjectForAca[1]).tagsinput('add')
-          $(thisObjectForSid[1]).tagsinput('add')
-
-        } else {
-          console.log('2')
-          temp = selectedStu
-          tempAca = selectedAca
-          tempSid = selectedSid
-          $(thisObject[1]).tagsinput('add')
-          $(thisObjectForAca[1]).tagsinput('add')
-          $(thisObjectForSid[1]).tagsinput('add')
-        }
-
-        $(thisObject[1]).tagsinput('add', temp)
-        $(thisObjectForAca[1]).tagsinput('add', tempAca)
-        $(thisObjectForSid[1]).tagsinput('add', tempSid)
-
-      } else if (thisObject[0].nodeName == 'INPUT') {
-        temp = thisObject[0].value
-
-        if (temp != '') {
-          temp += ',' + selectedStu
-          tempAca += ',' + selectedAca
-          tempSid += ',' + selectedSid
-        } else {
-          console.log('2')
-          temp = selectedStu
-          tempAca = selectedAca
-          tempSid = selectedSid
-          $(thisObject[0]).tagsinput('add')
-          $(thisObjectForAca[0]).tagsinput('add')
-          $(thisObjectForSid[0]).tagsinput('add')
-        }
-        $(thisObject[0]).tagsinput('add', temp)
-        $(thisObjectForAca[0]).tagsinput('add', tempAca)
-        $(thisObjectForSid[0]).tagsinput('add', tempSid)
-      }
-    })
-
-    $('.tInput').on('beforeItemRemove', function(event){
-      t = $(this)
-      sibling_sid = $(this).siblings('.inputSid')[0].children[1]
-      sibling_aca = $(this).siblings('.inputAca')[0].children[1]
-      // Do some processing here
-
-      var before_list = t[0].children[1].value.split(",").map(function(item) {
-        return item.trim();
-      });
-
-      console.log(before_list)
-      console.log(event.item)
-
-      var delete_index = before_list.indexOf(event.item)
-
-      console.log(before_list)
-      console.log(delete_index)
-
-      var before_sid_value = sibling_sid.value
-      var before_aca_value = sibling_aca.value
-
-      var delete_sid = before_sid_value.split(',').map(function(item) {
-        return item.trim()
-      });
-      var delete_aca = before_aca_value.split(',').map(function(item) {
-        return item.trim()
-      });
-
-      if (delete_index == -1) {
-        delete_sid.splice(0, 1);
-        delete_aca.splice(0, 1);
-      } else {
-        delete_sid.splice(delete_index, 1);
-        delete_aca.splice(delete_index, 1);
-      }
-
-      console.log(before_sid_value)
-      console.log(delete_sid)
-
-      sibling_aca.value = delete_aca.toString()
-      sibling_sid.value = delete_sid.toString()
-
-    });
-
-    $('#academyselect').on('change', function() {
-      $.ajax({
-        type: 'POST',
-        url: 'studentLoad',
-        data: {
-          aid: this.value,
-        },
-        success: function(data) {
-          console.log(data)
-          tempTag = ""
-          for (i = 0; i < data.length; i++) {
-            tempTag = tempTag + "<option value=" + data[i]['pk'] + ">" + data[i]['fields']['sname'] + "</option>"
-          }
-          document.getElementById('studentList').innerHTML = tempTag
-        }
-      });
-    })
-
-    $('#openBtn').click(function() {
-      if ($('#forInvenAddCheck').val() == undefined) {
-        alert("검색 후 사용해 주세요.")
-        return false;
-      }
-      $('#myModal').on('show', function() {
-
-      });
-      $('#myModal').modal({
-        show: true
-      })
-    });
-
-    function validateSearchForm() {
-      var num = /^\d+$/;
-
-      if (document.forms["searchform"]["area"].selectedIndex < 1) {
-        alert("지역, 지점을 선택해 주세요.")
-        return false;
-      } else if (num.test(document.forms["searchform"]["time"].value) == false) {
-        alert("시간은 숫자만 입력해 주세요.(예:1500)")
-        return false;
-      }
-    }
-
-    function validateTableForm(e) {
-      console.log(e)
-      tableLength = document.forms[e]['time[]'].length
-      tempAddrS = document.forms[e]['addr[]'][0].value
-      tempAddrE = document.forms[e]['addr[]'][tableLength - 1].value
-      var timepattern = /([01]\d|2[0-3]):([0-5]\d)/;
-
-      if (tempAddrS != "" || tempAddrE != "") {
-        alert("시작,끝 주소는 반드시 비워주세요.")
-        return false;
-      }
-      tempTime = document.forms[e]['time[]']
-      for (i = 0; i < tableLength; i++) {
-        if (timepattern.test(tempTime[i].value) == false) {
-          alert(i + 1 + "번째 로우의 숫자를 정확히 입력해 주세요.")
-          return false;
-        }
-      }
-
-      for (i = 1; i < tableLength - 1; i++) {
-        if (document.forms[e]['load[]'][i].value == '') {
-          alert(i + 1 + "번째 로우의 등하원을 선택해 주세요.")
-          return false;
-        }
-      }
-
-      tempName = document.forms[e]['name[]']
-      if (tempName[0].value != "" || tempName[tableLength - 1].value != "") {
-        alert("시작,끝 이름은 반드시 비워주세요.")
-        return false;
-      }
-    }
-
-    function reqInventory(iid) {
-      var req = $('#' + iid + 'text').val();
-      $.ajax({
-        type: 'POST',
-        url: 'reqInventory',
-        data: {
-          iid: iid,
-          req: req,
-        },
-        success: function(data) {
-          $('#' + iid + 'text').val(data);
-          alert("Success");
-        }
-      });
-    }
-  </script>
-  
-        
-        <br class="clear" />
-    </div>
-    <!-- END Content -->
-
-  </div>
-  <!-- /.content-wrapper -->
-
-<!--
-  <footer class="main-footer">
-    <div class="pull-right hidden-xs">
-      <b>Version</b> 2.3.8
-    </div>
-    <strong>Copyright &copy; 2014-2016 <a href="http://almsaeedstudio.com">Almsaeed Studio</a>.</strong> All rights
-    reserved.
-  </footer>
-//-->
-
-  <!-- Control Sidebar -->
-  <aside class="control-sidebar control-sidebar-dark">
-    <!-- Create the tabs -->
-    <ul class="nav nav-tabs nav-justified control-sidebar-tabs">
-      <li><a href="#control-sidebar-home-tab" data-toggle="tab"><i class="fa fa-home"></i></a></li>
-      <li><a href="#control-sidebar-settings-tab" data-toggle="tab"><i class="fa fa-gears"></i></a></li>
-    </ul>
-    <!-- Tab panes -->
-    <div class="tab-content">
-      <!-- Home tab content -->
-      <div class="tab-pane" id="control-sidebar-home-tab">
-        <h3 class="control-sidebar-heading">Recent Activity</h3>
-        <ul class="control-sidebar-menu">
-          <li>
-            <a href="javascript:void(0)">
-              <i class="menu-icon fa fa-birthday-cake bg-red"></i>
-
-              <div class="menu-info">
-                <h4 class="control-sidebar-subheading">Langdon's Birthday</h4>
-
-                <p>Will be 23 on April 24th</p>
-              </div>
-            </a>
-          </li>
-          <li>
-            <a href="javascript:void(0)">
-              <i class="menu-icon fa fa-user bg-yellow"></i>
-
-              <div class="menu-info">
-                <h4 class="control-sidebar-subheading">Frodo Updated His Profile</h4>
-
-                <p>New phone +1(800)555-1234</p>
-              </div>
-            </a>
-          </li>
-          <li>
-            <a href="javascript:void(0)">
-              <i class="menu-icon fa fa-envelope-o bg-light-blue"></i>
-
-              <div class="menu-info">
-                <h4 class="control-sidebar-subheading">Nora Joined Mailing List</h4>
-
-                <p>nora@example.com</p>
-              </div>
-            </a>
-          </li>
-          <li>
-            <a href="javascript:void(0)">
-              <i class="menu-icon fa fa-file-code-o bg-green"></i>
-
-              <div class="menu-info">
-                <h4 class="control-sidebar-subheading">Cron Job 254 Executed</h4>
-
-                <p>Execution time 5 seconds</p>
-              </div>
-            </a>
-          </li>
-        </ul>
-        <!-- /.control-sidebar-menu -->
-
-        <h3 class="control-sidebar-heading">Tasks Progress</h3>
-        <ul class="control-sidebar-menu">
-          <li>
-            <a href="javascript:void(0)">
-              <h4 class="control-sidebar-subheading">
-                Custom Template Design
-                <span class="label label-danger pull-right">70%</span>
-              </h4>
-
-              <div class="progress progress-xxs">
-                <div class="progress-bar progress-bar-danger" style="width: 70%"></div>
-              </div>
-            </a>
-          </li>
-          <li>
-            <a href="javascript:void(0)">
-              <h4 class="control-sidebar-subheading">
-                Update Resume
-                <span class="label label-success pull-right">95%</span>
-              </h4>
-
-              <div class="progress progress-xxs">
-                <div class="progress-bar progress-bar-success" style="width: 95%"></div>
-              </div>
-            </a>
-          </li>
-          <li>
-            <a href="javascript:void(0)">
-              <h4 class="control-sidebar-subheading">
-                Laravel Integration
-                <span class="label label-warning pull-right">50%</span>
-              </h4>
-
-              <div class="progress progress-xxs">
-                <div class="progress-bar progress-bar-warning" style="width: 50%"></div>
-              </div>
-            </a>
-          </li>
-          <li>
-            <a href="javascript:void(0)">
-              <h4 class="control-sidebar-subheading">
-                Back End Framework
-                <span class="label label-primary pull-right">68%</span>
-              </h4>
-
-              <div class="progress progress-xxs">
-                <div class="progress-bar progress-bar-primary" style="width: 68%"></div>
-              </div>
-            </a>
-          </li>
-        </ul>
-        <!-- /.control-sidebar-menu -->
-
-      </div>
-      <!-- /.tab-pane -->
-
-      <!-- Settings tab content -->
-      <div class="tab-pane" id="control-sidebar-settings-tab">
-        <form method="post">
-          <h3 class="control-sidebar-heading">General Settings</h3>
-
-          <div class="form-group">
-            <label class="control-sidebar-subheading">
-              Report panel usage
-              <input type="checkbox" class="pull-right" checked>
-            </label>
-
-            <p>
-              Some information about this general settings option
-            </p>
-          </div>
-          <!-- /.form-group -->
-
-          <div class="form-group">
-            <label class="control-sidebar-subheading">
-              Allow mail redirect
-              <input type="checkbox" class="pull-right" checked>
-            </label>
-
-            <p>
-              Other sets of options are available
-            </p>
-          </div>
-          <!-- /.form-group -->
-
-          <div class="form-group">
-            <label class="control-sidebar-subheading">
-              Expose author name in posts
-              <input type="checkbox" class="pull-right" checked>
-            </label>
-
-            <p>
-              Allow the user to show his name in blog posts
-            </p>
-          </div>
-          <!-- /.form-group -->
-
-          <h3 class="control-sidebar-heading">Chat Settings</h3>
-
-          <div class="form-group">
-            <label class="control-sidebar-subheading">
-              Show me as online
-              <input type="checkbox" class="pull-right" checked>
-            </label>
-          </div>
-          <!-- /.form-group -->
-
-          <div class="form-group">
-            <label class="control-sidebar-subheading">
-              Turn off notifications
-              <input type="checkbox" class="pull-right">
-            </label>
-          </div>
-          <!-- /.form-group -->
-
-          <div class="form-group">
-            <label class="control-sidebar-subheading">
-              Delete chat history
-              <a href="javascript:void(0)" class="text-red pull-right"><i class="fa fa-trash-o"></i></a>
-            </label>
-          </div>
-          <!-- /.form-group -->
-        </form>
-      </div>
-      <!-- /.tab-pane -->
-    </div>
-  </aside>
-  <!-- /.control-sidebar -->
-  <!-- Add the sidebar's background. This div must be placed
-       immediately after the control sidebar -->
-  <div class="control-sidebar-bg"></div>
-
-</div>
-<!-- ./wrapper -->
-
-<!-- jQuery 2.2.3 -->
-<!-- Bootstrap 3.3.6 -->
-<!-- FastClick -->
-<script src="/static/adminlte/plugins/fastclick/fastclick.js"></script>
-<!-- AdminLTE App -->
-<script src="/static/adminlte/dist/js/app.min.js"></script>
-<!-- Sparkline -->
-<script src="/static/adminlte/plugins/sparkline/jquery.sparkline.min.js"></script>
-<!-- jvectormap -->
-<script src="/static/adminlte/plugins/jvectormap/jquery-jvectormap-1.2.2.min.js"></script>
-<script src="/static/adminlte/plugins/jvectormap/jquery-jvectormap-world-mill-en.js"></script>
-<!-- SlimScroll 1.3.0 -->
-<script src="/static/adminlte/plugins/slimScroll/jquery.slimscroll.min.js"></script>
-<!-- ChartJS 1.0.1 -->
-<script src="/static/adminlte/plugins/chartjs/Chart.min.js"></script>
-<!-- AdminLTE dashboard demo (This is only for demo purposes) -->
-<!-- script src="/static/adminlte/dist/js/pages/dashboard2.js"></script -->
-<!-- AdminLTE for demo purposes -->
-<script src="/static/adminlte/dist/js/demo.js"></script>
-</body>
 <script>
-<!-- StudentInfo admin academy selection -->
-$(document).on('change','#branchSelected', function(){
-  var bname = $("#branchSelected option:selected").text()
-  var bid = $("#branchSelected option:selected").val()
-  $('#id_bid').val(bid)
-  $('#id_bname').val(bname)
-  $.ajax({
-    type: 'POST',
-    url: '/studentInfo',
-    data: {
-      branch: bid,
-      flag: 1,
-    },
-    success: function(data) {
-      console.log(data)
-      tempTag = "<option vlaue='default' selected>학원선택</option>"
-      for (i = 0; i < data.length; i++) {
-        tempTag = tempTag + "<option value=" + data[i]['pk'] + ">" + data[i]['fields']['name'] + "</option>"
-      }
-      document.getElementById('academyStuInfo').innerHTML = tempTag
+	var map;
+    	var bounds;
+
+	// 우편번호 찾기 찾기 화면을 넣을 element
+	var element_wrap = document.getElementById('wrap');
+	var gDrag = {
+		jq: $('#gmarker'),
+		item: {},
+		status: 0,
+		y: 0,
+		x: 0
+	};
+	var markers = [];
+	var last_infowindow;
+	var labels = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+	var labelIndex = 0;
+
+	function initMap() {
+		var uluru = {lat: 37.394798, lng: 127.111135};
+		map = new google.maps.Map(document.getElementById('map'), {
+			zoom: 17,
+			draggable: true,
+			center: uluru,
+			//mapTypeId: "OSM",
+		});
+
+	     daumMapType = new google.maps.ImageMapType({
+                getTileUrl: function(coord, zoom) {
+                    // See above example if you need smooth wrapping at 180th meridian
+
+			var x = coord.x - parseInt(110879/Math.pow(2, (17-zoom)));
+			var y = -(coord.y - parseInt(52761/Math.pow(2, (17-zoom))));
+
+
+		    console.log("[" + coord.x + ":" + coord.y + "] >> [" + x + ":" + y + "]");
+			//if (y < 0 || y >= scale) return null;
+                    console.log("http://map3.daumcdn.net/map_2d/2jap/L" + (20-zoom) + "/" + y + "/" + x + ".png");
+                    return "http://map3.daumcdn.net/map_2d/2jap/L" + (20-zoom) + "/" + y + "/" + x + ".png";
+                },
+                tileSize: new google.maps.Size(256, 256),
+                name: "OpenStreetMap",
+                maxZoom: 17,
+		isPng: true,
+            });
+
+	var daumProjection = "+proj=tmerc +lat_0=38 +lon_0=127 +k=1 +x_0=200000 +y_0=500000 +ellps=GRS80 +units=m +no_defs";
+		//daumMapType.projection = {
+			//fromLatLngToPoint: function(latLng) {
+				//var transformed = proj4("EPSG:4326", daumProjection, [latLng.lng(), latLng.lat()]);
+				//return new google.maps.Point(transformed[0], transformed[1]);
+			//},
+			//fromPointToLatLng: function(point, noWrap) {
+				//var transformed = proj4(daumProjection, "EPSG:4326", [point.x, point.y]);
+				//return new google.maps.LatLng(transformed[1], transformed[0], noWrap);
+			//}
+		//};
+		//map.mapTypes.set("OSM", daumMapType);
+		//map.setMapTypeId("OSM");
+
+		google.maps.event.addListener(map, 'click', function(e) {
+			var geocoder = new daum.maps.services.Geocoder();
+			geocoder.coord2addr(new daum.maps.LatLng(e.latLng.lat(), e.latLng.lng()), function(status, result) {
+				if (status === daum.maps.services.Status.OK) {
+					placeMarker(e.latLng, map, result[0].fullName);
+				}
+			});
+		});
+
+		$(".dropzone").droppable({
+			accept: "#gmarker",
+			activeClass: "drophere",
+			hoverClass: "dropaccept",
+			drop: function(event, ui, item){
+				gDrag.status = 1;
+				$(this).addClass("ui-state-highlight").html(gDrag.item.title);
+			}
+		});
+
+		gDrag.jq.draggable({
+			start: function(event, ui){
+					gDrag.jq.html('<img src="https://mts.googleapis.com/vt/icon/name=icons/spotlight/spotlight-poi.png" />');
+					gDrag.item.setVisible(true);
+				},
+			stop: function(event, ui){
+				gDrag.jq.html('');
+				if(gDrag.status){
+					//gDrag.item.setVisible(false);
+				}else{
+					gDrag.item.setVisible(true);
+				}
+			},
+		});
+			
+		$(document).mousemove(function(event){
+			gDrag.x = event.pageX;
+			gDrag.y = event.pageY;
+            	});
+			
+
+        }
+
+	$(function() {
+		$('.timeform').timepicker({'scrollDefault': '14:00'});
+	});
+
+
+	function placeMarker(position, map, text) {
+		var marker = new google.maps.Marker({
+			position: position,
+			map: map,
+			draggable: false,
+			raiseOnDrag: false,
+			label: {
+				text: labels[labelIndex++ % labels.length],
+			},
+			title: text,
+		});
+
+		google.maps.event.addListener(marker, 'mouseover', function(e) {
+			if (!gDrag.jq.hasClass('ui-draggable-dragging')) {
+				gDrag.item = this;
+				gDrag.jq.offset({ 
+					top: gDrag.y - 10,
+	     	     			left: gDrag.x - 10
+				});
+			}
+		});
+
+		markers.push(marker);
+
+		if (!bounds) {
+			bounds = new google.maps.LatLngBounds();
+			bounds.extend(position);
+			map.setCenter(position);
+		}
+		else {
+			//bounds.extend(position);
+			//map.fitBounds(bounds);		// auto-zoom
+			//map.panToBounds(bounds);	// auto-center
+		}
+
+		return (markers.length-1);
+	}
+
+	function foldDaumPostcode() {
+	// iframe을 넣은 element를 안보이게 한다.
+		element_wrap.style.display = 'none';
+	}
+
+    function sample3_execDaumPostcode() {
+      // 현재 scroll 위치를 저장해놓는다.
+      var currentScroll = Math.max(document.body.scrollTop, document.documentElement.scrollTop);
+      new daum.Postcode({
+        oncomplete: function(data) {
+          // 검색결과 항목을 클릭했을때 실행할 코드를 작성하는 부분.
+
+          // 각 주소의 노출 규칙에 따라 주소를 조합한다.
+          // 내려오는 변수가 값이 없는 경우엔 공백('')값을 가지므로, 이를 참고하여 분기 한다.
+          var fullAddr = data.address; // 최종 주소 변수
+          var extraAddr = ''; // 조합형 주소 변수
+
+          // 기본 주소가 도로명 타입일때 조합한다.
+          if (data.addressType === 'R') {
+            //법정동명이 있을 경우 추가한다.
+            if (data.bname !== '') { 
+		extraAddr += data.bname; 
+	    } 
+	    // 건물명이 있을 경우 추가한다.  
+	    if (data.buildingName !== '') { 
+		extraAddr += (extraAddr !== '' ? ', ' + data.buildingName : data.buildingName);
+            }
+            // 조합형주소의 유무에 따라 양쪽에 괄호를 추가하여 최종 주소를 만든다.
+            fullAddr += (extraAddr !== '' ? ' (' + extraAddr + ')' : '');
+          }
+
+          // 우편번호와 주소 정보를 해당 필드에 넣는다.
+          //document.getElementById('sample3_address').value = fullAddr;
+          var geocoder = new daum.maps.services.Geocoder();
+
+          var addr2coord = function(status, result) {
+            if (status == daum.maps.services.Status.OK) {
+		var position = new google.maps.LatLng(result.addr[0].lat, result.addr[0].lng);
+		placeMarker(position, map, fullAddr);
+            }
+          }
+
+          geocoder.addr2coord(data.address, addr2coord);
+
+          // iframe을 넣은 element를 안보이게 한다.
+          // (autoClose:false 기능을 이용한다면, 아래 코드를 제거해야 화면에서 사라지지 않는다.)
+          element_wrap.style.display = 'none';
+
+          // 우편번호 찾기 화면이 보이기 이전으로 scroll 위치를 되돌린다.
+          document.body.scrollTop = currentScroll;
+        },
+        // 우편번호 찾기 화면 크기가 조정되었을때 실행할 코드를 작성하는 부분. iframe을 넣은 element의 높이값을 조정한다.
+        onresize: function(size) {
+          element_wrap.style.height = size.height + 'px';
+        },
+        width: '100%',
+        height: '100%'
+      }).embed(element_wrap);
+
+      // iframe을 넣은 element를 보이게 한다.
+      element_wrap.style.display = 'block';
     }
-  });
-})
 
-$(document).on('change','#academyStuInfo', function(){
-  aname = $(this).find("option:selected").text()
-  aid = $(this).find("option:selected").val()
+	function search() {
+		var url = 'http://apis.daum.net/local/v1/search/keyword.json';
+		url += '?apikey=' + 'df6af02ef0921fda82ecbfd508cfcfdf'
+				+ '&query=' + encodeURIComponent($('#query').val())
+				+ '&callback=' + '?'
 
-  if($('#id_aid').val() == ''){
-    $('#id_aname').val(aname)
-    $('#id_aid').val(aid)
-  }else{
-  $('#id_aname').val($('#id_aname').val() + ','+aname)
-  $('#id_aid').val($('#id_aid').val()+','+aid)
-}
-})
+		$('.search_result_tr').remove();
+		labelIndex = 0;
 
-</script>
-<link href="/static/css/bootstrap-tagsinput.css" rel="stylesheet">
-<script src="/static/js/bootstrap-tagsinput.js"></script>
-</html>
+		$.getJSON(url,function(data) {
+				for (var i=0; i<data['channel']['info']['count']; i++) {
+					var html = "<tr class='search_result_tr'><td><a href='javascript:void(0)' class='search_result' id='search_result" + i + "'>" 
+					+ labels[labelIndex % labels.length] + " " + data['channel']['item'][i]['title']
+					+ "</a></td></tr>";
+					$('#result_tbody').append(html);
+					$('#search_result' + i).data("lat", data['channel']['item'][i]['latitude']);
+					$('#search_result' + i).data("lon", data['channel']['item'][i]['longitude']);
+					$('#search_result' + i).data("title", data['channel']['item'][i]['title']);
 
+					var position = new google.maps.LatLng(data['channel']['item'][i]['latitude'], data['channel']['item'][i]['longitude']);
+					var index = placeMarker(position, map, data['channel']['item'][i]['title']);
+					$('#search_result' + i).data("index", index);
+
+					$('#search_result' + i).on('click', function(event) {
+						var infowindow = new google.maps.InfoWindow({
+							content: $(this).data('title'),
+						});	
+						position = new google.maps.LatLng($(this).data('lat'), $(this).data('lon'));
+						map.setCenter(position);
+						if (last_infowindow) {
+							last_infowindow.close();
+						}
+						infowindow.open(map, markers[$(this).data('index')]);
+						last_infowindow = infowindow;
+					});
+				}
+			}
+		);
+	}
+
+	$('.phone-add').on('click', function(event) {
+		$(this).parent().parent().parent().append("<button class='btn btn-xs btn-success phonenumber'><span class='glyphicon glyphicon-phone'></span>" + $(this).parent().siblings(".phonenumber").val() + "</button> ");
+		$(this).parent().siblings(".phonenumber").val("");
+	});
+
+      </script>
+      <script async defer
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBaGGxx6F0oPYs8wS6tqYbh3ZJKzD8GMbI&callback=initMap">
+      </script>
+
+    </body>
+  </html>

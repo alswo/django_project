@@ -1197,8 +1197,12 @@ def updateSchedule(request):
                 except:
                     return HttpResponse("inven delete error:stable")
 
-                inven = Inventory.objects.get(id = iid)
-                inven.delete()
+		# reload after deleting
+		try:
+                	inven = Inventory.objects.get(id = iid)
+                	inven.delete()
+		except:
+			pass
 
             #redirect
             academy = Academy.objects.filter(bid=bid)

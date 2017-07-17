@@ -4,6 +4,7 @@ from django.http import HttpResponse, JsonResponse
 from schedule.models import RealtimeLocation, Inventory, ScheduleTable
 from passenger.models import StudentInfo
 from passenger.dateSchedule import timeToDate
+import json
 
 ## time format : HH:MM
 def get_difference(time1, time2):
@@ -41,9 +42,17 @@ def getRealtimeLocation(request):
             	student = StudentInfo.objects.get(id = sid)
 		sname = student.sname
 	    except StudentInfo.DoesNotExist:
-                return HttpResponse("해당 사용자가 존재하지 않습니다.")
+		msg = "해당 사용자가 존재하지 않습니다."
+		if (debug == 1):
+                	return HttpResponse(msg)
+		else:
+			return JsonResponse({'code': 401, 'msg': msg})
         else:
-            return HttpResponse("파라미터가 유효하지 않습니다.")
+ 		msg = "파라미터가 유효하지 않습니다."
+		if (debug == 1):
+                	return HttpResponse(msg)
+		else:
+			return JsonResponse({'code': 400, 'msg': msg})
 
 	if (debug == 1):
         	rawhm = int(request.GET.get('rawhm'))
@@ -153,22 +162,40 @@ def getSchedulesForStudent(request):
             	student = StudentInfo.objects.get(id = sid)
 		sname = student.sname
 	    except StudentInfo.DoesNotExist:
-                return HttpResponse("해당 사용자가 존재하지 않습니다.")
+		msg = "해당 사용자가 존재하지 않습니다."
+		if (debug == 1):
+                	return HttpResponse(msg)
+		else:
+			return JsonResponse({'code': 401, 'msg': msg})
         else:
-            return HttpResponse("파라미터가 유효하지 않습니다.")
-
-	if (debug == 1):
-        	rawhm = int(request.GET.get('rawhm'))
-        	hm = request.GET.get('hm')
-		today = request.GET.get('today')
-		d = request.GET.get('d')
+ 		msg = "파라미터가 유효하지 않습니다."
+		if (debug == 1):
+                	return HttpResponse(msg)
+		else:
+			return JsonResponse({'code': 400, 'msg': msg})
 
         scheduletables = ScheduleTable.objects.filter(slist__contains = [sid]).select_related()
-	#return HttpResponse(scheduletables.query)
 
-	msg = ""
+	msg = {}
+	msg['schedules'] = {} 
         for scheduletable in scheduletables:
-		msg += scheduletable.time + " : " + scheduletable.addr + " : " + scheduletable.inventory.carnum + " : " + scheduletable.inventory.day + "\n"
+		data = {}
+		data['time'] = scheduletable.time
+		data['addr'] = scheduletable.addr
+		data['carnum'] = scheduletable.iid.carnum
+		if scheduletable.lflag == 1:
+			data['lflag'] = '등원'
+		else:
+			data['lflga'] = '하원'
 
-	return HttpResponse(msg)
+		if scheduletable.iid.day in msg['schedules'].keys():
+			pass
+		else:
+			msg['schedules'][scheduletable.iid.day] = list()
+
+		msg['schedules'][scheduletable.iid.day].append(data)
+
+
+	return JsonResponse(msg)
+	#return JsonResponse(json.dumps(msg, ensure_ascii=False), safe=False)
 		
