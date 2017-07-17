@@ -2335,16 +2335,19 @@ def reqInventory(request):
     if request.method == "POST":
         iid = request.POST.get('iid')
         req = request.POST.get('req')
+        memo = request.POST.get('memo')
         flag = request.POST.get('flag')
 
         if flag == '0':
             inven = Inventory.objects.get(id=iid)
             inven.req = req
+            inven.memo = memo
             inven.save()
 
         elif flag == '1':
             eInven = EditedInven.objects.get(id = iid)
             eInven.req = req
+            eInven.memo = memo
             eInven.save()
 
         return HttpResponse(req)
