@@ -60,6 +60,7 @@ class EditedInven(models.Model):
     etime = models.IntegerField()
     week = models.IntegerField()
     req = models.TextField()
+    memo = models.TextField(null=True,blank=True)
 
     def __unicode__(self):
         return "[{0}] [{1}] {2} {3}~{4}".format(self.bid, self.carnum, self.day, self.stime, self.etime)
@@ -72,6 +73,7 @@ class EditedScheduleTable(models.Model):
     ieid = models.ForeignKey(EditedInven,related_name='editedscheduletables')
     time = models.CharField(max_length = 10,null=True,blank=True)
     addr = models.CharField(max_length = 60,null=True,blank=True)
+    req = models.CharField(max_length = 20,null=True,blank=True)
     alist = ArrayField(models.IntegerField(null=True,blank=True),null=True,blank=True)
     anamelist = ArrayField(models.CharField(max_length = 10, null=True, blank=True),null=True, blank=True)
     slist = ArrayField(models.IntegerField(null=True,blank=True),null=True,blank=True)
@@ -92,6 +94,7 @@ class HistoryScheduleTable(models.Model):
     carnum = models.IntegerField()
     time = models.CharField(max_length = 10,null=True,blank=True)
     addr = models.CharField(max_length = 30,null=True,blank=True)
+    req = models.CharField(max_length = 20,null=True,blank=True)
     alist = ArrayField(models.IntegerField(null=True,blank=True),null=True,blank=True)
     academies = models.ManyToManyField('passenger.Academy')
     members = models.ManyToManyField('passenger.StudentInfo')
