@@ -514,6 +514,7 @@ def updateSchedule(request):
             week = int(request.POST.get('week'))
             time = request.POST.getlist('time[]')
             addr = request.POST.getlist('addr[]')
+	    req = request.POST.getlist('req[]')
             name = request.POST.getlist('name[]')
             name2 = request.POST.getlist('name[]')
             academy = request.POST.getlist('academy[]')
@@ -591,11 +592,11 @@ def updateSchedule(request):
                         # lflag load -> 1 unload ->0 start -> 2 end -> 3
                         for i in range(len(time)):
                             if i == 0:
-                                estable = EditedScheduleTable(ieid_id = ei.id, time = time[i], addr = addr[i], alist='{}', slist='{}', sname=list(name2[i]), tflag='{}', lflag=2)
+                                estable = EditedScheduleTable(ieid_id = ei.id, time = time[i], addr = addr[i], req = req[i], alist='{}', slist='{}', sname=list(name2[i]), tflag='{}', lflag=2)
                                 estable.save()
 
                             elif i == len(time) - 1:
-                                estable = EditedScheduleTable(ieid_id = ei.id, time = time[i], addr = addr[i], alist='{}', slist='{}', sname=list(name2[i]), tflag='{}', lflag=3)
+                                estable = EditedScheduleTable(ieid_id = ei.id, time = time[i], addr = addr[i], req = req[i], alist='{}', slist='{}', sname=list(name2[i]), tflag='{}', lflag=3)
                                 estable.save()
 
                             elif 0 < i < len(time) - 1:
@@ -611,7 +612,7 @@ def updateSchedule(request):
                                     aname = Academy.objects.get(id = aid)
                                     anamelist.append(aname.name)
 
-                                estable = EditedScheduleTable(ieid_id = ei.id, time = time[i], addr = addr[i], alist=temp_aca, anamelist = anamelist, slist=sidlist, sname=temp_name, tflag=temp_lflag, lflag=load[i])
+                                estable = EditedScheduleTable(ieid_id = ei.id, time = time[i], addr = addr[i], req = req[i], alist=temp_aca, anamelist = anamelist, slist=sidlist, sname=temp_name, tflag=temp_lflag, lflag=load[i])
                                 estable.save()
 
                     contacts = []
@@ -690,11 +691,11 @@ def updateSchedule(request):
                         # lflag load -> 1 unload ->0 start -> 2 end -> 3
                         for i in range(len(time)):
                             if i == 0:
-                                estable = EditedScheduleTable(ieid_id = eiid, time = time[i], addr = addr[i], alist='{}', slist='{}', sname=list(name2[i]), tflag='{}', lflag=2)
+                                estable = EditedScheduleTable(ieid_id = eiid, time = time[i], addr = addr[i], req = req[i], alist='{}', slist='{}', sname=list(name2[i]), tflag='{}', lflag=2)
                                 estable.save()
 
                             elif i == len(time) - 1:
-                                estable = EditedScheduleTable(ieid_id = eiid, time = time[i], addr = addr[i], alist='{}', slist='{}', sname=list(name2[i]), tflag='{}', lflag=3)
+                                estable = EditedScheduleTable(ieid_id = eiid, time = time[i], addr = addr[i], req = req[i], alist='{}', slist='{}', sname=list(name2[i]), tflag='{}', lflag=3)
                                 estable.save()
 
                             elif 0 < i < len(time) - 1:
@@ -710,7 +711,7 @@ def updateSchedule(request):
                                     aname = Academy.objects.get(id = aid)
                                     anamelist.append(aname.name)
 
-                                estable = EditedScheduleTable(ieid_id = eiid, time = time[i], addr = addr[i], alist=temp_aca, anamelist = anamelist, slist=sidlist, sname=temp_name, tflag=temp_lflag, lflag=load[i])
+                                estable = EditedScheduleTable(ieid_id = eiid, time = time[i], addr = addr[i], req = req[i], alist=temp_aca, anamelist = anamelist, slist=sidlist, sname=temp_name, tflag=temp_lflag, lflag=load[i])
                                 estable.save()
 
                     contacts = []
@@ -787,11 +788,11 @@ def updateSchedule(request):
                         # lflag load -> 1 unload ->0 start -> 2 end -> 3
                         for i in range(len(time)):
                             if i == 0:
-                                estable = EditedScheduleTable(ieid_id = ei.id, time = time[i], addr = addr[i], alist='{}', slist='{}', sname=list(name2[i]), tflag='{}', lflag=2)
+                                estable = EditedScheduleTable(ieid_id = ei.id, time = time[i], addr = addr[i], req = req[i], alist='{}', slist='{}', sname=list(name2[i]), tflag='{}', lflag=2)
                                 estable.save()
 
                             elif i == len(time) - 1:
-                                estable = EditedScheduleTable(ieid_id = ei.id, time = time[i], addr = addr[i], alist='{}', slist='{}', sname=list(name2[i]), tflag='{}', lflag=3)
+                                estable = EditedScheduleTable(ieid_id = ei.id, time = time[i], addr = addr[i], req = req[i], alist='{}', slist='{}', sname=list(name2[i]), tflag='{}', lflag=3)
                                 estable.save()
 
                             elif 0 < i < len(time) - 1:
@@ -807,7 +808,7 @@ def updateSchedule(request):
                                     aname = Academy.objects.get(id = aid)
                                     anamelist.append(aname.name)
 
-                                estable = EditedScheduleTable(ieid_id = ei.id, time = time[i], addr = addr[i], alist=temp_aca, anamelist = anamelist, slist=sidlist, sname=temp_name, tflag=temp_lflag, lflag=load[i])
+                                estable = EditedScheduleTable(ieid_id = ei.id, time = time[i], addr = addr[i], req = req[i], alist=temp_aca, anamelist = anamelist, slist=sidlist, sname=temp_name, tflag=temp_lflag, lflag=load[i])
                                 estable.save()
 
                     contacts = []
@@ -879,11 +880,11 @@ def updateSchedule(request):
                         # lflag load -> 1 unload ->0 start -> 2 end -> 3
                         for i in range(len(time)):
                             if i == 0:
-                                estable = EditedScheduleTable(ieid_id = eiid, time = time[i], addr = addr[i], alist='{}', slist='{}', sname=list(name2[i]), tflag='{}', lflag=2)
+                                estable = EditedScheduleTable(ieid_id = eiid, time = time[i], addr = addr[i], req = req[i], alist='{}', slist='{}', sname=list(name2[i]), tflag='{}', lflag=2)
                                 estable.save()
 
                             elif i == len(time) - 1:
-                                estable = EditedScheduleTable(ieid_id = eiid, time = time[i], addr = addr[i], alist='{}', slist='{}', sname=list(name2[i]), tflag='{}', lflag=3)
+                                estable = EditedScheduleTable(ieid_id = eiid, time = time[i], addr = addr[i], req = req[i], alist='{}', slist='{}', sname=list(name2[i]), tflag='{}', lflag=3)
                                 estable.save()
 
                             elif 0 < i < len(time) - 1:
@@ -899,7 +900,7 @@ def updateSchedule(request):
                                     aname = Academy.objects.get(id = aid)
                                     anamelist.append(aname.name)
 
-                                estable = EditedScheduleTable(ieid_id = eiid, time = time[i], addr = addr[i], alist=temp_aca, anamelist = anamelist, slist=sidlist, sname=temp_name, tflag=temp_lflag, lflag=load[i])
+                                estable = EditedScheduleTable(ieid_id = eiid, time = time[i], addr = addr[i], req = req[i], alist=temp_aca, anamelist = anamelist, slist=sidlist, sname=temp_name, tflag=temp_lflag, lflag=load[i])
                                 estable.save()
 
                     contacts = []
@@ -961,11 +962,11 @@ def updateSchedule(request):
                     # lflag load -> 1 unload ->0 start -> 2 end -> 3
                     for i in range(len(time)):
                         if i == 0:
-                            estable = EditedScheduleTable(ieid_id = iid, time = time[i], addr = addr[i], alist='{}', slist='{}', sname=list(name2[i]), tflag='{}', lflag=2)
+                            estable = EditedScheduleTable(ieid_id = iid, time = time[i], addr = addr[i], req = req[i], alist='{}', slist='{}', sname=list(name2[i]), tflag='{}', lflag=2)
                             estable.save()
 
                         elif i == len(time) - 1:
-                            estable = EditedScheduleTable(ieid_id = iid, time = time[i], addr = addr[i], alist='{}', slist='{}', sname=list(name2[i]), tflag='{}', lflag=3)
+                            estable = EditedScheduleTable(ieid_id = iid, time = time[i], addr = addr[i], req = req[i], alist='{}', slist='{}', sname=list(name2[i]), tflag='{}', lflag=3)
                             estable.save()
 
                         elif 0 < i < len(time) - 1:
@@ -981,7 +982,7 @@ def updateSchedule(request):
                                 aname = Academy.objects.get(id = aid)
                                 anamelist.append(aname.name)
 
-                            estable = EditedScheduleTable(ieid_id = iid, time = time[i], addr = addr[i], alist=temp_aca, anamelist = anamelist, slist=sidlist, sname=temp_name, tflag=temp_lflag, lflag=load[i])
+                            estable = EditedScheduleTable(ieid_id = iid, time = time[i], addr = addr[i], req = req[i], alist=temp_aca, anamelist = anamelist, slist=sidlist, sname=temp_name, tflag=temp_lflag, lflag=load[i])
                             estable.save()
 
                     contacts = []
@@ -1060,7 +1061,7 @@ def updateSchedule(request):
                                 aname = Academy.objects.get(id = aid)
                                 anamelist.append(aname.name)
 
-                            estable = EditedScheduleTable(ieid_id = eiid, time = time[i], addr = addr[i], alist=temp_aca, anamelist = anamelist, slist=sidlist, sname=temp_name, tflag=temp_lflag, lflag=load[i])
+                            estable = EditedScheduleTable(ieid_id = eiid, time = time[i], addr = addr[i], req = req[i], alist=temp_aca, anamelist = anamelist, slist=sidlist, sname=temp_name, tflag=temp_lflag, lflag=load[i])
                             estable.save()
 
                     contacts = []
@@ -1115,11 +1116,11 @@ def updateSchedule(request):
                 # lflag load -> 1 unload ->0 start -> 2 end -> 3
                 for i in range(len(time)):
                     if i == 0:
-                        stable = ScheduleTable(iid_id = iid, time = time[i], addr = addr[i], alist='{}', slist='{}', sname=list(name2[i]), tflag='{}', lflag=2)
+                        stable = ScheduleTable(iid_id = iid, time = time[i], addr = addr[i], req = req[i], alist='{}', slist='{}', sname=list(name2[i]), tflag='{}', lflag=2)
                         stable.save()
 
                     elif i == len(time) - 1:
-                        stable = ScheduleTable(iid_id = iid, time = time[i], addr = addr[i], alist='{}', slist='{}', sname=list(name2[i]), tflag='{}', lflag=3)
+                        stable = ScheduleTable(iid_id = iid, time = time[i], addr = addr[i], req = req[i], alist='{}', slist='{}', sname=list(name2[i]), tflag='{}', lflag=3)
                         stable.save()
 
                     elif 0 < i < len(time) - 1:
@@ -1141,7 +1142,7 @@ def updateSchedule(request):
                             aname = Academy.objects.get(id = aid)
                             anamelist.append(aname.name)
 
-                        stable = ScheduleTable(iid_id = iid, time = time[i], addr = addr[i], alist=temp_aca, anamelist = anamelist, slist=sidlist, sname=temp_name, tflag=temp_lflag, lflag=load[i])
+                        stable = ScheduleTable(iid_id = iid, time = time[i], addr = addr[i], req = req[i], alist=temp_aca, anamelist = anamelist, slist=sidlist, sname=temp_name, tflag=temp_lflag, lflag=load[i])
                         stable.save()
 
                 if searchTime == '':
