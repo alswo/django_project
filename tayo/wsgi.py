@@ -5,10 +5,10 @@ path = os.path.abspath(__file__+'/../..')
 if path not in sys.path:
     sys.path.append(path)
 
-python_home = os.path.abspath(__file__ + '/../..')
+#python_home = os.path.abspath(__file__ + '/../..')
 
-activate_this = python_home + '/bin/activate_this.py'
-execfile(activate_this, dict(__file__=activate_this))
+#activate_this = python_home + '/bin/activate_this.py'
+#execfile(activate_this, dict(__file__=activate_this))
 #python_home = '/home/ubuntu/lee/work/django_project'
 #python_version = '.'.join(map(str, sys.version_info[:2]))
 #site_packages = python_home + '/lib/python%s/site-packages' % python_version
