@@ -156,9 +156,10 @@ def getSchedulesForStudent(request):
 		data['time'] = scheduletable.time
 		data['addr'] = scheduletable.addr
 		data['carnum'] = scheduletable.iid.carnum
+		data['inventory_id'] = scheduletable.iid_id
 		if scheduletable.lflag == 1:
 			data['lflag'] = '등원'
-		else:
+		elif scheduletable.lflag == 0:
 			data['lflag'] = '하원'
 
 		if scheduletable.iid.day in msg['schedules'].keys():
