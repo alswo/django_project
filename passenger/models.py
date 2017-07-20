@@ -7,6 +7,7 @@ from schedule.models import Branch
 from django.db import models
 import datetime
 from simple_history.models import HistoricalRecords
+from django.utils.crypto import get_random_string
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete = models.CASCADE)
@@ -177,6 +178,7 @@ class StudentInfo(models.Model):
     grade = models.IntegerField(null = True, blank = True)
     phone1 = models.IntegerField()
     phonelist = ArrayField(models.IntegerField(null = True, blank = True,default=0),default=0)
+    pin_number = models.CharField(max_length = 20, default=get_random_string(length=20))
     history = HistoricalRecords()
 
     def __unicode__(self):
