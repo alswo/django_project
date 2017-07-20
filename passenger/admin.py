@@ -47,7 +47,7 @@ class ScheduleDateAdmin(admin.ModelAdmin):
 
 class StudentInfoAdmin(SimpleHistoryAdmin):
     search_fields = ['aname','sname']
-    fields = ('academySelection','aid','aname','bid','bname','sname','grade','phone1','phonelist')
+    fields = ('academySelection','aid','aname','bid','bname','sname','grade','phone1','phonelist','pin_number')
     list_display = ('__unicode__',)
     form = StudentInfoForm
 

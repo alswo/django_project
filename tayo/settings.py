@@ -24,6 +24,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'simple_history',
     'corsheaders',
+    'firebase',
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -45,7 +46,7 @@ ROOT_URLCONF = 'tayo.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': ['/home/ubuntu/lee/venv_tayo/django_project/templates',],
+        'DIRS': ['/home/ubuntu/lee/django_project/templates',],
         #'DIRS': [],
         #'DIRS': [os.path.join(os.path.dirname(__file__),'templates'),],
         'DIRS': [BASE_DIR + '/templates/',],

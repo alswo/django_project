@@ -132,6 +132,7 @@ def weekly_update():
 			tempInven.slist = eiw1.slist
 			tempInven.stime = eiw1.stime
 			tempInven.etime = eiw1.etime
+			tempInven.req = eiw1.req
 			tempInven.scheduletables.all().delete()
 			tempInven.save()
 
@@ -191,9 +192,9 @@ def weekly_update():
 	 	tempInven.week3 = 1
 	 	tempInven.save()
 
-	ivenAllWeek2 = Inventory.objects.filter(week3 = 1)
+	ivenAllWeek3 = Inventory.objects.filter(week3 = 1)
 
-	for ia in ivenAllWeek2:
+	for ia in ivenAllWeek3:
 	 	tempInven = Inventory.objects.get(id = ia.id)
 		tempInven.week2 = 1
 	 	tempInven.week3 = 1

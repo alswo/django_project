@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  {% load staticfiles %}
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Shuttle Tayo</title>
+  <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+  <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+  <link href="{% static 'css/timeline.css' %}" rel="stylesheet">
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+  <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+  <script src="{% static 'js/bootstrap.min.js' %}"></script>
+  <script src="https://www.gstatic.com/firebasejs/4.1.3/firebase.js"></script>
+  <script>
+  // Initialize Firebase
+  var config = {
+    apiKey: "AIzaSyBjZonpI_zEjjvGki0FbAoy7kXdh4Jivw0",
+    authDomain: "tayo-f698c.firebaseapp.com",
+    databaseURL: "https://tayo-f698c.firebaseio.com",
+    projectId: "tayo-f698c",
+    storageBucket: "tayo-f698c.appspot.com",
+    messagingSenderId: "981510980022"
+  };
+  firebase.initializeApp(config);
+</script>
+
+</head>
+<body>
+<br>
+<!-- Navigation -->
+                <div class="form-group">
+                    <label>token</label>
+                    <input type="text" name="pin" id="pin">
+		    <button onclick="getToken();">ok</button>
+                </div>
+</body>
+<script>
+    function getToken(){
+        var pin = document.getElementById("pin").value;
+         $.ajax({
+                url: "getToken",
+                type: "POST",
+                data: {
+                        pin: pin,
+                        },
+                success: function(data){
+                    console.log(data)
+                    siginIn()
+		}
+        });
+    }
+
+    function siginIn(){
+	//firebase.auth().signInWithCustomToken(token).catch(function(error) {
+      	  //Handle Errors here.
+          //var errorCode = error.code;
+      	  //var errorMessage = error.message;
+       //});
+	firebase.auth().signInAnonymously().catch(function(error) {
+   	  // Handle Errors here.
+  	  var errorCode = error.code;
+  	  var errorMessage = error.message;
+  	  // ...
+	  console.log(firebase.auth().currentUser)
+	});
+    }
+</script>
+</html>
