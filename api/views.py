@@ -16,6 +16,12 @@ def get_difference(time1, time2):
 def format_hm(time):
     return (time[:2] + ':' + time[2:])
 
+def getResponse(debug, code, msg):
+	if (debug == 1):
+		return HttpResponse(msg)
+	else:
+		return JsonResponse({'code': code, 'msg': msg})
+
 # Create your views here.
 def getRealtimeLocation(request):
     if request.method == "GET":
@@ -43,16 +49,10 @@ def getRealtimeLocation(request):
 		sname = student.sname
 	    except StudentInfo.DoesNotExist:
 		msg = "해당 사용자가 존재하지 않습니다."
-		if (debug == 1):
-                	return HttpResponse(msg)
-		else:
-			return JsonResponse({'code': 401, 'msg': msg})
+		return getResponse(debug, 401, msg)
         else:
  		msg = "파라미터가 유효하지 않습니다."
-		if (debug == 1):
-                	return HttpResponse(msg)
-		else:
-			return JsonResponse({'code': 400, 'msg': msg})
+		return getResponse(debug, 400, msg)
 
 	if (debug == 1):
         	rawhm = int(request.GET.get('rawhm'))
@@ -65,20 +65,14 @@ def getRealtimeLocation(request):
         scheduletables = ScheduleTable.objects.filter(iid_id__in = today_inventory_ids).filter(slist__contains = [sid]).order_by('-time')
         if (len(scheduletables) <= 0):
 	    msg = sname + "님은 오늘 스케쥴이 없습니다."
-	    if (debug == 1):
-            	return HttpResponse(msg)
-	    else:
-            	return JsonResponse({'code': 204, 'msg': msg})
+	    return getResponse(debug, 204, msg)
 
         ## 마지막 스케쥴도 지났으면 (desc order 인 것 주의)
 	inventory = Inventory.objects.get(id = scheduletables.first().iid_id)
         if (inventory.etime < rawhm):
 	    carnum = inventory.carnum
 	    msg = str(carnum) + "호차 셔틀버스의 운행 스케쥴이 종료되었습니다."
-	    if (debug == 1):
-            	return HttpResponse(msg)
-	    else:
-		return JsonResponse({'code': 203, 'msg': msg})
+	    return getResponse(debug, 203, msg)
 
         for scheduletable in scheduletables:
             inventory = Inventory.objects.get(id = scheduletable.iid_id)
@@ -100,16 +94,10 @@ def getRealtimeLocation(request):
 
 		    if (waittime < 0):
 			msg = str(carnum) + "호차가 출발했습니다."
-			if (debug == 1):
-				return HttpResponse(msg)
-			else:
-				return JsonResponse({'code': 201, 'msg': msg})
+			return getResponse(debug, 201, msg)
 
 		    msg = str(carnum) + "호차가"  + str(waittime) + "분 후 도착합니다."
-		    if (debug == 1):
-                    	return HttpResponse(msg)
-		    else:
-			return JsonResponse({'code': 200, 'msg': msg})
+		    return getResponse(debug, 200, msg)
                 ## 다음 inventory 로..
                 else:
                     continue
@@ -118,23 +106,14 @@ def getRealtimeLocation(request):
 		carnum = inventory.carnum
 		if (rawhm - inventory.etime < 10):
 		    msg = str(carnum) + "호차 셔틀버스의 운행 스케쥴이 종료되었습니다."
-		    if (debug == 1):
-                    	return HttpResponse(msg)
-		    else:
-			return JsonResponse({'code': 203, 'msg': msg})
+		    return getResponse(debug, 203, msg)
 		else:
 		    msg = str(carnum) + "호차가 아직 출발 전입니다."
-		    if (debug == 1):
-                    	return HttpResponse(msg)
-		    else:
-			return JsonResponse({'code': 202, 'msg': msg})
+		    return getResponse(debug, 202, msg)
 
 	carnum = inventory.carnum
 	msg = str(carnum) + "호차가 아직 출발 전입니다."
-	if (debug == 1):
-        	return HttpResponse(msg)
-	else:
-		return JsonResponse({'code': 202, 'msg': msg})
+	return getResponse(debug, 202, msg)
 
 
 def getSchedulesForStudent(request):
@@ -163,16 +142,10 @@ def getSchedulesForStudent(request):
 		sname = student.sname
 	    except StudentInfo.DoesNotExist:
 		msg = "해당 사용자가 존재하지 않습니다."
-		if (debug == 1):
-                	return HttpResponse(msg)
-		else:
-			return JsonResponse({'code': 401, 'msg': msg})
+		return getResponse(debug, 401, msg)
         else:
  		msg = "파라미터가 유효하지 않습니다."
-		if (debug == 1):
-                	return HttpResponse(msg)
-		else:
-			return JsonResponse({'code': 400, 'msg': msg})
+		return getResponse(debug, 400, msg)
 
         scheduletables = ScheduleTable.objects.filter(slist__contains = [sid]).select_related()
 
@@ -199,3 +172,65 @@ def getSchedulesForStudent(request):
 	return JsonResponse(msg)
 	#return JsonResponse(json.dumps(msg, ensure_ascii=False), safe=False)
 		
+def setScheduleTableToRouteMap(scheduletable, msg, sequence, sid):
+	data = {}
+	if (scheduletable.lflag == 3):
+		data['addr'] = '도착'
+	elif (scheduletable.lflag == 2):
+		data['addr'] = '출발'
+	else:
+		data['addr'] = scheduletable.addr
+	data['time'] = scheduletable.time
+	data['sequence'] = sequence
+	if int(sid) in scheduletable.slist:
+		data['poi'] = 'ride'
+	msg['routemap'].append(data)
+
+def getRouteMap(request):
+	sid = request.GET.get('sid')
+	inventory_id = request.GET.get('inventory_id')
+	debug = request.GET.get('debug')
+	if (debug):
+		debug = 1
+	else:
+		debug = 0
+
+	if (sid and len(sid) > 0 and inventory_id and len(inventory_id)):
+		try:
+			student = StudentInfo.objects.get(id = sid)
+		except StudentInfo.DoesNotExist:
+			msg = "해당 사용자가 존재하지 않습니다."
+			return getResponse(debug, 401, msg)
+
+		try:
+			inventory = Inventory.objects.get(id = inventory_id)
+		except Inventory.DoesNotExist:
+			msg = "해당 inventory가 존재하지 않습니다."
+			return getResponse(debug, 401, msg)
+	else:
+		msg = "파라미터가 유효하지 않습니다."
+		return getResponse(debug, 400, msg)
+
+	scheduletables = ScheduleTable.objects.filter(iid_id = inventory_id).order_by('-time')
+	msg = {}
+	msg['routemap'] = list()
+
+	sequence = 0
+	for scheduletable in scheduletables:
+		if int(sid) in scheduletable.slist:
+			rideSequence = len(scheduletables) - sequence - 1
+			break
+		sequence += 1
+
+	sequence = 0
+	viewsequence = 0
+	for scheduletable in scheduletables.order_by('time'):
+		if (scheduletable.lflag == 3 or scheduletable.lflag == 2):
+			setScheduleTableToRouteMap(scheduletable, msg, viewsequence, sid)
+			viewsequence += 1
+		elif (sequence > rideSequence - 3 and sequence <= rideSequence):
+			setScheduleTableToRouteMap(scheduletable, msg, viewsequence, sid)
+			viewsequence += 1
+		sequence += 1
+
+	return JsonResponse(msg)
