@@ -20,7 +20,7 @@ def store_historyschedule():
 	for inventory in inventories:
 		scheduletables = ScheduleTable.objects.filter(iid_id = inventory.id)
 		for scheduletable in scheduletables:
-			hst = HistoryScheduleTable(date=ymd, iid_id=scheduletable.iid_id, carnum=inventory.carnum, time=scheduletable.time, addr=scheduletable.addr, alist=scheduletable.alist, tflag=scheduletable.tflag, lflag=scheduletable.lflag)
+			hst = HistoryScheduleTable(date=ymd, iid_id=scheduletable.iid_id, carnum=inventory.carnum, time=scheduletable.time, addr=scheduletable.addr, alist=scheduletable.alist, tflag=scheduletable.tflag, lflag=scheduletable.lflag, req=scheduletable.req)
 			hst.save()
                 	for sid in scheduletable.slist:
                     	    student = StudentInfo.objects.get(id=sid)
@@ -133,13 +133,15 @@ def weekly_update():
 			tempInven.stime = eiw1.stime
 			tempInven.etime = eiw1.etime
 			tempInven.req = eiw1.req
+			tempInven.memo = eiw1.memo
+			
 			tempInven.scheduletables.all().delete()
 			tempInven.save()
 
 			editedScheduleTablesWeek1 = eiw1.editedscheduletables.all()
 
 			for estw1 in editedScheduleTablesWeek1:
-				stable = ScheduleTable(iid = tempInven, time = estw1.time, addr = estw1.addr, alist=estw1.alist, anamelist=estw1.anamelist,slist=estw1.slist,sname=estw1.sname, tflag=estw1.tflag, lflag=estw1.lflag)
+				stable = ScheduleTable(iid = tempInven, time = estw1.time, addr = estw1.addr, req = estw1.req, alist=estw1.alist, anamelist=estw1.anamelist,slist=estw1.slist,sname=estw1.sname, tflag=estw1.tflag, lflag=estw1.lflag)
 				stable.save()
 
 
@@ -149,10 +151,10 @@ def weekly_update():
 	for ciw1 in createdInvenWeek1:
 		createdScheduleTablesWeek1 = ciw1.editedscheduletables.all()
 
-		inven = Inventory.objects.create(carnum = ciw1.carnum, bid = ciw1.bid, snum = ciw1.snum, day = ciw1.day , alist=ciw1.alist, anamelist = ciw1.anamelist, slist=ciw1.slist, stime = ciw1.stime, etime = ciw1.etime, req=ciw1.req, week1 = 1, week2 = 1, week3 = 1)
+		inven = Inventory.objects.create(carnum = ciw1.carnum, bid = ciw1.bid, snum = ciw1.snum, day = ciw1.day , alist=ciw1.alist, anamelist = ciw1.anamelist, slist=ciw1.slist, stime = ciw1.stime, etime = ciw1.etime, req=ciw1.req, memo=ciw1.memo, week1 = 1, week2 = 1, week3 = 1)
 
 		for cstw1 in createdScheduleTablesWeek1:
-			ScheduleTable.objects.create(iid = inven, time = cstw1.time, addr = cstw1.addr, alist=cstw1.alist, anamelist=cstw1.anamelist,slist=cstw1.slist,sname=cstw1.sname, tflag=cstw1.tflag, lflag=cstw1.lflag)
+			ScheduleTable.objects.create(iid = inven, time = cstw1.time, addr = cstw1.addr, req = cstw1.req, alist=cstw1.alist, anamelist=cstw1.anamelist,slist=cstw1.slist,sname=cstw1.sname, tflag=cstw1.tflag, lflag=cstw1.lflag)
 
 	#week1 editedInven, createdInven delete(include referenced tables)
 	EditedInven.objects.filter(week=1).prefetch_related('editedscheduletables').delete()
@@ -165,12 +167,12 @@ def weekly_update():
 	editedInvenWeek2 = EditedInven.objects.filter(week=2)
 
 	for eiw2 in editedInvenWeek2:
-		createInvenWeek3 = EditedInven.objects.create(carnum = eiw2.carnum, bid = eiw2.bid, snum = eiw2.snum, iid = eiw2.iid,day = eiw2.day, alist =eiw2.alist, anamelist = eiw2.anamelist, slist = eiw2.slist, stime = eiw2.stime, etime = eiw2.etime, req = eiw2.req, week = 3)
+		createInvenWeek3 = EditedInven.objects.create(carnum = eiw2.carnum, bid = eiw2.bid, snum = eiw2.snum, iid = eiw2.iid,day = eiw2.day, alist =eiw2.alist, anamelist = eiw2.anamelist, slist = eiw2.slist, stime = eiw2.stime, etime = eiw2.etime, req = eiw2.req, memo = eiw2.memo, week = 3)
 
 		editedScheduleTablesWeek2 = eiw2.editedscheduletables.all()
 
 		for estw2 in editedScheduleTablesWeek2:
-			EditedScheduleTable.objects.create(ieid = createInvenWeek3, time = estw2.time, addr = estw2.addr, alist = estw2.alist, anamelist = estw2.anamelist, slist = estw2.slist, sname = estw2.sname, tflag = estw2.tflag, lflag = estw2.lflag)
+			EditedScheduleTable.objects.create(ieid = createInvenWeek3, time = estw2.time, addr = estw2.addr, req = estw2.req, alist = estw2.alist, anamelist = estw2.anamelist, slist = estw2.slist, sname = estw2.sname, tflag = estw2.tflag, lflag = estw2.lflag)
 
 
 	#Inventory week3 -> week2, week2 -> week1, week1->week

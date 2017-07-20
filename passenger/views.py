@@ -17,7 +17,7 @@ def is_not_driver(user):
 
 @login_required
 def main(request):
-    academies = Academy.objects.order_by('-gid')
+    academies = Academy.objects.order_by('name')
     groups = Group.objects.order_by('-gid')
     branch = Branch.objects.order_by('-id')
 

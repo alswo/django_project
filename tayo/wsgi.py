@@ -16,7 +16,6 @@ execfile(activate_this, dict(__file__=activate_this))
 ##python_version = '.'.join(map(str, sys.version_info[:2]))
 #site_packages = python_home + '/lib/python%s/site-packages' % python_version
 #sys.path.append(site_packages)
-
 #site.addsitedir(site_packages)
 # Remember original sys.path.
 
