@@ -23,8 +23,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'simple_history',
-    'corsheaders',
     'firebase',
+    'api',
+    'corsheaders',
 ]
 
 MIDDLEWARE_CLASSES = [

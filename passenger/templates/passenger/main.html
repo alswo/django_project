@@ -15,6 +15,7 @@
                 <button id="dLabel" type="button" class="btn btn-success btn-lg btn-block" data-toggle="dropdown" aria-expanded="true">학원별 스케줄 보기</button>
                 <ul class="dropdown-menu" aria-labelledby="dLabel">
                     {% for academy in academies %}
+		    {% if academy.name != 'primo' and academy.name != '에뚜알' and academy.name != '헬로아트' %}
                     {% if user.first_name = academy.name %}
                     <li>
                         <a onclick="getDay({{academy.id}})">{{academy.name}}</a>
@@ -25,6 +26,7 @@
                         <a onclick="getDay({{academy.id}})">{{academy.name}}</a>
                     </li>
                     {% endif %}
+		    {% endif %}
                     {% endfor %}
                 </ul>
             </div>

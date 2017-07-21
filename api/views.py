@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
+from django.utils import timezone
 from schedule.models import RealtimeLocation, Inventory, ScheduleTable
 from passenger.models import StudentInfo
 from passenger.dateSchedule import timeToDate
+from api.models import Notice
 import json
 
 ## time format : HH:MM
@@ -156,9 +158,10 @@ def getSchedulesForStudent(request):
 		data['time'] = scheduletable.time
 		data['addr'] = scheduletable.addr
 		data['carnum'] = scheduletable.iid.carnum
+		data['inventory_id'] = scheduletable.iid_id
 		if scheduletable.lflag == 1:
 			data['lflag'] = '등원'
-		else:
+		elif scheduletable.lflag == 0:
 			data['lflag'] = '하원'
 
 		if scheduletable.iid.day in msg['schedules'].keys():
@@ -234,3 +237,50 @@ def getRouteMap(request):
 		sequence += 1
 
 	return JsonResponse(msg)
+
+def listNotice(request):
+	notices = Notice.objects.all().order_by('datetime')
+
+	msg = {}
+	msg['noticelist'] = list()
+	for notice in notices:
+		data = {}
+		data['id'] = notice.id
+		data['title'] = notice.title
+		#data['date'] = date(timezone.localtime(notice.datetime)).strftime("%Y.%m.%d")
+		data['date'] = timezone.localtime(notice.datetime).strftime("%Y.%m.%d")
+
+		msg['noticelist'].append(data)
+
+	return JsonResponse(msg)
+
+def getNotice(request):
+    if request.method == "GET":
+	id = request.GET.get('id')
+	debug = request.GET.get('debug')
+	if (debug):
+		debug = 1
+	else:
+		debug = 0
+
+	if (id and len(id) > 0):
+		pass
+	else:
+		msg = "파라미터가 유효하지 않습니다."
+		return getResponse(debug, 400, msg)
+	
+
+	try:
+		notice = Notice.objects.get(id = id)
+	except Notice.DoesNotExist:
+		msg = "해당 게시글이 존재하지 않습니다."
+		return getResponse(debug, 401, msg)
+
+	msg = {}
+	msg['notice'] = {}
+	msg['notice']['title'] = notice.title
+	msg['notice']['date'] = timezone.localtime(notice.datetime).strftime("%Y.%m.%d")
+	msg['notice']['content'] = notice.content
+
+	return JsonResponse(msg)
+	
