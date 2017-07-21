@@ -22,6 +22,7 @@ import json
 import logging
 import collections
 import re
+from schedule.createInventory import UpdateInven
 
 class TimeHistory:
 	def __init__(self):
@@ -200,7 +201,7 @@ def putSchedule(request):
         return render_to_response('putSchedule.html', {"academy" : academy, "bid" : bid,"carnum":carnum,"day":day,"week":week, "group" : group,'user':request.user})
 
     elif request.method == "POST":
-        day = request.POST.get('day')
+        day = request.POST.getlist('day[]')
         carnum = request.POST.get('carnum')
         bid = request.POST.get('bid')
         req = request.POST.get('req')
@@ -213,168 +214,31 @@ def putSchedule(request):
         sid = request.POST.getlist('sid[]')
         week = int(request.POST.get('week'))
 
-        try:
-            alist_temp = list(set([i for i in academy if i is not None and i != '']))
-            alist_temp2 = ','.join(alist_temp)
-            alist_temp3 = list(set(alist_temp2.split(',')))
-            alist = []
+        putInven = UpdateInven(bid,carnum,day,req,academy,time,addr,name,name2,load,sid,week)
 
-            for a in alist_temp3:
-                alist.append(int(a))
+        if putInven.setAlist() == 1:
+            return HttpResponse('error setAlist')
 
-        except:
-            return HttpResponse('error1')
+        if putInven.setSlist() == 1:
+            return HttpResponse('error setSlist')
 
-        slist_temp = list(set([i for i in sid if i is not None and i != '']))
-        slist_temp2 = ','.join(slist_temp)
-        slist_temp3 = list(set(slist_temp2.split(',')))
+        if putInven.setANameList() == 1:
+            return HttpResponse('error setANameList')
 
-        snum = len(slist_temp3)
-
-        stime = int(time[0].split(':')[0] + time[0].split(':')[1])
-        etime = int(time[-1].split(':')[0] + time[-1].split(':')[1])
-
-        academyList = Academy.objects.filter(id__in = alist)
-        anamelist_inven = []
-
-        for a in academyList:
-            anamelist_inven.append(a.name)
+        if putInven.setSEtime() == 1:
+            return HttpResponse('error setSEtime')
 
         if week == 0:
+            putInven.setWeek0()
 
-            inven = Inventory.objects.create(carnum = carnum, bid = bid, snum = snum, day = day , alist=alist, anamelist = anamelist_inven, slist=slist_temp3, stime = stime, etime = etime, req=req, week1 = 0, week2 = 0, week3 = 0)
+        elif week == 1:
+            putInven.setWeek1()
 
-            iid = inven.id
+        elif week == 2:
+            putInven.setWeek2()
 
-            # lflag load -> 1 unload ->0 start -> 2 end -> 3
-            for i in range(len(time)):
-                if i == 0:
-                    stable = ScheduleTable(iid_id = iid, time = time[i], addr = addr[i], alist='{}', slist='{}', sname=list(name2[i]), tflag='{}', lflag=2)
-                    stable.save()
-
-                elif i == len(time) - 1:
-                    stable = ScheduleTable(iid_id = iid, time = time[i], addr = addr[i], alist='{}', slist='{}', sname=list(name2[i]), tflag='{}', lflag=3)
-                    stable.save()
-
-                elif 0 < i < len(time) - 1:
-                    temp_aca = [a.strip() for a in academy[i].split(',')]
-                    temp_name = [n.strip() for n in name2[i].split(',')]
-                    sidlist = [s.strip() for s in sid[i].split(',')]
-
-
-                    # student = StudentInfo.objects.filter(aid__contains=[ a for a in temp_aca]).filter(sname__in=[ stu for stu in temp_name ])
-                    #
-                    # for s in student:
-                    #     sidtemp.append(s.id)
-
-                    temp_lflag = [0 for z in range(len(temp_name))]
-
-                    anamelist = []
-
-                    for aid in temp_aca:
-                        aname = Academy.objects.get(id = aid)
-                        anamelist.append(aname.name)
-
-                    stable = ScheduleTable(iid_id = iid, time = time[i], addr = addr[i], alist=temp_aca, anamelist = anamelist, slist=sidlist, sname=temp_name, tflag=temp_lflag, lflag=load[i])
-                    stable.save()
-
-
-        if week > 0:
-
-            if week == 1:
-                for j in range(3):
-                    ei = EditedInven(carnum = carnum, bid = bid, snum = snum, day = day, alist = alist, anamelist= anamelist_inven, slist=slist_temp3, stime = stime, etime = etime, req = req, week = j+1)
-                    ei.save()
-                    eiid = ei.id
-
-                    # lflag load -> 1 unload ->0 start -> 2 end -> 3
-                    for i in range(len(time)):
-                        if i == 0:
-                            estable = EditedScheduleTable(ieid_id = eiid, time = time[i], addr = addr[i], alist='{}', slist='{}', sname=list(name2[i]), tflag='{}', lflag=2)
-                            estable.save()
-
-                        elif i == len(time) - 1:
-                            estable = EditedScheduleTable(ieid_id = eiid, time = time[i], addr = addr[i], alist='{}', slist='{}', sname=list(name2[i]), tflag='{}', lflag=3)
-                            estable.save()
-
-                        elif 0 < i < len(time) - 1:
-                            temp_aca = [a.strip() for a in academy[i].split(',')]
-                            temp_name = [n.strip() for n in name2[i].split(',')]
-                            sidlist = [s.strip() for s in sid[i].split(',')]
-
-                            temp_lflag = [0 for z in range(len(temp_name))]
-
-                            anamelist = []
-
-                            for aid in temp_aca:
-                                aname = Academy.objects.get(id = aid)
-                                anamelist.append(aname.name)
-
-                            estable = EditedScheduleTable(ieid_id = eiid, time = time[i], addr = addr[i], alist=temp_aca, anamelist = anamelist, slist=sidlist, sname=temp_name, tflag=temp_lflag, lflag=load[i])
-                            estable.save()
-
-            elif week == 2:
-                for j in range(2):
-                    ei = EditedInven(carnum = carnum, bid = bid, snum = snum, day = day, alist = alist, anamelist= anamelist_inven, slist=slist_temp3, stime = stime, etime = etime, req = req, week = j+2)
-                    ei.save()
-                    eiid = ei.id
-
-                    # lflag load -> 1 unload ->0 start -> 2 end -> 3
-                    for i in range(len(time)):
-                        if i == 0:
-                            estable = EditedScheduleTable(ieid_id = eiid, time = time[i], addr = addr[i], alist='{}', slist='{}', sname=list(name2[i]), tflag='{}', lflag=2)
-                            estable.save()
-
-                        elif i == len(time) - 1:
-                            estable = EditedScheduleTable(ieid_id = eiid, time = time[i], addr = addr[i], alist='{}', slist='{}', sname=list(name2[i]), tflag='{}', lflag=3)
-                            estable.save()
-
-                        elif 0 < i < len(time) - 1:
-                            temp_aca = [a.strip() for a in academy[i].split(',')]
-                            temp_name = [n.strip() for n in name2[i].split(',')]
-                            sidlist = [s.strip() for s in sid[i].split(',')]
-
-                            temp_lflag = [0 for z in range(len(temp_name))]
-
-                            anamelist = []
-
-                            for aid in temp_aca:
-                                aname = Academy.objects.get(id = aid)
-                                anamelist.append(aname.name)
-
-                            estable = EditedScheduleTable(ieid_id = eiid, time = time[i], addr = addr[i], alist=temp_aca, anamelist = anamelist, slist=sidlist, sname=temp_name, tflag=temp_lflag, lflag=load[i])
-                            estable.save()
-            else:
-                ei = EditedInven(carnum = carnum, bid = bid, snum = snum, day = day, alist = alist, anamelist= anamelist_inven, slist=slist_temp3, stime = stime, etime = etime, req = req, week = week)
-                ei.save()
-                eiid = ei.id
-
-                # lflag load -> 1 unload ->0 start -> 2 end -> 3
-                for i in range(len(time)):
-                    if i == 0:
-                        estable = EditedScheduleTable(ieid_id = eiid, time = time[i], addr = addr[i], alist='{}', slist='{}', sname=list(name2[i]), tflag='{}', lflag=2)
-                        estable.save()
-
-                    elif i == len(time) - 1:
-                        estable = EditedScheduleTable(ieid_id = eiid, time = time[i], addr = addr[i], alist='{}', slist='{}', sname=list(name2[i]), tflag='{}', lflag=3)
-                        estable.save()
-
-                    elif 0 < i < len(time) - 1:
-                        temp_aca = [a.strip() for a in academy[i].split(',')]
-                        temp_name = [n.strip() for n in name2[i].split(',')]
-                        sidlist = [s.strip() for s in sid[i].split(',')]
-
-                        temp_lflag = [0 for z in range(len(temp_name))]
-
-                        anamelist = []
-
-                        for aid in temp_aca:
-                            aname = Academy.objects.get(id = aid)
-                            anamelist.append(aname.name)
-
-                        estable = EditedScheduleTable(ieid_id = eiid, time = time[i], addr = addr[i], alist=temp_aca, anamelist = anamelist, slist=sidlist, sname=temp_name, tflag=temp_lflag, lflag=load[i])
-                        estable.save()
-
+        else:
+            putInven.setWeek3()
 
         academy = Academy.objects.filter(bid = bid)
         group = Car.objects.filter(branchid = bid)
@@ -514,7 +378,7 @@ def updateSchedule(request):
             week = int(request.POST.get('week'))
             time = request.POST.getlist('time[]')
             addr = request.POST.getlist('addr[]')
-	    req = request.POST.getlist('req[]')
+            req = request.POST.getlist('req[]')
             name = request.POST.getlist('name[]')
             name2 = request.POST.getlist('name[]')
             academy = request.POST.getlist('academy[]')
@@ -1107,7 +971,7 @@ def updateSchedule(request):
 
             #week0 update
             else:
-                Inventory.objects.filter(id=iid).update(snum = snum, alist=alist, anamelist = anamelist_inven, slist=slist_temp3, stime = stime, etime = etime)
+                Inventory.objects.filter(id=iid).update(snum = snum, alist=alist, anamelist = anamelist_inven, slist=slist_temp3, stime = stime, etime = etime, carnum = carnum)
 
                 #delete stable before updateing stable
                 delete_stable = ScheduleTable.objects.filter(iid_id=iid)
@@ -1309,7 +1173,9 @@ def acaUpdateSchedule(request):
 
             contacts = sorted(contacts, key=lambda x: x.stime,reverse=False)
 
-            return render_to_response('acaUpdateSchedule.html',{"area":area,"searchTime":searchTime,"week":week,"day":day,"branch":branch,"academy":academy,"areaid": areaid,"aid":aid,"bid":bid, "contacts":contacts,'user':request.user})
+            carlist = Car.objects.filter(branchid=bid)
+
+            return render_to_response('acaUpdateSchedule.html',{"area":area,"searchTime":searchTime,"week":week,"day":day,"carlist":carlist, "branch":branch,"academy":academy,"areaid": areaid,"aid":aid,"bid":bid, "contacts":contacts,'user':request.user})
 
         return render_to_response('acaUpdateSchedule.html',{'area':area,'user':request.user})
 
@@ -2426,3 +2292,22 @@ def getRealtimeLocation(request):
             ## inventory 사이에..
             else:
                 return HttpResponse("다음 스케쥴이 아직 시작되지 않았습니다.")
+@csrf_exempt
+def moveCarInven(request):
+    if request.method == 'POST':
+	iid = request.POST.get('iid')
+        carname = request.POST.get('carname')
+
+        Inventory.objects.filter(id = iid).update(carnum = carname)
+
+    return HttpResponse(carname)
+
+@csrf_exempt
+def moveCarEditedInven(request):
+    if request.method == "POST":
+	iid = request.POST.get('iid')
+        carname = request.POST.get('carname')
+
+        EditedInven.objects.filter(id = iid).update(carnum = carname)
+
+    return HttpResponse(carname)

@@ -289,7 +289,7 @@
           <table class="table table-bordered table-schedule">
             <thead>
               <tr>
-                <th class="text-center">시간</th>
+                <th class="text-center thstyle1">시간</th>
                 <th class="text-center thstyle2">주소</th>
                 <th class="text-center thstyle2">이름</th>
                 <th class="text-center thstyle3">이름추가</th>
@@ -298,7 +298,19 @@
               </tr>
             </thead>
             <tbody class="table-body">
-              {% if c.scheduletables %} {% for s in c.scheduletables.all %}
+              {% if c.scheduletables %}
+              <select class="moveCarList">
+                {% for car in carlist %}
+                  {% if car.carname == c.carnum %}
+                    <option value="{{c.id}}/{{car.carname}}" selected>{{car.carname}}호차</option>
+                  {% else %}
+                    <option value="{{c.id}}/{{car.carname}}">{{car.carname}}호차</option>
+                  {% endif %}
+                {% endfor %}
+              </select>
+              &nbsp&nbsp<button type="button" class="btn-sm btn-primary" value="" id="move{{c.id}}" onclick="moveCarInven({{c.id}});">차량만 바꾸기</button>
+              <br><br>
+              {% for s in c.scheduletables.all %}
               <tr>
                 <td data-name="time"><input onchange="emptyTempList();" type="text" name="time[]" placeholder="Time" class="form-control" form="scheduleform{{c.id}}" value="{{s.time}}" /></td>
                 <td data-name="addr"><input type="text" name="addr[]" placeholder="Address" class="form-control" form="scheduleform{{c.id}}" value="{{s.addr}}" /></td>
@@ -329,7 +341,20 @@
                 </td>
                 <td data-name="del"><button name="del" class="btn btn-danger glyphicon glyphicon-remove row-remove"></button></td>
               </tr>
-              {% endfor %} {% elif c.editedscheduletables %} {% for es in c.editedscheduletables.all %}
+              {% endfor %}
+              {% elif c.editedscheduletables %}
+              <select class="moveCarList">
+                {% for car in carlist %}
+                  {% if car.carname == c.carnum %}
+                    <option value="{{c.id}}/{{car.carname}}" selected>{{car.carname}}호차</option>
+                  {% else %}
+                    <option value="{{c.id}}/{{car.carname}}">{{car.carname}}호차</option>
+                  {% endif %}
+                {% endfor %}
+              </select>
+              &nbsp&nbsp<button type="button" class="btn-sm btn-primary" value="" id="move{{c.id}}" onclick="moveCarEditedInven({{c.id}});">차량만 바꾸기</button>
+              <br><br>
+              {% for es in c.editedscheduletables.all %}
               <tr>
                 <td data-name="time"><input onchange="emptyTempList();" type="text" name="time[]" placeholder="Time" class="form-control" form="scheduleform{{c.id}}" value="{{es.time}}" /></td>
                 <td data-name="addr"><input type="text" name="addr[]" placeholder="Address" class="form-control" form="scheduleform{{c.id}}" value="{{es.addr}}" /></td>
@@ -399,7 +424,7 @@
                 <input class="hidden" name='day' value="{{day}}" form="scheduleform{{c.id}}" />
                 <input class="hidden" name='week' value="{{week}}" form="scheduleform{{c.id}}" />
                 <input class="hidden" name="update" value="1" form="scheduleform{{c.id}}" />
-                <input type="hidden" name="carnum" value="{{c.carnum}}" form="scheduleform{{c.id}}">
+                <input id="carnum{{c.id}}" type="hidden" name="carnum" value="{{c.carnum}}" form="scheduleform{{c.id}}">
                 <button type="submit" class="btn btn-success">저장</button>
               </form>
               {% if c.get_cname == 'editedinven' %}
@@ -412,7 +437,7 @@
                 <input class="hidden" name='day' value="{{day}}" form="deleteform{{c.id}}" />
                 <input class="hidden" name='week' value="{{week}}" form="deleteform{{c.id}}" />
                 <input class="hidden" name="update" value="0" form="deleteform{{c.id}}" />
-                <input class="hidden" name='carnum' value="{{c.carnum}}" form="deleteform{{c.id}}" />
+                <input id="carnum{{c.id}}" class="hidden" name='carnum' value="{{c.carnum}}" form="deleteform{{c.id}}" />
                 <button type="submit" class="btn btn-danger">삭제</button>
               </form>
               {% else %}
@@ -736,5 +761,47 @@
               });
             }
           });
+
+          $( ".moveCarList" ).change(function() {
+            console.log(this.value)
+            contactId = this.value.split('/')[0]
+            carnum = this.value.split('/')[1]
+            $('#carnum'+contactId).val(carnum);
+            $('#move'+contactId).val(carnum);
+          });
+
+          function moveCarInven(contactId){
+            carname = $('#move'+contactId).val()
+            iid = contactId
+            $.ajax({
+              type: 'POST',
+              url: 'moveCarInven',
+              data: {
+                iid: iid,
+                carname: carname
+              },
+              success: function(data) {
+                alert(data+'차량으로 이동 완료')
+                window.location.replace(window.location.href);
+              }
+            });
+          }
+
+          function moveCarEditedInven(contactId){
+            carname = $('#move'+contactId).val()
+            iid = contactId
+            $.ajax({
+              type: 'POST',
+              url: 'moveCarEditedInven',
+              data: {
+                iid: iid,
+                carname: carname
+              },
+              success: function(data) {
+                alert(data+'차량으로 이동 완료')
+                window.location.replace(window.location.href);
+              }
+            });
+          }
     </script>
     {% endblock content %}

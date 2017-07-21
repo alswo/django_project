@@ -18,4 +18,6 @@ urlpatterns = patterns('',
     url(r'^reqInventory', views.reqInventory),
     url(r'^setRealtimeLocation', views.setRealtimeLocation),
     url(r'^getRealtimeLocation', views.getRealtimeLocation),
+    url(r'^moveCarInven', views.moveCarInven),
+    url(r'^moveCarEditedInven', views.moveCarEditedInven),
 )
