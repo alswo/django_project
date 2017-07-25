@@ -6,7 +6,7 @@ from django.contrib.postgres.fields import ArrayField
 from schedule.models import Branch
 from django.db import models
 import datetime
-from simple_history.models import HistoricalRecords
+#from simple_history.models import HistoricalRecords
 from django.utils.crypto import get_random_string
 
 class Profile(models.Model):
@@ -40,7 +40,7 @@ class Academy(models.Model):
     lon = models.FloatField(null=True, blank=True)
     lat = models.FloatField(null=True, blank=True)
     bid = models.IntegerField()
-    history = HistoricalRecords()
+    #history = HistoricalRecords()
 
 class Commute(models.Model):
     name = models.CharField(max_length = 10)
@@ -56,7 +56,7 @@ class Commute(models.Model):
     off_lon = models.FloatField(null=True, blank=True, default = 0)
     off_lat = models.FloatField(null=True, blank=True, default = 0)
     etc = models.TextField(null = True, blank = True)
-    history = HistoricalRecords()
+    #history = HistoricalRecords()
 
 class PhoneList(models.Model):
     aca = Academy.objects.all()
@@ -179,7 +179,7 @@ class StudentInfo(models.Model):
     phone1 = models.IntegerField()
     phonelist = ArrayField(models.IntegerField(null = True, blank = True,default=0),default=0)
     pin_number = models.CharField(max_length = 20, default=get_random_string(length=20))
-    history = HistoricalRecords()
+    #history = HistoricalRecords()
 
     def __unicode__(self):
         return u"{0} // {1} // {2} // {3} // {4}".format(self.bname,",".join(self.aname),self.sname,self.grade,self.phone1)

@@ -2,7 +2,7 @@ from __future__ import unicode_literals
 
 from django.db import models
 from django.contrib.postgres.fields import ArrayField, JSONField
-from simple_history.models import HistoricalRecords
+#from simple_history.models import HistoricalRecords
 
 class Inventory(models.Model):
     carnum = models.IntegerField()
@@ -20,7 +20,7 @@ class Inventory(models.Model):
     #building = models.IntegerField()
     req = models.TextField()
     memo = models.TextField(null=True,blank=True)
-    history = HistoricalRecords()
+    #history = HistoricalRecords()
 
     def __unicode__(self):
         return "[{0}] [{1}] {2} {3}~{4}".format(self.bid, self.carnum, self.day, self.stime, self.etime)
@@ -39,7 +39,7 @@ class ScheduleTable(models.Model):
     sname = ArrayField(models.CharField(max_length = 10,null=True,blank=True),null=True,blank=True)
     tflag = ArrayField(models.IntegerField(null=True,blank=True),null=True,blank=True)
     lflag = models.IntegerField()
-    history = HistoricalRecords()
+    #history = HistoricalRecords()
 
     def __unicode__(self):
         return u"{0} {1} {2} - {3}".format(self.time,self.iid, self.addr , ",".join(self.sname))
