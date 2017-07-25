@@ -182,7 +182,7 @@ class StudentInfo(models.Model):
     history = HistoricalRecords()
 
     def __unicode__(self):
-        return u"{0} // {1} // {2} // {3}".format(self.bname,",".join(self.aname),self.sname,self.grade)
+        return u"{0} // {1} // {2} // {3} // {4}".format(self.bname,",".join(self.aname),self.sname,self.grade,self.phone1)
 
 
 class AcademySchedule(models.Model):
