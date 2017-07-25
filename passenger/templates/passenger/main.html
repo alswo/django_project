@@ -165,6 +165,7 @@
             <!--{% if user.is_staff %}
             <button id="dLabel" type="button" class="btn btn-warning btn-lg btn-block" data-toggle="dropdown" aria-expanded="true" onclick="location.href='sturegi'">신입생 등록요청(테스트중)</button>
             {% endif %}-->
+		<div id="homescreen"></div>
         </div>
         <div class="col-xs-2 col-sm-4"></div>
     </div>
@@ -175,6 +176,12 @@
         <div class="col-sm-4"></div>
     </div>
     <script>
+	{% if user.is_staff %}
+	if (navigator.userAgent.match(/android/i)) {
+		$('#homescreen')[0].innerHTML = '<a class="btn btn-info btn-lg btn-block" aria-expanded="true" href="intent://addshortcut?url=http://curtis-tayotayo.edticket.com&icon=http://www.edticket.com/static/img/tayologo.png&title=셔틀타요&oq=%ED%8C%A8%EC%85%98%ED%92%80&serviceCode=tayo&version=7#Intent;scheme=naversearchapp;action=android.intent.action.VIEW;category=android.intent.category.BROWSABLE;package=com.nhn.android.search;end" onclick="nclk(this,\'fot.shorcut\',\'\',\'\',event);" class="u_sc">홈스크린에 저장  <i class="fa fa-download"></i></a>';
+	}
+	{% endif %}
+
         function getSchedule(gid) {
             $.ajax({
                 type: 'POST',

@@ -153,6 +153,7 @@ def getSchedulesForStudent(request):
 
 	msg = {}
 	msg['schedules'] = {} 
+	daydictionary = {u'월':'mon', u'화':'tue', u'수':'wed', u'목':'thu', u'금':'fri', u'토':'sat', u'일':'sun'}
         for scheduletable in scheduletables:
 		data = {}
 		data['time'] = scheduletable.time
@@ -167,9 +168,9 @@ def getSchedulesForStudent(request):
 		if scheduletable.iid.day in msg['schedules'].keys():
 			pass
 		else:
-			msg['schedules'][scheduletable.iid.day] = list()
+			msg['schedules'][daydictionary[scheduletable.iid.day]] = list()
 
-		msg['schedules'][scheduletable.iid.day].append(data)
+		msg['schedules'][daydictionary[scheduletable.iid.day]].append(data)
 
 
 	return JsonResponse(msg)
