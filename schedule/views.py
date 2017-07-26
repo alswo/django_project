@@ -1923,6 +1923,7 @@ def acaUpdateSchedule(request):
             week = int(request.POST.get('week'))
             areaid = int(request.POST.get('areaid'))
             aid = int(request.POST.get('aca'))
+			raid = int(request.POST.get('aca'))
             area = Area.objects.all()
             branch = Branch.objects.filter(id = bid)
             #carlist for searching with carnum and redirection
