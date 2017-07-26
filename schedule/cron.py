@@ -56,11 +56,11 @@ def notice_to_student(sid, msg):
 		data = {
 			'text': name + "\n" + msg ,
 		}
-		#r = requests.post("https://hooks.slack.com/services/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", json=data)
+		r = requests.post("https://hooks.slack.com/services/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", json=data)
 	except StudentInfo.DoesNotExist:
 		name = "none"
 
-	print name + "[" + str(sid) + "] : " + msg
+	#print name + "[" + str(sid) + "] : " + msg
 	return
 
 def find_update():
