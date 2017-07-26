@@ -210,7 +210,8 @@
   </div>
 </div>
 <br>
-<br> {% for c in contacts %}
+<br>
+{% for c in contacts %}
 <div class="row">
   <div class="col-md-1"></div>
   <div class="col-md-10" style="background-color:rgb(201, 214, 222); height: auto; width: 100%">
@@ -387,7 +388,7 @@
                   <div class="modal-body">
                     <select id="academyselect" class="form-control"><option value="">학원선택</option>{% for a in academy %}<option value = "{{a.id}}">{{a.name}}</option>{% endfor %}</select>
                     <br>
-                    <select id="studentList" class="form-control"></select>
+                    <select id="studentList" class="selectpicker" data-live-search="ture"></select>
                     <input type="hidden" id="rowid" value="" />
                   </div>
                   <div class="modal-footer">
@@ -593,7 +594,9 @@
           for (i = 0; i < data.length; i++) {
             tempTag = tempTag + "<option value=" + data[i]['pk'] + ">" + data[i]['fields']['sname'] + "</option>"
           }
+
           document.getElementById('studentList').innerHTML = tempTag
+          $('#studentList').selectpicker('refresh');
         }
       });
     })

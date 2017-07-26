@@ -56,11 +56,11 @@ def notice_to_student(sid, msg):
 		data = {
 			'text': name + "\n" + msg ,
 		}
-		r = requests.post("https://hooks.slack.com/services/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", json=data)
+		#r = requests.post("https://hooks.slack.com/services/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", json=data)
 	except StudentInfo.DoesNotExist:
 		name = "none"
 
-	#print name + "[" + str(sid) + "] : " + msg
+	print name + "[" + str(sid) + "] : " + msg
 	return
 
 def find_update():
@@ -91,6 +91,7 @@ def find_update():
 		try :
 			studentinfo = StudentInfo.objects.get(id=sid)
 		except StudentInfo.DoesNotExist:
+            print "Does not exist"
 			continue
 		scheduletables = ScheduleTable.objects.filter(iid_id__in = inventory_ids).filter(slist__contains = [sid]).order_by('time')
 		old_scheduletables = HistoryScheduleTable.objects.filter(date = lastweek).filter(iid_id__in = inventory_ids).filter(members__in = [studentinfo]).order_by('time')
@@ -104,6 +105,7 @@ def find_update():
 					same_inventory = True
 					if (scheduletable.time == old_scheduletable.time and scheduletable.addr == old_scheduletable.addr):
 						found = True
+                        print "found True : " + str(sid)
 			if found == False :
 				inventory = Inventory.objects.get(id = scheduletable.iid_id)
 				if same_inventory == False :
