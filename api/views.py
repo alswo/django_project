@@ -152,7 +152,7 @@ def getSchedulesForStudent(request):
         scheduletables = ScheduleTable.objects.filter(slist__contains = [sid]).select_related()
 
 	msg = {}
-	msg['schedules'] = {} 
+	msg['schedules'] = {}
         for scheduletable in scheduletables:
 		data = {}
 		data['time'] = scheduletable.time
@@ -174,7 +174,7 @@ def getSchedulesForStudent(request):
 
 	return JsonResponse(msg)
 	#return JsonResponse(json.dumps(msg, ensure_ascii=False), safe=False)
-		
+
 def setScheduleTableToRouteMap(scheduletable, msg, sequence, sid):
 	data = {}
 	if (scheduletable.lflag == 3):
@@ -268,7 +268,7 @@ def getNotice(request):
 	else:
 		msg = "파라미터가 유효하지 않습니다."
 		return getResponse(debug, 400, msg)
-	
+
 
 	try:
 		notice = Notice.objects.get(id = id)
@@ -283,4 +283,50 @@ def getNotice(request):
 	msg['notice']['content'] = notice.content
 
 	return JsonResponse(msg)
+
+def getStudentInfo(request):
+    if request.method == "POST":
+        pin = request.POST.get('pin')
 	
+        if (debug):
+                debug = 1
+        else:
+                debug = 0
+        
+        try:
+            sInfo = StudentInfo.objects.get(pin_number = pin)
+
+            studentInfo = {}
+
+            studentInfo['sid'] = sInfo.id
+            studentInfo['aid'] = sInfo.aid
+            studentInfo['phone'] = sInfo.phone1
+            studentInfo['pin'] = sInfo.pin_number
+	    studentInfo['grade'] = sInfo.grade
+	
+	    if sInfo.id == None:
+		msg = 'Sid does not exist'
+        
+	        return getResponse(debug, 401, msg)
+
+	    elif sInfo.aid == None:
+                msg = 'Aid does not exist'
+
+		return getResponse(debug, 401, msg)
+
+	    elif sInfo.phone == None:
+		msg = 'Phone does not exist'
+
+		return getResponse(debug, 401, msg)
+	
+	    elif sInfo.grade == None:
+                msg = 'Grade does not exist'
+
+		return getRespone(debug, 401, msg)
+
+            return JsonResponse(studentInfo)
+
+        except Exception as e:
+            
+            msg = 'PIN does not register' 
+	    return HttpResponse(debug,400,msg)
