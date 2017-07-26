@@ -44,19 +44,6 @@ window.onload = function(){
         });
       })
 
-      $('#openBtn').click(function() {
-        if ($('#forInvenAddCheck').val() == undefined) {
-          alert("검색 후 사용해 주세요.")
-          return false;
-        }
-        $('#myModal').on('show', function() {
-
-        });
-        $('#myModal').modal({
-          show: true
-        })
-      });
-
       $('#academyselect').on('change', function() {
         $.ajax({
           type: 'POST',
@@ -94,13 +81,16 @@ window.onload = function(){
         var selectedStu = []
         selectedSid = $('#studentList').val()
 
+        var aca = $('#academyselect').val()
+
         for (var i = 0; i < selectedSid.length; i++) {
            var val = selectedSid[i];
-           var aca = $('#academyselect').val()
            var txt = $("#studentList option[value='"+val+"']").text();
             selectedStu.push(txt)
             selectedAca.push(aca)
         }
+
+        console.log(selectedAca)
 
         if (thisObject[0].nodeName == 'DIV') {
           temp = thisObject[1].value
@@ -144,12 +134,10 @@ window.onload = function(){
             tempAca = ''+selectedAca
             tempSid = ''+ selectedSid
             $(thisObject[0]).tagsinput('add')
-            $(thisObjectForAca[0]).tagsinput('add')
-            $(thisObjectForSid[0]).tagsinput('add')
           }
           $(thisObject[0]).tagsinput('add', temp)
-          $(thisObjectForAca[0]).tagsinput('add', tempAca)
-          $(thisObjectForSid[0]).tagsinput('add', tempSid)
+          $(thisObjectForAca[0]).val(tempAca)
+          $(thisObjectForSid[0]).val(tempSid)
         }
       })
 

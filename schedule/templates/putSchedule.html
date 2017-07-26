@@ -12,6 +12,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/css/bootstrap-select.min.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/js/bootstrap-select.min.js"></script>
   <script src="http://code.jquery.com/ui/1.11.1/jquery-ui.js"></script>
+  <script src="{% static 'js/updateSchedule/updateSchedule.js' %}"></script>
   <style>
     .thstyle1 {
       text-align: center;
@@ -307,11 +308,10 @@
   </div>
 </body>
 <script>
-
   $('.table-container').on('click', '.addrow', function() {
     $(this).parent().find('.table-body').append(
       '<tr><td data-name="time" class="thstyle1"><input type="text" name="time[]" placeholder="Time" class="form-control" form="scheduleform"/></td><td class="thstyle11"><input type="text" name="addr[]" placeholder="Address" class="form-control" form="scheduleform"/></td><td data-name="name" class="inputTd"><input type="text" name="name[]" data-role="tagsinput" class="form-control" form="scheduleform" value="{% for name in s.sname %}{{name}}{% include '
-      comma.html ' %}{% endfor %}" /></td><td data-name="addstu"><button class="btn btn-primary glyphicon glyphicon-plus addstudent" data-toggle="modal"></button></td><td data-name="academy" class="inputAca" style="display:none"><input name="academy[]" class="form-control" form="scheduleform" value="{% for aid in s.alist %}{{aid}}{% include '
+      comma.html ' %}{% endfor %}" /></td><td data-name="addstu"><button class="btn btn-primary glyphicon glyphicon-plus addstudent" data-toggle="modal"></button></td><td data-name="academy" class="inputAcaU" style="display:none"><input name="academy[]" class="form-control" form="scheduleform" value="{% for aid in s.alist %}{{aid}}{% include '
       comma.html ' %}{% endfor %}" /></td><td data-name="sid" class="inputSid" style="display:none;"><input name="sid[]" type="text" data-role="tagsinput" class="form-control" form="scheduleform" value="{% for sid in s.slist %}{{sid}}{% include '
       comma.html ' %}{% endfor %}"/></td><td data-name="load"><select name="load[]" form="scheduleform"><option value="">등하원</option><option value="1">등원</option><option value="0">하원</option></select></td><td data-name="del"><button name="del" class="btn btn-danger glyphicon glyphicon-remove row-remove"></button></td></tr>'
     )
@@ -320,66 +320,6 @@
   $(".table-schedule").on('click', '.row-remove', function(event) {
     $(this).parent().parent().remove();
   });
-
-  $(document).on('beforeItemRemove', '.inputTd', function(event) {
-    t = $(this)
-    sibling_sid = $(this)[0].parentNode.children[6].children[0]
-    sibling_aca = $(this)[0].parentNode.children[5].children[0]
-
-    // Do some processing here
-    console.log(sibling_sid)
-    console.log(sibling_aca)
-    var before_list = t[0].children[1].value.split(",").map(function(item) {
-      return item.trim();
-    });
-
-    var delete_index = before_list.indexOf(event.item.trim())
-
-    var before_sid_value = sibling_sid.value
-    var before_aca_value = sibling_aca.value
-    console.log(before_sid_value)
-    console.log(before_aca_value)
-
-    var delete_sid = before_sid_value.split(',').map(function(item) {
-      return item.trim()
-    });
-    var delete_aca = before_aca_value.split(',').map(function(item) {
-      return item.trim()
-    });
-
-    console.log(delete_sid)
-    console.log(delete_aca)
-
-    if (delete_index == -1) {
-      delete_sid.splice(0, 1);
-      delete_aca.splice(0, 1);
-    } else {
-      delete_sid.splice(delete_index, 1);
-      delete_aca.splice(delete_index, 1);
-    }
-
-    sibling_aca.value = delete_aca.toString()
-    sibling_sid.value = delete_sid.toString()
-
-  });
-  $('#academyselect').on('change', function() {
-    $.ajax({
-      type: 'POST',
-      url: 'studentLoad',
-      data: {
-        aid: this.value,
-      },
-      success: function(data) {
-        console.log(data);
-        tempTag = "";
-        for (i = 0; i < data.length; i++) {
-          tempTag = tempTag + "<option value=\"" + data[i]['pk'] + "\">" + data[i]['fields']['sname'] + "</option>"
-        }
-        document.getElementById('studentList').innerHTML = tempTag;
-        $('#studentList').selectpicker('refresh');
-      }
-    });
-  })
 
   function validateTableForm(e) {
     console.log(e)
@@ -419,13 +359,6 @@
     }
   }
 
-  $(".table-body").sortable({
-    update: function(event, ui) {
-      $(this).children().each(function(index) {
-        $(this).find('td')
-      });
-    }
-  });
 </script>
 
 </html>
