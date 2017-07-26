@@ -16,7 +16,7 @@ private_key=RSA.importKey("-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0B
 """
 
 @csrf_exempt
-def get_token(request):
+def getToken(request):
     if request.method == 'GET':
         return render_to_response('authorizer.html')
 

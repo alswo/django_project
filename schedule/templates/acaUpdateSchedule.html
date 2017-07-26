@@ -244,9 +244,9 @@
   {% for c in contacts %}
   <div class="row">
     <div class="col-md-1"></div>
-    <div class="col-md-10" style="background-color:rgb(201, 214, 222); height: auto; width: 100%; border-radius: 25px;">
-      <div class="col-md-12 table-responsive">
-        <br>
+    <div class="col-md-10" style="background-color:rgb(201, 214, 222); height: auto; width: 100%">
+      <div class="col-md-12" style="margin:10px">
+        <!-- br>
         <div class="row">
           <div class="col-md-5">
           </div>
@@ -254,203 +254,215 @@
             <h3 style="font-family: 'Lucida Console'; font-weight: bold; color:rgb(77,77,77)">{{c.stime}} - {{c.etime}}</h3>
           </div>
           <div class="col-md-5">
+
           </div>
         </div>
-        <br>
+        <br//-->
         <div class="row">
-          <div class="row">
+          <div class="col-md-4">
+            동승자분과 공유 메모
+            <textarea class="form-control" style="" rows="4" id="{{c.id}}text">{{c.req}}</textarea>
           </div>
-          <div class="col-md-8">
-            <textarea class="form-control" style="border-radius: 15px;" rows="4" id="{{c.id}}text">{{c.req}}</textarea>
-          </div>
-          <div class="col-md-1">
+          <!-- div class="col-md-1">
+  	  <br><br><br><br>
             {% if c.get_cname == 'editedinven' %}
             <div class="row"><button type="button" class="btn btn-primary" onclick="reqInventory({{c.id}},1);">저장</button></div>
-            <br>
-            <div class="row"><button type="button" class="btn btn-success" onclick="reqInventory({{c.id}},1);">수정</button></div>
             {% else %}
             <div class="row"><button type="button" class="btn btn-primary" onclick="reqInventory({{c.id}},0);">저장</button></div>
-            <br>
-            <div class="row"><button type="button" class="btn btn-success" onclick="reqInventory({{c.id}},0);">수정</button></div>
+            {% endif %}
+          </div //-->
+          <div class="col-md-4">
+            내 메모
+            <textarea class="form-control" style="" rows="4" id="{{c.id}}memo">{% if c.memo %} {{c.memo}} {% endif %} </textarea>
+          </div>
+          <div class="col-md-1">
+            <br><br><br><br> {% if c.get_cname == 'editedinven' %}
+            <div class="row"><button type="button" class="btn btn-primary" onclick="reqInventory({{c.id}},1);">저장</button></div>
+            {% else %}
+            <div class="row"><button type="button" class="btn btn-primary" onclick="reqInventory({{c.id}},0);">저장</button></div>
             {% endif %}
           </div>
           <div class="col-md-3">
-            <ul class="list-group">
+            <ul class="list-group" style="margin:0px">
               <li class="list-group-item">
                 학원: {% for a in c.anamelist %} {{a}} | {%endfor%}
               </li>
               <li class="list-group-item">학생 수: {{c.snum}}</li>
-              <li class="list-group-item">요일: {{c.day}}</li>
+              <li class="list-group-item">요일: {{c.day}} ( {{c.stime}} - {{c.etime}} )</li>
             </ul>
           </div>
         </div>
-        <br>
-        <div class="row table-container">
-          <table class="table table-bordered table-schedule">
-            <thead>
-              <tr>
-                <th class="text-center thstyle1">시간</th>
-                <th class="text-center thstyle2">주소</th>
-                <th class="text-center thstyle2">이름</th>
-                <th class="text-center thstyle3">이름추가</th>
-                <th class="text-center thstyle3">등하원</th>
-                <th class="text-center thstyle3">삭제</th>
-              </tr>
-            </thead>
-            <tbody class="table-body">
-              {% if c.scheduletables %}
-              <select class="moveCarList">
-                {% for car in carlist %}
-                  {% if car.carname == c.carnum %}
-                    <option value="{{c.id}}/{{car.carname}}" selected>{{car.carname}}호차</option>
-                  {% else %}
-                    <option value="{{c.id}}/{{car.carname}}">{{car.carname}}호차</option>
-                  {% endif %}
-                {% endfor %}
-              </select>
-              &nbsp&nbsp<button type="button" class="btn-sm btn-primary" value="" id="move{{c.id}}" onclick="moveCarInven({{c.id}});">차량만 바꾸기</button>
-              <br><br>
-              {% for s in c.scheduletables.all %}
-              <tr>
-                <td data-name="time"><input onchange="emptyTempList();" type="text" name="time[]" placeholder="Time" class="form-control" form="scheduleform{{c.id}}" value="{{s.time}}" /></td>
-                <td data-name="addr"><input type="text" name="addr[]" placeholder="Address" class="form-control" form="scheduleform{{c.id}}" value="{{s.addr}}" /></td>
-                <td data-name="name" class="inputTd">
-                  <input type="text" name="name[]" data-role="tagsinput" class="form-control tInput" form="scheduleform{{c.id}}" value="{% for name in s.sname %}{{name}}{% include 'comma.html' %}{% endfor %}" />
-                </td>
-                <td data-name="addstu"><button class="btn btn-primary glyphicon glyphicon-plus addstudent" data-toggle="modal"></button></td>
-                <td data-name="academy" class="inputAcaU" style="display:none;"><input name="academy[]" type="text" class="form-control" form="scheduleform{{c.id}}" value="{% for aid in s.alist %}{{aid}}{% include 'comma.html' %}{% endfor %}" /></td>
-                <td data-name="sid" class="inputSid" style="display:none;"><input name="sid[]" type="text" class="form-control" form="scheduleform{{c.id}}" value="{% for sid in s.slist %}{{sid}}{% include 'comma.html' %}{% endfor %}" /></td>
-                <td data-name="load">
-                  {% if s.lflag == 1 %}
-                  <select name="load[]" form="scheduleform{{c.id}}">
+        <div class="row">
+          <div class="col-md-12">
+            <table class="table table-bordered table-schedule" style="margin:4px">
+              <thead>
+                <tr>
+                  <th class="text-center thstyle4">시간</th>
+                  <th class="text-center thstyle2">주소</th>
+                  <th class="text-center thstyle3">Req</th>
+                  <th class="text-center thstyle2">이름</th>
+                  <th class="text-center thstyle3">추가</th>
+                  <th class="text-center thstyle3">등하원</th>
+                  <th class="text-center thstyle3">삭제</th>
+                </tr>
+              </thead>
+              <tbody class="table-body">
+                {% if c.scheduletables %}
+                <select class="moveCarList">
+                  {% for car in carlist %}
+                    {% if car.carname == carnum %}
+                      <option value="{{c.id}}/{{car.carname}}" selected>{{car.carname}}호차</option>
+                    {% else %}
+                      <option value="{{c.id}}/{{car.carname}}">{{car.carname}}호차</option>
+                    {% endif %}
+                  {% endfor %}
+                </select>
+                &nbsp&nbsp<button type="button" class="btn-sm btn-primary" value="" id="move{{c.id}}" onclick="moveCarInven({{c.id}});">차량만 바꾸기</button>
+                <br><br>
+                {% for s in c.scheduletables.all %}
+                <tr>
+                  <td data-name="time" class="tdstyle4"><input onchange="emptyTempList();" type="text" name="time[]" placeholder="Time" class="form-control inputstyle" form="scheduleform{{c.id}}" value="{{s.time}}" /></td>
+                  <td data-name="addr" class="tdstyle2"><input type="text" name="addr[]" placeholder="Address" class="form-control inputstyle" form="scheduleform{{c.id}}" value="{{s.addr}}" /></td>
+                  <td data-name="req" class="tdstyle3">
+                    <select name="req[]" form="scheduleform{{c.id}}">
+  			                 <option value="">없음</option>
+  			                 <option value="데려와주세요" {% if s.req == "데려와주세요" %} selected {% endif %} >데려와주세요</option>
+  		              </select>
+                  </td>
+                  <td data-name="name" class="inputTd tdstyle2">
+                    <input type="text" name="name[]" data-role="tagsinput" class="form-control tInput" form="scheduleform{{c.id}}" value="{% for name in s.sname %}{{name}}{% include 'comma.html' %}{% endfor %}" />
+                  </td>
+                  <td data-name="addstu" class="text-center tdstyle3"><button class="btn btn-primary glyphicon glyphicon-plus addstudent" data-toggle="modal"></button></td>
+                  <td data-name="sid" class="inputSid" style="display:none;"><input name="sid[]" type="text" class="form-control" form="scheduleform{{c.id}}" value="{% for sid in s.slist %}{{sid}}{% include 'comma.html' %}{% endfor %}" /></td>
+                  <td data-name="academy" class="inputAcaU" style="display:none;"><input name="academy[]" type="text" class="form-control" form="scheduleform{{c.id}}" value="{% for aid in s.alist %}{{aid}}{% include 'comma.html' %}{% endfor %}" /></td>
+                  <td data-name="load" class="text-center tdstyle3">
+                    {% if s.lflag == 1 %}
+                    <select name="load[]" form="scheduleform{{c.id}}">
                       <option value="">등하원</option>
                       <option value="1" selected>등원</option>
                       <option value="0">하원</option>
                     </select> {% endif %} {% if s.lflag == 0 %}
-                  <select name="load[]" form="scheduleform{{c.id}}">
+                    <select name="load[]" form="scheduleform{{c.id}}">
                       <option value="">등하원</option>
                       <option value="1">등원</option>
                       <option value="0" selected>하원</option>
                     </select> {% endif %} {% if s.lflag == 2 %}
-                  <select name="load[]" form="scheduleform{{c.id}}">
+                    <select name="load[]" form="scheduleform{{c.id}}">
                       <option value="">출발</option>
                     </select> {% endif %} {% if s.lflag == 3 %}
-                  <select name="load[]" form="scheduleform{{c.id}}">
+                    <select name="load[]" form="scheduleform{{c.id}}">
                       <option value="">도착</option>
                     </select> {% endif %}
-                </td>
-                <td data-name="del"><button name="del" class="btn btn-danger glyphicon glyphicon-remove row-remove"></button></td>
-              </tr>
-              {% endfor %}
-              {% elif c.editedscheduletables %}
-              <select class="moveCarList">
-                {% for car in carlist %}
-                  {% if car.carname == c.carnum %}
-                    <option value="{{c.id}}/{{car.carname}}" selected>{{car.carname}}호차</option>
-                  {% else %}
-                    <option value="{{c.id}}/{{car.carname}}">{{car.carname}}호차</option>
-                  {% endif %}
+                  </td>
+                  <td data-name="del" class="text-center tdstyle3"><button name="del" class="btn btn-sm btn-danger glyphicon glyphicon-remove row-remove"></button></td>
+                </tr>
                 {% endfor %}
-              </select>
-              &nbsp&nbsp<button type="button" class="btn-sm btn-primary" value="" id="move{{c.id}}" onclick="moveCarEditedInven({{c.id}});">차량만 바꾸기</button>
-              <br><br>
-              {% for es in c.editedscheduletables.all %}
-              <tr>
-                <td data-name="time"><input onchange="emptyTempList();" type="text" name="time[]" placeholder="Time" class="form-control" form="scheduleform{{c.id}}" value="{{es.time}}" /></td>
-                <td data-name="addr"><input type="text" name="addr[]" placeholder="Address" class="form-control" form="scheduleform{{c.id}}" value="{{es.addr}}" /></td>
-                <td data-name="name" class="inputTd">
-                  <input type="text" name="name[]" data-role="tagsinput" class="form-control tInput" form="scheduleform{{c.id}}" value="{% for name in es.sname %}{{name}}{% include 'comma.html' %}{% endfor %}" />
-                </td>
-                <td data-name="addstu"><button class="btn btn-primary glyphicon glyphicon-plus addstudent" data-toggle="modal"></button></td>
-                <td data-name="academy" class="inputAcaU" style="display:none;"><input name="academy[]" type="text" class="form-control" form="scheduleform{{c.id}}" value="{% for aid in es.alist %}{{aid}}{% include 'comma.html' %}{% endfor %}" /></td>
-                <td data-name="sid" class="inputSid" style="display:none;"><input name="sid[]" type="text" class="form-control" form="scheduleform{{c.id}}" value="{% for sid in es.slist %}{{sid}}{% include 'comma.html' %}{% endfor %}" /></td>
-                <td data-name="load">
-                  {% if es.lflag == 1 %}
-                  <select name="load[]" form="scheduleform{{c.id}}">
+                {% elif c.editedscheduletables %}
+                <select class="moveCarList">
+                  {% for car in carlist %}
+                    {% if car.carname == carnum %}
+                      <option value="{{c.id}}/{{car.carname}}" selected>{{car.carname}}호차</option>
+                    {% else %}
+                      <option value="{{c.id}}/{{car.carname}}">{{car.carname}}호차</option>
+                    {% endif %}
+                  {% endfor %}
+                </select>
+                &nbsp&nbsp<button type="button" class="btn-sm btn-primary" value="" id="move{{c.id}}" onclick="moveCarEditedInven({{c.id}});">차량만 바꾸기</button>
+                <br><br>
+                {% for es in c.editedscheduletables.all %}
+                <tr>
+                  <td data-name="time" class="tdstyle4"><input onchange="emptyTempList();" type="text" name="time[]" placeholder="Time" class="form-control" form="scheduleform{{c.id}}" value="{{es.time}}" /></td>
+                  <td data-name="addr" class="tdstyle2"><input type="text" name="addr[]" placeholder="Address" class="form-control" form="scheduleform{{c.id}}" value="{{es.addr}}" /></td>
+                  <td data-name="req" class="tdstyle3">
+                    <select name="req[]" form="scheduleform{{c.id}}">
+  			<option value="">없음</option>
+  			<option value="데려와주세요" {% if s.req == "데려와주세요" %} selected {% endif %} >데려와주세요</option>
+  		</select>
+                  </td>
+                  <td data-name="name" class="inputTd tdstyle2">
+                    <input type="text" name="name[]" data-role="tagsinput" class="form-control tInput" form="scheduleform{{c.id}}" value="{% for name in es.sname %}{{name}}{% include 'comma.html' %}{% endfor %}" />
+                  </td>
+                  <td data-name="addstu" class="text-center tdstyle3"><button class="btn btn-primary glyphicon glyphicon-plus addstudent" data-toggle="modal"></button></td>
+                  <td data-name="sid" class="inputSid" style="display:none;"><input name="sid[]" type="text" class="form-control" form="scheduleform{{c.id}}" value="{% for sid in es.slist %}{{sid}}{% include 'comma.html' %}{% endfor %}" /></td>
+                  <td data-name="academy" class="inputAcaU" style="display:none;"><input name="academy[]" type="text" class="form-control" form="scheduleform{{c.id}}" value="{% for aid in es.alist %}{{aid}}{% include 'comma.html' %}{% endfor %}" /></td>
+                  <td data-name="load" class="text-center tdstyle3">
+                    {% if es.lflag == 1 %}
+                    <select name="load[]" form="scheduleform{{c.id}}">
                       <option value="">등하원</option>
                       <option value="1" selected>등원</option>
                       <option value="0">하원</option>
                     </select> {% endif %} {% if es.lflag == 0 %}
-                  <select name="load[]" form="scheduleform{{c.id}}">
+                    <select name="load[]" form="scheduleform{{c.id}}">
                       <option value="">등하원</option>
                       <option value="1">등원</option>
                       <option value="0" selected>하원</option>
                     </select> {% endif %} {% if es.lflag == 2 %}
-                  <select name="load[]" form="scheduleform{{c.id}}">
+                    <select name="load[]" form="scheduleform{{c.id}}">
                       <option value="">출발</option>
                     </select> {% endif %} {% if es.lflag == 3 %}
-                  <select name="load[]" form="scheduleform{{c.id}}">
+                    <select name="load[]" form="scheduleform{{c.id}}">
                       <option value="">도착</option>
                     </select> {% endif %}
-                </td>
-                <td data-name="move">
-                  <a href="javascript:void(0)" class="glyphicon glyphicon-chevron-up up"></a>
-                  <a href="javascript:void(0)" class="glyphicon glyphicon-chevron-down down"></a>
-                </td>
-                <td data-name="del"><button name="del" class="btn btn-danger glyphicon glyphicon-remove row-remove"></button></td>
-              </tr>
-              {% endfor %} {% endif %}
-            </tbody>
-            <div class="modal fade" id="addstu" role="dialog" aria-labelledby="myModalLabel">
-              <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                  <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title" id="myModalLabel">Modal title</h4>
-                  </div>
-                  <div class="modal-body">
-                    <select id="academyselect" class="form-control"><option value="">학원선택</option>{% for a in academy %}<option value = "{{a.id}}">{{a.name}}</option>{% endfor %}</select>
-                    <br>
-                    <select id="studentList" class="form-control"></select>
-                    <input type="hidden" id="rowid" value="" />
-                  </div>
-                  <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary studenttoinput">학생추가</button>
+                  </td>
+                  <td data-name="del" class="text-center tdstyle3"><button name="del" class="btn btn-danger glyphicon glyphicon-remove row-remove"></button></td>
+                </tr>
+                {% endfor %} {% endif %}
+              </tbody>
+              <div class="modal fade" id="addstu" role="dialog" aria-labelledby="myModalLabel">
+                <div class="modal-dialog" role="document">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                      <h4 class="modal-title" id="myModalLabel">Modal title</h4>
+                    </div>
+                    <div class="modal-body">
+                      <select id="academyselect" class="form-control"><option value="">학원선택</option>{% for a in academy %}<option value = "{{a.id}}">{{a.name}}</option>{% endfor %}</select>
+                      <br>
+                      <select id="studentList" class="selectpicker" data-live-search="ture"></select>
+                      <input type="hidden" id="rowid" value="" />
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                      <button type="button" class="btn btn-primary studenttoinput">학생추가</button>
+                    </div>
                   </div>
                 </div>
-              </div>
-          </table>
-          <a id="{{c.id}}" class="btn btn-default pull-right addrow">Add Row</a>
-          </div>
-          <br>
-          <div class="row pull-right">
-              <form class="savedelete submitForm" accept-charset="" action="acaUpdateSchedule" method="post" enctype='application/json' onsubmit="return validateTableForm(this.id)" id="scheduleform{{c.id}}">
-                <input class="hidden" name="iid" value="{{c.id}}" form="scheduleform{{c.id}}" />
-                <input class="hidden" name="bid" value="{{bid}}" form="scheduleform{{c.id}}" />
-                <input class="hidden" name='searchTime' value="{{time}}" form="scheduleform{{c.id}}" />
-                <input class="hidden" name='aca' value="{{aid}}" form="scheduleform{{c.id}}" />
-                <input class="hidden" name='areaid' value="{{areaid}}" form="scheduleform{{c.id}}" />
-                <input class="hidden" name='day' value="{{day}}" form="scheduleform{{c.id}}" />
-                <input class="hidden" name='week' value="{{week}}" form="scheduleform{{c.id}}" />
-                <input class="hidden" name="update" value="1" form="scheduleform{{c.id}}" />
-                <input id="carnum{{c.id}}" type="hidden" name="carnum" value="{{c.carnum}}" form="scheduleform{{c.id}}">
-                <button type="submit" class="btn btn-success">저장</button>
-              </form>
-              {% if c.get_cname == 'editedinven' %}
-              <form class="savedelete submitForm" action="acaUpdateSchedule" method="post" id="deleteform{{c.id}}" onSubmit="return confirm('정말 삭제 하시겠어요?');">
-                <input class="hidden" name="iid" value="{{c.id}}" form="deleteform{{c.id}}" />
-                <input class="hidden" name="bid" value="{{bid}}" form="deleteform{{c.id}}" />
-                <input class="hidden" name='searchTime' value="{{time}}" form="deleteform{{c.id}}" />
-                <input class="hidden" name='aca' value="{{aid}}" form="deleteform{{c.id}}" />
-                <input class="hidden" name='areaid' value="{{areaid}}" form="deleteform{{c.id}}" />
-                <input class="hidden" name='day' value="{{day}}" form="deleteform{{c.id}}" />
-                <input class="hidden" name='week' value="{{week}}" form="deleteform{{c.id}}" />
-                <input class="hidden" name="update" value="0" form="deleteform{{c.id}}" />
-                <input id="carnum{{c.id}}" class="hidden" name='carnum' value="{{c.carnum}}" form="deleteform{{c.id}}" />
-                <button type="submit" class="btn btn-danger">삭제</button>
-              </form>
-              {% else %}
-              {% endif %}
-            <br>
-            <br>
-            <br>
+            </table>
+            </div>
+            <!-- /div //-->
+            <!-- br //-->
+            <!-- div class="row pull-right" //-->
+            <form class="savedelete submitForm" accept-charset="" action="updateSchedule" method="post" enctype='application/json' onsubmit="return validateTableForm(this.id)" id="scheduleform{{c.id}}">
+              <input class="hidden" name="week" value="{{week}}" form="scheduleform{{c.id}}" />
+              <input class="hidden" name="iid" value="{{c.id}}" form="scheduleform{{c.id}}" />
+              <input class="hidden" name="areaid" value="{{areaid}}" form="scheduleform{{c.id}}" />
+              <input class="hidden" name="bid" value="{{bid}}" form="scheduleform{{c.id}}" />
+              <input class="hidden" name='searchTime' value="{{searchTime}}" form="scheduleform{{c.id}}" />
+              <input class="hidden" name='day' value="{{day}}" form="scheduleform{{c.id}}" />
+              <input class="hidden" name="update" value="1" form="scheduleform{{c.id}}" />
+              <input id="carnum{{c.id}}" type="hidden" name="carnum" value="{{c.carnum}}" form="scheduleform{{c.id}}">
+              <button type="submit" class="btn btn-success pull-right">저장</button>
+            </form>
+            {% if c.get_cname == 'editedinven' or week == 0 %}
+            <form class="savedelete submitForm" action="updateSchedule" method="post" id="deleteform{{c.id}}" onSubmit="return confirm('정말 삭제 하시겠어요?');">
+              <input class="hidden" name="week" value="{{week}}" form="deleteform{{c.id}}" />
+              <input class="hidden" name="iid" value="{{c.id}}" form="deleteform{{c.id}}" />
+              <input class="hidden" name="areaid" value="{{areaid}}" form="deleteform{{c.id}}" />
+              <input class="hidden" name="bid" value="{{bid}}" form="deleteform{{c.id}}" />
+              <input class="hidden" name='searchTime' value="{{searchTime}}" form="deleteform{{c.id}}" />
+              <input class="hidden" name='day' value="{{day}}" form="deleteform{{c.id}}" />
+              <input class="hidden" name="update" value="0" form="deleteform{{c.id}}" />
+              <input id="carnum{{c.id}}" class="hidden" name='carnum' value="{{c.carnum}}" form="deleteform{{c.id}}" />
+              <button type="submit" class="btn btn-danger">삭제</button>
+            </form>
+            {% else %}
+            {% endif %}
+            <a id="{{c.id}}" class="btn btn-default pull-right addrow">Add Row</a>
           </div>
         </div>
-        <div class="col-md-1"></div>
       </div>
+      <div class="col-md-1"></div>
     </div>
-    <br>
     <br> {% endfor %}
     <script>
       var tempList = new Array();
@@ -472,13 +484,13 @@
         $(this).parent().find('.table-body').append(
           '<tr><td data-name="time"><input onchange="emptyTempList();" type="text" name="time[]" placeholder="Time" class="form-control" form="scheduleform' + id +
           '"/></td><td><input type="text" name="addr[]" placeholder="Address" class="form-control" form="scheduleform' + id +
-          '"/></td><td data-name="name" class="inputTd"><input type="text" name="name[]" data-role="tagsinput" class="form-control" form="scheduleform' + id + '" value="{% for name in s.sname %}{{name}}{% include '
+          '"/></td><td data-name="req" class="tdstyle3"><select name="req[]" form="scheduleform'+id+'"><option value="">없음</option><option value="데려와주세요" {% if s.req == "데려와주세요" %} selected {% endif %} >데려와주세요</option></select></td><td data-name="name" class="inputTd"><input type="text" name="name[]" data-role="tagsinput" class="form-control" form="scheduleform' + id + '" value="{% for name in s.sname %}{{name}}{% include '
           comma.html ' %}{% endfor %}" /></td><td data-name="addstu"><button class="btn btn-primary glyphicon glyphicon-plus addstudent" data-toggle="modal"></button></td><td data-name="academy" class="inputAcaU" style="display:none"><input name="academy[]" data-role="tagsinput" class="form-control" form="scheduleform' +
           id + '" value="{% for aid in s.alist %}{{aid}}{% include '
           comma.html ' %}{% endfor %}" /></td>                <td data-name="sid" class="inputSid" style="display:none;"><input name="sid[]" type="text" data-role="tagsinput" class="form-control" form="scheduleform' + id +
           '" value="{% for sid in s.slist %}{{sid}}{% include '
           comma.html ' %}{% endfor %}" /></td><td data-name="load"><select name="load[]" form="scheduleform' + id +
-          '"><option value="">등하원</option><option value="1">등원</option><option value="0">하원</option></select></td><td data-name="move"><a href="javascript:void(0)" class="glyphicon glyphicon-chevron-up up"></a><a href="javascript:void(0)" class="glyphicon glyphicon-chevron-down down"></a></td><td data-name="del"><button name="del" class="btn btn-danger glyphicon glyphicon-remove row-remove"></button></td></tr>'
+          '"><option value="">등하원</option><option value="1">등원</option><option value="0">하원</option></select></td><td data-name="del"><button name="del" class="btn btn-danger glyphicon glyphicon-remove row-remove"></button></td></tr>'
         )
       });
 
@@ -634,6 +646,7 @@
               tempTag = tempTag + "<option value=" + data[i]['pk'] + ">" + data[i]['fields']['sname'] + "</option>"
             }
             document.getElementById('studentList').innerHTML = tempTag
+            $('#studentList').selectpicker('refresh');
           }
         });
       })
