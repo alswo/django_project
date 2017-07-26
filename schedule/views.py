@@ -1209,7 +1209,7 @@ def acaUpdateSchedule(request):
             week = int(request.POST.get('week'))
             time = request.POST.getlist('time[]')
             addr = request.POST.getlist('addr[]')
-	    req = request.POST.getlist('req[]')
+            req = request.POST.getlist('req[]')
             name = request.POST.getlist('name[]')
             name2 = request.POST.getlist('name[]')
             academy = request.POST.getlist('academy[]')
