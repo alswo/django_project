@@ -21,7 +21,7 @@ def getResponse(debug, code, msg):
         return JsonResponse({'code': code, 'msg': msg})
 
 @csrf_exempt
-def get_token(request):
+def getToken(request):
     if request.method == 'GET':
         return render_to_response('authorizer.html')
 

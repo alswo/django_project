@@ -79,7 +79,7 @@
                           <div class="modal-body">
                             <select id="academyselect" class="form-control"><option value="">학원선택</option>{% for a in academy %}<option value = "{{a.id}}">{{a.name}}</option>{% endfor %}</select>
                             <br>
-                            <select id="studentList" class="form-control"></select>
+                            <select id="studentList" class="form-control" multiple></select>
                             <input type="hidden" id="rowid" value="" />
                           </div>
                           <div class="modal-footer">
