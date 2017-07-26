@@ -73,7 +73,7 @@ def find_update():
 	lastweekt = timeToDate()
 	lastweekt.setLastWeekDay()
 	lastweek = lastweekt.timeToYmd()
-
+	
 	inventory_ids = list()
 
 	inventories = Inventory.objects.filter(day=d).select_related()
@@ -85,13 +85,14 @@ def find_update():
 				for sid in scheduletable.slist:
 					studentset.add(str(sid))
 
+	#print "lastweek = " + lastweek
 	print "len = " + str(len(studentset))
+	#print "inv_len = " + str(len(inventory_ids))
 	for sid in studentset:
 		#for inventory in inventories:
 		try :
 			studentinfo = StudentInfo.objects.get(id=sid)
 		except StudentInfo.DoesNotExist:
-            print "Does not exist"
 			continue
 		scheduletables = ScheduleTable.objects.filter(iid_id__in = inventory_ids).filter(slist__contains = [sid]).order_by('time')
 		old_scheduletables = HistoryScheduleTable.objects.filter(date = lastweek).filter(iid_id__in = inventory_ids).filter(members__in = [studentinfo]).order_by('time')
@@ -110,8 +111,9 @@ def find_update():
 				inventory = Inventory.objects.get(id = scheduletable.iid_id)
 				if same_inventory == False :
 					msg += "\t\t신규 {" + inventory.day + "} [" + scheduletable.time + "] : " + scheduletable.addr + "\n"
+					#msg += u"\t\t신규 {" + inventory.day + "} [" + scheduletable.time + "] : " + scheduletable.addr + ":" + str(scheduletable.iid_id) + "\n"
 				else :
-					msg += "\t\t변경 {" + inventory.day + "} [" + scheduletable.time + "] : " + scheduletable.addr + "\n"
+					msg += u"\t\t변경 {" + inventory.day + "} [" + scheduletable.time + "] : " + scheduletable.addr + "\n"
                 if (msg != ""):
 		    notice_to_student(sid, msg)
 
