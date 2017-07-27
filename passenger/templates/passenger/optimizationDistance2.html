@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+
+<head>
+  {% load staticfiles %}
+  <meta charset="UTF-8">
+  <title>TAYO</title>
+  <script src="{% static 'js/jquery-3.1.0.min.js' %}"></script>
+  <script src="{% static 'js/jquery-ui.js' %}"></script>
+  <script src='https://apis.skplanetx.com/tmap/js?version=1&format=javascript&appKey=9c78e49d-c72c-36a6-8e25-5c249e9291a3'></script>
+  <script type="text/javascript" src="{% static 'js/graph.js' %}"></script>
+  <script type="text/javascript" src="{% static 'js/bootstrap.min.js' %}"></script>
+  <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+  <script src="http://dmaps.daum.net/map_js_init/postcode.v2.js"></script>
+  <!-- services 라이브러리 불러오기 -->
+  <!-- 라이브러리 -->
+  <script type="text/javascript" src="http://apis.daum.net/maps/maps3.js?apikey=df6af02ef0921fda82ecbfd508cfcfdf&libraries=services"></script>
+
+
+</head>
+
+<body>
+  <div class="row">
+    <div class="col-md-7">
+      <div id="map" style="width:1200px;height:600px;"></div>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>POI</th>
+          </tr>
+        </thead>
+        <tbody id="view-marker">
+        </tbody>
+      </table>
+    </div>
+    <div id="left_bar" class="col-md-2">
+       <br><br><br><br>
+	<table class="table">
+		<thead></thead>
+		<tbody id="result_tbody"></tbody>
+	</table>
+    </div>
+    <div class="col-md-3">
+      <div class="row">
+        <br>
+          <h4 align="center">좌표 검색</h4>
+          <br>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+            </div>
+            <div class="col-md-6" align="right">
+            </div>
+        </div>
+
+        <div class="row">
+        <div class="table-responsive">
+        <div class="row">
+          <div class="col-md-7">
+              <div class="row">
+		<form action="javascript:search()">
+                <div class="col-md-9">
+                  <input type="text" id="query" autocomplete=off class="form-control" placeholder="주소">
+                  <!-- button type="button" class="btn btn-info" onclick="sample3_execDaumPostcode()">주소검색</button //-->
+                </div>
+                <div class="col-md-3">
+		  <button type="submit" class="btn btn-info">주소검색</button>
+                </div>
+		</form>
+             </div>
+             <br>
+
+          </div>
+          <div class="col-md-5">
+                <button class="btn btn-success " onclick="addrToPoi('s')">출발</button>
+                <button class="btn btn-danger " onclick="addrToPoi('e')">도착</button>
+                <button class="btn btn-default " onclick="addrToPoi('a')">추가</button>
+          </div>
+        </div>
+        <div class="row form-group">
+          <label class="col-sm-2 control-label text-right">알고리즘</label>
+          <div class="col-sm-5">
+            <select id="algorithm" class="form-control input-sm">
+                <option>선택</option>
+                <option value="prim"> 길찾기 (Prim) </option>
+                <option value="onlytime"> 순서대로 소요시간만 </option>
+                <option value="salesman"> 길찾기 (Travelling-Salesman) </option>
+                <option value="mintime"> 길찾기 (학생들 소요시간 합 최소) </option>
+                <option value="deviation"> 길찾기 (학생들 소요시간 증가분의 최소 분산) </option>
+            </select>
+          </div>
+        </div>
+            <form>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>위치</th>
+                  <th>위도</th>
+                  <th>경도</th>
+                  <th>탑승자수</th>
+                  <th style="display:none">주소</th>
+                </tr>
+              </thead>
+              <tbody id="info-marker">
+                <tr id="startPoi" class="success">
+
+                </tr>
+		<tr id="xx">
+			<td colspan="4">
+				<table class="table">
+				<thead></thead>
+				<tbody id="addPoi"></tbody>
+				</table>
+			</td>
+		</tr>
+                <tr id="endPoi" class="danger">
+
+                </tr>
+              </tbody>
+            </table>
+            </form>
+      </div>
+      <div class="row">
+        <div class="col-md-5">
+        </div>
+        <div class="col-md-7">
+          <!-- button type="button" class="btn btn-primary" onclick="getOptimized();">노드계산</button>
+          <button type="button" class="btn btn-success" data-toggle="modal" data-target="#myModal" onclick="getOpti();">최적동선 찾기</button //-->
+          <button type="button" class="btn btn-success" data-toggle="modal" data-target="#myModal" onclick="getRoute();">최적동선 찾기</button-->
+        </div>
+      </div>
+
+    </div>
+  </div>
+  <!-- Modal -->
+  <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title" id="myModalLabel">동선 결과 </h4>
+        </div>
+        <div class="modal-body">
+          <div class="row">
+            <h3 id="recommand"></h3>
+          </div>
+        </div>
+        <hr>
+        <div class="modal-body">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  </div>
+      <script async defer
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBaGGxx6F0oPYs8wS6tqYbh3ZJKzD8GMbI&callback=initMap">
+      </script>
+</body>
+<script>
+  markers = []
+  var number = 0;
+  academy_flag = 0;
+  var index_number = 0;
+
+  var map;
+  var mapW, mapH; // 지도의 가로, 세로 크기(Pixel단위) 를 지정 합니다.
+  var cLonLat, zoom; //중심 좌표와 지도레벨을 정의 합니다.
+  var routeLayer;
+
+  function setVariables() {
+    cLonLat = new Tmap.LonLat();
+    //중심점 좌표 입니다. EPSG3857 좌표계 형식 입니다.
+    zoom = 16; // zoom level입니다.  0~19 레벨을 서비스 하고 있습니다.
+    mapW = '100%'; // 지도의 가로 크기 입니다.
+    mapH = '600px'; // 지도의 세로 크기 입니다.
+  }
+
+  function init() {
+    setVariables();
+    map = new Tmap.Map({
+      div: 'map_div',
+      width: mapW,
+      height: mapH,
+      animation: true
+    });
+    // div : 지도가 생성될 div의 id값과 같은 값을 옵션으로 정의 합니다.
+    // Tmap,Map 클래스에 대한 상세 사항은 "JavaScript" 하위메뉴인 "기본 기능" 페이지를 참조 해주세요.
+    map.events.register("click", map, onClickMap);
+    map.setCenter(cLonLat, zoom);
+  }
+
+	var labels = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+	var labelIndex = 0;
+	var last_infowindow;
+	var gClicked;
+
+	function initMap() {
+		var uluru = {lat: 37.394798, lng: 127.111135};
+		map = new google.maps.Map(document.getElementById('map'), {
+                        zoom: 17,
+                        draggable: true,
+                        center: uluru,
+                        //mapTypeId: "OSM",
+                });
+
+             daumMapType = new google.maps.ImageMapType({
+                getTileUrl: function(coord, zoom) {
+                    // See above example if you need smooth wrapping at 180th meridian
+
+                        //if (y < 0 || y >= scale) return null;
+                    return "http://tlpimg3.tmap.co.kr/tms/1.0.0/hd_tile/" + zoom + "/" + coord.x + "/" + ( Math.pow(2, zoom) - coord.y - 1 ) + ".png?bizAppId=9c78e49d-c72c-36a6-8e25-5c249e9291a3?v=Release1.18.30";
+                },
+                tileSize: new google.maps.Size(256, 256),
+                name: "OpenStreetMap",
+                maxZoom: 19,
+                isPng: true,
+             });
+
+                map.mapTypes.set("OSM", daumMapType);
+                map.setMapTypeId("OSM");
+
+                google.maps.event.addListener(map, 'click', function(e) {
+                        var geocoder = new daum.maps.services.Geocoder();
+                        geocoder.coord2addr(new daum.maps.LatLng(e.latLng.lat(), e.latLng.lng()), function(status, result) {
+                                if (status === daum.maps.services.Status.OK) {
+                                        placeMarker(e.latLng, map, result[0].fullName);
+                                }
+                        });
+                });
+
+	}
+
+	function initMarkers() {
+		for (i=0; i<markers.length; i++) {
+			markers[i].setMap(null);
+		}
+		markers = [];
+	}
+
+        function search() {
+                var url = 'http://apis.daum.net/local/v1/search/keyword.json';
+                url += '?apikey=' + 'df6af02ef0921fda82ecbfd508cfcfdf'
+                                + '&query=' + encodeURIComponent($('#query').val())
+                                + '&callback=' + '?'
+
+                $('.search_result_tr').remove();
+		initMarkers();
+                labelIndex = 0;
+		gClicked = null;
+
+                $.getJSON(url,function(data) {
+                                for (var i=0; i<data['channel']['info']['count']; i++) {
+                                        var html = "<tr class='search_result_tr'><td><a href='javascript:void(0)' class='search_result' id='search_result" + i + "'>"
+                                        + labels[labelIndex % labels.length] + " " + data['channel']['item'][i]['title']
+                                        + "</a></td></tr>";
+                                        $('#result_tbody').append(html);
+                                        $('#search_result' + i).data("lat", data['channel']['item'][i]['latitude']);
+                                        $('#search_result' + i).data("lon", data['channel']['item'][i]['longitude']);
+                                        $('#search_result' + i).data("title", data['channel']['item'][i]['title']);
+
+                                        var position = new google.maps.LatLng(data['channel']['item'][i]['latitude'], data['channel']['item'][i]['longitude']);
+                                        var index = placeMarker(position, map, data['channel']['item'][i]['title']);
+                                        $('#search_result' + i).data("index", index);
+					if (i==0) {
+						map.setCenter(position);
+					}
+
+                                        $('#search_result' + i).on('click', function(event) {
+                                                var infowindow = new google.maps.InfoWindow({
+                                                        content: $(this).data('title'),
+                                                });
+                                                position = new google.maps.LatLng($(this).data('lat'), $(this).data('lon'));
+                                                map.setCenter(position);
+                                                if (last_infowindow) {
+                                                        last_infowindow.close();
+                                                }
+                                                infowindow.open(map, markers[$(this).data('index')]);
+                                                last_infowindow = infowindow;
+	
+						gClicked = $(this);
+                                        });
+                                }
+                        }
+                );
+        }
+
+        function placeMarker(position, map, text) {
+                var marker = new google.maps.Marker({
+                        position: position,
+                        map: map,
+                        draggable: false,
+                        raiseOnDrag: false,
+                        label: {
+                                text: labels[labelIndex++ % labels.length],
+                        },
+                        title: text,
+                });
+
+                google.maps.event.addListener(marker, 'mouseover', function(e) {
+                        if (!gDrag.jq.hasClass('ui-draggable-dragging')) {
+                                gDrag.item = this;
+                                gDrag.jq.offset({
+                                        top: gDrag.y - 10,
+                                        left: gDrag.x - 10
+                                });
+                        }
+                });
+
+                markers.push(marker);
+
+                return (markers.length-1);
+        }
+
+
+
+
+
+  //    function initTmap(){
+  //        map = new Tmap.Map({div:'map_div', width:'100%', height:'800px'});
+  //        map.events.register("click", map, onClickMap);
+
+  //    }
+
+
+  function onClickMap(e) {
+    var markerLayer = new Tmap.Layer.Markers();
+    map.addLayer(markerLayer);
+
+    var lonlat = map.getLonLatFromViewPortPx(e.xy);
+    var size = new Tmap.Size(21, 25);
+    var offset = new Tmap.Pixel(-(size.w / 2), -size.h);
+    var icon = new Tmap.Icon('https://developers.skplanetx.com/upload/tmap/marker/pin_b_m_a.png',size,offset);
+
+    var marker = new Tmap.Marker(lonlat, icon);
+    markerLayer.addMarker(marker);
+
+    setTable(marker.lonlat);
+
+    //markers.push(marker);
+  }
+
+  function setTable(position) {
+    //marker info table
+    var node_tr = document.createElement('tr');
+    var node_td = document.createElement('td');
+
+
+    node_td.innerText = number + ' ' + position;
+    var target = document.getElementById('view-marker');
+
+    target.appendChild(node_tr);
+    target.appendChild(node_td);
+
+    tempHtmlAdd = "<tr id='addPoi" +  index_number + "'><td data-name='del'><button name='del' id='del' class='btn-xs btn-danger glyphicon glyphicon-remove row-remove' onClick='remove_row(" + index_number + ")'></button></td><td>" + "<input class='form-control' type='text' name='addr'>" + "</td><td>"+ Math.round(position.lon) + "</td><td>"+ Math.round(position.lat) + "</td><td><input type='text' class='form-control' name='numpassenger' value='1'></td><td class='markerInfo' style='display:none'>"+ "???" +":"+position.lon +":"+position.lat+"</td></tr>";
+    $('#addPoi').append(tempHtmlAdd)
+    index_number++;
+
+    number++;
+  }
+
+  var g = new Graph();
+
+  var source = []
+
+  function getOptimized() {
+    //getWeight(markers[0].lonlat, markers[1].lonlat);
+    g.reset();
+    markers = []
+
+    infoTemp = []
+    infoLength = $('.markerInfo').length
+
+    infoTemp = $('#markerStart').text().split(':')
+    markers.push(infoTemp)
+
+    for( i = 0 ; i < infoLength; i ++){
+      infoTemp = $('.markerInfo')[i].innerText.split(':')
+      markers.push(infoTemp)
+    }
+
+    infoTemp = $('#markerEnd').text().split(':')
+    infoTemp[0] += "E"
+    markers.push(infoTemp)
+
+    for (var i = 0; i < markers.length; i++) {
+      g.addNode(markers[i][0].toString());
+    }
+
+    for (var j = 0; j < markers.length; j++) {
+      for (var k = j + 1; k < markers.length; k++) {
+        getWeight(markers[j][1], markers[j][2], markers[k][1], markers[k][2], g.nodes[j], g.nodes[k], function() {
+          var temp = this.valueOf();
+          edge_1 = temp[0].toString();
+          edge_2 = temp[1].toString();
+          edge_3 = temp[2];
+          var temp_s = [edge_1, edge_2, edge_3];
+          source.push(temp_s);
+          g.addEdge(edge_1, edge_2, edge_3);
+        });
+
+      }
+    }
+
+    //console.log(jsonObj);
+    alert("Done");
+
+  }
+
+  function getOpti() {
+    var source_result = []
+    var result = Prim(g);
+    //var resultTemp;
+
+    // console.log(g.edges[lastNode])
+    // for(e = 0; e < g.edges[lastNode].length; e++ ){
+    //   if(g.edges[lastNode][e].sink.indexOf("E") != -1){
+    //     resultTemp = [g.edges[lastNode][e].capacity,g.edges[lastNode][e].sink]
+    //   }
+    // }
+    //
+    // result.push(resultTemp)
+
+    result.push(g.nodes[g.nodes.length -1 ])
+
+    console.log(result)
+
+    doc = document.getElementById('recommand');
+    var temp = '';
+    var source_j = 0;
+    var source_k = 1;
+
+    var result_j = 0;
+    //result.push(academy);
+
+
+    for (var j = 0; j < result.length - 1; j++) {
+      for (var k = 0; k < source.length; k++) {
+        if (result[source_j] == source[k][0] && result[source_k] == source[k][1]) {
+          source_result.push(source[k][2])
+        } else if (result[source_j] == source[k][1] && result[source_k] == source[k][0]) {
+          source_result.push(source[k][2])
+        }
+      }
+      source_j++;
+      source_k++;
+    }
+
+    var all_time = 0;
+
+    for (var i = 0; i < result.length; i++) {
+      if (i < result.length - 1) {
+        temp += '<br>' + result[i] + '(' + Math.floor(source_result[result_j] / 6) / 10 + ' M)' + '<br>';
+      } else {
+        temp += '<br>' + result[i]
+      }
+
+      if (typeof(source_result[result_j]) != "undefined") {
+        all_time += source_result[result_j];
+      }
+      result_j++;
+    }
+    doc.innerHTML = temp + '&nbsp&nbsp' + ' <span class="glyphicon glyphicon-time" aria-hidden="true"></span>' + ' : ' + Math.floor(all_time / 60) + 'M';
+  }
+
+  function getRoute() {
+    var jsonObj = {};
+    var vertexInfo;
+
+    initMarkers();
+
+    vertexInfo = $('#markerStart').text().split(':');
+    jsonObj['startName'] = vertexInfo[0];
+    jsonObj['startX'] = vertexInfo[1];
+    jsonObj['startY'] = vertexInfo[2];
+
+    vertexInfo = $('#markerEnd').text().split(':');
+    jsonObj['endName'] = vertexInfo[0];
+    jsonObj['endX'] = vertexInfo[1];
+    jsonObj['endY'] = vertexInfo[2];
+
+    jsonObj['viaPoints'] = [];
+    for (i=0; i < $('.markerInfo').length; i++) {
+        vertexInfo = $('.markerInfo')[i].innerText.split(':');
+        jsonObj['viaPoints'][i] = {};
+        jsonObj['viaPoints'][i]['viaPointName'] = vertexInfo[0];
+        jsonObj['viaPoints'][i]['viaPointId'] = vertexInfo[0];
+        jsonObj['viaPoints'][i]['index'] = i;
+        jsonObj['viaPoints'][i]['viaX'] = vertexInfo[1];
+        jsonObj['viaPoints'][i]['viaY'] = vertexInfo[2];
+        jsonObj['viaPoints'][i]['viaPointNumPassenger'] = $('.markerInfo')[i].parentNode.childNodes[4].firstChild.value;
+
+        if (jsonObj['viaPoints'][i]['viaPointName'] == '???') {
+            jsonObj['viaPoints'][i]['viaPointName'] = $('.markerInfo')[i].parentNode.childNodes[1].firstChild.value;
+        }
+        
+    } 
+
+    console.log(jsonObj);
+
+    if (!jsonObj['startName'] || !jsonObj['endName'] ){
+        alert("도착지와 출발지는 꼭 설정하셔야 합니다.");
+        $('#myModal').modal('hide');
+        return;
+    }
+
+
+    var xmlhttp = new XMLHttpRequest();
+    xmlhttp.onreadystatechange = function() {
+      if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+          var result = JSON.parse(xmlhttp.responseText);
+          console.log(xmlhttp.responseText);
+          doc = document.getElementById('recommand');
+          appendHtml = "";
+          for (i=0; i < result['features'].length - 1; i++) {
+             appendHtml += '<br>' + result['features'][i]['viaPointName'];
+             appendHtml += '(' + Math.floor(result['features'][i+1]['requiredTime'] / 6) / 10 + ' M)<br>';
+          }
+          appendHtml += '<br>' + result['features'][i]['viaPointName'];
+          doc.innerHTML = appendHtml + '&nbsp&nbsp' + ' <span class="glyphicon glyphicon-time" aria-hidden="true"></span> : ' + Math.floor(parseInt(result['properties']['totalTime']) / 60) + 'M';
+
+
+          jsonObj['viaPoints'] = [];
+          var passList = "";
+          for (i=0; i < result['features'].length - 1; i++) {
+              result['features'][i]['viaPointName']
+              for (j=0; j < $('.markerInfo').length; j++) {
+                  vertexInfo = $('.markerInfo')[j].innerText.split(':');
+                  if (result['features'][i]['viaPointName'] === vertexInfo[0]
+                      || result['features'][i]['viaPointName'] === $('.markerInfo')[j].parentNode.childNodes[1].firstChild.value) {
+                      passList += vertexInfo[1] + "," + vertexInfo[2] + ",A,0";
+                  }
+              }
+          }
+
+          var urlStr = 'https://apis.skplanetx.com/tmap/multiViaPointRoute?version=1&format=xml';
+          urlStr += "&startX=" + jsonObj['startX'];
+          urlStr += "&startY=" + jsonObj['startY'];
+          urlStr += "&endX=" + jsonObj['endX'];
+          urlStr += "&endY=" + jsonObj['endY'];
+          urlStr += "&appKey=9c78e49d-c72c-36a6-8e25-5c249e9291a3&reqCoordType=WGS84GEO&resCoordType=WGS84GEO";
+          urlStr += "&passList=" + passList;
+
+
+	  //urlStr = 'http://curtis-tayotayo.edticket.com/static/test.kml';
+
+
+	  var routeLayer = new google.maps.KmlLayer({
+		url: urlStr,
+		map: map
+ 	  });
+      }
+    };
+
+    var e = $('#algorithm');
+    var algorithm;
+    if (e.length >= 1) {
+        var algorithm = e[0].options[e[0].selectedIndex].value;
+    }
+
+    if (!algorithm) {
+        algorithm = "";
+    }
+    console.log("algorithm = " + algorithm);
+    xmlhttp.open("POST", "/optimizer/getRoute?reqCoordType=WGS84GEO&algorithm=" + algorithm);
+    xmlhttp.setRequestHeader("Content-Type", "application/json");
+    xmlhttp.send(JSON.stringify(jsonObj));
+
+    console.log(JSON.stringify(jsonObj));
+
+    return;
+  }
+
+//경로 그리기 후 해당영역으로 줌
+function onDrawnFeatures(e){
+    map.zoomToExtent(this.getDataExtent());
+}
+
+
+  function getPoi() {
+
+  }
+
+  function addrToPoi(flag) {
+console.log(gClicked);
+	if (!gClicked) {
+		return;
+	}
+
+	addr = gClicked.data('title');
+	lon = gClicked.data('lon');
+	lat = gClicked.data('lat');
+
+        tempHtmlStart = "<td>"+addr+"</td><td class='lon'>"+lon+"</td><td class='lat'>"+lat+"</td><td>...</td><td id='markerStart' style='display:none'>"+addr+":"+lon+":"+lat+"</td>";
+        tempHtmlEnd = "<td>"+addr+"</td><td class='lon'>"+lon+"</td><td class='lat'>"+lat+"</td><td>...</td><td id='markerEnd' style='display:none'>"+addr+":"+lon+":"+lat+"</td>";
+        tempHtmlAdd = "<tr id='addPoi" +  index_number + "'><td data-name='del'><button name='del' id='del' class='btn-xs btn-danger glyphicon glyphicon-remove row-remove' onClick='remove_row(" + index_number + ")'></button></td><td>" +addr+"</td><td>"+lon+"</td><td>"+lat+"</td><td><input type='text' class='form-control' name='numpassenger' value='1'></td><td class='markerInfo' style='display:none'>"+addr+":"+lon+":"+lat+"</td></tr>";
+
+        if (flag == "a"){
+            $('#addPoi').append(tempHtmlAdd)
+	    index_number++;
+        } else if (flag == "s"){
+            $('#startPoi').html(tempHtmlStart)
+        } else if (flag == 'e'){
+            $('#endPoi').html(tempHtmlEnd)
+	}
+
+	return;
+  }
+
+  var capacity;
+
+  function getWeight(start_lon, start_lat, end_lon, end_lat, j, k, callback) {
+
+    var j = j;
+    var k = k;
+    var startX = start_lon;
+    var startY = start_lat;
+    var endX = end_lon;
+    var endY = end_lat;
+    var urlStr = "https://apis.skplanetx.com/tmap/routes?version=1";
+    urlStr += "&startX=" + startX;
+    urlStr += "&startY=" + startY;
+    urlStr += "&endX=" + endX;
+    urlStr += "&endY=" + endY;
+    urlStr += "&appKey=9c78e49d-c72c-36a6-8e25-5c249e9291a3";
+
+
+
+    var xmlHttp = new XMLHttpRequest();
+
+
+    xmlHttp.onreadystatechange = function() {
+      if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
+        capacity = xmlHttp.responseText;
+        jsonObj = JSON.parse(capacity);
+
+        capa = jsonObj.features[0].properties.totalTime;
+
+        capacity = []
+        capacity.push(j);
+        capacity.push(k);
+        capacity.push(capa);
+
+        console.log(capacity);
+        callback.apply(capacity);
+      } else if (xmlHttp.readyState == 4 && xmlHttp.status == 400) {
+        capacity = []
+        capacity.push(j);
+        capacity.push(k);
+        capacity.push(0);
+
+        callback.apply(capacity);
+      }
+    }
+
+    xmlHttp.open("GET", urlStr, true); // true for asynchronous
+    xmlHttp.send(null);
+  }
+
+</script>
+<script>
+  function addSchedule(gid) {
+    sorting_time = document.getElementById('sorting_time').value;
+    writing = document.getElementById('writing').value;
+    day = document.getElementById('day').value;
+    aid = document.getElementById('aid').value;
+    slist = document.getElementsByClassName('slist');
+    slists = []
+    for (i = 0; i < slist.length; i++) {
+      slists.push(slist[i].value)
+    }
+    $.ajax({
+      url: "/addSchedule",
+      type: "POST",
+      data: {
+        a_name: a_name,
+        sorting_time: sorting_time,
+        writing: writing,
+        day: day,
+        gid: gid,
+        aid: aid,
+        slist: slists,
+      },
+      success: function(data) {
+        alert(data)
+      }
+    });
+  }
+
+  $(document).ready(function() {
+    $('[data-toggle="tooltip"]').tooltip();
+  });
+
+
+</script>
+<script>
+  // 우편번호 찾기 찾기 화면을 넣을 element
+  var element_wrap = document.getElementById('wrap');
+
+  function sample3_execDaumPostcode() {
+    // 현재 scroll 위치를 저장해놓는다.
+    var currentScroll = Math.max(document.body.scrollTop, document.documentElement.scrollTop);
+    new daum.Postcode({
+      oncomplete: function(data) {
+        // 검색결과 항목을 클릭했을때 실행할 코드를 작성하는 부분.
+
+        // 각 주소의 노출 규칙에 따라 주소를 조합한다.
+        // 내려오는 변수가 값이 없는 경우엔 공백('')값을 가지므로, 이를 참고하여 분기 한다.
+        var fullAddr = data.address; // 최종 주소 변수
+        var extraAddr = ''; // 조합형 주소 변수
+
+        // 기본 주소가 도로명 타입일때 조합한다.
+        if (data.addressType === 'R') {
+          //법정동명이 있을 경우 추가한다.
+          if (data.bname !== '') {
+            extraAddr += data.bname;
+          }
+          // 건물명이 있을 경우 추가한다.
+          if (data.buildingName !== '') {
+            extraAddr += (extraAddr !== '' ? ', ' + data.buildingName : data.buildingName);
+          }
+          // 조합형주소의 유무에 따라 양쪽에 괄호를 추가하여 최종 주소를 만든다.
+          fullAddr += (extraAddr !== '' ? ' (' + extraAddr + ')' : '');
+        }
+
+        // 우편번호와 주소 정보를 해당 필드에 넣는다.
+        document.getElementById('sample3_address').value = fullAddr;
+
+        // iframe을 넣은 element를 안보이게 한다.
+        // (autoClose:false 기능을 이용한다면, 아래 코드를 제거해야 화면에서 사라지지 않는다.)
+        element_wrap.style.display = 'none';
+
+        // 우편번호 찾기 화면이 보이기 이전으로 scroll 위치를 되돌린다.
+        document.body.scrollTop = currentScroll;
+      },
+      // 우편번호 찾기 화면 크기가 조정되었을때 실행할 코드를 작성하는 부분. iframe을 넣은 element의 높이값을 조정한다.
+      onresize: function(size) {
+        element_wrap.style.height = size.height + 'px';
+      },
+      width: '100%',
+      height: '100%'
+    }).embed(element_wrap);
+
+    // iframe을 넣은 element를 보이게 한다.
+    element_wrap.style.display = 'block';
+  }
+
+  function remove_row(num) {
+	$('#addPoi' + num).remove();
+  }
+
+  var fixHelperModified = function(e, tr) {
+	var $originals = tr.children();
+	var $helper = tr.clone();
+ 	$helper.children().each(function(index) {
+		$(this).width($originals.eq(index).width());
+	});
+	return $helper;
+  };
+
+  var updateIndex = function(e, ui) {
+  	$('tr', ui.item.parent()).each(function (i) {
+		console.log($(this));
+	});
+  };
+
+  $('#addPoi').sortable({
+	helper: fixHelperModified,
+	stop: updateIndex
+  }).disableSelection();
+</script>
+
+</html>
