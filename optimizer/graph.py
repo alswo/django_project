@@ -110,6 +110,11 @@ class PoiVertex(Vertex):
 
 
 class PoiGraph(Graph):
+    def __init__(self, reqCoordType="EPSG3857"):
+        self.vert_dict = {}
+        self.num_vertices = 0
+        self.reqCoordType = reqCoordType
+        
     def add_vertex(self, node, lon, lat, numpassenger):
         self.num_vertices = self.num_vertices + 1
         new_vertex = PoiVertex(node, lon, lat, numpassenger)
@@ -119,7 +124,7 @@ class PoiGraph(Graph):
     def set_everyweight(self):
 
 	urlstr = "http://route-tayotayo.edticket.com:8080/routes"
-	payload = {'appKey': '9c78e49d-c72c-36a6-8e25-5c249e9291a3', 'version': '1'}
+	payload = {'appKey': '9c78e49d-c72c-36a6-8e25-5c249e9291a3', 'version': '1', 'reqCoordType': self.reqCoordType}
         r = requests.get(urlstr, params=payload)
         r.json()
         for v in self.get_vertices():

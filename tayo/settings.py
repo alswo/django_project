@@ -14,6 +14,7 @@ INSTALLED_APPS = [
     'django_crontab',
     'schedule',
     'passenger',
+    'monitor',
     'optimizer',
     'django.contrib.admin',
     'django.contrib.auth',

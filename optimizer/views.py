@@ -36,10 +36,12 @@ def cmp_viapoints(a, b):
 
 @csrf_exempt
 def getRoute(request):
-    g = PoiGraph()
+    algorithm = request.GET.get('algorithm')
+    reqCoordType = request.GET.get('reqCoordType')
+
+    g = PoiGraph(reqCoordType)
     result = None
 
-    algorithm = request.GET.get('algorithm')
 
     received_json_data = json.loads(request.body)
 
