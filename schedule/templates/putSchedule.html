@@ -262,7 +262,7 @@
                 <h4 class="modal-title" id="myModalLabel">Modal title</h4>
               </div>
               <div class="modal-body">
-                <select id="academyselect" class="form-control"><option value="">학원선택</option>{% for a in academy %}<option value = "{{a.id}}">{{a.name}}</option>{% endfor %}</select>
+                <select id="academyselect" class="form-control selectpicker" data-live-search="ture"><option value="">학원선택</option>{% for a in academy %}<option value = "{{a.id}}">{{a.name}}</option>{% endfor %}</select>
                 <br>
                 <!-- select id="studentList" class="form-control"></select //-->
                 <div class="row-fluid">
