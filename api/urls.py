@@ -7,4 +7,5 @@ urlpatterns = patterns('',
     url(r'^getRouteMap$', views.getRouteMap),
     url(r'^listNotice$', views.listNotice),
     url(r'^getNotice$', views.getNotice),
+    url(r'^getStudentInfo$', views.getStudentInfo),
 )

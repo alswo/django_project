@@ -1216,10 +1216,11 @@ def acaUpdateSchedule(request):
             load = request.POST.getlist('load[]')
             sid = request.POST.getlist('sid[]')
             aid = int(request.POST.get('aca'))
+            raid = int(request.POST.get('aca'))
             areaid = int(request.POST.get('areaid'))
             bid = int(request.POST.get('bid'))
             carnum = request.POST.get('carnum')
-
+            carlist = Car.objects.filter(branchid=bid)
 
             #searchTime,day,area,branch for inventory searching and redirection
             searchTime = request.POST.get('searchTime')
@@ -1355,7 +1356,7 @@ def acaUpdateSchedule(request):
                     academy = Academy.objects.filter(bid=bid)
                     contacts = sorted(contacts, key=lambda x: x.stime,reverse=False)
 
-                    return render_to_response('acaUpdateSchedule.html',{"area":area,"branch":branch,"searchTime":searchTime,"academy":academy,"day":day,"carnum":carnum,"aid":aid,"bid":bid,"areaid": areaid,"week": week,"contacts":contacts,'user':request.user})
+                    return render_to_response('acaUpdateSchedule.html',{"area":area,"branch":branch,"searchTime":searchTime,"carlist":carlist, "academy":academy,"day":day,"carnum":carnum,"aid":raid,"bid":bid,"areaid": areaid,"week": week,"contacts":contacts,'user':request.user})
 
 
 				#first update editedinven
@@ -1455,7 +1456,7 @@ def acaUpdateSchedule(request):
                     academy = Academy.objects.filter(bid=bid)
                     contacts = sorted(contacts, key=lambda x: x.stime,reverse=False)
 
-                    return render_to_response('acaUpdateSchedule.html',{"area":area,"branch":branch,"searchTime":searchTime,"academy":academy,"day":day,"carnum":carnum,"aid":aid,"bid":bid,"areaid": areaid,"week": week,"contacts":contacts,'user':request.user})
+                    return render_to_response('acaUpdateSchedule.html',{"area":area,"branch":branch,"searchTime":searchTime,"carlist":carlist,"academy":academy,"day":day,"carnum":carnum,"aid":raid,"bid":bid,"areaid": areaid,"week": week,"contacts":contacts,'user':request.user})
 
             elif week == 2:
                 try:
@@ -1554,7 +1555,7 @@ def acaUpdateSchedule(request):
                     academy = Academy.objects.filter(bid=bid)
                     contacts = sorted(contacts, key=lambda x: x.stime,reverse=False)
 
-                    return render_to_response('acaUpdateSchedule.html',{"area":area,"branch":branch,"searchTime":searchTime,"academy":academy,"day":day,"carnum":carnum,"aid":aid,"bid":bid,"areaid": areaid,"week": week,"contacts":contacts,'user':request.user})
+                    return render_to_response('acaUpdateSchedule.html',{"area":area,"branch":branch,"searchTime":searchTime,"carlist":carlist,"academy":academy,"day":day,"carnum":carnum,"aid":raid,"bid":bid,"areaid": areaid,"week": week,"contacts":contacts,'user':request.user})
 
 
 				#first update editedinven
@@ -1647,7 +1648,7 @@ def acaUpdateSchedule(request):
                     academy = Academy.objects.filter(bid=bid)
                     contacts = sorted(contacts, key=lambda x: x.stime,reverse=False)
 
-                    return render_to_response('acaUpdateSchedule.html',{"area":area,"branch":branch,"searchTime":searchTime,"academy":academy,"day":day,"carnum":carnum,"aid":aid,"bid":bid,"areaid": areaid,"week": week,"contacts":contacts,'user':request.user})
+                    return render_to_response('acaUpdateSchedule.html',{"area":area,"branch":branch,"searchTime":searchTime,"carlist":carlist,"academy":academy,"day":day,"carnum":carnum,"aid":raid,"bid":bid,"areaid": areaid,"week": week,"contacts":contacts,'user':request.user})
 
 
             elif week == 3:
@@ -1660,51 +1661,36 @@ def acaUpdateSchedule(request):
 
                 #update inventory editedinven
                 if eInven_index == 0:
-                    editedInven = EditedInven.objects.get(id = iid)
-                    invenId = editedInven.iid_id
+                    EditedInven.objects.filter(id = iid).update(carnum = carnum, bid = bid, snum = snum,day = day, alist = alist, anamelist= anamelist_inven, slist=slist_temp3, stime = stime, etime = etime, week = week)
 
-                    editedInvenList = EditedInven.objects.filter(iid_id = invenId)
+                    delete_estable = EditedScheduleTable.objects.filter(ieid_id=iid)
+                    delete_estable.delete()
 
-                    for ei in editedInvenList:
-                        ei.carnum = carnum
-                        ei.bid = bid
-                        ei.snum = snum
-                        ei.day = day
-                        ei.alist = alist
-                        ei.anamelist = anamelist_inven
-                        ei.slist_temp3 = slist_temp3
-                        ei.stime = stime
-                        ei.etime = etime
-                        ei.save()
+                    # lflag load -> 1 unload ->0 start -> 2 end -> 3
+                    for i in range(len(time)):
+                        if i == 0:
+                            estable = EditedScheduleTable(ieid_id = iid, time = time[i], addr = addr[i], req = req[i], alist='{}', slist='{}', sname=list(name2[i]), tflag='{}', lflag=2)
+                            estable.save()
 
-                        delete_estable = EditedScheduleTable.objects.filter(ieid_id=ei.id)
-                        delete_estable.delete()
+                        elif i == len(time) - 1:
+                            estable = EditedScheduleTable(ieid_id = iid, time = time[i], addr = addr[i], req = req[i], alist='{}', slist='{}', sname=list(name2[i]), tflag='{}', lflag=3)
+                            estable.save()
 
-                        # lflag load -> 1 unload ->0 start -> 2 end -> 3
-                        for i in range(len(time)):
-                            if i == 0:
-                                estable = EditedScheduleTable(ieid_id = ei.id, time = time[i], addr = addr[i],req = req[i], alist='{}', slist='{}', sname=list(name2[i]), tflag='{}', lflag=2)
-                                estable.save()
+                        elif 0 < i < len(time) - 1:
+                            temp_aca = [a.strip() for a in academy[i].split(',')]
+                            temp_name = [n.strip() for n in name2[i].split(',')]
+                            sidlist = [s.strip() for s in sid[i].split(',')]
 
-                            elif i == len(time) - 1:
-                                estable = EditedScheduleTable(ieid_id = ei.id, time = time[i], addr = addr[i],req = req[i], alist='{}', slist='{}', sname=list(name2[i]), tflag='{}', lflag=3)
-                                estable.save()
+                            temp_lflag = [0 for z in range(len(temp_name))]
 
-                            elif 0 < i < len(time) - 1:
-                                temp_aca = [a.strip() for a in academy[i].split(',')]
-                                temp_name = [n.strip() for n in name2[i].split(',')]
-                                sidlist = [s.strip() for s in sid[i].split(',')]
+                            anamelist = []
 
-                                temp_lflag = [0 for z in range(len(temp_name))]
+                            for aid in temp_aca:
+                                aname = Academy.objects.get(id = aid)
+                                anamelist.append(aname.name)
 
-                                anamelist = []
-
-                                for aid in temp_aca:
-                                    aname = Academy.objects.get(id = aid)
-                                    anamelist.append(aname.name)
-
-                                estable = EditedScheduleTable(ieid_id = ei.id, time = time[i], addr = addr[i],req = req[i], alist=temp_aca, anamelist = anamelist, slist=sidlist, sname=temp_name, tflag=temp_lflag, lflag=load[i])
-                                estable.save()
+                            estable = EditedScheduleTable(ieid_id = iid, time = time[i], addr = addr[i], req = req[i], alist=temp_aca, anamelist = anamelist, slist=sidlist, sname=temp_name, tflag=temp_lflag, lflag=load[i])
+                            estable.save()
 
                     contacts = []
 
@@ -1747,7 +1733,7 @@ def acaUpdateSchedule(request):
                     academy = Academy.objects.filter(bid=bid)
                     contacts = sorted(contacts, key=lambda x: x.stime,reverse=False)
 
-                    return render_to_response('acaUpdateSchedule.html',{"area":area,"branch":branch,"searchTime":searchTime,"academy":academy,"day":day,"carnum":carnum,"aid":aid,"bid":bid,"areaid": areaid,"week": week,"contacts":contacts,'user':request.user})
+                    return render_to_response('acaUpdateSchedule.html',{"area":area,"branch":branch,"searchTime":searchTime,"carlist":carlist,"academy":academy,"day":day,"carnum":carnum,"aid":raid,"bid":bid,"areaid": areaid,"week": week,"contacts":contacts,'user':request.user})
 
 
 				#first update editedinven
@@ -1783,7 +1769,7 @@ def acaUpdateSchedule(request):
                                 aname = Academy.objects.get(id = aid)
                                 anamelist.append(aname.name)
 
-                            estable = EditedScheduleTable(ieid_id = eiid, time = time[i], addr = addr[i],req = req[i], alist=temp_aca, anamelist = anamelist, slist=sidlist, sname=temp_name, tflag=temp_lflag, lflag=load[i])
+                            estable = EditedScheduleTable(ieid_id = e3iid, time = time[i], addr = addr[i],req = req[i], alist=temp_aca, anamelist = anamelist, slist=sidlist, sname=temp_name, tflag=temp_lflag, lflag=load[i])
                             estable.save()
 
                     contacts = []
@@ -1827,7 +1813,7 @@ def acaUpdateSchedule(request):
                     academy = Academy.objects.filter(bid=bid)
                     contacts = sorted(contacts, key=lambda x: x.stime,reverse=False)
 
-                    return render_to_response('acaUpdateSchedule.html',{"area":area,"branch":branch,"searchTime":searchTime,"academy":academy,"day":day,"carnum":carnum,"aid":aid,"bid":bid,"areaid": areaid,"week": week,"contacts":contacts,'user':request.user})
+                    return render_to_response('acaUpdateSchedule.html',{"area":area,"branch":branch,"searchTime":searchTime,"carlist":carlist,"academy":academy,"day":day,"carnum":carnum,"aid":raid,"bid":bid,"areaid": areaid,"week": week,"contacts":contacts,'user':request.user})
             else:
                 Inventory.objects.filter(id=iid).update(snum = snum, alist=alist, anamelist = anamelist_inven, slist=slist_temp3, stime = stime, etime = etime)
 
@@ -1909,7 +1895,7 @@ def acaUpdateSchedule(request):
                         contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week3=0).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('scheduletables'))
                         contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week = 3).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('editedscheduletables'))
 
-                return render_to_response('acaUpdateSchedule.html',{"area":area,"searchTime":searchTime,"week":week,"day":day,"branch":branch,"academy":academy,"areaid": areaid,"aid":aid,"bid":bid, "contacts":contacts,'user':request.user})
+                return render_to_response('acaUpdateSchedule.html',{"area":area,"searchTime":searchTime,"week":week,"day":day,"carlist":carlist,"branch":branch,"academy":academy,"areaid": areaid,"aid":raid,"bid":bid, "contacts":contacts,'user':request.user})
 
         #update -> 0 delete inventory, stable
         elif update == '0':
@@ -1922,6 +1908,7 @@ def acaUpdateSchedule(request):
             week = int(request.POST.get('week'))
             areaid = int(request.POST.get('areaid'))
             aid = int(request.POST.get('aca'))
+            raid = int(request.POST.get('aca'))
             area = Area.objects.all()
             branch = Branch.objects.filter(id = bid)
             #carlist for searching with carnum and redirection
@@ -1999,7 +1986,7 @@ def acaUpdateSchedule(request):
 
             contacts = sorted(contacts, key=lambda x: x.stime,reverse=False)
 
-            return render_to_response('acaUpdateSchedule.html',{"area":area,"searchTime":searchTime,"week":week,"day":day,"branch":branch,"academy":academy,"areaid": areaid,"aid":aid,"bid":bid, "contacts":contacts,'user':request.user})
+            return render_to_response('acaUpdateSchedule.html',{"area":area,"searchTime":searchTime,"carlist":carlist,"week":week,"day":day,"branch":branch,"academy":academy,"areaid": areaid,"aid":raid,"bid":bid, "contacts":contacts,'user':request.user})
 @csrf_exempt
 def studentLoad(request):
     if request.method == "POST":

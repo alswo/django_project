@@ -10,6 +10,7 @@ urlpatterns = [
     url(r'^api/',include('api.urls')),
     url(r'^monitor/',include('monitor.urls')),
     url(r'^getToken/',include('firebase.urls')),
+    url(r'^fcm/', include('fcm.urls')),
     url(
         r'^accounts/login/',
         'django.contrib.auth.views.login',

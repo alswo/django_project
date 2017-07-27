@@ -27,6 +27,7 @@ INSTALLED_APPS = [
     'firebase',
     'api',
     'corsheaders',
+    'fcm',
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -67,6 +68,8 @@ TEMPLATES = [
         },
     },
 ]
+
+FCM_APIKEY = "AAAAJM6rFH8:APA91bGSgH5Qce2RlnY0DUyXuZye1bJZWUtM8TpKiovBdjpcz9xzYbDAGYIvb4evTDSazerKCqXHVF093CxKvGSilQrWeA09ms0xjlYVsCR2bv1q3HtRe0qlR916j0EcR9EgYtQmyus8"
 
 WSGI_APPLICATION = 'tayo.wsgi.application'
 

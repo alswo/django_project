@@ -21,7 +21,13 @@ def main(request):
     groups = Group.objects.order_by('-gid')
     branch = Branch.objects.order_by('-id')
 
-    return render_to_response('passenger/main.html', {"academies" : academies, "groups": groups, "branch" : branch,'user':request.user})
+    join_group = Group.objects.extra(select = {'gid':'passenger_group.gid','gname':'passenger_group.gname', 'bname':'schedule_branch.bname'},tables=['schedule_branch'], where=['schedule_branch.id = passenger_group.bid']).order_by('gid')
+
+    driver = []
+    for g in join_group:
+        driver.append(g)
+
+    return render_to_response('passenger/main.html', {"driver":driver, "academies" : academies, "groups": groups, "branch" : branch,'user':request.user})
 
 
 
