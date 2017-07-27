@@ -40,9 +40,9 @@
             <div class="dropdown">
                 <button id="dLabel" type="button" class="btn btn-success btn-lg btn-block" data-toggle="dropdown" aria-expanded="true">기사님용 스케줄 보기</button>
                 <ul class="dropdown-menu" aria-labelledby="dLabel">
-                    {% for group in groups %}
+                    {% for d in driver %}
                     <li>
-                        <a onclick="getDayDriver({{group.gid}})">{{ group.gname }}</a>
+                        <a onclick="getDayDriver({{d.gid}})">{{ d.gname }} {{d.bname}}</a>
                     </li>
                     {% endfor %}
                 </ul>
@@ -57,9 +57,9 @@
             <div class="dropdown">
                 <button id="dLabel" type="button" class="btn btn-info btn-lg btn-block" data-toggle="dropdown" aria-expanded="true">호차별 스케줄 관리(Beta)</button>
                 <ul class="dropdown-menu" aria-labelledby="dLabel">
-                    {% for group in groups %}
+                    {% for d in driver %}
                     <li>
-                        <a onclick="updateDay({{group.gid}})">{{ group.gname }}</a>
+                        <a onclick="updateDay({{d.gid}})">{{ d.gname }} {{d.bname}}</a>
                     </li>
                     {% endfor %}
                 </ul>
