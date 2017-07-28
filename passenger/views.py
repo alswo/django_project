@@ -61,6 +61,12 @@ def opti(request):
 
 @login_required
 @user_passes_test(is_not_driver, login_url='/', redirect_field_name=None)
+def opti2(request):
+    if request.method =="GET":
+        return render_to_response('passenger/optimizationDistance2.html', {'user':request.user})
+
+@login_required
+@user_passes_test(is_not_driver, login_url='/', redirect_field_name=None)
 def opti_0613(request):
     if request.method =="GET":
         return render_to_response('passenger/optimizationDistance.0613.html', {'user':request.user})
