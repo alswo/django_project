@@ -14,6 +14,11 @@ from django.forms.models import model_to_dict
 from django.core.exceptions import ObjectDoesNotExist
 from itertools import chain
 from django.core.serializers import serialize
+from django.core.files import File
+from django.utils.crypto import get_random_string
+from django.core.files.storage import default_storage
+from django.conf import settings
+import re
 import datetime
 import operator
 import json
@@ -44,6 +49,13 @@ def getRoute(request):
 
 
     received_json_data = json.loads(request.body)
+
+    unique_id = get_random_string(length=32)
+    tmp_dir = settings.TAYO_TMP_DIR
+    with open(tmp_dir + unique_id, 'w') as f:
+    	jsonfile = File(f)
+	json.dump(received_json_data, jsonfile)
+	jsonfile.close()
 
     g.add_vertex(received_json_data['startName'], received_json_data['startX'], received_json_data['startY'], 0)
     for viaPoint in received_json_data['viaPoints']:
@@ -79,7 +91,7 @@ def getRoute(request):
 
     #xml = getRouteSequential_in(result, received_json_data)
 
-    jsonobj = g.get_json({'xml':''}, result)
+    jsonobj = g.get_json({'unique_id':unique_id}, result)
     return HttpResponse(jsonobj)
 
 def getRouteSequential_in(pointlist, payload):
@@ -107,22 +119,32 @@ def getRouteSequential_in(pointlist, payload):
 
 @csrf_exempt
 def getRouteSequential(request):
-    #urlstr = "http://route-tayotayo.edticket.com:8080/routes/routeSequential30?version=1"
+    unique_id = request.GET.get('unique_id')
     urlstr = "https://apis.skplanetx.com/tmap/routes/routeSequential30?version=1&format=xml"
     appKey = '9c78e49d-c72c-36a6-8e25-5c249e9291a3'
     headers = {'Content-Type': 'application/json', 'appKey': appKey, 'Accept':'application/xml'}
 
-    payload = json.loads(request.body)
+    tmp_dir = settings.TAYO_TMP_DIR
+    with open(tmp_dir + unique_id, 'r') as f:
+    	jsonfile = File(f)
+	payload = json.load(jsonfile)
+
+    #payload = json.loads(request.body)
     ## it has almost everything
     payload['startTime'] = '201706231300'
 
     r = requests.post(urlstr, data=json.dumps(payload), headers=headers)
     if r.status_code == requests.codes.ok:
         response = r.text
-        return HttpResponse("success" + str(response))
+	response = re.sub(r'<w>-?\d+</w>', '', response)
+	response = re.sub(r'<h>-?\d+</h>', '', response)
+	response = re.sub(r'<x>-?\d+</x>', '', response)
+	response = re.sub(r'<y>-?\d+</y>', '', response)
+	response = re.sub(r'7f00ff00', 'ff0000cc', response)
+        return HttpResponse(response, content_type = 'application/xml;charset=utf-8')
         ## weight = response['features'][0]['properties']['totalTime']
     else:
         weight = 0
 
 
-    return HttpResponse(r.text);
+    return HttpResponse('fail' + r.text);

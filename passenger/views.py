@@ -8,6 +8,7 @@ from django.http import HttpResponse, HttpRequest, HttpResponseRedirect, JsonRes
 from django.core import serializers
 from django.core.serializers import serialize
 from passenger.dateSchedule import timeToDate
+from django.utils.crypto import get_random_string
 import json
 
 def is_not_driver(user):
@@ -63,7 +64,8 @@ def opti(request):
 @user_passes_test(is_not_driver, login_url='/', redirect_field_name=None)
 def opti2(request):
     if request.method =="GET":
-        return render_to_response('passenger/optimizationDistance2.html', {'user':request.user})
+	unique_id = get_random_string(length=32)
+        return render_to_response('passenger/optimizationDistance2.html', {'user':request.user, 'unique_id':unique_id})
 
 @login_required
 @user_passes_test(is_not_driver, login_url='/', redirect_field_name=None)
