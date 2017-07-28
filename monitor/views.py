@@ -19,11 +19,13 @@ def shuttles(request):
 	t = timeToDate()
 	today = t.timeToYmd()
 	hm = t.timeToHM()
+	rawhm = t.timeToRawHM()
+	d = t.timeToD()
 
-	hm = "18:29"
+	#hm = "18:29"
 
 	msg = ""
-	inventories = Inventory.objects.filter(day = '월', stime__lte = '1801', etime__gte = '1801')
+	inventories = Inventory.objects.filter(day = d, stime__lte = rawhm, etime__gte = rawhm)
 	invens = list()
 	for inventory in inventories:
 		diff1 = -1
@@ -35,7 +37,7 @@ def shuttles(request):
 		scheduletables = ScheduleTable.objects.filter(iid = inventory.id).order_by('time')
 
 		inven['shuttle']['carnum'] = inventory.carnum
-		lastlocation = RealtimeLocation.objects.filter(date='2017-07-17', carnum=inventory.carnum, schedule_time__lte=str(inventory.etime)[:2]+':'+str(inventory.etime)[2:]).order_by('schedule_time').last()
+		lastlocation = RealtimeLocation.objects.filter(date=today, carnum=inventory.carnum, schedule_time__lte=str(inventory.etime)[:2]+':'+str(inventory.etime)[2:]).order_by('schedule_time').last()
 		if (lastlocation):
 			diff1 = get_difference(lastlocation.schedule_time, lastlocation.departure_time)
 			hoursMinutes = setTimeDelta(hm, diff1).split(':')
@@ -78,7 +80,8 @@ def shuttles(request):
 
 		inven_id = inventory.id
 
-	return render_to_response('shuttles.html', {'msg': msg, 'invens': invens})
+	#return render_to_response('shuttles.html', {'msg': msg, 'invens': invens})
 	#return HttpResponse('\n'.join('{}: {}'.format(*k) for k in enumerate(invens['shuttle']['carnum'])))
+	return HttpResponse(msg)
 	#return HttpResponse("diff1 = " + str(diff1) + ", diff2 = " + str(diff2))
 	#return HttpResponse(inven_id)

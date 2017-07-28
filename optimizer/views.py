@@ -108,7 +108,7 @@ def getRouteSequential_in(pointlist, payload):
 @csrf_exempt
 def getRouteSequential(request):
     #urlstr = "http://route-tayotayo.edticket.com:8080/routes/routeSequential30?version=1"
-    urlstr = "https://apis.skplanetx.com/tmap/routes/routeSequential30?version=1"
+    urlstr = "https://apis.skplanetx.com/tmap/routes/routeSequential30?version=1&format=xml"
     appKey = '9c78e49d-c72c-36a6-8e25-5c249e9291a3'
     headers = {'Content-Type': 'application/json', 'appKey': appKey, 'Accept':'application/xml'}
 
@@ -118,7 +118,7 @@ def getRouteSequential(request):
 
     r = requests.post(urlstr, data=json.dumps(payload), headers=headers)
     if r.status_code == requests.codes.ok:
-        response = r.json()
+        response = r.text
         return HttpResponse("success" + str(response))
         ## weight = response['features'][0]['properties']['totalTime']
     else:
