@@ -366,7 +366,7 @@ console.log($('.markerInfo')[i].parentNode);
 	  jsonObj['resCoordType'] = 'WGS84GEO';
 
 	unique_id = result['unique_id'];
-	urlStr = 'http://curtis-tayotayo.edticket.com/optimizer/getRouteSequential?unique_id=' + unique_id;
+	urlStr = 'http://' + window.location.hostname + '/optimizer/getRouteSequential?unique_id=' + unique_id;
 	console.log(urlStr);
 
 	  var routeLayer = new google.maps.KmlLayer({
