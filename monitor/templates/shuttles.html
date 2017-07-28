@@ -1,6 +1,7 @@
 <HTML>
 <HEAD>
 	<meta charset="utf-8">
+	<meta http-equiv="refresh" content="10" />
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.20.1/vis.min.js"></script>
 	<link href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.20.1/vis.min.css" rel="stylesheet" type="text/css" />
 	<style type="text/css">
@@ -29,11 +30,12 @@
 	var busimg;
 
 	today = new Date();
+	var diff_hour = 3;
 	{% for inven in invens %}
 		container = document.getElementById('timeline_{{inven.id}}');
 		items = new vis.DataSet();
 		{% for schedule in inven.schedules %}
-			today.setHours({{schedule.hour}});
+			today.setHours({{schedule.hour}} + diff_hour);
 			today.setMinutes({{schedule.minute}});
 			items.add({
 				content: "{{schedule.addr}}",
@@ -51,7 +53,7 @@
 	
 		busitem.appendChild(busimg);
 	
-		today.setHours({{inven.shuttle.hour}});
+		today.setHours({{inven.shuttle.hour}} + diff_hour);
 		today.setMinutes({{inven.shuttle.minute}});
 		items.add({
 			'content': busitem,

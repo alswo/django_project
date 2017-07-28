@@ -35,7 +35,7 @@ def shuttles(request):
 		scheduletables = ScheduleTable.objects.filter(iid = inventory.id).order_by('time')
 
 		inven['shuttle']['carnum'] = inventory.carnum
-		lastlocation = RealtimeLocation.objects.filter(date='2017-07-17', carnum=inventory.carnum).order_by('schedule_time').last()
+		lastlocation = RealtimeLocation.objects.filter(date='2017-07-17', carnum=inventory.carnum, schedule_time__lte=str(inventory.etime)[:2]+':'+str(inventory.etime)[2:]).order_by('schedule_time').last()
 		if (lastlocation):
 			diff1 = get_difference(lastlocation.schedule_time, lastlocation.departure_time)
 			hoursMinutes = setTimeDelta(hm, diff1).split(':')
@@ -65,8 +65,8 @@ def shuttles(request):
 			inven['schedules'].append({'hour': hoursMinutes[0], 'minute': hoursMinutes[1], 'addr': addr})
 	
 			if (lastlocation and lastlocation.schedule_time < scheduletable.time and hm > scheduletable.time and diff2 < 0):
-				diff2 = get_difference(scheduletable.time, hm) - 1
-				hoursMinutes = setTimeDelta(hm, diff2).split(':')
+				diff2 = 1
+				hoursMinutes = setTimeDelta(scheduletable.time, -1).split(':')
 				inven['shuttle']['hour'] = hoursMinutes[0]
 				inven['shuttle']['minute'] = hoursMinutes[1]
 
