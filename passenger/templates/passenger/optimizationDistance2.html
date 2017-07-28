@@ -530,7 +530,7 @@
                   vertexInfo = $('.markerInfo')[j].innerText.split(':');
                   if (result['features'][i]['viaPointName'] === vertexInfo[0]
                       || result['features'][i]['viaPointName'] === $('.markerInfo')[j].parentNode.childNodes[1].firstChild.value) {
-                      passList += vertexInfo[1] + "," + vertexInfo[2] + ",A,0";
+                      passList += vertexInfo[1] + "," + vertexInfo[2] + ",A,0_";
                   }
               }
           }
@@ -543,8 +543,11 @@
           urlStr += "&appKey=9c78e49d-c72c-36a6-8e25-5c249e9291a3&reqCoordType=WGS84GEO&resCoordType=WGS84GEO";
           urlStr += "&passList=" + passList;
 
+	console.log(urlStr);
 
 	  //urlStr = 'http://curtis-tayotayo.edticket.com/static/test.kml';
+	  //urlStr = 'https://apis.skplanetx.com/tmap/multiViaPointRoute?version=1&format=xml&sta…O&resCoordType=WGS84GEO&passList=127.12342999485031,37.385015768202166,A,0';
+
 
 
 	  var routeLayer = new google.maps.KmlLayer({
