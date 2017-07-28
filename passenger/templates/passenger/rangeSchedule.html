@@ -76,6 +76,7 @@
                         {% endfor %}
                  </select>
             </div>
+
             <div class="col-md-3">
                 <div class="form-group">
                     <label>From</label>
@@ -90,18 +91,18 @@
             </div>
             <div class="col-md-3">
                 <br>
-                <button class="btn btn-info" onclick="rangeSchedule()" type="button" value="dateAcademy">적용</button>                     
+                <button class="btn btn-info" onclick="rangeSchedule()" type="button" value="dateAcademy">적용</button>
             </div>
        </div>
         <!-- /.row -->
         <div class="row" id="content">
-            
-        </div>    
+
+        </div>
 </div>
     <!-- /.container -->
 </body>
 <script>
-    
+
     function rangeSchedule(){
         var select = document.getElementById("eaid");
          var aid = select.options[select.selectedIndex].value;
@@ -119,7 +120,7 @@
                 }
         });
     }
-  
+
 
 </script>
 </html>

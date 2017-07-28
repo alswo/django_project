@@ -426,9 +426,15 @@ def dateSchedule(request):
 
             return render_to_response('passenger/dateSchedule.html', {"academy" : academy,'user':request.user})
 
+        elif request.GET.get("what") == "car":
+            group = Group.objects.all()
+
+            return render_to_response('passenger/carRangeSchedule.html', {"group" : group,'user':request.user})
+
     elif request.method == "POST":
         what = request.POST.get('what')
         aid = request.POST.get('aid')
+        gid = request.POST.get('gid')
         date = request.POST.get('date')
         toDate = request.POST.get('to')
         fromDate = request.POST.get('from')
@@ -448,12 +454,25 @@ def dateSchedule(request):
 
             a_name.strip()
             contacts = ScheduleDate.objects.filter(today__range=[fromD,toD]).filter(a_name__contains = a_name).order_by('today','time')
+
             for contact in contacts:
                 anames = contact.a_name.strip().split('&')
                 if (a_name in anames):
                     contacts2.append(contact)
             count = len(contacts2)
+
             return render_to_response('passenger/viewDateSchedule.html', {"contacts": contacts2, "count" : count,'user':request.user})
+
+        elif what == 'car':
+            t = timeToDate()
+            toD = t.timeToDtype(toDate)
+            fromD = t.timeToDtype(fromDate)
+            contacts = ScheduleDate.objects.filter(today__range=[fromD,toD]).filter(gid=gid).order_by('today','time')
+
+            count = len(contacts)
+
+            return render_to_response('passenger/viewDateSchedule.html', {"contacts": contacts, "count" : count,'user':request.user})
+
 
 @csrf_exempt
 @login_required

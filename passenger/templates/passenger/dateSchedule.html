@@ -55,7 +55,7 @@
                         <a href="dateSchedule?what=range">구간별 스케쥴 카운팅</a>
                     </li>
                     <li>
-                        <a href="#">호차 일짜별 스케쥴 보기</a>
+                        <a href="dateSchedule?what=car">호차 일짜별 스케쥴 보기</a>
                     </li>
                 </ul>
             </div>
@@ -70,7 +70,7 @@
     <div class="container" id = "content">
         <div class="row">
             <div class="col-md-3">
-                <label>Academy</label> 
+                <label>Academy</label>
                 <select class="form-control" id="eaid">
                         {% for aca in academy %}
                         <option value="{{aca.id}}">{{aca.name}}</option>
@@ -85,13 +85,13 @@
             </div>
             <div class="col-md-3">
                 <br>
-                <button class="btn btn-info" onclick="getDateSchedule()" type="button" value="dateAcademy">적용</button>                     
+                <button class="btn btn-info" onclick="getDateSchedule()" type="button" value="dateAcademy">적용</button>
             </div>
        </div>
         <!-- /.row -->
         <div class="row" id="dateSchedule">
-            
-        </div>    
+
+        </div>
 </div>
     <!-- /.container -->
 {% else %}
@@ -124,8 +124,6 @@
                 }
         });
     }
-    
+
 </script>
 </html>
-
-

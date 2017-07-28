@@ -287,7 +287,7 @@ def getNotice(request):
 
 def getStudentInfo(request):
     if request.method == "POST":
-        pin = request.POST.get('pin')
+        pin = request.POST.get('pin_number')
 	
         if (debug):
                 debug = 1
@@ -329,5 +329,5 @@ def getStudentInfo(request):
 
         except Exception as e:
             
-            msg = 'PIN does not register' 
+            msg = 'PIN does not exist' 
 	    return HttpResponse(debug,400,msg)

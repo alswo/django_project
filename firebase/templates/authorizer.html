@@ -39,10 +39,10 @@
     function getToken(){
         var pin = document.getElementById("pin").value;
          $.ajax({
-                url: "getToken",
+                url: "getStudentInfo",
                 type: "POST",
                 data: {
-                        pin: pin,
+                        pin_number: pin,
                         },
                 success: function(data){
                     console.log(data)
