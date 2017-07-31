@@ -22,16 +22,15 @@ function callNumber(num){
 <body>
   <div class="container">
     <br>
-        <div class="row day" align="center">
-          <button type="button" class="btn-sm btn-danger" onclick="location.href='/'">홈</button>
-          <button type="button" class="btn-sm btn-info" onclick="location.href='getSchedule?bid={{bid}}&aid={{aid}}&day=월'">월</button>
-          <button type="button" class="btn-sm btn-info" onclick="location.href='getSchedule?bid={{bid}}&aid={{aid}}&day=화'">화</button>
-          <button type="button" class="btn-sm btn-info" onclick="location.href='getSchedule?bid={{bid}}&aid={{aid}}&day=수'">수</button>
-          <button type="button" class="btn-sm btn-info" onclick="location.href='getSchedule?bid={{bid}}&aid={{aid}}&day=목'">목</button>
-          <button type="button" class="btn-sm btn-info" onclick="location.href='getSchedule?bid={{bid}}&aid={{aid}}&day=금'">금</button>
-          <button type="button" class="btn-sm btn-info" onclick="location.href='getSchedule?bid={{bid}}&aid={{aid}}&day=토'">토</button>
-          <button type="button" class="btn-sm btn-primary" onclick="window.print()">출력</button>
-        </div>
+    <div class="row">
+      <div class="col-md-4">
+
+      </div>
+        <div class="col-md-4" align="center"><button type="button" class="btn btn-danger" onclick="location.href='/'">홈</button>  <button type="button" class="btn btn-info" onclick="location.href=getSchedule?bid={{bid}}&aid={{aid}}&day=월'">월</button>  <button type="button" class="btn btn-info" onclick="location.href='getSchedule?bid={{bid}}&aid={{aid}}&day=화'">화</button>  <button type="button" class="btn btn-info" onclick="location.href='getSchedule?bid={{bid}}&aid={{aid}}&day=수'">수</button>  <button type="button" class="btn btn-info" onclick="location.href='getSchedule?bid={{bid}}&aid={{aid}}&day=목'">목</button>  <button type="button" class="btn btn-info" onclick="location.href='getSchedule?bid={{bid}}&aid={{aid}}&day=금'">금</button>  <button type="button" class="btn btn-info" onclick="location.href='getSchedule?bid={{bid}}&aid={{aid}}&day=토'">토</button> <button type="button" class="btn btn-primary" onclick="window.print()">출력</button></div>
+      <div class="col-md-4">
+
+      </div>
+    </div>
         <br>
     <div class="row schedule">
         <div class="col-md-1"></div>

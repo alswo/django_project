@@ -129,7 +129,7 @@ def getSchedule(request):
                 contacts.extend(Inventory.objects.filter(id = i.id).prefetch_related('scheduletables'))
 
             if car:
-                branch = Car.objects.get(id = car)
+                branch = Car.objects.get(carname = car)
                 invens = Inventory.objects.filter(carnum=car).filter(day = day)
 
                 contacts = []
