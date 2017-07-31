@@ -39,7 +39,7 @@ def shuttles(request):
 		inven['shuttle']['carnum'] = inventory.carnum
 		lastlocation = RealtimeLocation.objects.filter(date=today, carnum=inventory.carnum, schedule_time__lte=str(inventory.etime)[:2]+':'+str(inventory.etime)[2:]).order_by('schedule_time').last()
 		if (lastlocation):
-			diff1 = get_difference(lastlocation.schedule_time, lastlocation.departure_time)
+			diff1 = get_difference(lastlocation.departure_time, lastlocation.schedule_time)
 			hoursMinutes = setTimeDelta(hm, diff1).split(':')
 			inven['shuttle']['hour'] = hoursMinutes[0]
 			inven['shuttle']['minute'] = hoursMinutes[1]
