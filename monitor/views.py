@@ -49,9 +49,9 @@ def shuttles(request):
 
 			if (scheduletable.lflag == 2):
 				addr = '출발'
-				# 아직 출발하지 않았으면
-				if (lastlocation):
+				if (lastlocation and lastlocation.schedule_time >= scheduletable.time):
 					pass
+				# 아직 출발하지 않았으면
 				else:
 					inven['shuttle']['hour'] = hoursMinutes[0]
 					inven['shuttle']['minute'] = hoursMinutes[1]
