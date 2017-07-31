@@ -64,13 +64,14 @@ def shuttles(request):
 			else:
 				addr = scheduletable.addr
 
+				if (lastlocation and lastlocation.schedule_time < scheduletable.time and hm > scheduletable.time and diff2 < 0):
+					diff2 = 1
+					hoursMinutes = setTimeDelta(scheduletable.time, -1).split(':')
+					inven['shuttle']['hour'] = hoursMinutes[0]
+					inven['shuttle']['minute'] = hoursMinutes[1]
+
 			inven['schedules'].append({'hour': hoursMinutes[0], 'minute': hoursMinutes[1], 'addr': addr})
 	
-			if (lastlocation and lastlocation.schedule_time < scheduletable.time and hm > scheduletable.time and diff2 < 0):
-				diff2 = 1
-				hoursMinutes = setTimeDelta(scheduletable.time, -1).split(':')
-				inven['shuttle']['hour'] = hoursMinutes[0]
-				inven['shuttle']['minute'] = hoursMinutes[1]
 
 		invens.append(inven)
 
