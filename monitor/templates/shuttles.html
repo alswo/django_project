@@ -30,7 +30,7 @@
 	var busimg;
 
 	today = new Date();
-	var diff_hour = 3;
+	var diff_hour = 0;
 	{% for inven in invens %}
 		container = document.getElementById('timeline_{{inven.id}}');
 		items = new vis.DataSet();

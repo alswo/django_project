@@ -80,8 +80,8 @@ def shuttles(request):
 
 		inven_id = inventory.id
 
-	#return render_to_response('shuttles.html', {'msg': msg, 'invens': invens})
+	return render_to_response('shuttles.html', {'msg': msg, 'invens': invens})
 	#return HttpResponse('\n'.join('{}: {}'.format(*k) for k in enumerate(invens['shuttle']['carnum'])))
-	return HttpResponse(msg)
+	#return HttpResponse(msg)
 	#return HttpResponse("diff1 = " + str(diff1) + ", diff2 = " + str(diff2))
 	#return HttpResponse(inven_id)
