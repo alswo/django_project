@@ -168,7 +168,7 @@ def getSchedule(request):
                 return render_to_response('getSchedule.html', {"contacts": contacts, "bid" : bid, "aid" : aid,'user':request.user})
 
         elif request.user.groups.filter(name__in = ['driver']).exists():
-            branch = Car.objects.get(id = car)
+            branch = Car.objects.get(carname = car)
             invens = Inventory.objects.filter(carnum=car).filter(day = day)
 
             contacts = []
