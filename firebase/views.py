@@ -21,27 +21,27 @@ def getResponse(debug, code, msg):
         return JsonResponse({'code': code, 'msg': msg})
 
 @csrf_exempt
-def getToken(request):
+def getStudentInfo(request):
     if request.method == 'GET':
         return render_to_response('authorizer.html')
 
-    elif request.method == 'POST':
-        pin = request.POST.get('pin')
-	debug =request.POST.get('debug')
-
-	if (debug):
-            debug = 1
-
-	else:
-            debug = 0
-
-        try:
-            sInfo = StudentInfo.objects.get(pin_number = pin)
-
-        except Exception as e:
-            msg = 'PIN does not correct'
-
-	    return getResponse(debug,400,msg)
+    # elif request.method == 'POST':
+    #     pin = request.POST.get('pin')
+	# debug =request.POST.get('debug')
+    #
+	# if (debug):
+    #         debug = 1
+    #
+	# else:
+    #         debug = 0
+    #
+    #     try:
+    #         sInfo = StudentInfo.objects.get(pin_number = pin)
+    #
+    #     except Exception as e:
+    #         msg = 'PIN does not correct'
+    #
+	#     return getResponse(debug,400,msg)
 
         # try:
         #     cred = credentials.Certificate("/home/ubuntu/lee/django_project/firebase/tayo-f698c-firebase-adminsdk-2raa9-d658cca556.json")
@@ -50,15 +50,15 @@ def getToken(request):
         # except Exception as e:
         #     return HttpResponse(e.message)
 
-        if sInfo != 0:
-            # tokenizer = create_custom_token(pin)
-            studentInfo = {}
-            studentInfo['sid'] = sInfo.id
-            studentInfo['aid'] = sInfo.aid
-            studentInfo['phone'] = sInfo.phone1
-            studentInfo['pin'] = sInfo.pin_number
-
-            return JsonResponse(studentInfo)
+        # if sInfo != 0:
+        #     # tokenizer = create_custom_token(pin)
+        #     studentInfo = {}
+        #     studentInfo['sid'] = sInfo.id
+        #     studentInfo['aid'] = sInfo.aid
+        #     studentInfo['phone'] = sInfo.phone1
+        #     studentInfo['pin'] = sInfo.pin_number
+        #
+        #     return JsonResponse(studentInfo)
 
 
 # def create_custom_token(uid):
