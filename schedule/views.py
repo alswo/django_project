@@ -992,6 +992,10 @@ def updateSchedule(request):
                         temp_name = [n.strip() for n in name2[i].split(',')]
                         sidlist = [s.strip() for s in sid[i].split(',')]
 
+                        temp_aca = filter(None, temp_aca)
+                        temp_name = filter(None, temp_name)
+                        sidlist = filter(None, sidlist)
+
 
                         # student = StudentInfo.objects.filter(aid__contains=[ a for a in temp_aca]).filter(sname__in=[ stu for stu in temp_name ])
                         #
