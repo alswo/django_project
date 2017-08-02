@@ -176,11 +176,9 @@
         <div class="col-sm-4"></div>
     </div>
     <script>
-	{% if user.is_staff %}
 	if (navigator.userAgent.match(/android/i)) {
-		$('#homescreen')[0].innerHTML = '<a class="btn btn-info btn-lg btn-block" aria-expanded="true" href="intent://addshortcut?url=http://curtis-tayotayo.edticket.com&icon=http://www.edticket.com/static/img/tayologo.png&title=셔틀타요&oq=%ED%8C%A8%EC%85%98%ED%92%80&serviceCode=tayo&version=7#Intent;scheme=naversearchapp;action=android.intent.action.VIEW;category=android.intent.category.BROWSABLE;package=com.nhn.android.search;end" onclick="nclk(this,\'fot.shorcut\',\'\',\'\',event);" class="u_sc">홈스크린에 저장  <i class="fa fa-download"></i></a>';
+		$('#homescreen')[0].innerHTML = '<a class="btn btn-info btn-lg btn-block" aria-expanded="true" href="intent://addshortcut?url=http://www.edticket.com&icon=http://www.edticket.com/static/img/tayologo.png&title=셔틀타요&oq=%ED%8C%A8%EC%85%98%ED%92%80&serviceCode=tayo&version=7#Intent;scheme=naversearchapp;action=android.intent.action.VIEW;category=android.intent.category.BROWSABLE;package=com.nhn.android.search;end" onclick="nclk(this,\'fot.shorcut\',\'\',\'\',event);" class="u_sc">바로가기 만들기  <i class="fa fa-download"></i></a>';
 	}
-	{% endif %}
 
         function getSchedule(gid) {
             $.ajax({
