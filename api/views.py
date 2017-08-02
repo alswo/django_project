@@ -7,6 +7,7 @@ from passenger.models import StudentInfo
 from passenger.dateSchedule import timeToDate
 from api.models import Notice
 import json
+from django.views.decorators.csrf import csrf_exempt
 
 ## time format : HH:MM
 def get_difference(time1, time2):
@@ -152,7 +153,7 @@ def getSchedulesForStudent(request):
         scheduletables = ScheduleTable.objects.filter(slist__contains = [sid]).select_related()
 
 	msg = {}
-	msg['schedules'] = {} 
+	msg['schedules'] = {}
 	daydictionary = {u'월':'mon', u'화':'tue', u'수':'wed', u'목':'thu', u'금':'fri', u'토':'sat', u'일':'sun'}
         for scheduletable in scheduletables:
 		data = {}
@@ -285,17 +286,15 @@ def getNotice(request):
 
 	return JsonResponse(msg)
 
+@csrf_exempt
 def getStudentInfo(request):
     if request.method == "POST":
-        pin = request.POST.get('pin_number')
-	
-        if (debug):
-                debug = 1
-        else:
-                debug = 0
-        
+        pin_number = request.POST.get('pin_number')
+
+	debug = 0
+
         try:
-            sInfo = StudentInfo.objects.get(pin_number = pin)
+            sInfo = StudentInfo.objects.get(pin_number = pin_number)
 
             studentInfo = {}
 
@@ -304,30 +303,11 @@ def getStudentInfo(request):
             studentInfo['phone'] = sInfo.phone1
             studentInfo['pin'] = sInfo.pin_number
 	    studentInfo['grade'] = sInfo.grade
-	
-	    if sInfo.id == None:
-		msg = 'Sid does not exist'
-        
-	        return getResponse(debug, 401, msg)
-
-	    elif sInfo.aid == None:
-                msg = 'Aid does not exist'
-
-		return getResponse(debug, 401, msg)
-
-	    elif sInfo.phone == None:
-		msg = 'Phone does not exist'
-
-		return getResponse(debug, 401, msg)
-	
-	    elif sInfo.grade == None:
-                msg = 'Grade does not exist'
-
-		return getRespone(debug, 401, msg)
 
             return JsonResponse(studentInfo)
 
-        except Exception as e:
-            
-            msg = 'PIN does not exist' 
-	    return HttpResponse(debug,400,msg)
+        except:
+
+            msg = 'PIN does not exist'
+
+            return getResponse(debug,400,msg)

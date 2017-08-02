@@ -213,8 +213,14 @@ def putSchedule(request):
         load = request.POST.getlist('load[]')
         sid = request.POST.getlist('sid[]')
         week = int(request.POST.get('week'))
+        alist = request.POST.getlist('alist[]')
 
-        putInven = UpdateInven(bid,carnum,day,req,academy,time,addr,name,name2,load,sid,week)
+        if not alist:
+            alist = 0
+            putInven = UpdateInven(bid,carnum,day,req,academy,time,addr,name,name2,load,sid,week,alist)
+
+        if alist != None:
+            putInven = UpdateInven(bid,carnum,day,req,academy,time,addr,name,name2,load,sid,week,alist)
 
         if putInven.setAlist() == 1:
             return HttpResponse('error setAlist')
@@ -384,6 +390,7 @@ def updateSchedule(request):
             academy = request.POST.getlist('academy[]')
             load = request.POST.getlist('load[]')
             sid = request.POST.getlist('sid[]')
+            busAlist = request.POST.getlist('alist[]')
             #redirect
             carnum = int(request.POST.get('carnum'))
 
@@ -406,11 +413,25 @@ def updateSchedule(request):
                     alist.append(int(a))
 
             except:
-                return HttpResponse('error1')
+                alist = []
+                for a in busAlist:
+                    alist.append(int(a))
 
-            slist_temp = list(set([i for i in sid if i is not None and i != '']))
-            slist_temp2 = ','.join(slist_temp)
-            slist_temp3 = list(set(slist_temp2.split(',')))
+            try:
+                slist_temp = list(set([i for i in sid if i is not None and i != '']))
+                slist_temp2 = ','.join(slist_temp)
+                slist_temp3 = list(set(slist_temp2.split(',')))
+
+                try:
+                    for s in slist_temp3:
+                        slist.append(int(s))
+
+                    slist_temp3 = slist
+                except:
+                    slist_temp3 = [0]
+            except:
+                HttpResponse('error1')
+
 
             stime = int(time[0].split(':')[0] + time[0].split(':')[1])
             etime = int(time[-1].split(':')[0] + time[-1].split(':')[1])
@@ -1225,7 +1246,7 @@ def acaUpdateSchedule(request):
             bid = int(request.POST.get('bid'))
             carnum = request.POST.get('carnum')
             carlist = Car.objects.filter(branchid=bid)
-
+            alist = request.POST.getlist('alist[]')
             #searchTime,day,area,branch for inventory searching and redirection
             searchTime = request.POST.get('searchTime')
             day = request.POST.get('day')
@@ -2287,9 +2308,8 @@ def getRealtimeLocation(request):
 @csrf_exempt
 def moveCarInven(request):
     if request.method == 'POST':
-	iid = request.POST.get('iid')
+        iid = request.POST.get('iid')
         carname = request.POST.get('carname')
-
         Inventory.objects.filter(id = iid).update(carnum = carname)
 
     return HttpResponse(carname)
@@ -2297,9 +2317,24 @@ def moveCarInven(request):
 @csrf_exempt
 def moveCarEditedInven(request):
     if request.method == "POST":
-	iid = request.POST.get('iid')
+        iid = request.POST.get('iid')
         carname = request.POST.get('carname')
 
         EditedInven.objects.filter(id = iid).update(carnum = carname)
 
     return HttpResponse(carname)
+
+@csrf_exempt
+def busAcademy(request):
+    if request.method == "POST":
+        alist = request.POST.getlist('alist[]')
+        iid = request.POST.get('iid')
+        anamelist = []
+
+        for a in alist:
+            academy = Academy.objects.get(id = a)
+            anamelist.append(academy.name)
+
+        Inventory.objects.filter(id = iid).update(alist = alist, anamelist = anamelist)
+
+        return HttpResponse(0)

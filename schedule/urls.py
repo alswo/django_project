@@ -20,4 +20,5 @@ urlpatterns = patterns('',
     url(r'^getRealtimeLocation', views.getRealtimeLocation),
     url(r'^moveCarInven', views.moveCarInven),
     url(r'^moveCarEditedInven', views.moveCarEditedInven),
+    url(r'^busAcademy', views.busAcademy),
 )
