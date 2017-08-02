@@ -1,5 +1,4 @@
 <html>
-
 <head>
   {% load staticfiles %}
   <script src="{% static 'js/jquery-1.10.2.js' %}"></script>
@@ -32,6 +31,10 @@
     .thstyle3 {
       text-align: center;
       width: 8.5%;
+    }
+    .bus-input{
+      background-color: 	#F5F5F5;
+      border-radius: 15px;
     }
   </style>
 </head>
@@ -231,10 +234,25 @@
             <div class="col-md-2">
             </div>
           </div>
+          <br><br>
+          <div class="row bus-input">
+          <div class="col-md-2">
+            <h4>버스용 입력시 선택</h4>
+          </div>
+          <div class="col-md-3">
+            <label>ACADEMY:</label>
+            <select name='alist[]' class="selectpicker" data-live-search="ture" id="{{contact.id}}gid" form="scheduleform" multiple>
+            {% for a in academy %}
+            <option value="{{a.id}}">{{a.name}}</option>
+            {% endfor %}
+            </select>
+          </div>
+          <br><br><br><br>
         </div>
+      </div>
         <br><br><br><br><br><br>
       </div>
-      <br>
+      <br><br><br><br><br><br><br><br><br><br>
       <div class="table-container">
         <p>요청사항</p>
         <textarea class="form-control" rows="4" name="req" form="scheduleform"></textarea>

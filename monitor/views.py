@@ -19,11 +19,11 @@ def shuttles(request):
 	t = timeToDate()
 	today = t.timeToYmd()
 	hm = t.timeToHM()
-
-	hm = "18:29"
+	rawhm = t.timeToRawHM()
+	d = t.timeToD()
 
 	msg = ""
-	inventories = Inventory.objects.filter(day = '월', stime__lte = '1801', etime__gte = '1801')
+	inventories = Inventory.objects.filter(day = d, stime__lte = int(rawhm) + 30, etime__gte = int(rawhm) - 30)
 	invens = list()
 	for inventory in inventories:
 		diff1 = -1
@@ -35,9 +35,9 @@ def shuttles(request):
 		scheduletables = ScheduleTable.objects.filter(iid = inventory.id).order_by('time')
 
 		inven['shuttle']['carnum'] = inventory.carnum
-		lastlocation = RealtimeLocation.objects.filter(date='2017-07-17', carnum=inventory.carnum, schedule_time__lte=str(inventory.etime)[:2]+':'+str(inventory.etime)[2:]).order_by('schedule_time').last()
+		lastlocation = RealtimeLocation.objects.filter(date=today, carnum=inventory.carnum, schedule_time__lte=str(inventory.etime)[:2]+':'+str(inventory.etime)[2:], schedule_time__gte=str(inventory.stime)[:2]+':'+str(inventory.stime)[2:]).order_by('schedule_time').last()
 		if (lastlocation):
-			diff1 = get_difference(lastlocation.schedule_time, lastlocation.departure_time)
+			diff1 = get_difference(lastlocation.departure_time, lastlocation.schedule_time)
 			hoursMinutes = setTimeDelta(hm, diff1).split(':')
 			inven['shuttle']['hour'] = hoursMinutes[0]
 			inven['shuttle']['minute'] = hoursMinutes[1]
@@ -47,9 +47,9 @@ def shuttles(request):
 
 			if (scheduletable.lflag == 2):
 				addr = '출발'
-				# 아직 출발하지 않았으면
-				if (lastlocation):
+				if (lastlocation and lastlocation.schedule_time >= scheduletable.time):
 					pass
+				# 아직 출발하지 않았으면
 				else:
 					inven['shuttle']['hour'] = hoursMinutes[0]
 					inven['shuttle']['minute'] = hoursMinutes[1]
@@ -62,13 +62,13 @@ def shuttles(request):
 			else:
 				addr = scheduletable.addr
 
+				if (lastlocation and lastlocation.schedule_time < scheduletable.time and hm > scheduletable.time and diff2 < 0):
+					diff2 = 1
+					hoursMinutes = setTimeDelta(scheduletable.time, -1).split(':')
+					inven['shuttle']['hour'] = hoursMinutes[0]
+					inven['shuttle']['minute'] = hoursMinutes[1]
+
 			inven['schedules'].append({'hour': hoursMinutes[0], 'minute': hoursMinutes[1], 'addr': addr})
-	
-			if (lastlocation and lastlocation.schedule_time < scheduletable.time and hm > scheduletable.time and diff2 < 0):
-				diff2 = 1
-				hoursMinutes = setTimeDelta(scheduletable.time, -1).split(':')
-				inven['shuttle']['hour'] = hoursMinutes[0]
-				inven['shuttle']['minute'] = hoursMinutes[1]
 
 		invens.append(inven)
 
@@ -80,5 +80,6 @@ def shuttles(request):
 
 	return render_to_response('shuttles.html', {'msg': msg, 'invens': invens})
 	#return HttpResponse('\n'.join('{}: {}'.format(*k) for k in enumerate(invens['shuttle']['carnum'])))
+	#return HttpResponse(msg)
 	#return HttpResponse("diff1 = " + str(diff1) + ", diff2 = " + str(diff2))
 	#return HttpResponse(inven_id)

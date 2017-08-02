@@ -73,6 +73,8 @@ FCM_APIKEY = "AAAAJM6rFH8:APA91bGSgH5Qce2RlnY0DUyXuZye1bJZWUtM8TpKiovBdjpcz9xzYb
 
 WSGI_APPLICATION = 'tayo.wsgi.application'
 
+TAYO_TMP_DIR = BASE_DIR + '/tmp/'
+
 
 # Database
 # https://docs.djangoproject.com/en/1.9/ref/settings/#databases

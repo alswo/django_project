@@ -126,7 +126,7 @@
             </div>
             <br>
             {% endif %}
-            {% if user.profile.bid == 2 %}
+            {% if user|in_group:"academy"%}
             <button id="dLabel" type="button" class="btn btn-primary btn-lg btn-block"  onclick="location.href='/inventory/getSchedule'"data-toggle="modal" data-target="#getschedule">학원용 스케쥴보기 (NEW)</button>
             <br>
             {% endif %}

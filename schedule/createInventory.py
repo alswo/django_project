@@ -13,7 +13,7 @@ from schedule.models import Inventory, ScheduleTable, EditedInven, EditedSchedul
 from passenger.models import Academy
 
 class UpdateInven:
-    def __init__(self,bid,carnum,day,req,academy,time,addr,name,name2,load,sid,week):
+    def __init__(self,bid,carnum,day,req,academy,time,addr,name,name2,load,sid,week,alist):
         self.bid = bid
         self.carnum = carnum
         self.day = day
@@ -26,38 +26,45 @@ class UpdateInven:
         self.load = load
         self.sid = sid
         self.week = week
+        self.alist = alist
 
     def setAlist(self):
+        if self.alist == 0:
+            try:
+                alist_temp = list(set([i for i in self.academy if i is not None and i != '']))
+                alist_temp2 = ','.join(alist_temp)
+                alist_temp3 = list(set(alist_temp2.split(',')))
+                alist = []
 
-        try:
-            alist_temp = list(set([i for i in self.academy if i is not None and i != '']))
-            alist_temp2 = ','.join(alist_temp)
-            alist_temp3 = list(set(alist_temp2.split(',')))
-            alist = []
+                for a in alist_temp3:
+                    alist.append(int(a))
 
-            for a in alist_temp3:
-                alist.append(int(a))
+                self.alist = alist
 
-            self.alist = alist
-
-        except:
-            return(1)
+            except:
+                return(1)
+        else:
+            self.alist = self.alist
 
     def setSlist(self):
-
         try:
             slist_temp = list(set([i for i in self.sid if i is not None and i != '']))
             slist_temp2 = ','.join(slist_temp)
             slist_temp3 = list(set(slist_temp2.split(',')))
             slist = []
 
-            for s in slist_temp3:
-                slist.append(int(s))
+            try:
+                for s in slist_temp3:
+                    slist.append(int(s))
 
-            snum = len(slist)
+                snum = len(slist)
 
-            self.slist = slist
-            self.snum = snum
+                self.slist = slist
+                self.snum = snum
+
+            except:
+                self.slist = [0]
+                self.snum = 0
 
         except:
             return(1)
@@ -107,6 +114,10 @@ class UpdateInven:
                     temp_name = [n.strip() for n in self.name2[i].split(',')]
                     sidlist = [s.strip() for s in self.sid[i].split(',')]
 
+                    temp_aca = filter(None, temp_aca)
+                    temp_name = filter(None, temp_name)
+                    sidlist = filter(None, sidlist)
+
                     temp_lflag = [0 for z in range(len(temp_name))]
 
                     anamelist = []
@@ -139,6 +150,10 @@ class UpdateInven:
                         temp_aca = [a.strip() for a in self.academy[i].split(',')]
                         temp_name = [n.strip() for n in self.name2[i].split(',')]
                         sidlist = [s.strip() for s in self.sid[i].split(',')]
+
+                        temp_aca = filter(None, temp_aca)
+                        temp_name = filter(None, temp_name)
+                        sidlist = filter(None, sidlist)
 
                         temp_lflag = [0 for z in range(len(temp_name))]
 
@@ -173,6 +188,10 @@ class UpdateInven:
                         temp_name = [n.strip() for n in self.name2[i].split(',')]
                         sidlist = [s.strip() for s in self.sid[i].split(',')]
 
+                        temp_aca = filter(None, temp_aca)
+                        temp_name = filter(None, temp_name)
+                        sidlist = filter(None, sidlist)
+
                         temp_lflag = [0 for z in range(len(temp_name))]
 
                         anamelist = []
@@ -204,6 +223,11 @@ class UpdateInven:
                     temp_aca = [a.strip() for a in self.academy[i].split(',')]
                     temp_name = [n.strip() for n in self.name2[i].split(',')]
                     sidlist = [s.strip() for s in self.sid[i].split(',')]
+
+                    temp_aca = filter(None, temp_aca)
+                    temp_name = filter(None, temp_name)
+                    sidlist = filter(None, sidlist)
+
 
                     temp_lflag = [0 for z in range(len(temp_name))]
 

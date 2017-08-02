@@ -39,6 +39,7 @@
 		<thead></thead>
 		<tbody id="result_tbody"></tbody>
 	</table>
+	<div id="click_poi"></div>
     </div>
     <div class="col-md-3">
       <div class="row">
@@ -124,8 +125,6 @@
         <div class="col-md-5">
         </div>
         <div class="col-md-7">
-          <!-- button type="button" class="btn btn-primary" onclick="getOptimized();">노드계산</button>
-          <button type="button" class="btn btn-success" data-toggle="modal" data-target="#myModal" onclick="getOpti();">최적동선 찾기</button //-->
           <button type="button" class="btn btn-success" data-toggle="modal" data-target="#myModal" onclick="getRoute();">최적동선 찾기</button-->
         </div>
       </div>
@@ -170,28 +169,6 @@
   var cLonLat, zoom; //중심 좌표와 지도레벨을 정의 합니다.
   var routeLayer;
 
-  function setVariables() {
-    cLonLat = new Tmap.LonLat();
-    //중심점 좌표 입니다. EPSG3857 좌표계 형식 입니다.
-    zoom = 16; // zoom level입니다.  0~19 레벨을 서비스 하고 있습니다.
-    mapW = '100%'; // 지도의 가로 크기 입니다.
-    mapH = '600px'; // 지도의 세로 크기 입니다.
-  }
-
-  function init() {
-    setVariables();
-    map = new Tmap.Map({
-      div: 'map_div',
-      width: mapW,
-      height: mapH,
-      animation: true
-    });
-    // div : 지도가 생성될 div의 id값과 같은 값을 옵션으로 정의 합니다.
-    // Tmap,Map 클래스에 대한 상세 사항은 "JavaScript" 하위메뉴인 "기본 기능" 페이지를 참조 해주세요.
-    map.events.register("click", map, onClickMap);
-    map.setCenter(cLonLat, zoom);
-  }
-
 	var labels = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 	var labelIndex = 0;
 	var last_infowindow;
@@ -229,8 +206,12 @@
                                         placeMarker(e.latLng, map, result[0].fullName);
                                 }
                         });
-                });
+			$('#click_poi').data("lat", e.latLng.lat());
+			$('#click_poi').data("lon", e.latLng.lng());
+			$('#click_poi').data("title", "???");
 
+			gClicked = $('#click_poi');
+                });
 	}
 
 	function initMarkers() {
@@ -315,155 +296,9 @@
         }
 
 
-
-
-
-  //    function initTmap(){
-  //        map = new Tmap.Map({div:'map_div', width:'100%', height:'800px'});
-  //        map.events.register("click", map, onClickMap);
-
-  //    }
-
-
-  function onClickMap(e) {
-    var markerLayer = new Tmap.Layer.Markers();
-    map.addLayer(markerLayer);
-
-    var lonlat = map.getLonLatFromViewPortPx(e.xy);
-    var size = new Tmap.Size(21, 25);
-    var offset = new Tmap.Pixel(-(size.w / 2), -size.h);
-    var icon = new Tmap.Icon('https://developers.skplanetx.com/upload/tmap/marker/pin_b_m_a.png',size,offset);
-
-    var marker = new Tmap.Marker(lonlat, icon);
-    markerLayer.addMarker(marker);
-
-    setTable(marker.lonlat);
-
-    //markers.push(marker);
-  }
-
-  function setTable(position) {
-    //marker info table
-    var node_tr = document.createElement('tr');
-    var node_td = document.createElement('td');
-
-
-    node_td.innerText = number + ' ' + position;
-    var target = document.getElementById('view-marker');
-
-    target.appendChild(node_tr);
-    target.appendChild(node_td);
-
-    tempHtmlAdd = "<tr id='addPoi" +  index_number + "'><td data-name='del'><button name='del' id='del' class='btn-xs btn-danger glyphicon glyphicon-remove row-remove' onClick='remove_row(" + index_number + ")'></button></td><td>" + "<input class='form-control' type='text' name='addr'>" + "</td><td>"+ Math.round(position.lon) + "</td><td>"+ Math.round(position.lat) + "</td><td><input type='text' class='form-control' name='numpassenger' value='1'></td><td class='markerInfo' style='display:none'>"+ "???" +":"+position.lon +":"+position.lat+"</td></tr>";
-    $('#addPoi').append(tempHtmlAdd)
-    index_number++;
-
-    number++;
-  }
-
   var g = new Graph();
 
   var source = []
-
-  function getOptimized() {
-    //getWeight(markers[0].lonlat, markers[1].lonlat);
-    g.reset();
-    markers = []
-
-    infoTemp = []
-    infoLength = $('.markerInfo').length
-
-    infoTemp = $('#markerStart').text().split(':')
-    markers.push(infoTemp)
-
-    for( i = 0 ; i < infoLength; i ++){
-      infoTemp = $('.markerInfo')[i].innerText.split(':')
-      markers.push(infoTemp)
-    }
-
-    infoTemp = $('#markerEnd').text().split(':')
-    infoTemp[0] += "E"
-    markers.push(infoTemp)
-
-    for (var i = 0; i < markers.length; i++) {
-      g.addNode(markers[i][0].toString());
-    }
-
-    for (var j = 0; j < markers.length; j++) {
-      for (var k = j + 1; k < markers.length; k++) {
-        getWeight(markers[j][1], markers[j][2], markers[k][1], markers[k][2], g.nodes[j], g.nodes[k], function() {
-          var temp = this.valueOf();
-          edge_1 = temp[0].toString();
-          edge_2 = temp[1].toString();
-          edge_3 = temp[2];
-          var temp_s = [edge_1, edge_2, edge_3];
-          source.push(temp_s);
-          g.addEdge(edge_1, edge_2, edge_3);
-        });
-
-      }
-    }
-
-    //console.log(jsonObj);
-    alert("Done");
-
-  }
-
-  function getOpti() {
-    var source_result = []
-    var result = Prim(g);
-    //var resultTemp;
-
-    // console.log(g.edges[lastNode])
-    // for(e = 0; e < g.edges[lastNode].length; e++ ){
-    //   if(g.edges[lastNode][e].sink.indexOf("E") != -1){
-    //     resultTemp = [g.edges[lastNode][e].capacity,g.edges[lastNode][e].sink]
-    //   }
-    // }
-    //
-    // result.push(resultTemp)
-
-    result.push(g.nodes[g.nodes.length -1 ])
-
-    console.log(result)
-
-    doc = document.getElementById('recommand');
-    var temp = '';
-    var source_j = 0;
-    var source_k = 1;
-
-    var result_j = 0;
-    //result.push(academy);
-
-
-    for (var j = 0; j < result.length - 1; j++) {
-      for (var k = 0; k < source.length; k++) {
-        if (result[source_j] == source[k][0] && result[source_k] == source[k][1]) {
-          source_result.push(source[k][2])
-        } else if (result[source_j] == source[k][1] && result[source_k] == source[k][0]) {
-          source_result.push(source[k][2])
-        }
-      }
-      source_j++;
-      source_k++;
-    }
-
-    var all_time = 0;
-
-    for (var i = 0; i < result.length; i++) {
-      if (i < result.length - 1) {
-        temp += '<br>' + result[i] + '(' + Math.floor(source_result[result_j] / 6) / 10 + ' M)' + '<br>';
-      } else {
-        temp += '<br>' + result[i]
-      }
-
-      if (typeof(source_result[result_j]) != "undefined") {
-        all_time += source_result[result_j];
-      }
-      result_j++;
-    }
-    doc.innerHTML = temp + '&nbsp&nbsp' + ' <span class="glyphicon glyphicon-time" aria-hidden="true"></span>' + ' : ' + Math.floor(all_time / 60) + 'M';
-  }
 
   function getRoute() {
     var jsonObj = {};
@@ -472,6 +307,10 @@
     initMarkers();
 
     vertexInfo = $('#markerStart').text().split(':');
+
+    jsonObj['reqCoordType'] = 'WGS84GEO';
+    jsonObj['resCoordType'] = 'WGS84GEO';
+
     jsonObj['startName'] = vertexInfo[0];
     jsonObj['startX'] = vertexInfo[1];
     jsonObj['startY'] = vertexInfo[2];
@@ -494,6 +333,7 @@
 
         if (jsonObj['viaPoints'][i]['viaPointName'] == '???') {
             jsonObj['viaPoints'][i]['viaPointName'] = $('.markerInfo')[i].parentNode.childNodes[1].firstChild.value;
+console.log($('.markerInfo')[i].parentNode);
         }
         
     } 
@@ -522,30 +362,12 @@
           doc.innerHTML = appendHtml + '&nbsp&nbsp' + ' <span class="glyphicon glyphicon-time" aria-hidden="true"></span> : ' + Math.floor(parseInt(result['properties']['totalTime']) / 60) + 'M';
 
 
-          jsonObj['viaPoints'] = [];
-          var passList = "";
-          for (i=0; i < result['features'].length - 1; i++) {
-              result['features'][i]['viaPointName']
-              for (j=0; j < $('.markerInfo').length; j++) {
-                  vertexInfo = $('.markerInfo')[j].innerText.split(':');
-                  if (result['features'][i]['viaPointName'] === vertexInfo[0]
-                      || result['features'][i]['viaPointName'] === $('.markerInfo')[j].parentNode.childNodes[1].firstChild.value) {
-                      passList += vertexInfo[1] + "," + vertexInfo[2] + ",A,0";
-                  }
-              }
-          }
+	  jsonObj['reqCoordType'] = 'WGS84GEO';
+	  jsonObj['resCoordType'] = 'WGS84GEO';
 
-          var urlStr = 'https://apis.skplanetx.com/tmap/multiViaPointRoute?version=1&format=xml';
-          urlStr += "&startX=" + jsonObj['startX'];
-          urlStr += "&startY=" + jsonObj['startY'];
-          urlStr += "&endX=" + jsonObj['endX'];
-          urlStr += "&endY=" + jsonObj['endY'];
-          urlStr += "&appKey=9c78e49d-c72c-36a6-8e25-5c249e9291a3&reqCoordType=WGS84GEO&resCoordType=WGS84GEO";
-          urlStr += "&passList=" + passList;
-
-
-	  //urlStr = 'http://curtis-tayotayo.edticket.com/static/test.kml';
-
+	unique_id = result['unique_id'];
+	urlStr = 'http://' + window.location.hostname + '/optimizer/getRouteSequential?unique_id=' + unique_id;
+	console.log(urlStr);
 
 	  var routeLayer = new google.maps.KmlLayer({
 		url: urlStr,
@@ -573,18 +395,8 @@
     return;
   }
 
-//경로 그리기 후 해당영역으로 줌
-function onDrawnFeatures(e){
-    map.zoomToExtent(this.getDataExtent());
-}
-
-
-  function getPoi() {
-
-  }
 
   function addrToPoi(flag) {
-console.log(gClicked);
 	if (!gClicked) {
 		return;
 	}
@@ -593,9 +405,16 @@ console.log(gClicked);
 	lon = gClicked.data('lon');
 	lat = gClicked.data('lat');
 
-        tempHtmlStart = "<td>"+addr+"</td><td class='lon'>"+lon+"</td><td class='lat'>"+lat+"</td><td>...</td><td id='markerStart' style='display:none'>"+addr+":"+lon+":"+lat+"</td>";
-        tempHtmlEnd = "<td>"+addr+"</td><td class='lon'>"+lon+"</td><td class='lat'>"+lat+"</td><td>...</td><td id='markerEnd' style='display:none'>"+addr+":"+lon+":"+lat+"</td>";
-        tempHtmlAdd = "<tr id='addPoi" +  index_number + "'><td data-name='del'><button name='del' id='del' class='btn-xs btn-danger glyphicon glyphicon-remove row-remove' onClick='remove_row(" + index_number + ")'></button></td><td>" +addr+"</td><td>"+lon+"</td><td>"+lat+"</td><td><input type='text' class='form-control' name='numpassenger' value='1'></td><td class='markerInfo' style='display:none'>"+addr+":"+lon+":"+lat+"</td></tr>";
+	if (addr == '???') {
+		formaddr = "<input class='form-control' type='text' name='addr'>";
+	}
+	else {
+		formaddr = addr;
+	}
+
+        tempHtmlStart = "<td>"+addr+"</td><!-- td class='lon'>"+lon+"</td><td class='lat'>"+lat+"</td//--><td>...</td><td id='markerStart' style='display:none'>"+addr+":"+lon+":"+lat+"</td>";
+        tempHtmlEnd = "<td>"+addr+"</td><!-- td class='lon'>"+lon+"</td><td class='lat'>"+lat+"</td//--><td>...</td><td id='markerEnd' style='display:none'>"+addr+":"+lon+":"+lat+"</td>";
+        tempHtmlAdd = "<tr id='addPoi" +  index_number + "'><td data-name='del'><button name='del' id='del' class='btn-xs btn-danger glyphicon glyphicon-remove row-remove' onClick='remove_row(" + index_number + ")'></button></td><td>" +formaddr+"</td><!-- td>"+lon+"</td><td>"+lat+"</td//--><td><input type='text' class='form-control' name='numpassenger' value='1'></td><td class='markerInfo' style='display:none'>"+addr+":"+lon+":"+lat+"</td></tr>";
 
         if (flag == "a"){
             $('#addPoi').append(tempHtmlAdd)
@@ -607,56 +426,6 @@ console.log(gClicked);
 	}
 
 	return;
-  }
-
-  var capacity;
-
-  function getWeight(start_lon, start_lat, end_lon, end_lat, j, k, callback) {
-
-    var j = j;
-    var k = k;
-    var startX = start_lon;
-    var startY = start_lat;
-    var endX = end_lon;
-    var endY = end_lat;
-    var urlStr = "https://apis.skplanetx.com/tmap/routes?version=1";
-    urlStr += "&startX=" + startX;
-    urlStr += "&startY=" + startY;
-    urlStr += "&endX=" + endX;
-    urlStr += "&endY=" + endY;
-    urlStr += "&appKey=9c78e49d-c72c-36a6-8e25-5c249e9291a3";
-
-
-
-    var xmlHttp = new XMLHttpRequest();
-
-
-    xmlHttp.onreadystatechange = function() {
-      if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
-        capacity = xmlHttp.responseText;
-        jsonObj = JSON.parse(capacity);
-
-        capa = jsonObj.features[0].properties.totalTime;
-
-        capacity = []
-        capacity.push(j);
-        capacity.push(k);
-        capacity.push(capa);
-
-        console.log(capacity);
-        callback.apply(capacity);
-      } else if (xmlHttp.readyState == 4 && xmlHttp.status == 400) {
-        capacity = []
-        capacity.push(j);
-        capacity.push(k);
-        capacity.push(0);
-
-        callback.apply(capacity);
-      }
-    }
-
-    xmlHttp.open("GET", urlStr, true); // true for asynchronous
-    xmlHttp.send(null);
   }
 
 </script>
