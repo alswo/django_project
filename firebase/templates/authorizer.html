@@ -39,15 +39,15 @@
     function getToken(){
         var pin = document.getElementById("pin").value;
          $.ajax({
-                url: "getStudentInfo",
+                url: "http://test.edticket.com/api/getStudentInfo",
                 type: "POST",
                 data: {
                         pin_number: pin,
                         },
-                success: function(data){
-                    console.log(data)
-                    siginIn()
-		}
+                success:function(result, status, xhr){
+                	var ret = JSON.parse(xhr.responseText);
+			console.log(ret.sid)
+                }
         });
     }
 

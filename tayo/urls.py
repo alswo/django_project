@@ -8,8 +8,8 @@ urlpatterns = [
     url(r'^inventory/',include('schedule.urls')),
     url(r'^optimizer/',include('optimizer.urls')),
     url(r'^api/',include('api.urls')),
+    url(r'^getToken',include('firebase.urls')),
     url(r'^monitor/',include('monitor.urls')),
-    url(r'^getToken/',include('firebase.urls')),
     url(r'^fcm/', include('fcm.urls')),
     url(
         r'^accounts/login/',

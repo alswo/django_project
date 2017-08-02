@@ -146,7 +146,7 @@ function callNumber(num){
         <div class="col-md-1"></div>
 <script>
 function dropdown(t,offset,invenid,stableid,choice) {
-    var chocie = choice
+    var choice = choice
     $.ajax({
         url: "/inventory/todayLoad",
         type: "GET",
@@ -237,7 +237,7 @@ function setRealtimeLocation(element, carnum, schedule_time) {
        }
        return;
    }
-   
+
    // 앞의 정류장들이 모두 click 되어야 진행
    for (i=1; i<elementids[1]; i++) {
        if (document.getElementById(elementids[0] + '_' + i).style.backgroundColor != bgcolor) {
