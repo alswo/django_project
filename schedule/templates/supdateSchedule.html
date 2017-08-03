@@ -295,7 +295,7 @@
               {% if c.scheduletables %}
               <select class="moveCarList">
                 {% for car in carlist %}
-                  {% if car.carname == carnum %}
+                  {% if car.carname == c.carnum %}
                     <option value="{{c.id}}/{{car.carname}}" selected>{{car.carname}}호차</option>
                   {% else %}
                     <option value="{{c.id}}/{{car.carname}}">{{car.carname}}호차</option>
@@ -465,55 +465,6 @@
       )
     });
 
-    function validateSearchForm() {
-      var num = /^\d+$/;
-
-      if (document.forms["searchform"]["area"].selectedIndex < 1) {
-        alert("지역, 지점을 선택해 주세요.")
-        return false;
-      } else if (document.forms["searchform"]["time"].value != '') {
-        if (num.test(document.forms["searchform"]["time"].value) == false) {
-          alert("시간은 숫자만 입력해 주세요.(예:1500)")
-          return false;
-        }
-      }
-    }
-
-    function validateTableForm(e) {
-      console.log(e)
-      tableLength = document.forms[e]['time[]'].length
-      tempAddrS = document.forms[e]['addr[]'][0].value
-      tempAddrE = document.forms[e]['addr[]'][tableLength - 1].value
-      var timepattern = /([01]\d|2[0-3]):([0-5]\d)/;
-
-      if (tempAddrS != "" || tempAddrE != "") {
-        alert("시작,끝 주소는 반드시 비워주세요.")
-        return false;
-      }
-      tempTime = document.forms[e]['time[]']
-      for (i = 0; i < tableLength; i++) {
-        if (timepattern.test(tempTime[i].value) == false) {
-          alert(i + 1 + "번째 로우의 숫자를 정확히 입력해 주세요.")
-          return false;
-        }
-      }
-
-      tempName = document.forms[e]['name[]']
-      if (tempName[0].value != "" || tempName[tableLength - 1].value != "") {
-        alert("시작,끝 이름은 반드시 비워주세요.")
-        return false;
-      }
-
-      tempLoad = document.forms[e]['load[]']
-      for (i = 1; i < tableLength - 1; i++) {
-        if (tempLoad[i].value == '') {
-          alert(i + 1 + "번째 등하원 여부를 선택해 주세요.")
-          return false;
-        }
-      }
-
-    }
-
     function reqInventory(iid, flag) {
 
       var req = $('#' + iid + 'text').val();
@@ -579,10 +530,11 @@
     function validateSearchForm() {
       var num = /^\d+$/;
 
-      if (document.forms["searchform"]["area"].selectedIndex < 1) {
-        alert("지역, 지점을 선택해 주세요.")
-        return false;
-      } else if (document.forms["searchform"]["time"].value != '') {
+      //if (document.forms["searchform"]["area"].selectedIndex < 1) {
+        //alert("지역, 지점을 선택해 주세요.")
+        //return false;
+      //} else 
+      if (document.forms["searchform"]["time"].value != '') {
         if (num.test(document.forms["searchform"]["time"].value) == false) {
           alert("시간은 숫자만 입력해 주세요.(예:1500)")
           return false;

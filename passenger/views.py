@@ -183,6 +183,9 @@ def driverSchedule(request):
 
 @csrf_exempt
 def updateSchedule(request):
+    if (request.user.is_authenticated() and request.user.username == 'sua'):
+        return HttpResponse("You don't have permission for this page!!")
+
     if request.method == "GET":
         gid = request.GET.get('gid')
         day = request.GET.get('day')
@@ -209,6 +212,9 @@ def updateSchedule(request):
         return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
 def uAca(request):
+    if (request.user.is_authenticated() and request.user.username == 'sua'):
+        return HttpResponse("You don't have permission for this page!!")
+
     if request.method == "GET":
         aid = request.GET.get('aid')
         day = request.GET.get('day')

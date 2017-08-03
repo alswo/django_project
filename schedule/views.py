@@ -262,10 +262,10 @@ def updateSchedule(request):
                 carnum = int(request.GET.get('car'))
                 week = request.GET.get('week')
                 searchflag = request.GET.get('searchinven')
-                areaid = int(request.GET.get('areaid'))
                 bid = int(request.GET.get('bid'))
                 day = request.GET.get('day')
                 searchTime = request.GET.get('searchTime')
+                areaid = request.GET.get('areaid')
 
                 academy = Academy.objects.filter(bid=bid)
                 branch = Branch.objects.filter(areaid = areaid)
@@ -322,7 +322,8 @@ def updateSchedule(request):
 
 
         area = Area.objects.all()
-        return render_to_response('supdateSchedule.html',{'area':area,'user':request.user})
+        branch = Branch.objects.all()
+        return render_to_response('supdateSchedule.html',{'area':area, 'branch': branch, 'user':request.user})
 
 
     elif request.method == "POST":
@@ -344,14 +345,18 @@ def updateSchedule(request):
         if updateflag == '2':
             #searchflag -> 1: first searching
             searchflag = request.POST.get('searchinven')
-            areaid = int(request.POST.get('area'))
+            areaid = 0
             bid = int(request.POST.get('bid'))
             day = request.POST.get('day')
             searchTime = request.POST.get('searchTime')
 
             if searchflag == '1':
                 academy = Academy.objects.filter(bid=bid)
-                branch = Branch.objects.filter(areaid = areaid)
+                if (request.POST.get('area')):
+                    areaid = int(request.POST.get('area'))
+                    branch = Branch.objects.filter(areaid = areaid)
+                else:
+                    branch = Branch.objects.all()
                 carlist = Car.objects.filter(branchid=bid)
                 carnum = carlist[0].carname
 

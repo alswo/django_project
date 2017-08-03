@@ -305,7 +305,7 @@
                 {% if c.scheduletables %}
                 <select class="moveCarList">
                   {% for car in carlist %}
-                    {% if car.carname == carnum %}
+                    {% if car.carname == c.carnum %}
                       <option value="{{c.id}}/{{car.carname}}" selected>{{car.carname}}호차</option>
                     {% else %}
                       <option value="{{c.id}}/{{car.carname}}">{{car.carname}}호차</option>
