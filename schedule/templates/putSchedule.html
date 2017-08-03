@@ -328,7 +328,7 @@
 <script>
   $('.table-container').on('click', '.addrow', function() {
     $(this).parent().find('.table-body').append(
-      '<tr><td data-name="time" class="thstyle1"><input type="text" name="time[]" placeholder="Time" class="form-control" form="scheduleform"/></td><td class="thstyle11"><input type="text" name="addr[]" placeholder="Address" class="form-control" form="scheduleform"/></td><td data-name="name" class="inputTd"><input type="text" name="name[]" data-role="tagsinput" class="form-control" form="scheduleform" value="{% for name in s.sname %}{{name}}{% include '
+      '<tr><td data-name="time" class="thstyle1"><input type="text" name="time[]" placeholder="Time" onblur="normalizeTime(this);" class="form-control" form="scheduleform"/></td><td class="thstyle11"><input type="text" name="addr[]" placeholder="Address" class="form-control" form="scheduleform"/></td><td data-name="name" class="inputTd"><input type="text" name="name[]" data-role="tagsinput" class="form-control" form="scheduleform" value="{% for name in s.sname %}{{name}}{% include '
       comma.html ' %}{% endfor %}" /></td><td data-name="addstu"><button class="btn btn-primary glyphicon glyphicon-plus addstudent" data-toggle="modal"></button></td><td data-name="academy" class="inputAcaU" style="display:none"><input name="academy[]" class="form-control" form="scheduleform" value="{% for aid in s.alist %}{{aid}}{% include '
       comma.html ' %}{% endfor %}" /></td><td data-name="sid" class="inputSid" style="display:none;"><input name="sid[]" type="text" data-role="tagsinput" class="form-control" form="scheduleform" value="{% for sid in s.slist %}{{sid}}{% include '
       comma.html ' %}{% endfor %}"/></td><td data-name="load"><select name="load[]" form="scheduleform"><option value="">등하원</option><option value="1">등원</option><option value="0">하원</option></select></td><td data-name="del"><button name="del" class="btn btn-danger glyphicon glyphicon-remove row-remove"></button></td></tr>'
@@ -376,6 +376,21 @@
       return false;
     }
   }
+
+  function normalizeTime(element) {
+      tvalue = element.value;
+      console.log(tvalue.length);
+      if (tvalue.length == 4 && tvalue.match(/^[0-9]+$/)) {
+        tvalue = [tvalue.slice(0, 2), ":", tvalue.slice(2)].join('');
+        element.value = tvalue;
+      }
+  }
+
+  $(document).ready(function() { 
+      for (i = 0; i < 3; i++) {
+        $('.addrow').click(); 
+      }
+  });
 
 </script>
 
