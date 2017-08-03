@@ -265,6 +265,7 @@ def updateSchedule(request):
                 bid = int(request.GET.get('bid'))
                 day = request.GET.get('day')
                 searchTime = request.GET.get('searchTime')
+                areaid = request.GET.get('areaid')
 
                 academy = Academy.objects.filter(bid=bid)
                 branch = Branch.objects.filter(areaid = areaid)
