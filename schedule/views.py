@@ -345,14 +345,18 @@ def updateSchedule(request):
         if updateflag == '2':
             #searchflag -> 1: first searching
             searchflag = request.POST.get('searchinven')
-            areaid = int(request.POST.get('area'))
+            areaid = 0
             bid = int(request.POST.get('bid'))
             day = request.POST.get('day')
             searchTime = request.POST.get('searchTime')
 
             if searchflag == '1':
                 academy = Academy.objects.filter(bid=bid)
-                branch = Branch.objects.filter(areaid = areaid)
+                if (request.POST.get('area')):
+                    areaid = int(request.POST.get('area'))
+                    branch = Branch.objects.filter(areaid = areaid)
+                else:
+                    branch = Branch.objects.all()
                 carlist = Car.objects.filter(branchid=bid)
                 carnum = carlist[0].carname
 
