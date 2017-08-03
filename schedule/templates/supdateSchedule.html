@@ -364,7 +364,7 @@
                 <td data-name="name" class="inputTd tdstyle2">
                   <input type="text" name="name[]" data-role="tagsinput" class="form-control tInput" form="scheduleform{{c.id}}" value="{% for name in es.sname %}{{name}}{% include 'comma.html' %}{% endfor %}" />
                 </td>
-                <td data-name="addstu" class="text-center tdstyle3"><button class="btn btn-primary glyphicon glyphicon-plus addstudent" data-toggle="modal"></button></td>
+                <td data-name="addstu" class="text-center tdstyle3"><button class="btn btn-primary glyphicon glyphicon-plus addstudent" data-toggle="modal" ></button></td>
                 <td data-name="sid" class="inputSid" style="display:none;"><input name="sid[]" type="text" class="form-control" form="scheduleform{{c.id}}" value="{% for sid in es.slist %}{{sid}}{% include 'comma.html' %}{% endfor %}" /></td>
                 <td data-name="academy" class="inputAcaU" style="display:none;"><input name="academy[]" type="text" class="form-control" form="scheduleform{{c.id}}" value="{% for aid in es.alist %}{{aid}}{% include 'comma.html' %}{% endfor %}" /></td>
                 <td data-name="load" class="text-center tdstyle3">
@@ -390,26 +390,27 @@
               </tr>
               {% endfor %} {% endif %}
             </tbody>
-            <div class="modal fade" id="addstu" role="dialog" aria-labelledby="myModalLabel">
-              <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                  <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title" id="myModalLabel">Modal title</h4>
-                  </div>
-                  <div class="modal-body">
-                    <select id="academyselect" class="form-control selectpicker" data-live-search="ture"><option value="">학원선택</option>{% for a in academy %}<option value = "{{a.id}}">{{a.name}}</option>{% endfor %}</select>
-                    <br>
-                    <select id="studentList" class="selectpicker" data-live-search="ture" multiple></select>
-                    <input type="hidden" id="rowid" value="" />
-                  </div>
-                  <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary studenttoinput">학생추가</button>
-                  </div>
+          </table>
+          </div>
+          <div class="modal fade" id="addstu" role="dialog" aria-labelledby="myModalLabel">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                  <h4 class="modal-title" id="myModalLabel">Modal title</h4>
+                </div>
+                <div class="modal-body">
+                  <select id="academyselect" class="form-control selectpicker" data-live-search="ture"><option value="">학원선택</option>{% for a in academy %}<option value = "{{a.id}}">{{a.name}}</option>{% endfor %}</select>
+                  <br>
+                  <select id="studentList" class="selectpicker modal-select" data-live-search="ture" multiple></select>
+                  <input type="hidden" id="rowid" value="" />
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                  <button type="button" class="btn btn-primary studenttoinput">학생추가</button>
                 </div>
               </div>
-          </table>
+            </div>
           </div>
           <!-- /div //-->
           <!-- br //-->
@@ -606,5 +607,12 @@
         }
       });
     }
+
+    $('body').on('hidden.bs.modal', '.modal', function () {
+      var myBackup = $('#addstu').clone();
+      $('#addstu').modal('hide').remove();
+      var myClone = myBackup.clone();
+      $('body').append(myClone);
+    });
   </script>
   {% endblock content %}

@@ -44,7 +44,7 @@ window.onload = function(){
         });
       })
 
-      $('#academyselect').on('change', function() {
+      $(document).on('change','#academyselect',function() {
         $.ajax({
           type: 'POST',
           url: 'studentLoad',
