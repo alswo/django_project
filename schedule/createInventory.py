@@ -51,12 +51,12 @@ class UpdateInven:
             slist_temp = list(set([i for i in self.sid if i is not None and i != '']))
             slist_temp2 = ','.join(slist_temp)
             slist_temp3 = list(set(slist_temp2.split(',')))
-            slist = []
 
             try:
                 for s in slist_temp3:
                     slist.append(int(s))
-
+                
+                slist = []
                 snum = len(slist)
 
                 self.slist = slist

@@ -401,37 +401,42 @@ def updateSchedule(request):
             branch = Branch.objects.filter(areaid = areaid)
             #carlist for searching with carnum and redirection
             carlist = Car.objects.filter(branchid=bid)
-            #for redirection
+           
+            bus_check = 0
+            for a in range(len(academy)):
+                if 0 < a < len(academy) - 1: 
+                    if academy[a] == '':
+                        bus_check = 1
 
-            try:
+            if bus_check == 1:
+                alist = []
+
+                for a in busAlist:
+                    alist.append(int(a))
+                                                         
+            elif bus_check == 0:
                 alist_temp = list(set([i for i in academy if i is not None and i != '']))
                 alist_temp2 = ','.join(alist_temp)
                 alist_temp3 = list(set(alist_temp2.split(',')))
                 alist = []
 
                 for a in alist_temp3:
-                    alist.append(int(a))
-
-            except:
-                alist = []
-                for a in busAlist:
-                    alist.append(int(a))
+                    alist.append(int(a)) 
 
             try:
                 slist_temp = list(set([i for i in sid if i is not None and i != '']))
                 slist_temp2 = ','.join(slist_temp)
                 slist_temp3 = list(set(slist_temp2.split(',')))
+                slist = []
 
-                try:
-                    for s in slist_temp3:
-                        slist.append(int(s))
+                for s in slist_temp3:
+                    slist.append(int(s))
 
-                    slist_temp3 = slist
-                except:
-                    slist_temp3 = [0]
+                slist_temp3 = slist
+           
             except:
-                HttpResponse('error1')
-
+                
+                slist_temp3 = [0]
 
             stime = int(time[0].split(':')[0] + time[0].split(':')[1])
             etime = int(time[-1].split(':')[0] + time[-1].split(':')[1])
