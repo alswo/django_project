@@ -341,16 +341,21 @@
   });
 
   function getRowHtml(readonly) {
-      var disabled;
+      var readonly_property;
 
       if (readonly) {
-          disabled = " readOnly ";
+          readonly_property = " readOnly ";
+          display_none = 'style="display:none;"';
+      }
+      else {
+          readonly_property = "";
+          display_none = "";
       }
 
-      return '<tr><td data-name="time" class="thstyle1"><input type="text" name="time[]" placeholder="Time" onblur="normalizeTime(this);" class="form-control" form="scheduleform"/></td><td class="thstyle11"><input type="text" name="addr[]" placeholder="Address" class="form-control" form="scheduleform" ' + disabled + ' /></td><td data-name="name" class="inputTd"><input type="text" name="name[]" data-role="tagsinput" class="form-control" form="scheduleform" ' + disabled + ' value="{% for name in s.sname %}{{name}}{% include '
-      comma.html ' %}{% endfor %}" /></td><td data-name="addstu" ' + (readonly ? 'style="display:none;"' : '') + '><button class="btn btn-primary glyphicon glyphicon-plus addstudent" data-toggle="modal"></button></td><td data-name="academy" class="inputAcaU" style="display:none"><input name="academy[]" class="form-control" form="scheduleform" value="{% for aid in s.alist %}{{aid}}{% include '
+      return '<tr><td data-name="time" class="thstyle1"><input type="text" name="time[]" placeholder="Time" onblur="normalizeTime(this);" class="form-control" form="scheduleform"/></td><td class="thstyle11"><input type="text" name="addr[]" placeholder="Address" class="form-control" form="scheduleform" ' + readonly_property + ' /></td><td data-name="name" class="inputTd"><input type="text" name="name[]" data-role="tagsinput" class="form-control" form="scheduleform" ' + readonly_property + ' value="{% for name in s.sname %}{{name}}{% include '
+      comma.html ' %}{% endfor %}" /></td><td data-name="addstu"><button class="btn btn-primary glyphicon glyphicon-plus addstudent" data-toggle="modal" ' + display_none + '></button></td><td data-name="academy" class="inputAcaU" style="display:none"><input name="academy[]" class="form-control" form="scheduleform" value="{% for aid in s.alist %}{{aid}}{% include '
       comma.html ' %}{% endfor %}" /></td><td data-name="sid" class="inputSid" style="display:none;"><input name="sid[]" type="text" data-role="tagsinput" class="form-control" form="scheduleform" value="{% for sid in s.slist %}{{sid}}{% include '
-      comma.html ' %}{% endfor %}"/></td><td data-name="load"><select name="load[]" form="scheduleform" ' + (readonly ? 'style="display:none;"' : '') + '><option value="">등하원</option><option value="1">등원</option><option value="0">하원</option></select></td><td data-name="del"><button name="del" class="btn btn-danger glyphicon glyphicon-remove row-remove" ' + (readonly ? 'style="display:none;"' : '') + ' ></button></td></tr>';
+      comma.html ' %}{% endfor %}"/></td><td data-name="load"><select name="load[]" form="scheduleform" ' + display_none + '><option value="">등하원</option><option value="1">등원</option><option value="0">하원</option></select></td><td data-name="del"><button name="del" class="btn btn-danger glyphicon glyphicon-remove row-remove" ' + display_none + '></button></td></tr>';
   }
 
   function validateTableForm(e) {
