@@ -262,7 +262,6 @@ def updateSchedule(request):
                 carnum = int(request.GET.get('car'))
                 week = request.GET.get('week')
                 searchflag = request.GET.get('searchinven')
-                areaid = int(request.GET.get('areaid'))
                 bid = int(request.GET.get('bid'))
                 day = request.GET.get('day')
                 searchTime = request.GET.get('searchTime')
@@ -322,7 +321,8 @@ def updateSchedule(request):
 
 
         area = Area.objects.all()
-        return render_to_response('supdateSchedule.html',{'area':area,'user':request.user})
+        branch = Branch.objects.all()
+        return render_to_response('supdateSchedule.html',{'area':area, 'branch': branch, 'user':request.user})
 
 
     elif request.method == "POST":
