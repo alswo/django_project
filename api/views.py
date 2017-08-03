@@ -155,13 +155,13 @@ def getSchedulesForStudent(request):
 	msg = {}
 	msg['schedules'] = {}
 	daydictionary = {u'월':'mon', u'화':'tue', u'수':'wed', u'목':'thu', u'금':'fri', u'토':'sat', u'일':'sun'}
-    for scheduletable in scheduletables:
+	for scheduletable in scheduletables:
 		data = {}
 		data['time'] = scheduletable.time
 		data['addr'] = scheduletable.addr
 		data['carnum'] = scheduletable.iid.carnum
 		data['inventory_id'] = scheduletable.iid_id
-        data['scheduletable_id'] = scheduletable.id
+		data['scheduletable_id'] = scheduletable.id
 		if scheduletable.lflag == 1:
 			data['lflag'] = '등원'
 		elif scheduletable.lflag == 0:
@@ -173,7 +173,6 @@ def getSchedulesForStudent(request):
 			msg['schedules'][daydictionary[scheduletable.iid.day]] = list()
 
 		msg['schedules'][daydictionary[scheduletable.iid.day]].append(data)
-
 
 	return JsonResponse(msg)
 	#return JsonResponse(json.dumps(msg, ensure_ascii=False), safe=False)
