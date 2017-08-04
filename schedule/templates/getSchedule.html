@@ -134,7 +134,7 @@ function callNumber(num){
         <div class="col-md-1"></div>
 <script>
 function dropdown(t,offset,invenid,stableid,choice) {
-    var chocie = choice
+    var choice = choice
     $.ajax({
         url: "/inventory/todayLoad",
         type: "GET",
@@ -147,7 +147,7 @@ function dropdown(t,offset,invenid,stableid,choice) {
           if (choice == 0){
             $("ul", t.parent).html("<li><a href='#'>"+data['aname']+"</a></li><li><a href='javascript:todayLoad("+offset+","+invenid+","+stableid+");'>오늘안타요</a></li><li><a href='tel:0"+data['phone1']+"'>학생전화</a></li><li><a href='#' class='pphone'></a></li>");
           }
-          else if (chocie == 1){
+          else if (choice == 1){
             $("ul", t.parent).html("<li><a href='#'>"+data['aname']+"</a></li><li><a href='javascript:todayLoad("+offset+","+invenid+","+stableid+");'>오늘안타요(취소)</a></li><li><a href='tel:0"+data['phone1']+"'>학생전화</a></li><li><a href='#' class='pphone'></a></li>");
 
           }
