@@ -8,6 +8,47 @@ from datetime import datetime
 
 # Create your views here.
 
+class CrowdedBus:
+	def __init__(self):
+		self.carnum = 0
+		self.stime_hr = ''
+		self.stime_min = ''
+		self.etime_hr = ''
+		self.etime_min = ''
+		self.numofstudent = 0
+		self.numofschedule = 0
+
+def makeTimeStr(inttime):
+	timestr = "%04d" % inttime
+	return [timestr[:2], timestr[2:]]
+
+def inventories(request):
+	t = timeToDate()
+	d = t.timeToD()
+
+	green_numofstudent = 2
+	orange_numofstudent = 5
+
+	if request.GET.get('green_numofstudent'):
+		green_numofstudent = int(request.GET.get('green_numofstudent'))
+	if request.GET.get('orange_numofstudent'):
+		orange_numofstudent = int(request.GET.get('orange_numofstudent'))
+
+	crowdedbuses = []
+
+	inventories = Inventory.objects.filter(day = d, bid = 1)
+	for inventory in inventories:
+		crowdedbus = CrowdedBus()
+		crowdedbus.carnum = inventory.carnum
+		(crowdedbus.stime_hr, crowdedbus.stime_min) = makeTimeStr(inventory.stime)
+		(crowdedbus.etime_hr, crowdedbus.etime_min) = makeTimeStr(inventory.etime)
+		crowdedbus.numofstudent = len(inventory.slist)
+
+		crowdedbuses.append(crowdedbus)
+
+	return render_to_response('crowdedbus.html', {'crowdedbuses': crowdedbuses, 'green_numofstudent': green_numofstudent, 'orange_numofstudent': orange_numofstudent, 'range': range(10)})
+
+
 def setTimeDelta(time1, timedelta):
 	timevar1 = time1.split(':')
 	totalmin = int(timevar1[0]) * 60 + int(timevar1[1]) + timedelta
