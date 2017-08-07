@@ -391,7 +391,6 @@
               {% endfor %} {% endif %}
             </tbody>
           </table>
-          </div>
           <div class="modal fade" id="addstu" role="dialog" aria-labelledby="myModalLabel">
             <div class="modal-dialog" role="document">
               <div class="modal-content">
@@ -411,6 +410,7 @@
                 </div>
               </div>
             </div>
+          </div>
           </div>
           <!-- /div //-->
           <!-- br //-->
@@ -533,7 +533,7 @@
       //if (document.forms["searchform"]["area"].selectedIndex < 1) {
         //alert("지역, 지점을 선택해 주세요.")
         //return false;
-      //} else 
+      //} else
       if (document.forms["searchform"]["time"].value != '') {
         if (num.test(document.forms["searchform"]["time"].value) == false) {
           alert("시간은 숫자만 입력해 주세요.(예:1500)")

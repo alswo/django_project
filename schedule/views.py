@@ -35,6 +35,63 @@ class DailyHistory:
 		self.date = ""
 		self.timehistory = list()
 
+def invenToJson(invens):
+    contacts = []
+
+    for i in invens:
+        inventory={}
+        inventory['id'] = i.id
+        inventory['carnum'] = i.carnum
+        inventory['bid'] = i.bid
+        inventory['day'] = i.day
+        inventory['alist'] = i.alist
+        inventory['anamelist'] = i.anamelist
+        inventory['slist'] = i.slist
+        inventory['stime'] = i.stime
+        inventory['etime'] = i.etime
+        inventory['week1'] = i.week1
+        inventory['week2'] = i.week2
+        inventory['week3'] = i.week3
+        inventory['req'] = i.req
+        inventory['memo'] = i.memo
+
+        schedules = ScheduleTable.objects.filter(iid = i.id)
+
+        inventory['schedule'] = []
+
+        for s in schedules:
+            schedule={}
+            schedule['id'] = s.id
+            schedule['time'] = s.time
+            schedule['addr'] = s.addr
+            schedule['req'] = s.req
+            schedule['alist'] = s.alist
+            schedule['anamelist'] = s.anamelist
+            schedule['slist'] = s.slist
+            schedule['sinfo'] = []
+
+            for si in s.slist:
+                sInfo={}
+                studentInfo = StudentInfo.objects.get(id = si)
+                sInfo['id'] = studentInfo.id
+                sInfo['name'] = studentInfo.sname
+                sInfo['aid'] = studentInfo.aid
+                sInfo['aname'] = studentInfo.aname
+                sInfo['grade'] = studentInfo.grade
+                sInfo['phone1'] = studentInfo.phone1
+                sInfo['phonelist'] = studentInfo.phonelist
+
+	        schedule['sinfo'].append(sInfo)
+
+	    schedule['sname']= s.sname
+            schedule['tflag'] = s.tflag
+            schedule['lflag'] = s.lflag
+
+            inventory['schedule'].append(schedule)
+
+        contacts.append(inventory)
+    
+    return contacts
 
 @csrf_exempt
 def getAcaPhone(request):
@@ -64,30 +121,14 @@ def getCarPhone(request):
 
 @csrf_exempt
 def todayLoad(request):
-    if request.method == "GET":
-        offset = request.GET.get('offset')
-        invenid = request.GET.get('invenid')
-        stableid = request.GET.get('stableid')
-
-        stable = ScheduleTable.objects.get(id = stableid)
-        temp_slist = stable.slist
-        temp_index = int(offset) - 1
-        sinfoid = temp_slist[temp_index]
-
-        sinfo = StudentInfo.objects.get(id=sinfoid)
-        dict_sinfo = model_to_dict(sinfo)
-        data = json.dumps(dict_sinfo)
-
-        return HttpResponse(data, content_type="application/json")
-
     if request.method == "POST":
-        offset = request.POST.get('offset')
-        invenid = request.POST.get('invenid')
-        stableid = request.POST.get('stableid')
+        sid = int(request.POST.get('sid'))
+        stableid = int(request.POST.get('stableid'))
 
         stable = ScheduleTable.objects.get(id = stableid)
         temp_tflag = stable.tflag
-        temp_index = int(offset) - 1
+        slist = stable.slist
+        temp_index = slist.index(sid)
 
         # 0 -> load, 1 -> unload
         if temp_tflag[temp_index] == 0:
@@ -117,25 +158,16 @@ def getSchedule(request):
         today = t.timeToYmd()
         realtimelocation = RealtimeLocation.objects.filter(date=today, carnum=car).order_by('schedule_time').last()
 
-
-	#return HttpResponse(realtimelocation.schedule_time);
-
         if request.user.is_staff:
             invens = Inventory.objects.filter(bid = bid).filter(alist__contains = [aid]).filter(day = day)
             list_invensid = []
-            contacts = []
-
-            for i in invens:
-                contacts.extend(Inventory.objects.filter(id = i.id).prefetch_related('scheduletables'))
+            contacts = invenToJson(invens)
 
             if car:
                 branch = Car.objects.get(carname = car)
                 invens = Inventory.objects.filter(carnum=car).filter(day = day)
 
-                contacts = []
-
-                for i in invens:
-                    contacts.extend(Inventory.objects.filter(id = i.id).prefetch_related('scheduletables'))
+                contacts = invenToJson(invens)
 
                 return render_to_response('getCarSchedule.html', {"contacts": contacts,"car": car, 'user':request.user, 'realtimelocation':realtimelocation})
 
@@ -145,10 +177,8 @@ def getSchedule(request):
             if day:
                 invens = Inventory.objects.filter(bid = bid).filter(alist__contains = [aid]).filter(day = day)
                 list_invensid = []
-                contacts = []
-
-                for i in invens:
-                    contacts.extend(Inventory.objects.filter(id = i.id).prefetch_related('scheduletables'))
+                
+                contacts = invenToJson(invens)
 
                 return render_to_response('getSchedule.html', {"contacts": contacts, "bid" : bid, "aid" : aid,'user':request.user})
 
@@ -160,10 +190,7 @@ def getSchedule(request):
                 invens = Inventory.objects.filter(bid = bid).filter(alist__contains = [aid]).filter(day='월')
 
                 list_invensid = []
-                contacts = []
-
-                for i in invens:
-                    contacts.extend(Inventory.objects.filter(id = i.id).prefetch_related('scheduletables'))
+                contacts = invenToJson(invens)
 
                 return render_to_response('getSchedule.html', {"contacts": contacts, "bid" : bid, "aid" : aid,'user':request.user})
 
@@ -171,10 +198,7 @@ def getSchedule(request):
             branch = Car.objects.get(carname = car)
             invens = Inventory.objects.filter(carnum=car).filter(day = day)
 
-            contacts = []
-
-            for i in invens:
-                contacts.extend(Inventory.objects.filter(id = i.id).prefetch_related('scheduletables'))
+            contacts = invenToJson(invens)
 
             return render_to_response('getCarSchedule.html', {"contacts": contacts,"car": car, 'user':request.user, 'realtimelocation':realtimelocation})
 
@@ -406,10 +430,10 @@ def updateSchedule(request):
             branch = Branch.objects.filter(areaid = areaid)
             #carlist for searching with carnum and redirection
             carlist = Car.objects.filter(branchid=bid)
-           
+
             bus_check = 0
             for a in range(len(academy)):
-                if 0 < a < len(academy) - 1: 
+                if 0 < a < len(academy) - 1:
                     if academy[a] == '':
                         bus_check = 1
 
@@ -418,7 +442,7 @@ def updateSchedule(request):
 
                 for a in busAlist:
                     alist.append(int(a))
-                                                         
+
             elif bus_check == 0:
                 alist_temp = list(set([i for i in academy if i is not None and i != '']))
                 alist_temp2 = ','.join(alist_temp)
@@ -426,7 +450,7 @@ def updateSchedule(request):
                 alist = []
 
                 for a in alist_temp3:
-                    alist.append(int(a)) 
+                    alist.append(int(a))
 
             try:
                 slist_temp = list(set([i for i in sid if i is not None and i != '']))
@@ -438,9 +462,9 @@ def updateSchedule(request):
                     slist.append(int(s))
 
                 slist_temp3 = slist
-           
+
             except:
-                
+
                 slist_temp3 = [0]
 
             stime = int(time[0].split(':')[0] + time[0].split(':')[1])

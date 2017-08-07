@@ -46,18 +46,14 @@
                         },
                 success:function(result, status, xhr){
                 	var ret = JSON.parse(xhr.responseText);
-			console.log(ret.sid)
+                    siginIn();
                 }
         });
     }
 
     function siginIn(){
-	//firebase.auth().signInWithCustomToken(token).catch(function(error) {
-      	  //Handle Errors here.
-          //var errorCode = error.code;
-      	  //var errorMessage = error.message;
-       //});
-	firebase.auth().signInAnonymously().catch(function(error) {
+	alert('1')
+    firebase.auth().signInAnonymously().catch(function(error) {
    	  // Handle Errors here.
   	  var errorCode = error.code;
   	  var errorMessage = error.message;
