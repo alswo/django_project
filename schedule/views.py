@@ -72,14 +72,18 @@ def invenToJson(invens):
 
             for si in s.slist:
                 sInfo={}
-                studentInfo = StudentInfo.objects.get(id = si)
-                sInfo['id'] = studentInfo.id
-                sInfo['name'] = studentInfo.sname
-                sInfo['aid'] = studentInfo.aid
-                sInfo['aname'] = studentInfo.aname
-                sInfo['grade'] = studentInfo.grade
-                sInfo['phone1'] = studentInfo.phone1
-                sInfo['phonelist'] = studentInfo.phonelist
+                try:
+                    studentInfo = StudentInfo.objects.get(id = si)
+                    sInfo['id'] = studentInfo.id
+                    sInfo['name'] = studentInfo.sname
+                    sInfo['aid'] = studentInfo.aid
+                    sInfo['aname'] = studentInfo.aname
+                    sInfo['grade'] = studentInfo.grade
+                    sInfo['phone1'] = studentInfo.phone1
+                    sInfo['phonelist'] = studentInfo.phonelist
+		
+		except:
+		    HttpResponse(si)
 
 	        schedule['sinfo'].append(sInfo)
 
