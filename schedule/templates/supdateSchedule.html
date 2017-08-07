@@ -607,12 +607,5 @@
         }
       });
     }
-
-    $('body').on('hidden.bs.modal', '.modal', function () {
-      var myBackup = $('#addstu').clone();
-      $('#addstu').modal('hide').remove();
-      var myClone = myBackup.clone();
-      $('body').append(myClone);
-    });
   </script>
   {% endblock content %}
