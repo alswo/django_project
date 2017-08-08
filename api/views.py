@@ -8,6 +8,7 @@ from passenger.dateSchedule import timeToDate
 from api.models import Notice
 import json
 from django.views.decorators.csrf import csrf_exempt
+from datetime import datetime, timedelta
 
 ## time format : HH:MM
 def get_difference(time1, time2):
@@ -127,6 +128,8 @@ def getSchedulesForStudent(request):
         today = t.timeToYmd()
         rawhm = t.timeToRawHM()
         hm = t.timeToHM()
+	startdayOfWeek = t.timeToStartDayOfWeek()
+
         sid = request.GET.get('sid')
         carnum = -1
         iid = ""
@@ -155,6 +158,7 @@ def getSchedulesForStudent(request):
 	msg = {}
 	msg['schedules'] = {}
 	daydictionary = {u'월':'mon', u'화':'tue', u'수':'wed', u'목':'thu', u'금':'fri', u'토':'sat', u'일':'sun'}
+	daylist = ['월', '화', '수', '목', '금', '토', '일']
 	for scheduletable in scheduletables:
 		data = {}
 		data['time'] = scheduletable.time
@@ -170,9 +174,15 @@ def getSchedulesForStudent(request):
 		if scheduletable.iid.day in msg['schedules'].keys():
 			pass
 		else:
-			msg['schedules'][daydictionary[scheduletable.iid.day]] = list()
+			msg['schedules'][daydictionary[scheduletable.iid.day]] = {}
+			msg['schedules'][daydictionary[scheduletable.iid.day]]['list'] = list()
+			msg['schedules'][daydictionary[scheduletable.iid.day]]['date'] = (startdayOfWeek + timedelta(days=daylist.index(scheduletable.iid.day))).strftime("%Y.%m.%d")
+			if d == scheduletable.iid.day :
+				msg['schedules'][daydictionary[scheduletable.iid.day]]['today'] = True
+			else:
+				msg['schedules'][daydictionary[scheduletable.iid.day]]['today'] = False
 
-		msg['schedules'][daydictionary[scheduletable.iid.day]].append(data)
+		msg['schedules'][daydictionary[scheduletable.iid.day]]['list'].append(data)
 
 	return JsonResponse(msg)
 	#return JsonResponse(json.dumps(msg, ensure_ascii=False), safe=False)

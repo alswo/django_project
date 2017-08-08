@@ -1,5 +1,6 @@
 #_*_ coding:utf-8 _*_
 import time
+from datetime import datetime, timedelta
 
 class timeToDate:
 
@@ -69,6 +70,13 @@ class timeToDate:
             return "일"
 
         return d
+
+    def timeToStartDayOfWeek(self):
+	dt = datetime.fromtimestamp(time.mktime(self.t))
+	start = dt - timedelta(days = dt.weekday())
+	end = start + timedelta(days=6)
+
+	return start
 
     def timeToDtype(self,time):
         timeList = time.split("/")
