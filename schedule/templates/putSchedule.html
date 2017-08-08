@@ -405,10 +405,17 @@
       }
   }
 
-  $(document).ready(function() { 
-     for (i = 0; i < 3; i++) {
-       $('.addrow').click(); 
-     }
+  $(document).ready(function() {
+      for (i = 0; i < 3; i++) {
+        $('.addrow').click();
+      }
+  });
+
+  $('body').on('hidden.bs.modal', '.modal', function () {
+    var myBackup = $('#addstu').clone();
+    $('#addstu').modal('hide').remove();
+    var myClone = myBackup.clone();
+    $('body').append(myClone);
   });
 
 </script>

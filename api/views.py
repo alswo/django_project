@@ -321,3 +321,32 @@ def getStudentInfo(request):
             msg = 'PIN does not exist'
 
             return getResponse(debug,400,msg)
+
+def todayLoad(request):
+    if request.method == "GET":
+        sid = request.GET.get('sid')
+        sTableId = request.GET.get('sTableId')
+        iId = request.GET.get('iId')
+
+        stable = ScheduleTable.objects.get(id = sTableId)
+
+        offset_list = stable.slist
+        offset = offset_list.index(sid)
+        
+        temp_tflag = stable.tflag
+        temp_index = offset
+
+        if temp_tflag[temp_index] == 0:
+            temp_tflag[temp_index] = 1
+            button_flag = 0
+
+        elif temp_tflag[temp_index] == 1:
+            temp_tflag[temp_index] = 0
+            button_flag = 1
+
+        stable.tflag = temp_tflag
+        stable.save()
+
+        return HttpResponse(button_flag)
+
+

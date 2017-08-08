@@ -35,8 +35,9 @@ li {
   opacity: 1.0;
 }
 
-.btn {
-  padding: 1px 1px;
+.btn-small {
+  padding: 0.5px 0.5px;
+  margin-bottom: 1px;
 }
 
 </style>
@@ -51,13 +52,13 @@ function callNumber(num){
   <div class="container">
     <br>
         <div class="row day" align="center">
-          <button type="button" class="btn-sm btn-danger" onclick="location.href='/'">홈</button>
-          <button type="button" class="btn-sm btn-info" onclick="location.href='getSchedule?car={{car}}&day=월'">월</button>
-          <button type="button" class="btn-sm btn-info" onclick="location.href='getSchedule?car={{car}}&day=화'">화</button>
-          <button type="button" class="btn-sm btn-info" onclick="location.href='getSchedule?car={{car}}&day=수'">수</button>
-          <button type="button" class="btn-sm btn-info" onclick="location.href='getSchedule?car={{car}}&day=목'">목</button>
-          <button type="button" class="btn-sm btn-info" onclick="location.href='getSchedule?car={{car}}&day=금'">금</button>
-          <button type="button" class="btn-sm btn-info" onclick="location.href='getSchedule?car={{car}}&day=토'">토</button>
+          <button type="button" class="btn btn-danger" onclick="location.href='/'">홈</button>
+          <button type="button" class="btn btn-info" onclick="location.href='getSchedule?car={{car}}&day=월'">월</button>
+          <button type="button" class="btn btn-info" onclick="location.href='getSchedule?car={{car}}&day=화'">화</button>
+          <button type="button" class="btn btn-info" onclick="location.href='getSchedule?car={{car}}&day=수'">수</button>
+          <button type="button" class="btn btn-info" onclick="location.href='getSchedule?car={{car}}&day=목'">목</button>
+          <button type="button" class="btn btn-info" onclick="location.href='getSchedule?car={{car}}&day=금'">금</button>
+          <button type="button" class="btn btn-info" onclick="location.href='getSchedule?car={{car}}&day=토'">토</button>
           <!--<button type="button" class="btn btn-primary" onclick="window.print()">출력</button>-->
         </div>
         <br>
@@ -69,12 +70,12 @@ function callNumber(num){
             <div class="panel panel-default">
               <!-- Default panel contents -->
               <div class="panel-heading">
-                <button type="button" class="btn btn-warning">{{c.carnum}}호차</button>
-                <button type="button" class="btn btn-warning">{{c.day}}요일</button>
+                <button type="button" class="btn btn-small btn-warning">{{c.carnum}}호차</button>
+                <button type="button" class="btn btn-small btn-warning">{{c.day}}요일</button>
                 {% for aname in c.anamelist %}
                 {% for aid in c.alist %}
                   {% if forloop.counter == forloop.parentloop.counter %}
-                      <button type="button" class="btn btn-warning" role="button" data-toggle="collapse" href="#collapsePhone{{c.id}}" onclick="getAcaPhone(this, {{aid}},{{c.id}})" aria-expanded="false" aria-controls="collapseExample">{{aname}}</button>
+                      <button type="button" class="btn btn-small btn-warning" role="button" data-toggle="collapse" href="#collapsePhone{{c.id}}" onclick="getAcaPhone(this, {{aid}},{{c.id}})" aria-expanded="false" aria-controls="collapseExample">{{aname}}</button>
                   {% endif %}
                 {% endfor %}
                 {% endfor %}
@@ -93,24 +94,26 @@ function callNumber(num){
                     </tr>
                 </thead>
                 <tbody>
-                    {% for s in c.scheduletables.all %}
+                    {% for s in c.schedule %}
                     {% if s.lflag == 1 %}
                     <tr class="alert alert-info">
                     {% elif s.lflag == 0 %}
                     <tr class="alert alert-danger">
                     {% endif %}
                     {% if s.lflag == 0 or s.lflag == 1 %}
-                        <td><button type="button" class="load btn btn-space departure-button" id="departurebutton{{c.id}}_{{forloop.counter}}" onclick="setRealtimeLocation(this, {{c.carnum}}, '{{s.time}}');" disabled>{{s.time}}</button></td>
+                        <td><button type="button" class="load btn btn-small btn-space departure-button" id="departurebutton{{c.id}}_{{forloop.counter}}" onclick="setRealtimeLocation(this, {{c.carnum}}, '{{s.time}}');" disabled>{{s.time}}</button></td>
                         <td><strong>{{s.addr}}</strong></td>
                         <td>
                           {% for f in s.tflag %}
-                            {% for name in s.sname %}
+                            {% for si in s.sinfo %}
                             {% if forloop.counter == forloop.parentloop.counter %}
                             <div class="dropdown">
-                                  <button type="button" id="{{c.id}}{{s.id}}{{forloop.counter}}" class="load btn btn-space {% if f == 0 %} btn-primary {% elif f == 2 %} btn-warning blink {% else %} btn-default {% endif %} dropdown-toggle" data-toggle="dropdown" onclick="dropdown(this, {{forloop.counter}},{{c.id}},{{s.id}},{{f}});">
-                                    {{name}}
+                                  <button type="button" id="{{c.id}}{{s.id}}{{forloop.counter}}" class="load btn btn-small btn-space {% if f == 0 %} btn-primary {% elif f == 2 %} btn-warning blink {% else %} btn-default {% endif %} dropdown-toggle" data-toggle="dropdown">
+                                    {{si.name}}
                                   </button>
                               <ul class="dropdown-menu pull-right">
+                                <li><a href="#">{% for aname in si.aname %}{{aname}}{% endfor %}</a></li>
+                                <li><a href='tel:0{{si.phone1}}'>전화하기</a></li>
                               </ul>
                               <br>
                             </div>
@@ -124,14 +127,14 @@ function callNumber(num){
                     {% endif %}
                     {% if s.lflag == 2 %}
                     <tr>
-                        <td><button type="button" class="load btn btn-space departure-button" id="departurebutton{{c.id}}_{{forloop.counter}}" onclick="setRealtimeLocation(this, {{c.carnum}}, '{{s.time}}');">{{s.time}}</button></td>
+                        <td><button type="button" class="load btn btn-small btn-space departure-button" id="departurebutton{{c.id}}_{{forloop.counter}}" onclick="setRealtimeLocation(this, {{c.carnum}}, '{{s.time}}');">{{s.time}}</button></td>
                         <td>출발</td>
                         <td></td>
                     </tr>
                     {% endif %}
                     {% if s.lflag == 3 %}
                     <tr>
-                        <td><button type="button" class="load btn btn-space departure-button" id="departurebutton{{c.id}}_{{forloop.counter}}" onclick="setRealtimeLocation(this, {{c.carnum}}, '{{s.time}}');" disabled>{{s.time}}</button></td>
+                        <td><button type="button" class="load btn btn-small btn-space departure-button" id="departurebutton{{c.id}}_{{forloop.counter}}" onclick="setRealtimeLocation(this, {{c.carnum}}, '{{s.time}}');" disabled>{{s.time}}</button></td>
                         <td>도착</td>
                         <td></td>
                     </tr>
