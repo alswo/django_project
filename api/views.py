@@ -158,7 +158,17 @@ def getSchedulesForStudent(request):
 	msg = {}
 	msg['schedules'] = {}
 	daydictionary = {u'월':'mon', u'화':'tue', u'수':'wed', u'목':'thu', u'금':'fri', u'토':'sat', u'일':'sun'}
-	daylist = ['월', '화', '수', '목', '금', '토', '일']
+	daylist = [u'월', u'화', u'수', u'목', u'금', u'토', u'일']
+
+	for day in daylist:
+		msg['schedules'][daydictionary[day]] = {}
+		msg['schedules'][daydictionary[day]]['list'] = list()
+		msg['schedules'][daydictionary[day]]['date'] = (startdayOfWeek + timedelta(days=daylist.index(day))).strftime("%Y.%m.%d")
+		if d == day :
+			msg['schedules'][daydictionary[day]]['today'] = True
+		else:
+			msg['schedules'][daydictionary[day]]['today'] = False
+
 	for scheduletable in scheduletables:
 		data = {}
 		data['time'] = scheduletable.time
@@ -171,16 +181,16 @@ def getSchedulesForStudent(request):
 		elif scheduletable.lflag == 0:
 			data['lflag'] = '하원'
 
-		if scheduletable.iid.day in msg['schedules'].keys():
-			pass
-		else:
-			msg['schedules'][daydictionary[scheduletable.iid.day]] = {}
-			msg['schedules'][daydictionary[scheduletable.iid.day]]['list'] = list()
-			msg['schedules'][daydictionary[scheduletable.iid.day]]['date'] = (startdayOfWeek + timedelta(days=daylist.index(scheduletable.iid.day))).strftime("%Y.%m.%d")
-			if d == scheduletable.iid.day :
-				msg['schedules'][daydictionary[scheduletable.iid.day]]['today'] = True
-			else:
-				msg['schedules'][daydictionary[scheduletable.iid.day]]['today'] = False
+		#if scheduletable.iid.day in msg['schedules'].keys():
+			#pass
+		#else:
+			#msg['schedules'][daydictionary[scheduletable.iid.day]] = {}
+			#msg['schedules'][daydictionary[scheduletable.iid.day]]['list'] = list()
+			#msg['schedules'][daydictionary[scheduletable.iid.day]]['date'] = (startdayOfWeek + timedelta(days=daylist.index(scheduletable.iid.day))).strftime("%Y.%m.%d")
+			#if d == scheduletable.iid.day :
+				#msg['schedules'][daydictionary[scheduletable.iid.day]]['today'] = True
+			#else:
+				#msg['schedules'][daydictionary[scheduletable.iid.day]]['today'] = False
 
 		msg['schedules'][daydictionary[scheduletable.iid.day]]['list'].append(data)
 
