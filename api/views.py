@@ -119,6 +119,9 @@ def getRealtimeLocation(request):
 	msg = str(carnum) + "호차가 아직 출발 전입니다."
 	return getResponse(debug, 202, msg)
 
+def makeTimeStr(inttime):
+        timestr = "%04d" % inttime
+        return timestr[:2] + ":" + timestr[2:]
 
 def getSchedulesForStudent(request):
     if request.method == "GET":
@@ -175,6 +178,8 @@ def getSchedulesForStudent(request):
 		data['addr'] = scheduletable.addr
 		data['carnum'] = scheduletable.iid.carnum
 		data['inventory_id'] = scheduletable.iid_id
+		data['start_time'] = makeTimeStr(scheduletable.iid.stime)
+		data['end_time'] = makeTimeStr(scheduletable.iid.etime)
 		data['institute_name'] = list(map(lambda x: (Academy.objects.get(id=x)).name, (set(scheduletable.iid.alist) & set(student.aid))))
 		data['scheduletable_id'] = scheduletable.id
 		if scheduletable.lflag == 1:
