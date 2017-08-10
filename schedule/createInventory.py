@@ -53,10 +53,11 @@ class UpdateInven:
             slist_temp3 = list(set(slist_temp2.split(',')))
 
             try:
+                slist = []
+                
                 for s in slist_temp3:
                     slist.append(int(s))
-                
-                slist = []
+
                 snum = len(slist)
 
                 self.slist = slist
