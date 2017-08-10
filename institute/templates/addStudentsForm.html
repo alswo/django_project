@@ -3,7 +3,7 @@
 <DIV class="row">
 	<DIV class="col-md-12">
 		<DIV class="table-reponsive">
-			<FORM role="form" autocomplete="off" action="addStudents" method="POST">
+			<FORM role="form" autocomplete="off" action="addStudents" method="POST" id="addStudentsForm">
 				<FIELDSET class="fsStyle">
 					<DIV class="row collapse in">
 						<DIV class="col-md-2">
@@ -12,15 +12,16 @@
 							<label>이름</label>
 						</DIV>
 						<DIV class="col-md-4 input-div">
-							<input type='text' name='sname' maxlength='10' class="form-control" />
+							<input type='text' name='sname' id='sname' maxlength='10' class="form-control" />
 						</DIV>
 					</DIV>
+					<BR>
 					<DIV class="row collapse in">
 						<DIV class="col-md-2">
 						</DIV>
 						<DIV class="col-md-2">
 							<label>연락처</label>
-							<label>4개 연락처 중에 최소 하나는 필수로 입력하셔야 합니다. </label>
+							<label>( 4개 연락처 중에 최소 하나는 필수로 입력하셔야 합니다. )</label>
 						</DIV>
 						<DIV class="col-md-4">
 							<DIV class="row input-group" id="phonediv1">
@@ -44,6 +45,7 @@
 							</DIV>
 						</DIV>
 					</DIV>
+					<BR>
 					<DIV class="row collapse in">
 						<DIV class="col-md-2">
 						</DIV>
@@ -58,6 +60,7 @@
 							</select>
 						</DIV>
 					</DIV>
+					<BR>
 					<DIV class="row collapse in">
 						<DIV class="col-md-2">
 						</DIV>
@@ -72,11 +75,12 @@
 							</select>
 						</DIV>
 					</DIV>
+					<BR>
 					<DIV class="row collapse in">
 						<DIV class="col-md-2">
 						</DIV>
 						<DIV class="col-md-2">
-							<button type='submit' class="form-control">추가</button>
+							<button id="addsubmit" class="form-control">추가</button>
 						</DIV>
 					</DIV>
 				</FIELDSET>
@@ -103,9 +107,44 @@ $(document).ready(function(){
                 $(fieldID).remove();
             });
     });
-    
-
-    
+	$('#addsubmit').click(function(e) {
+		if (validateName($('#sname').val()) == false) {
+			alert("입력값이 올바르지 않습니다.");
+			e.preventDefault();
+		}
+		if (validatePhoneNumber($('#parents_phonenumber').val())
+			|| validatePhoneNumber($('#grandparents_phonenumber').val())
+			|| validatePhoneNumber($('#self_phonenumber').val())
+			|| validatePhoneNumber($('#care_phonenumber').val())) {
+		}
+		else {
+			alert("입력값이 올바르지 않습니다.");
+			e.preventDefault();
+		}
+	});
 });
+
+function validateName(name) {
+	if (!name) {
+		return false;
+	} 
+	name = name.replace(/[\s]/g, '');
+
+	if (name.length < 2) {
+		return false;
+	}
+
+	return true;
+}
+
+function validatePhoneNumber(phonenumber) {
+	phonenumber = phonenumber.replace(/[^0-9]/g, '');
+	if (phonenumber.length < 10) {
+		return false;
+	}
+
+	return true;
+}
+
 </SCRIPT>
 {% endblock content %}

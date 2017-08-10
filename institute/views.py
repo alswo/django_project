@@ -58,10 +58,21 @@ def addStudentsForm(request):
 @login_required
 def addStudents(request):
 	if request.user.is_staff :
-		institute = request.GET.get('institute')
+		institute = request.session.get('institute', None)
 	else :
 		institute = request.user.first_name
 
+	if institute:
+		try:
+			academy = Academy.objects.get(name = institute)
+		except AcademyDeosNotExist:
+			return HttpResponse("학원 검색에 실패했습니다.")
+	else:
+		return HttpResponse("학원 권한이 필요합니다.")
+
+	bname = Branch.objects.get(id=academy.bid)
+	aid = Academy.objects.get(name=institute)
+	StudentInfo(bid=academy.bid, bname=bname, phone1=0, aid=
 	academy = Academy.objects.filter(name = institute)
 
 	sname = request.POST.get('sname')
