@@ -12,6 +12,12 @@
       background-color: greenyellow;
       border-color: green;
     }
+    .vis-item.green a:link{
+      color: black;
+    }
+    .vis-item.green a:visited{
+      color: black;
+    }
 
     /* create a custom sized dot at the bottom of the red item */
     .vis-item.red {
@@ -19,10 +25,33 @@
       border-color: darkred;
       color: white;
     }
+    .vis-item.red a:link{
+      color: black;
+    }
+    .vis-item.red a:visited{
+      color: black;
+    }
 
     .vis-item.orange {
       background-color: gold;
       border-color: orange;
+    }
+    .vis-item.orange a:link{
+      color: black;
+    }
+    .vis-item.orange a:visited{
+      color: black;
+    }
+
+    .vis-item.grey {
+      background-color: #7A7F7F;
+      border-color: grey;
+    }
+    .vis-item.grey a:link{
+      color: black;
+    }
+    .vis-item.grey a:visited{
+      color: black;
     }
 
 	</style>
@@ -36,12 +65,12 @@
 	</DIV>
 	<FORM action='inventories'>
 	<DIV class='row'>
-		<DIV class='col-md-4'>
+		<DIV class='col-md-2'>
 		</DIV>
 		<DIV class='col-md-1'>
 					학생수
 		</DIV>
-		<DIV class='col-md-3'>
+		<DIV class='col-md-4'>
 			<DIV class='row'>
 				<DIV class='col-md-1'>
 				</DIV>
@@ -82,66 +111,24 @@
 				</DIV>
 			</DIV>
 		</DIV>
-		<DIV class='col-md-4'>
-		</DIV>
-	</DIV>
-	<DIV class='row'>
-		<DIV class='col-md-4'>
-		</DIV>
 		<DIV class='col-md-1'>
-					스케쥴수
-		</DIV>
-		<DIV class='col-md-3'>
-			<DIV class='row'>
-				<DIV class='col-md-1'>
-				</DIV>
-				<DIV class='col-md-1'>
-					<button type="button" class="vis-item green">..</button>
-				</DIV>
-				<DIV class='col-md-1'>
-					&lt
-				</DIV>
-				<DIV class='col-md-2'>
-					<SELECT name="" class="form-control">
-						{% for i in range %}
-						<OPTION>{{i}}</OPTION>
-						{% endfor %}
-					</SELECT>
-				</DIV>
-				<DIV class='col-md-1'>
-					&lt
-				</DIV>
-				<DIV class='col-md-1'>
-					<button type="button" class="vis-item orange">..</button>
-				</DIV>
-				<DIV class='col-md-1'>
-					&lt
-				</DIV>
-				<DIV class='col-md-2'>
-					<SELECT name="" class="form-control">
-						{% for i in range %}
-						<OPTION>{{i}}</OPTION>
-						{% endfor %}
-					</SELECT>
-				</DIV>
-				<DIV class='col-md-1'>
-					&lt
-				</DIV>
-				<DIV class='col-md-1'>
-					<button type="button" class="vis-item red">..</button>
-				</DIV>
-			</DIV>
+				<SELECT name="aid" class="form-control">
+					<OPTION value = "0">학원선택</OPTION>
+					{% for aca in academies %}
+					<OPTION value = "{{aca.id}}" {% if aid == aca.id %} selected {% endif %}> {{aca.name}} </OPTION>
+					{% endfor %}
+				<SELECT>
 		</DIV>
 		<DIV class='col-md-4'>
-			<input type=submit>
+			<input type="submit">
 		</DIV>
 	</DIV>
-	</FORM>
 	<DIV class='row'>
 		<DIV class='col-md-12'>
 			<p>
 		</DIV>
 	</DIV>
+	</FORM>
 	<DIV id="timeline"></DIV>
 <SCRIPT>
 	var container = document.getElementById('timeline');
@@ -149,23 +136,34 @@
 	var todayStart = new Date();
 	var todayEnd = new Date();
 
+	var groups = new vis.DataSet([
+{% for shuttle in shuttles %}
+	{id : {{shuttle}}, content: '{{shuttle}}호차', value:{{shuttle}}},
+{% endfor %}
+	]);
+
 {% for crowdedbus in crowdedbuses %}
 	todayStart.setHours({{crowdedbus.stime_hr}});
 	todayStart.setMinutes({{crowdedbus.stime_min}});
 	todayEnd.setHours({{crowdedbus.etime_hr}});
 	todayEnd.setMinutes({{crowdedbus.etime_min}});
 	items.add({
-		content: '{{ crowdedbus.carnum }}호차',
+		group: {{crowdedbus.carnum}},
+		content: '<a href="http://www.edticket.com/inventory/updateSchedule?areaid=1&bid=1&day={{day}}&searchTime=&updateflag=2&searchinven=2&car={{crowdedbus.carnum}}">' + {% if aid > 0 and aid in crowdedbus.alist %} '{{aname}}' {% else %} '{{ crowdedbus.carnum }}호차' {% endif %} + '</a>',
 		start: new Date(todayStart),
 		end: new Date(todayEnd),
-		className: {% if crowdedbus.numofstudent < green_numofstudent %} 'green' {% elif crowdedbus.numofstudent < orange_numofstudent %} 'orange' {% else %} 'red' {% endif %},
+		className: {% if aid > 0 and not aid in crowdedbus.alist %} 'grey' {% else %} {% if crowdedbus.numofstudent < green_numofstudent %} 'green' {% elif crowdedbus.numofstudent < orange_numofstudent %} 'orange' {% else %} 'red' {% endif %} {% endif %},
 	});
 {% endfor %}
 
 	var options = {
+		groupOrder: function(a, b) {
+			return a.value - b.value;
+		},
 		zoomMin: 1000 * 60 * 60 * 14,
 	};
 	var timeline = new vis.Timeline(container, items, options);
+	timeline.setGroups(groups);
 </SCRIPT>
 </BODY>
 </HTML>
