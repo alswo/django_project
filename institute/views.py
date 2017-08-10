@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from django.shortcuts import render_to_response, render
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
@@ -72,7 +73,7 @@ def addStudents(request):
 
 	bname = Branch.objects.get(id=academy.bid)
 	aid = Academy.objects.get(name=institute)
-	StudentInfo(bid=academy.bid, bname=bname, phone1=0, aid=
+	#StudentInfo(bid=academy.bid, bname=bname, phone1=0, aid=aid, 
 	academy = Academy.objects.filter(name = institute)
 
 	sname = request.POST.get('sname')
