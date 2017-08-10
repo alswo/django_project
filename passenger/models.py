@@ -6,8 +6,10 @@ from django.contrib.postgres.fields import ArrayField
 from schedule.models import Branch
 from django.db import models
 import datetime
+import uuid
 #from simple_history.models import HistoricalRecords
 from django.utils.crypto import get_random_string
+import re
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete = models.CASCADE)
@@ -169,6 +171,11 @@ class ShuttleSchedule(models.Model):
 class Grade(models.Model):
     name = models.CharField(max_length = 30)
 
+class PersonalInfo(models.Model):
+    branch = models.ForeignKey(Branch)
+    name = models.CharField(max_length = 10)
+    pin_number = models.CharField(max_length = 20)
+
 class StudentInfo(models.Model):
     aid = models.IntegerField()
     bid = models.IntegerField()
@@ -179,11 +186,15 @@ class StudentInfo(models.Model):
     phone1 = models.IntegerField()
     phonelist = ArrayField(models.IntegerField(null = True, blank = True,default=0),default=0)
     pin_number = models.CharField(max_length = 20, default=get_random_string(length=20))
-    #history = HistoricalRecords()
+    #personinfo = models.ForeignKey(PersonalInfo, on_delete=models.CASCADE)
+    personinfo = models.ForeignKey(PersonalInfo, blank=True, null=True)
+    mother_phonenumber = models.CharField(max_length=15)
+    father_phonenumber = models.CharField(max_length=15)
+    self_phonenumber = models.CharField(max_length=15)
+    etc_phonenumber = models.CharField(max_length=15)
 
     def __unicode__(self):
         return u"{0} // {1} // {2} // {3} // {4}".format(self.bname,self.aname,self.sname,self.grade,self.phone1)
-
 
 class AcademySchedule(models.Model):
     gid = models.IntegerField()
