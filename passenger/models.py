@@ -170,9 +170,9 @@ class Grade(models.Model):
     name = models.CharField(max_length = 30)
 
 class StudentInfo(models.Model):
-    aid = ArrayField(models.IntegerField(null = True, blank = True))
+    aid = models.IntegerField()
     bid = models.IntegerField()
-    aname = ArrayField(models.CharField(max_length = 20),default='')
+    aname = models.CharField(max_length = 20)
     bname = models.CharField(max_length = 20)
     sname = models.CharField(max_length = 10)
     grade = models.IntegerField(null = True, blank = True)
@@ -182,7 +182,7 @@ class StudentInfo(models.Model):
     #history = HistoricalRecords()
 
     def __unicode__(self):
-        return u"{0} // {1} // {2} // {3} // {4}".format(self.bname,",".join(self.aname),self.sname,self.grade,self.phone1)
+        return u"{0} // {1} // {2} // {3} // {4}".format(self.bname,self.aname,self.sname,self.grade,self.phone1)
 
 
 class AcademySchedule(models.Model):
