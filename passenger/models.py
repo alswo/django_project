@@ -188,10 +188,10 @@ class StudentInfo(models.Model):
     pin_number = models.CharField(max_length = 20, default=get_random_string(length=20))
     #personinfo = models.ForeignKey(PersonalInfo, on_delete=models.CASCADE)
     personinfo = models.ForeignKey(PersonalInfo, blank=True, null=True)
-    mother_phonenumber = models.CharField(max_length=15)
-    father_phonenumber = models.CharField(max_length=15)
-    self_phonenumber = models.CharField(max_length=15)
-    etc_phonenumber = models.CharField(max_length=15)
+    parents_phonenumber = models.CharField(max_length=15, null = True, blank = True)
+    grandparents_phonenumber = models.CharField(max_length=15, null = True, blank = True)
+    self_phonenumber = models.CharField(max_length=15, null = True, blank = True)
+    care_phonenumber = models.CharField(max_length=15, null = True, blank = True)
 
     def __unicode__(self):
         return u"{0} // {1} // {2} // {3} // {4}".format(self.bname,self.aname,self.sname,self.grade,self.phone1)
