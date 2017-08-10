@@ -4,6 +4,7 @@ from django.http import HttpResponse
 from schedule.models import Inventory, ScheduleTable, RealtimeLocation
 from schedule.views import get_difference
 from passenger.dateSchedule import timeToDate
+from passenger.models import Academy
 from datetime import datetime
 
 # Create your views here.
@@ -17,6 +18,7 @@ class CrowdedBus:
 		self.etime_min = ''
 		self.numofstudent = 0
 		self.numofschedule = 0
+		self.alist = None
 
 def makeTimeStr(inttime):
 	timestr = "%04d" % inttime
@@ -34,7 +36,13 @@ def inventories(request):
 	if request.GET.get('orange_numofstudent'):
 		orange_numofstudent = int(request.GET.get('orange_numofstudent'))
 
+	if request.GET.get('aid') :
+		aid = int(request.GET.get('aid'))
+	else :
+		aid = 0
+
 	crowdedbuses = []
+	shuttles = {}
 
 	inventories = Inventory.objects.filter(day = d, bid = 1)
 	for inventory in inventories:
@@ -43,10 +51,18 @@ def inventories(request):
 		(crowdedbus.stime_hr, crowdedbus.stime_min) = makeTimeStr(inventory.stime)
 		(crowdedbus.etime_hr, crowdedbus.etime_min) = makeTimeStr(inventory.etime)
 		crowdedbus.numofstudent = len(inventory.slist)
+		crowdedbus.alist = inventory.alist
 
 		crowdedbuses.append(crowdedbus)
+		shuttles[inventory.carnum] = 1
 
-	return render_to_response('crowdedbus.html', {'crowdedbuses': crowdedbuses, 'green_numofstudent': green_numofstudent, 'orange_numofstudent': orange_numofstudent, 'range': range(10)})
+	academies = Academy.objects.filter(bid = 1).order_by('name')
+	try:
+		aname = Academy.objects.get(id = aid).name
+	except Academy.DoesNotExist:
+		aname = ""
+
+	return render_to_response('crowdedbus.html', {'crowdedbuses': crowdedbuses, 'shuttles': shuttles.keys(), 'green_numofstudent': green_numofstudent, 'orange_numofstudent': orange_numofstudent, 'range': range(10), 'academies': academies, 'aid': aid, 'aname': aname, 'day': d})
 
 
 def setTimeDelta(time1, timedelta):
