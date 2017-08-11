@@ -177,7 +177,7 @@ class PersonalInfo(models.Model):
     pin_number = models.CharField(max_length = 20)
 
 class StudentInfo(models.Model):
-    aid = models.IntegerField()
+    aid = models.ForeignKey('Academy', null=True)
     bid = models.IntegerField()
     aname = models.CharField(max_length = 20)
     bname = models.CharField(max_length = 20)
