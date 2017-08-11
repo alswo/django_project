@@ -178,7 +178,6 @@ class PersonalInfo(models.Model):
 
 class StudentInfo(models.Model):
     aid = models.IntegerField()
-    a_f = models.ForeignKey('Academy', null=True)
     bid = models.IntegerField()
     aname = models.CharField(max_length = 20)
     bname = models.CharField(max_length = 20)
