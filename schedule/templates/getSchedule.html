@@ -74,13 +74,13 @@ function callNumber(num){
                 </div>
               </div>
               <div class="panel-body">
-
+		{{ c.req }}
               </div>
-            <table class="table table-bordered table-responsive">
+            <table class="table table-bordered">
                 <thead>
                     <tr>
-                        <th>시간</th>
-                        <th>주소</th>
+                        <th class="thstyle1">시간</th>
+                        <th class="thstyle11">주소</th>
                         <th class="thstyle3">이름</th>
                     </tr>
                 </thead>
@@ -88,7 +88,7 @@ function callNumber(num){
                     {% for s in c.schedule %}
                     {% if s.lflag == 1 %}
                     <tr class="alert alert-info">
-                        <td>{{s.time}}</td>
+                        <td class="thstyle1">{{s.time}}</td>
                         <td>{{s.addr}}</td>
                         <td>
                           {% for f in s.tflag %}
@@ -118,8 +118,8 @@ function callNumber(num){
                     {% endif %}
                     {% if s.lflag == 0 %}
                     <tr class="alert alert-danger">
-                        <td>{{s.time}}</td>
-                        <td>{{s.addr}}</td>
+                        <td class="thstyle1">{{s.time}}</td>
+                        <td class="thstyle11">{{s.addr}}</td>
                         <td>
                             {% for f in s.tflag %}
                               {% for si in s.sinfo %}
@@ -145,15 +145,15 @@ function callNumber(num){
                     {% endif %}
                     {% if s.lflag == 2 %}
                     <tr>
-                        <td>{{s.time}}</td>
-                        <td>출발</td>
+                        <td class="thstyle1">{{s.time}}</td>
+                        <td class="thstyle11">출발</td>
                         <td></td>
                     </tr>
                     {% endif %}
                     {% if s.lflag == 3 %}
                     <tr>
-                        <td>{{s.time}}</td>
-                        <td>도착</td>
+                        <td class="thstyle1">{{s.time}}</td>
+                        <td class="thstyle11">도착</td>
                         <td></td>
                     </tr>
                     {% endif %}
