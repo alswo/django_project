@@ -180,7 +180,8 @@ def getSchedulesForStudent(request):
 		data['inventory_id'] = scheduletable.iid_id
 		data['start_time'] = makeTimeStr(scheduletable.iid.stime)
 		data['end_time'] = makeTimeStr(scheduletable.iid.etime)
-		data['institute_name'] = list(map(lambda x: (Academy.objects.get(id=x)).name, (set(scheduletable.iid.alist) & set(student.aid))))
+		#data['institute_name'] = list(map(lambda x: (Academy.objects.get(id=x)).name, (set(scheduletable.iid.alist) & set(student.aid))))
+		data['institute_name'] = Academy.objects.get(id=student.aid_id).name
 		data['scheduletable_id'] = scheduletable.id
 		if scheduletable.lflag == 1:
 			data['lflag'] = '등원'
