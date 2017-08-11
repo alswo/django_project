@@ -45,11 +45,13 @@ class PhoneListAdmin(admin.ModelAdmin):
 class ScheduleDateAdmin(admin.ModelAdmin):
     list_display = ('a_name', 'day', 'time')
 
-class StudentInfoAdmin(SimpleHistoryAdmin):
-    search_fields = ['aname','sname']
-    fields = ('academySelection','aid','aname','bid','bname','sname','grade','phone1','phonelist','pin_number')
-    list_display = ('__unicode__',)
+class StudentInfoAdmin(admin.ModelAdmin):
     form = StudentInfoForm
+    model = StudentInfo
+
+    search_fields = ['aname','sname']
+    # fields = ('aid','aname','bid','bname','sname','grade','phone1','phonelist','pin_number')
+    list_display = ('__unicode__',)
 
 class GradeAdmin(admin.ModelAdmin):
     list_display = ('name',)

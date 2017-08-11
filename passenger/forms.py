@@ -4,22 +4,16 @@ from passenger.models import StudentInfo, Branch, Profile, Academy
 from django.contrib.auth.models import User
 from django.template.loader import render_to_string
 
-class StudentInfoWidget(forms.Widget):
-    template_name = "studentInfo_widget.html"
-
-
-    def render(self, name, value , attrs=None):
-        branch = Branch.objects.all()
-        context = {'branch':branch}
-        return mark_safe(render_to_string(self.template_name, context))
+class CustomModelChoiceField(forms.ModelChoiceField):
+     def label_from_instance(self, obj):
+         return "%s" % (obj.name)
 
 class StudentInfoForm(forms.ModelForm):
-    academySelection = forms.CharField(widget=StudentInfoWidget,required=False)
+    aid = CustomModelChoiceField(queryset=Academy.objects.all())
 
     class Meta:
-        model = StudentInfo
+        model = Academy
         fields = "__all__"
-
 
 class ProfileInfoWidget(forms.Widget):
     template_name = "studentInfo_widget.html"
