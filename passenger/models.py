@@ -192,8 +192,6 @@ class StudentInfo(models.Model):
     grandparents_phonenumber = models.CharField(max_length=15, null = True, blank = True)
     self_phonenumber = models.CharField(max_length=15, null = True, blank = True)
     care_phonenumber = models.CharField(max_length=15, null = True, blank = True)
-    birth_year = models.CharField(max_length=4, null = True, blank = True)
-    billing_date = models.CharField(max_length=2, null = True, blank = True)
 
     def __unicode__(self):
         return u"{0} // {1} // {2} // {3} // {4}".format(self.bname,self.aname,self.sname,self.grade,self.phone1)
