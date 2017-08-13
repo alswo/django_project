@@ -218,7 +218,7 @@ function getCarPhone(e, cid,fc){
         carnum: cid,
       },
       success: function(data) {
-        $('#collapsePhone'+fc).html("<br><a class='btn-xs btn-info' href='tel:"+data['phonelist'][0]+"'>기사님</a>&nbsp&nbsp<a class='btn-xs btn-info' href='tel:"+data['phonelist'][0]+"'>동승자</a>");
+        $('#collapsePhone'+fc).html("<br><a class='btn-xs btn-info' href='tel:"+data['phonelist'][0]+"'>기사님</a>&nbsp&nbsp<a class='btn-xs btn-info' href='tel:"+data['phonelist'][1]+"'>동승자</a>");
       }
   });
 
