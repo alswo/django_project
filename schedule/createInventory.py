@@ -10,15 +10,14 @@
 # sid = request.POST.getlist('sid[]')
 # week = int(request.POST.get('week'))
 from schedule.models import Inventory, ScheduleTable, EditedInven, EditedScheduleTable
-from passenger.models import Academy
+from passenger.models import Academy, StudentInfo
 
 class UpdateInven:
-    def __init__(self,bid,carnum,day,req,academy,time,addr,name,name2,load,sid,week,alist):
+    def __init__(self,bid,carnum,day,req,time,addr,name,name2,load,sid,week,alist):
         self.bid = bid
         self.carnum = carnum
         self.day = day
         self.req = req
-        self.academy = academy
         self.time = time
         self.addr = addr
         self.name = name
@@ -30,19 +29,18 @@ class UpdateInven:
 
     def setAlist(self):
         if self.alist == 0:
-            try:
-                alist_temp = list(set([i for i in self.academy if i is not None and i != '']))
-                alist_temp2 = ','.join(alist_temp)
-                alist_temp3 = list(set(alist_temp2.split(',')))
-                alist = []
+            slist_temp = list(set([i for i in self.sid if i is not None and i != '']))
+            slist_temp2 = ','.join(slist_temp)
+            slist_temp3 = list(set(slist_temp2.split(',')))
+            slist = []
+ 
+            for s in slist_temp3:
+                slist.append(int(s))
 
-                for a in alist_temp3:
-                    alist.append(int(a))
-
-                self.alist = alist
-
-            except:
-                return(1)
+            slist_temp3 = slist
+            academy = StudentInfo.objects.filter(id__in = slist_temp3)
+            self.alist = [a.aid_id for a in academy]
+            
         else:
             self.alist = self.alist
 
@@ -111,13 +109,19 @@ class UpdateInven:
                     stable.save()
 
                 elif 0 < i < len(self.time) - 1:
-                    temp_aca = [a.strip() for a in self.academy[i].split(',')]
-                    temp_name = [n.strip() for n in self.name2[i].split(',')]
-                    sidlist = [s.strip() for s in self.sid[i].split(',')]
+                    try:
+                        academy = StudentInfo.objects.filter(id__in = [int(s) for s in self.sid[i].split(',')])
+                        temp_aca = [a.aid_id for a in academy]
+                        temp_name = [n.strip() for n in self.name2[i].split(',')]
+                        sidlist = [s.strip() for s in self.sid[i].split(',')]
 
-                    temp_aca = filter(None, temp_aca)
-                    temp_name = filter(None, temp_name)
-                    sidlist = filter(None, sidlist)
+                    except:
+                        temp_aca = []
+                        temp_name = []
+                        sidlist = []
+                        temp_aca = filter(None, temp_aca)
+                        temp_name = filter(None, temp_name)
+                        sidlist = filter(None, sidlist)
 
                     temp_lflag = [0 for z in range(len(temp_name))]
 
@@ -148,13 +152,19 @@ class UpdateInven:
                         estable.save()
 
                     elif 0 < i < len(self.time) - 1:
-                        temp_aca = [a.strip() for a in self.academy[i].split(',')]
-                        temp_name = [n.strip() for n in self.name2[i].split(',')]
-                        sidlist = [s.strip() for s in self.sid[i].split(',')]
+                        try:
+                            academy = StudentInfo.objects.filter(id__in = [int(s) for s in self.sid[i].split(',')])
+                            temp_aca = [a.aid_id for a in academy]
+                            temp_name = [n.strip() for n in self.name2[i].split(',')]
+                            sidlist = [s.strip() for s in self.sid[i].split(',')]
 
-                        temp_aca = filter(None, temp_aca)
-                        temp_name = filter(None, temp_name)
-                        sidlist = filter(None, sidlist)
+                        except:
+                            temp_aca = []
+                            temp_name = []
+                            sidlist = []
+                            temp_aca = filter(None, temp_aca)
+                            temp_name = filter(None, temp_name)
+                            sidlist = filter(None, sidlist)
 
                         temp_lflag = [0 for z in range(len(temp_name))]
 
@@ -185,13 +195,19 @@ class UpdateInven:
                         estable.save()
 
                     elif 0 < i < len(self.time) - 1:
-                        temp_aca = [a.strip() for a in self.academy[i].split(',')]
-                        temp_name = [n.strip() for n in self.name2[i].split(',')]
-                        sidlist = [s.strip() for s in self.sid[i].split(',')]
+                        try:
+                            academy = StudentInfo.objects.filter(id__in = [int(s) for s in self.sid[i].split(',')])
+                            temp_aca = [a.aid_id for a in academy]
+                            temp_name = [n.strip() for n in self.name2[i].split(',')]
+                            sidlist = [s.strip() for s in self.sid[i].split(',')]
 
-                        temp_aca = filter(None, temp_aca)
-                        temp_name = filter(None, temp_name)
-                        sidlist = filter(None, sidlist)
+                        except:
+                            temp_aca = []
+                            temp_name = []
+                            sidlist = []
+                            temp_aca = filter(None, temp_aca)
+                            temp_name = filter(None, temp_name)
+                            sidlist = filter(None, sidlist)
 
                         temp_lflag = [0 for z in range(len(temp_name))]
 
@@ -221,15 +237,20 @@ class UpdateInven:
                     estable.save()
 
                 elif 0 < i < len(self.time) - 1:
-                    temp_aca = [a.strip() for a in self.academy[i].split(',')]
-                    temp_name = [n.strip() for n in self.name2[i].split(',')]
-                    sidlist = [s.strip() for s in self.sid[i].split(',')]
+                    try:
+                        academy = StudentInfo.objects.filter(id__in = [int(s) for s in self.sid[i].split(',')])
+                        temp_aca = [a.aid_id for a in academy]
+                        temp_name = [n.strip() for n in self.name2[i].split(',')]
+                        sidlist = [s.strip() for s in self.sid[i].split(',')]
 
-                    temp_aca = filter(None, temp_aca)
-                    temp_name = filter(None, temp_name)
-                    sidlist = filter(None, sidlist)
-
-
+                    except:
+                        temp_aca = []
+                        temp_name = []
+                        sidlist = []
+                        temp_aca = filter(None, temp_aca)
+                        temp_name = filter(None, temp_name)
+                        sidlist = filter(None, sidlist)
+                    
                     temp_lflag = [0 for z in range(len(temp_name))]
 
                     anamelist = []

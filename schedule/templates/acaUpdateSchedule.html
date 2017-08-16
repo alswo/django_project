@@ -119,37 +119,20 @@
     <div class="row">
       <div class="col-md-3" align="right"></div>
       <div class="col-md-6" align="center">
-      {% if day == '월' %}
-      <button type="button" class="btn btn-info" onclick="location.href='acaUpdateSchedule?areaid={{areaid}}&bid={{bid}}&aca={{aid}}&day=월&searchTime={{searchTime}}&searchinven=1'">월</button>
-      {% else %}
-      <button type="button" class="btn btn-primary" onclick="location.href='acaUpdateSchedule?areaid={{areaid}}&bid={{bid}}&aca={{aid}}&day=월&searchTime={{searchTime}}&searchinven=1'">월</button>
-      {% endif %}
-      {% if day == '화' %}
-      <button type="button" class="btn btn-info" onclick="location.href='acaUpdateSchedule?areaid={{areaid}}&bid={{bid}}&aca={{aid}}&day=화&searchTime={{searchTime}}&searchinven=1'">화</button>
-      {% else %}
-      <button type="button" class="btn btn-primary" onclick="location.href='acaUpdateSchedule?areaid={{areaid}}&bid={{bid}}&aca={{aid}}&day=화&searchTime={{searchTime}}&searchinven=1'">화</button>
-      {% endif %}
-      {% if day == '수' %}
-      <button type="button" class="btn btn-info" onclick="location.href='acaUpdateSchedule?areaid={{areaid}}&bid={{bid}}&aca={{aid}}&day=수&searchTime={{serachTime}}&searchinven=1'">수</button>
-      {% else %}
-      <button type="button" class="btn btn-primary" onclick="location.href='acaUpdateSchedule?areaid={{areaid}}&bid={{bid}}&aca={{aid}}&day=수&searchTime={{serachTime}}&searchinven=1'">수</button>
-      {% endif %}
-      {% if day == '목' %}
-      <button type="button" class="btn btn-info" onclick="location.href='acaUpdateSchedule?areaid={{areaid}}&bid={{bid}}&aca={{aid}}&day=목&searchTime={{searchTime}}&searchinven=1'">목</button>
-      {% else %}
-      <button type="button" class="btn btn-primary" onclick="location.href='acaUpdateSchedule?areaid={{areaid}}&bid={{bid}}&aca={{aid}}&day=목&searchTime={{searchTime}}&searchinven=1'">목</button>
-      {% endif %}
-      {% if day == '금' %}
-      <button type="button" class="btn btn-info" onclick="location.href='acaUpdateSchedule?areaid={{areaid}}&bid={{bid}}&aca={{aid}}&day=금&searchTime={{searchTime}}&searchinven=1'">금</button>
-      {% else %}
-      <button type="button" class="btn btn-primary" onclick="location.href='acaUpdateSchedule?areaid={{areaid}}&bid={{bid}}&aca={{aid}}&day=금&searchTime={{searchTime}}&searchinven=1'">금</button>
-      {% endif %}
-      {% if day == '토' %}
-      <button type="button" class="btn btn-info" onclick="location.href='acaUpdateSchedule?areaid={{areaid}}&bid={{bid}}&aca={{aid}}&day=토&searchTime={{searchTime}}&searchinven=1'">토</button>
-      {% else %}
-      <button type="button" class="btn btn-primary" onclick="location.href='acaUpdateSchedule?areaid={{areaid}}&bid={{bid}}&aca={{aid}}&day=토&searchTime={{searchTime}}&searchinven=1'">토</button>
-      {% endif %}
-      <a href="#" class="btn btn-warning" id="openBtn">인벤추가</a>
+        {% if day == '월' %}
+        <button type="button" class="btn btn-info" onclick="location.href='acaUpdateSchedule?areaid={{areaid}}&bid={{bid}}&aca={{aid}}&day=월&searchTime={{searchTime}}&searchinven=1'">월</button> {% else %}
+        <button type="button" class="btn btn-primary" onclick="location.href='acaUpdateSchedule?areaid={{areaid}}&bid={{bid}}&aca={{aid}}&day=월&searchTime={{searchTime}}&searchinven=1'">월</button> {% endif %} {% if day == '화' %}
+        <button type="button" class="btn btn-info" onclick="location.href='acaUpdateSchedule?areaid={{areaid}}&bid={{bid}}&aca={{aid}}&day=화&searchTime={{searchTime}}&searchinven=1'">화</button> {% else %}
+        <button type="button" class="btn btn-primary" onclick="location.href='acaUpdateSchedule?areaid={{areaid}}&bid={{bid}}&aca={{aid}}&day=화&searchTime={{searchTime}}&searchinven=1'">화</button> {% endif %} {% if day == '수' %}
+        <button type="button" class="btn btn-info" onclick="location.href='acaUpdateSchedule?areaid={{areaid}}&bid={{bid}}&aca={{aid}}&day=수&searchTime={{serachTime}}&searchinven=1'">수</button> {% else %}
+        <button type="button" class="btn btn-primary" onclick="location.href='acaUpdateSchedule?areaid={{areaid}}&bid={{bid}}&aca={{aid}}&day=수&searchTime={{serachTime}}&searchinven=1'">수</button> {% endif %} {% if day == '목' %}
+        <button type="button" class="btn btn-info" onclick="location.href='acaUpdateSchedule?areaid={{areaid}}&bid={{bid}}&aca={{aid}}&day=목&searchTime={{searchTime}}&searchinven=1'">목</button> {% else %}
+        <button type="button" class="btn btn-primary" onclick="location.href='acaUpdateSchedule?areaid={{areaid}}&bid={{bid}}&aca={{aid}}&day=목&searchTime={{searchTime}}&searchinven=1'">목</button> {% endif %} {% if day == '금' %}
+        <button type="button" class="btn btn-info" onclick="location.href='acaUpdateSchedule?areaid={{areaid}}&bid={{bid}}&aca={{aid}}&day=금&searchTime={{searchTime}}&searchinven=1'">금</button> {% else %}
+        <button type="button" class="btn btn-primary" onclick="location.href='acaUpdateSchedule?areaid={{areaid}}&bid={{bid}}&aca={{aid}}&day=금&searchTime={{searchTime}}&searchinven=1'">금</button> {% endif %} {% if day == '토' %}
+        <button type="button" class="btn btn-info" onclick="location.href='acaUpdateSchedule?areaid={{areaid}}&bid={{bid}}&aca={{aid}}&day=토&searchTime={{searchTime}}&searchinven=1'">토</button> {% else %}
+        <button type="button" class="btn btn-primary" onclick="location.href='acaUpdateSchedule?areaid={{areaid}}&bid={{bid}}&aca={{aid}}&day=토&searchTime={{searchTime}}&searchinven=1'">토</button> {% endif %}
+        <a href="#" class="btn btn-warning" id="openBtn">인벤추가</a>
       </div>
       <div id="myModal" class="modal fade" tabindex="-1" role="dialog">
         <div class="modal-header">
@@ -185,12 +168,9 @@
           <input type="hidden" name='aca' class="form-control" value="{{aid}}" />
           <input type="hidden" name='day' class="form-control" value="{{day}}" />
           <input type="hidden" name='searchTime' class="form-control" value="{{searchTime}}" />
-          <input type="hidden" name='searchinven' class="form-control" value="1" />
-          {% if week == 0 %}
-          <button type="submit" class="btn btn-info">금주</button>
-          {% else %}
-          <button type="submit" class="btn btn-primary">금주</button>
-          {% endif %}
+          <input type="hidden" name='searchinven' class="form-control" value="1" /> {% if week == 0 %}
+          <button type="submit" class="btn btn-info">금주</button> {% else %}
+          <button type="submit" class="btn btn-primary">금주</button> {% endif %}
         </form>
         <form action="acaUpdateSchedule" method="get" class="searchedByCar">
           <input type="hidden" name='week' class="form-control" value="1" />
@@ -198,13 +178,10 @@
           <input type="hidden" name='bid' class="form-control" value="{{bid}}" />
           <input type="hidden" name='aca' class="form-control" value="{{aid}}" />
           <input type="hidden" name='day' class="form-control" value="{{day}}" />
-          <input type="hidden" name='searchTime' class="form-control" value="{{searchTime}}"/>
-          <input type="hidden" name='searchinven' class="form-control" value="1" />
-          {% if week == 1 %}
-          <button type="submit" class="btn btn-info">1주 후</button>
-          {% else %}
-          <button type="submit" class="btn btn-primary">1주 후</button>
-          {% endif %}
+          <input type="hidden" name='searchTime' class="form-control" value="{{searchTime}}" />
+          <input type="hidden" name='searchinven' class="form-control" value="1" /> {% if week == 1 %}
+          <button type="submit" class="btn btn-info">1주 후</button> {% else %}
+          <button type="submit" class="btn btn-primary">1주 후</button> {% endif %}
         </form>
         <form action="acaUpdateSchedule" method="get" class="searchedByCar">
           <input type="hidden" name='week' class="form-control" value="2" />
@@ -213,12 +190,9 @@
           <input type="hidden" name='aca' class="form-control" value="{{aid}}" />
           <input type="hidden" name='day' class="form-control" value="{{day}}" />
           <input type="hidden" name='searchTime' class="form-control" value="{{searchTime}}" />
-          <input type="hidden" name='searchinven' class="form-control" value="1" />
-          {% if week == 2 %}
-          <button type="submit" class="btn btn-info">2주 후</button>
-          {% else %}
-          <button type="submit" class="btn btn-primary">2주 후</button>
-          {% endif %}
+          <input type="hidden" name='searchinven' class="form-control" value="1" /> {% if week == 2 %}
+          <button type="submit" class="btn btn-info">2주 후</button> {% else %}
+          <button type="submit" class="btn btn-primary">2주 후</button> {% endif %}
         </form>
         <form action="acaUpdateSchedule" method="get" class="searchedByCar">
           <input type="hidden" name='week' class="form-control" value="3" />
@@ -227,12 +201,9 @@
           <input type="hidden" name='aca' class="form-control" value="{{aid}}" />
           <input type="hidden" name='day' class="form-control" value="{{day}}" />
           <input type="hidden" name='searchTime' class="form-control" value="{{searchTime}}" />
-          <input type="hidden" name='searchinven' class="form-control" value="1" />
-          {% if week == 3 %}
-          <button type="submit" class="btn btn-info">3주 후</button>
-          {% else %}
-          <button type="submit" class="btn btn-primary">3주 후</button>
-          {% endif %}
+          <input type="hidden" name='searchinven' class="form-control" value="1" /> {% if week == 3 %}
+          <button type="submit" class="btn btn-info">3주 후</button> {% else %}
+          <button type="submit" class="btn btn-primary">3주 후</button> {% endif %}
         </form>
       </div>
     </div>
@@ -240,8 +211,7 @@
     </div>
   </div>
   <br>
-  <br>
-  {% for c in contacts %}
+  <br> {% for c in contacts %}
   <div class="row">
     <div class="col-md-1"></div>
     <div class="col-md-10" style="background-color:rgb(201, 214, 222); height: auto; width: 100%">
@@ -268,14 +238,11 @@
             <textarea class="form-control" style="" rows="4" id="{{c.id}}memo">{% if c.memo %} {{c.memo}} {% endif %} </textarea>
           </div>
           <div class="col-md-1">
-            <br><br><br><br>
-            {% if c.get_cname == 'editedinven' %}
+            <br><br><br><br> {% if c.get_cname == 'editedinven' %}
             <div class="row"><button type="button" class="btn btn-primary" onclick="reqInventory({{c.id}},1);">저장</button></div>
-            <br>
-            {% else %}
+            <br> {% else %}
             <div class="row"><button type="button" class="btn btn-primary" onclick="reqInventory({{c.id}},0);">저장</button></div>
-            <br>
-            {% endif %}
+            <br> {% endif %}
           </div>
           <div class="col-md-3">
             <ul class="list-group" style="margin:0px">
@@ -311,10 +278,9 @@
                       <option value="{{c.id}}/{{car.carname}}">{{car.carname}}호차</option>
                     {% endif %}
                   {% endfor %}
-                </select>
-                &nbsp&nbsp<button type="button" class="btn-sm btn-primary" value="" id="move{{c.id}}" onclick="moveCarInven({{c.id}});">차량만 바꾸기</button>
-                <br><br>
-                {% for s in c.scheduletables.all %}
+                </select> &nbsp&nbsp
+                <button type="button" class="btn-sm btn-primary" value="" id="move{{c.id}}" onclick="moveCarInven({{c.id}});">차량만 바꾸기</button>
+                <br><br> {% for s in c.scheduletables.all %}
                 <tr>
                   <td data-name="time" class="tdstyle4"><input onchange="emptyTempList();" type="text" name="time[]" placeholder="Time" class="form-control inputstyle" form="scheduleform{{c.id}}" value="{{s.time}}" /></td>
                   <td data-name="addr" class="tdstyle2"><input type="text" name="addr[]" placeholder="Address" class="form-control inputstyle" form="scheduleform{{c.id}}" value="{{s.addr}}" /></td>
@@ -329,7 +295,6 @@
                   </td>
                   <td data-name="addstu" class="text-center tdstyle3"><button class="btn btn-primary glyphicon glyphicon-plus addstudent" data-toggle="modal"></button></td>
                   <td data-name="sid" class="inputSid" style="display:none;"><input name="sid[]" type="text" class="form-control" form="scheduleform{{c.id}}" value="{% for sid in s.slist %}{{sid}}{% include 'comma.html' %}{% endfor %}" /></td>
-                  <td data-name="academy" class="inputAcaU" style="display:none;"><input name="academy[]" type="text" class="form-control" form="scheduleform{{c.id}}" value="{% for aid in s.alist %}{{aid}}{% include 'comma.html' %}{% endfor %}" /></td>
                   <td data-name="load" class="text-center tdstyle3">
                     {% if s.lflag == 1 %}
                     <select name="load[]" form="scheduleform{{c.id}}">
@@ -351,8 +316,7 @@
                   </td>
                   <td data-name="del" class="text-center tdstyle3"><button name="del" class="btn btn-sm btn-danger glyphicon glyphicon-remove row-remove"></button></td>
                 </tr>
-                {% endfor %}
-                {% elif c.editedscheduletables %}
+                {% endfor %} {% elif c.editedscheduletables %}
                 <select class="moveCarList">
                   {% for car in carlist %}
                     {% if car.carname == carnum %}
@@ -361,10 +325,9 @@
                       <option value="{{c.id}}/{{car.carname}}">{{car.carname}}호차</option>
                     {% endif %}
                   {% endfor %}
-                </select>
-                &nbsp&nbsp<button type="button" class="btn-sm btn-primary" value="" id="move{{c.id}}" onclick="moveCarEditedInven({{c.id}});">차량만 바꾸기</button>
-                <br><br>
-                {% for es in c.editedscheduletables.all %}
+                </select> &nbsp&nbsp
+                <button type="button" class="btn-sm btn-primary" value="" id="move{{c.id}}" onclick="moveCarEditedInven({{c.id}});">차량만 바꾸기</button>
+                <br><br> {% for es in c.editedscheduletables.all %}
                 <tr>
                   <td data-name="time" class="tdstyle4"><input onchange="emptyTempList();" type="text" name="time[]" placeholder="Time" class="form-control" form="scheduleform{{c.id}}" value="{{es.time}}" /></td>
                   <td data-name="addr" class="tdstyle2"><input type="text" name="addr[]" placeholder="Address" class="form-control" form="scheduleform{{c.id}}" value="{{es.addr}}" /></td>
@@ -379,7 +342,6 @@
                   </td>
                   <td data-name="addstu" class="text-center tdstyle3"><button class="btn btn-primary glyphicon glyphicon-plus addstudent" data-toggle="modal"></button></td>
                   <td data-name="sid" class="inputSid" style="display:none;"><input name="sid[]" type="text" class="form-control" form="scheduleform{{c.id}}" value="{% for sid in es.slist %}{{sid}}{% include 'comma.html' %}{% endfor %}" /></td>
-                  <td data-name="academy" class="inputAcaU" style="display:none;"><input name="academy[]" type="text" class="form-control" form="scheduleform{{c.id}}" value="{% for aid in es.alist %}{{aid}}{% include 'comma.html' %}{% endfor %}" /></td>
                   <td data-name="load" class="text-center tdstyle3">
                     {% if es.lflag == 1 %}
                     <select name="load[]" form="scheduleform{{c.id}}">
@@ -452,8 +414,7 @@
               <input id="carnum{{c.id}}" class="hidden" name='carnum' value="{{c.carnum}}" form="deleteform{{c.id}}" />
               <button type="submit" class="btn btn-danger">삭제</button>
             </form>
-            {% else %}
-            {% endif %}
+            {% else %} {% endif %}
             <a id="{{c.id}}" class="btn btn-default pull-right addrow">Add Row</a>
           </div>
         </div>
@@ -468,134 +429,229 @@
         $(this).parent().find('.table-body').append(
           '<tr><td data-name="time"><input type="text" name="time[]" placeholder="Time" class="form-control" form="scheduleform' + id +
           '"/></td><td><input type="text" name="addr[]" placeholder="Address" class="form-control" form="scheduleform' + id +
-          '"/></td><td data-name="req" class="tdstyle3"><select name="req[]" form="scheduleform'+id+'"><option value="">없음</option><option value="데려와주세요" {% if s.req == "데려와주세요" %} selected {% endif %} >데려와주세요</option></select></td><td data-name="name" class="inputTd"><input type="text" name="name[]" data-role="tagsinput" class="form-control" form="scheduleform' + id + '" value="{% for name in s.sname %}{{name}}{% include '
-          comma.html ' %}{% endfor %}" /></td><td data-name="addstu"><button class="btn btn-primary glyphicon glyphicon-plus addstudent" data-toggle="modal"></button></td><td data-name="academy" class="inputAcaU" style="display:none"><input name="academy[]" data-role="tagsinput" class="form-control" form="scheduleform' +
-          id + '" value="{% for aid in s.alist %}{{aid}}{% include '
-          comma.html ' %}{% endfor %}" /></td>                <td data-name="sid" class="inputSid" style="display:none;"><input name="sid[]" type="text" data-role="tagsinput" class="form-control" form="scheduleform' + id +
-          '" value="{% for sid in s.slist %}{{sid}}{% include '
+          '"/></td><td data-name="req" class="tdstyle3"><select name="req[]" form="scheduleform' + id +
+          '"><option value="">없음</option><option value="데려와주세요" {% if s.req == "데려와주세요" %} selected {% endif %} >데려와주세요</option></select></td><td data-name="name" class="inputTd"><input type="text" name="name[]" data-role="tagsinput" class="form-control" form="scheduleform' +
+          id + '" value="{% for name in s.sname %}{{name}}{% include '
+          comma.html ' %}{% endfor %}" /></td><td data-name="addstu"><button class="btn btn-primary glyphicon glyphicon-plus addstudent" data-toggle="modal"></button></td>                <td data-name="sid" class="inputSid" style="display:none;"><input name="sid[]" type="text" data-role="tagsinput" class="form-control" form="scheduleform' +
+          id + '" value="{% for sid in s.slist %}{{sid}}{% include '
           comma.html ' %}{% endfor %}" /></td><td data-name="load"><select name="load[]" form="scheduleform' + id +
           '"><option value="">등하원</option><option value="1">등원</option><option value="0">하원</option></select></td><td data-name="del"><button name="del" class="btn btn-danger glyphicon glyphicon-remove row-remove"></button></td></tr>'
         )
       });
 
-                  function reqInventory(iid, flag) {
+      function reqInventory(iid, flag) {
 
-                    var req = $('#' + iid + 'text').val();
-                    var memo = $('#' + iid + 'memo').val();
-                    $.ajax({
-                      type: 'POST',
-                      url: 'reqInventory',
-                      data: {
-                        iid: iid,
-                        req: req,
-                        memo: memo,
-                        flag: flag,
-                      },
-                      success: function(data) {
-                        $('#' + iid + 'text').val(data);
-                        alert("Success");
-                      }
-                    });
-                  }
+        var req = $('#' + iid + 'text').val();
+        var memo = $('#' + iid + 'memo').val();
+        $.ajax({
+          type: 'POST',
+          url: 'reqInventory',
+          data: {
+            iid: iid,
+            req: req,
+            memo: memo,
+            flag: flag,
+          },
+          success: function(data) {
+            $('#' + iid + 'text').val(data);
+            alert("Success");
+          }
+        });
+      }
 
-                  $( ".moveCarList" ).change(function() {
-                    console.log(this.value)
-                    contactId = this.value.split('/')[0]
-                    carnum = this.value.split('/')[1]
-                    $('#carnum'+contactId).val(carnum);
-                    $('#move'+contactId).val(carnum);
-                  });
+      $(".moveCarList").change(function() {
+        console.log(this.value)
+        contactId = this.value.split('/')[0]
+        carnum = this.value.split('/')[1]
+        $('#carnum' + contactId).val(carnum);
+        $('#move' + contactId).val(carnum);
+      });
 
-                  function moveCarInven(contactId){
-                    carname = $('#move'+contactId).val()
-                    iid = contactId
-                    $.ajax({
-                      type: 'POST',
-                      url: 'moveCarInven',
-                      data: {
-                        iid: iid,
-                        carname: carname
-                      },
-                      success: function(data) {
-                        alert(data+'차량으로 이동 완료')
-                        window.location.replace(window.location.href);
-                      }
-                    });
-                  }
+      function moveCarInven(contactId) {
+        carname = $('#move' + contactId).val()
+        iid = contactId
+        $.ajax({
+          type: 'POST',
+          url: 'moveCarInven',
+          data: {
+            iid: iid,
+            carname: carname
+          },
+          success: function(data) {
+            alert(data + '차량으로 이동 완료')
+            window.location.replace(window.location.href);
+          }
+        });
+      }
 
-                  function moveCarEditedInven(contactId){
-                    carname = $('#move'+contactId).val()
-                    iid = contactId
-                    $.ajax({
-                      type: 'POST',
-                      url: 'moveCarEditedInven',
-                      data: {
-                        iid: iid,
-                        carname: carname
-                      },
-                      success: function(data) {
-                        alert(data+'차량으로 이동 완료')
-                        window.location.replace(window.location.href);
-                      }
-                    });
-                  }
+      function moveCarEditedInven(contactId) {
+        carname = $('#move' + contactId).val()
+        iid = contactId
+        $.ajax({
+          type: 'POST',
+          url: 'moveCarEditedInven',
+          data: {
+            iid: iid,
+            carname: carname
+          },
+          success: function(data) {
+            alert(data + '차량으로 이동 완료')
+            window.location.replace(window.location.href);
+          }
+        });
+      }
 
-                  function validateSearchForm() {
-                    var num = /^\d+$/;
+      function validateSearchForm() {
+        var num = /^\d+$/;
 
-                    if (document.forms["searchform"]["area"].selectedIndex < 1) {
-                      alert("지역, 지점을 선택해 주세요.")
-                      return false;
-                    } else if (document.forms["searchform"]["time"].value != '') {
-                      if (num.test(document.forms["searchform"]["time"].value) == false) {
-                        alert("시간은 숫자만 입력해 주세요.(예:1500)")
-                        return false;
-                      }
-                    }
-                  }
+        if (document.forms["searchform"]["area"].selectedIndex < 1) {
+          alert("지역, 지점을 선택해 주세요.")
+          return false;
+        } else if (document.forms["searchform"]["time"].value != '') {
+          if (num.test(document.forms["searchform"]["time"].value) == false) {
+            alert("시간은 숫자만 입력해 주세요.(예:1500)")
+            return false;
+          }
+        }
+      }
 
-                  function validateTableForm(e) {
-                    console.log(e)
-                    tableLength = document.forms[e]['time[]'].length
-                    tempAddrS = document.forms[e]['addr[]'][0].value
-                    tempAddrE = document.forms[e]['addr[]'][tableLength - 1].value
-                    var timepattern = /([01]\d|2[0-3]):([0-5]\d)/;
+      function validateTableForm(e) {
+        console.log(e)
+        tableLength = document.forms[e]['time[]'].length
+        tempAddrS = document.forms[e]['addr[]'][0].value
+        tempAddrE = document.forms[e]['addr[]'][tableLength - 1].value
+        var timepattern = /([01]\d|2[0-3]):([0-5]\d)/;
 
-                    if (tempAddrS != "" || tempAddrE != "") {
-                      alert("시작,끝 주소는 반드시 비워주세요.")
-                      return false;
-                    }
-                    tempTime = document.forms[e]['time[]']
-                    for (i = 0; i < tableLength; i++) {
-                      if (timepattern.test(tempTime[i].value) == false) {
-                        alert(i + 1 + "번째 로우의 숫자를 정확히 입력해 주세요.")
-                        return false;
-                      }
-                    }
+        if (tempAddrS != "" || tempAddrE != "") {
+          alert("시작,끝 주소는 반드시 비워주세요.")
+          return false;
+        }
+        tempTime = document.forms[e]['time[]']
+        for (i = 0; i < tableLength; i++) {
+          if (timepattern.test(tempTime[i].value) == false) {
+            alert(i + 1 + "번째 로우의 숫자를 정확히 입력해 주세요.")
+            return false;
+          }
+        }
 
-                    tempName = document.forms[e]['name[]']
-                    if (tempName[0].value != "" || tempName[tableLength - 1].value != "") {
-                      alert("시작,끝 이름은 반드시 비워주세요.")
-                      return false;
-                    }
+        tempName = document.forms[e]['name[]']
+        if (tempName[0].value != "" || tempName[tableLength - 1].value != "") {
+          alert("시작,끝 이름은 반드시 비워주세요.")
+          return false;
+        }
 
-                    tempLoad = document.forms[e]['load[]']
-                    for (i = 1; i < tableLength - 1; i++) {
-                      if (tempLoad[i].value == '') {
-                        alert(i + 1 + "번째 등하원 여부를 선택해 주세요.")
-                        return false;
-                      }
-                    }
+        tempLoad = document.forms[e]['load[]']
+        for (i = 1; i < tableLength - 1; i++) {
+          if (tempLoad[i].value == '') {
+            alert(i + 1 + "번째 등하원 여부를 선택해 주세요.")
+            return false;
+          }
+        }
 
-                  }
-                  $('#openBtn').click(function() {
-                          $('#myModal').on('show', function() {
+      }
+      $('#openBtn').click(function() {
+        $('#myModal').on('show', function() {
 
-                          });
-                          $('#myModal').modal({
-                            show: true
-                          })
-                        });
+        });
+        $('#myModal').modal({
+          show: true
+        })
+      });
 
+      var thisObject;
+      var thisObjectForSid;
+
+      $(document).on('click', '.addstudent', function() {
+        //thisObject -> studentName, thisObjectForAca -> AcademyID
+        a = $(this)
+        thisObject = $(this).parent().prevAll('.inputTd').children();
+        thisObjectForSid = $(this).parent().nextAll('.inputSid').children();
+        console.log(thisObject);
+        console.log(thisObjectForSid);
+        $('#addstu').modal('show');
+      })
+
+      $(document).on('click', '.studenttoinput', function() {
+        var selectedStu = []
+        selectedSid = $('#studentList').val()
+
+
+        for (var i = 0; i < selectedSid.length; i++) {
+          var val = selectedSid[i];
+          var txt = $("#studentList option[value='" + val + "']").text();
+          selectedStu.push(txt)
+        }
+
+        if (thisObject[0].nodeName == 'DIV') {
+          temp = thisObject[1].value
+          tempSid = thisObjectForSid[1].value
+
+          if (temp != '') {
+            console.log('updateSchedule 1')
+
+            temp += ',' + selectedStu
+            tempSid += ',' + selectedSid
+          } else {
+            console.log('updateSchedule 2')
+
+            temp = '' + selectedStu
+            tempSid = '' + selectedSid
+          }
+          $(thisObject[1]).tagsinput('removeAll')
+          $(thisObjectForSid[1]).tagsinput('removeAll')
+
+          $(thisObject[1]).tagsinput('add', temp)
+          $(thisObjectForSid[1]).tagsinput('add', tempSid)
+
+        } else if (thisObject[0].nodeName == 'INPUT') {
+          temp = thisObject[0].value
+          tempSid = thisObjectForSid[0].value
+
+          if (temp != '') {
+            console.log('putSchedule 1')
+
+            temp += ',' + selectedStu
+            tempSid += ',' + selectedSid
+          } else {
+            console.log('putSchedule 2')
+
+            temp = '' + selectedStu
+            tempSid = '' + selectedSid
+          }
+          $(thisObject[0]).tagsinput('removeAll')
+          $(thisObjectForSid[0]).tagsinput('removeAll')
+
+          $(thisObject[0]).tagsinput('add', temp)
+          $(thisObjectForSid[0]).tagsinput('add', tempSid)
+        }
+      })
+      $(document).on('beforeItemRemove', '.inputTd', function(event) {
+        t = $(this)
+        sibling_sid = $(this).siblings('.inputSid')[0].children[1]
+
+        // Do some processing here
+        console.log(sibling_sid)
+        var before_list = t[0].children[1].value.split(",").map(function(item) {
+          return item.trim();
+        });
+
+        var delete_index = before_list.indexOf(event.item.trim())
+
+        var before_sid_value = sibling_sid.value
+        console.log(before_sid_value)
+
+        var delete_sid = before_sid_value.split(',').map(function(item) {
+          return item.trim()
+        });
+
+        console.log(delete_sid)
+
+        if (delete_index == -1) {
+          delete_sid.splice(0, 1);
+        } else {
+          delete_sid.splice(delete_index, 1);
+        }
+        sibling_sid.value = delete_sid
+      });
     </script>
     {% endblock content %}

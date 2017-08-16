@@ -74,14 +74,15 @@ def invenToJson(invens):
                 sInfo={}
                 try:
                     studentInfo = StudentInfo.objects.get(id = si)
+                    academy = Academy.objects.get(id = studentInfo.aid_id)
                     sInfo['id'] = studentInfo.id
                     sInfo['name'] = studentInfo.sname
                     sInfo['aid'] = studentInfo.aid
-                    sInfo['aname'] = studentInfo.aname
+                    sInfo['aname'] = academy.name
                     sInfo['grade'] = studentInfo.grade
                     sInfo['phone1'] = studentInfo.phone1
                     sInfo['phonelist'] = studentInfo.phonelist
-		
+
 		except:
 		    HttpResponse(si)
 
@@ -94,7 +95,7 @@ def invenToJson(invens):
             inventory['schedule'].append(schedule)
 
         contacts.append(inventory)
-    
+
     return contacts
 
 @csrf_exempt
@@ -181,7 +182,7 @@ def getSchedule(request):
             if day:
                 invens = Inventory.objects.filter(bid = bid).filter(alist__contains = [aid]).filter(day = day)
                 list_invensid = []
-                
+
                 contacts = invenToJson(invens)
 
                 return render_to_response('getSchedule.html', {"contacts": contacts, "bid" : bid, "aid" : aid,'user':request.user})
@@ -237,7 +238,6 @@ def putSchedule(request):
         addr = request.POST.getlist('addr[]')
         name = request.POST.getlist('name[]')
         name2 = request.POST.getlist('name[]')
-        academy = request.POST.getlist('academy[]')
         load = request.POST.getlist('load[]')
         sid = request.POST.getlist('sid[]')
         week = int(request.POST.get('week'))
@@ -245,10 +245,10 @@ def putSchedule(request):
 
         if not alist:
             alist = 0
-            putInven = UpdateInven(bid,carnum,day,req,academy,time,addr,name,name2,load,sid,week,alist)
+            putInven = UpdateInven(bid,carnum,day,req,time,addr,name,name2,load,sid,week,alist)
 
         if alist != None:
-            putInven = UpdateInven(bid,carnum,day,req,academy,time,addr,name,name2,load,sid,week,alist)
+            putInven = UpdateInven(bid,carnum,day,req,time,addr,name,name2,load,sid,week,alist)
 
         if putInven.setAlist() == 1:
             return HttpResponse('error setAlist')
@@ -304,7 +304,7 @@ def updateSchedule(request):
                     week = 0
 
                 else:
-					week = int(week)
+	            week = int(week)
 
                 contacts = []
 
@@ -351,6 +351,7 @@ def updateSchedule(request):
 
         area = Area.objects.all()
         branch = Branch.objects.all()
+
         return render_to_response('supdateSchedule.html',{'area':area, 'branch': branch, 'user':request.user})
 
 
@@ -423,7 +424,8 @@ def updateSchedule(request):
             academy = request.POST.getlist('academy[]')
             load = request.POST.getlist('load[]')
             sid = request.POST.getlist('sid[]')
-            busAlist = request.POST.getlist('alist[]')
+            bus_check = request.POST.get('bus_check')
+	    busAlist = request.POST.getlist('alist[]')
             #redirect
             carnum = int(request.POST.get('carnum'))
 
@@ -435,28 +437,13 @@ def updateSchedule(request):
             #carlist for searching with carnum and redirection
             carlist = Car.objects.filter(branchid=bid)
 
-            bus_check = 0
-            for a in range(len(academy)):
-                if 0 < a < len(academy) - 1:
-                    if academy[a] == '':
-                        bus_check = 1
-
-            if bus_check == 1:
+            if bus_check == '1':
                 alist = []
-
                 for a in busAlist:
                     alist.append(int(a))
+                slist_temp3 = [0]
 
-            elif bus_check == 0:
-                alist_temp = list(set([i for i in academy if i is not None and i != '']))
-                alist_temp2 = ','.join(alist_temp)
-                alist_temp3 = list(set(alist_temp2.split(',')))
-                alist = []
-
-                for a in alist_temp3:
-                    alist.append(int(a))
-
-            try:
+            else:
                 slist_temp = list(set([i for i in sid if i is not None and i != '']))
                 slist_temp2 = ','.join(slist_temp)
                 slist_temp3 = list(set(slist_temp2.split(',')))
@@ -466,10 +453,8 @@ def updateSchedule(request):
                     slist.append(int(s))
 
                 slist_temp3 = slist
-
-            except:
-
-                slist_temp3 = [0]
+                academy = StudentInfo.objects.filter(id__in = slist_temp3)
+                alist = [a.aid_id for a in academy]
 
             stime = int(time[0].split(':')[0] + time[0].split(':')[1])
             etime = int(time[-1].split(':')[0] + time[-1].split(':')[1])
@@ -523,11 +508,21 @@ def updateSchedule(request):
                                 estable.save()
 
                             elif 0 < i < len(time) - 1:
-                                temp_aca = [a.strip() for a in academy[i].split(',')]
-                                temp_name = [n.strip() for n in name2[i].split(',')]
-                                sidlist = [s.strip() for s in sid[i].split(',')]
+				try:
+                                    academy = StudentInfo.objects.filter(id__in = [int(s) for s in sid[i].split(',')])
+                                    temp_aca = [a.aid_id for a in academy]
+                                    temp_name = [n.strip() for n in name2[i].split(',')]
+                                    sidlist = [s.strip() for s in sid[i].split(',')]
 
-                                temp_lflag = [0 for z in range(len(temp_name))]
+                                except:
+                                    temp_aca = []
+                                    temp_name = []
+                                    sidlist = []
+                                    temp_aca = filter(None, temp_aca)
+                                    temp_name = filter(None, temp_name)
+                                    sidlist = filter(None, sidlist)
+
+			        temp_lflag = [0 for z in range(len(temp_name))]
 
                                 anamelist = []
 
@@ -622,9 +617,19 @@ def updateSchedule(request):
                                 estable.save()
 
                             elif 0 < i < len(time) - 1:
-                                temp_aca = [a.strip() for a in academy[i].split(',')]
-                                temp_name = [n.strip() for n in name2[i].split(',')]
-                                sidlist = [s.strip() for s in sid[i].split(',')]
+				try:
+                                    academy = StudentInfo.objects.filter(id__in = [int(s) for s in sid[i].split(',')])
+                                    temp_aca = [a.aid_id for a in academy]
+                                    temp_name = [n.strip() for n in name2[i].split(',')]
+                                    sidlist = [s.strip() for s in sid[i].split(',')]
+
+                                except:
+                                    temp_aca = []
+                                    temp_name = []
+                                    sidlist = []
+                                    temp_aca = filter(None, temp_aca)
+                                    temp_name = filter(None, temp_name)
+                                    sidlist = filter(None, sidlist)
 
                                 temp_lflag = [0 for z in range(len(temp_name))]
 
@@ -719,9 +724,19 @@ def updateSchedule(request):
                                 estable.save()
 
                             elif 0 < i < len(time) - 1:
-                                temp_aca = [a.strip() for a in academy[i].split(',')]
-                                temp_name = [n.strip() for n in name2[i].split(',')]
-                                sidlist = [s.strip() for s in sid[i].split(',')]
+				try:
+                                    academy = StudentInfo.objects.filter(id__in = [int(s) for s in sid[i].split(',')])
+                                    temp_aca = [a.aid_id for a in academy]
+                                    temp_name = [n.strip() for n in name2[i].split(',')]
+                                    sidlist = [s.strip() for s in sid[i].split(',')]
+
+                                except:
+                                    temp_aca = []
+                                    temp_name = []
+                                    sidlist = []
+                                    temp_aca = filter(None, temp_aca)
+                                    temp_name = filter(None, temp_name)
+                                    sidlist = filter(None, sidlist)
 
                                 temp_lflag = [0 for z in range(len(temp_name))]
 
@@ -811,9 +826,19 @@ def updateSchedule(request):
                                 estable.save()
 
                             elif 0 < i < len(time) - 1:
-                                temp_aca = [a.strip() for a in academy[i].split(',')]
-                                temp_name = [n.strip() for n in name2[i].split(',')]
-                                sidlist = [s.strip() for s in sid[i].split(',')]
+                                try:
+                                    academy = StudentInfo.objects.filter(id__in = [int(s) for s in sid[i].split(',')])
+                                    temp_aca = [a.aid_id for a in academy]
+                                    temp_name = [n.strip() for n in name2[i].split(',')]
+                                    sidlist = [s.strip() for s in sid[i].split(',')]
+
+                                except:
+                                    temp_aca = []
+                                    temp_name = []
+                                    sidlist = []
+                                    temp_aca = filter(None, temp_aca)
+                                    temp_name = filter(None, temp_name)
+                                    sidlist = filter(None, sidlist)
 
                                 temp_lflag = [0 for z in range(len(temp_name))]
 
@@ -867,7 +892,7 @@ def updateSchedule(request):
 
                     return render_to_response('supdateSchedule.html',{"area":area,"branch":branch,"searchTime":searchTime,"academy":academy,"day":day,"carlist": carlist,"carnum":carnum,"bid":bid,"areaid": areaid,"week": week,"contacts":contacts,'user':request.user})
 
-            if week == 3:
+            elif week == 3:
                 try:
                     eInven = EditedInven.objects.get(id = iid, week = week)
                     eInven_index = 0;
@@ -893,9 +918,19 @@ def updateSchedule(request):
                             estable.save()
 
                         elif 0 < i < len(time) - 1:
-                            temp_aca = [a.strip() for a in academy[i].split(',')]
-                            temp_name = [n.strip() for n in name2[i].split(',')]
-                            sidlist = [s.strip() for s in sid[i].split(',')]
+			    try:
+                                academy = StudentInfo.objects.filter(id__in = [int(s) for s in sid[i].split(',')])
+                                temp_aca = [a.aid_id for a in academy]
+                                temp_name = [n.strip() for n in name2[i].split(',')]
+                                sidlist = [s.strip() for s in sid[i].split(',')]
+
+                            except:
+                                temp_aca = []
+                                temp_name = []
+                                sidlist = []
+                                temp_aca = filter(None, temp_aca)
+                                temp_name = filter(None, temp_name)
+                                sidlist = filter(None, sidlist)
 
                             temp_lflag = [0 for z in range(len(temp_name))]
 
@@ -972,9 +1007,19 @@ def updateSchedule(request):
                             estable.save()
 
                         elif 0 < i < len(time) - 1:
-                            temp_aca = [a.strip() for a in academy[i].split(',')]
-                            temp_name = [n.strip() for n in name2[i].split(',')]
-                            sidlist = [s.strip() for s in sid[i].split(',')]
+			    try:
+                                academy = StudentInfo.objects.filter(id__in = [int(s) for s in sid[i].split(',')])
+                                temp_aca = [a.aid_id for a in academy]
+                                temp_name = [n.strip() for n in name2[i].split(',')]
+                                sidlist = [s.strip() for s in sid[i].split(',')]
+
+                            except:
+                                temp_aca = []
+                                temp_name = []
+                                sidlist = []
+                                temp_aca = filter(None, temp_aca)
+                                temp_name = filter(None, temp_name)
+                                sidlist = filter(None, sidlist)
 
                             temp_lflag = [0 for z in range(len(temp_name))]
 
@@ -1047,19 +1092,19 @@ def updateSchedule(request):
                         stable.save()
 
                     elif 0 < i < len(time) - 1:
-                        temp_aca = [a.strip() for a in academy[i].split(',')]
-                        temp_name = [n.strip() for n in name2[i].split(',')]
-                        sidlist = [s.strip() for s in sid[i].split(',')]
+                        try:
+			    academy = StudentInfo.objects.filter(id__in = [int(s) for s in sid[i].split(',')])
+                            temp_aca = [a.aid_id for a in academy]
+                            temp_name = [n.strip() for n in name2[i].split(',')]
+                            sidlist = [s.strip() for s in sid[i].split(',')]
 
-                        temp_aca = filter(None, temp_aca)
-                        temp_name = filter(None, temp_name)
-                        sidlist = filter(None, sidlist)
-
-
-                        # student = StudentInfo.objects.filter(aid__contains=[ a for a in temp_aca]).filter(sname__in=[ stu for stu in temp_name ])
-                        #
-                        # for s in student:
-                        #     sidtemp.append(s.id)
+			except:
+                            temp_aca = []
+                            temp_name = []
+  			    sidlist = []
+                            temp_aca = filter(None, temp_aca)
+                            temp_name = filter(None, temp_name)
+                            sidlist = filter(None, sidlist)
 
                         temp_lflag = [0 for z in range(len(temp_name))]
 
@@ -1363,9 +1408,19 @@ def acaUpdateSchedule(request):
                                 estable.save()
 
                             elif 0 < i < len(time) - 1:
-                                temp_aca = [a.strip() for a in academy[i].split(',')]
-                                temp_name = [n.strip() for n in name2[i].split(',')]
-                                sidlist = [s.strip() for s in sid[i].split(',')]
+				try:
+                                    academy = StudentInfo.objects.filter(id__in = [int(s) for s in sid[i].split(',')])
+                                    temp_aca = [a.aid_id for a in academy]
+                                    temp_name = [n.strip() for n in name2[i].split(',')]
+                                    sidlist = [s.strip() for s in sid[i].split(',')]
+
+                                except:
+                                    temp_aca = []
+                            	    temp_name = []
+                                    sidlist = []
+                                    temp_aca = filter(None, temp_aca)
+                                    temp_name = filter(None, temp_name)
+                                    sidlist = filter(None, sidlist)
 
                                 temp_lflag = [0 for z in range(len(temp_name))]
 
@@ -1464,8 +1519,20 @@ def acaUpdateSchedule(request):
                                 estable.save()
 
                             elif 0 < i < len(time) - 1:
-                                temp_aca = [a.strip() for a in academy[i].split(',')]
-                                temp_name = [n.strip() for n in name2[i].split(',')]
+                                try:
+                                    academy = StudentInfo.objects.filter(id__in = [int(s) for s in sid[i].split(',')])
+                                    temp_aca = [a.aid_id for a in academy]
+                                    temp_name = [n.strip() for n in name2[i].split(',')]
+                                    sidlist = [s.strip() for s in sid[i].split(',')]
+
+                                except:
+                                    temp_aca = []
+                                    temp_name = []
+                                    sidlist = []
+                                    temp_aca = filter(None, temp_aca)
+                                    temp_name = filter(None, temp_name)
+                                    sidlist = filter(None, sidlist)
+
                                 sidlist = [s.strip() for s in sid[i].split(',')]
                                 temp_lflag = [0 for z in range(len(temp_name))]
 
@@ -1562,9 +1629,19 @@ def acaUpdateSchedule(request):
                                 estable.save()
 
                             elif 0 < i < len(time) - 1:
-                                temp_aca = [a.strip() for a in academy[i].split(',')]
-                                temp_name = [n.strip() for n in name2[i].split(',')]
-                                sidlist = [s.strip() for s in sid[i].split(',')]
+                                try:
+                                    academy = StudentInfo.objects.filter(id__in = [int(s) for s in sid[i].split(',')])
+                                    temp_aca = [a.aid_id for a in academy]
+                                    temp_name = [n.strip() for n in name2[i].split(',')]
+                                    sidlist = [s.strip() for s in sid[i].split(',')]
+
+                                except:
+                                    temp_aca = []
+                                    temp_name = []
+                                    sidlist = []
+                                    temp_aca = filter(None, temp_aca)
+                                    temp_name = filter(None, temp_name)
+                                    sidlist = filter(None, sidlist)
 
                                 temp_lflag = [0 for z in range(len(temp_name))]
 
@@ -1656,10 +1733,21 @@ def acaUpdateSchedule(request):
                                 estable.save()
 
                             elif 0 < i < len(time) - 1:
-                                temp_aca = [a.strip() for a in academy[i].split(',')]
-                                temp_name = [n.strip() for n in name2[i].split(',')]
-                                sidlist = [s.strip() for s in sid[i].split(',')]
-                                temp_lflag = [0 for z in range(len(temp_name))]
+                                try:
+                                    academy = StudentInfo.objects.filter(id__in = [int(s) for s in sid[i].split(',')])
+                            	    temp_aca = [a.aid_id for a in academy]
+                                    temp_name = [n.strip() for n in name2[i].split(',')]
+                                    sidlist = [s.strip() for s in sid[i].split(',')]
+
+                                except:
+                                    temp_aca = []
+                                    temp_name = []
+                                    sidlist = []
+                                    temp_aca = filter(None, temp_aca)
+                                    temp_name = filter(None, temp_name)
+                                    sidlist = filter(None, sidlist)
+
+				temp_lflag = [0 for z in range(len(temp_name))]
 
                                 anamelist = []
 
@@ -1740,9 +1828,19 @@ def acaUpdateSchedule(request):
                             estable.save()
 
                         elif 0 < i < len(time) - 1:
-                            temp_aca = [a.strip() for a in academy[i].split(',')]
-                            temp_name = [n.strip() for n in name2[i].split(',')]
-                            sidlist = [s.strip() for s in sid[i].split(',')]
+			    try:
+                                academy = StudentInfo.objects.filter(id__in = [int(s) for s in sid[i].split(',')])
+                                temp_aca = [a.aid_id for a in academy]
+                                temp_name = [n.strip() for n in name2[i].split(',')]
+                                sidlist = [s.strip() for s in sid[i].split(',')]
+
+                            except:
+                                temp_aca = []
+                                temp_name = []
+                                sidlist = []
+                                temp_aca = filter(None, temp_aca)
+                                temp_name = filter(None, temp_name)
+                                sidlist = filter(None, sidlist)
 
                             temp_lflag = [0 for z in range(len(temp_name))]
 
@@ -1821,9 +1919,20 @@ def acaUpdateSchedule(request):
                             estable.save()
 
                         elif 0 < i < len(time) - 1:
-                            temp_aca = [a.strip() for a in academy[i].split(',')]
-                            temp_name = [n.strip() for n in name2[i].split(',')]
-                            sidlist = [s.strip() for s in sid[i].split(',')]
+                            try:
+                                academy = StudentInfo.objects.filter(id__in = [int(s) for s in sid[i].split(',')])
+                                temp_aca = [a.aid_id for a in academy]
+                                temp_name = [n.strip() for n in name2[i].split(',')]
+                                sidlist = [s.strip() for s in sid[i].split(',')]
+
+                            except:
+                                temp_aca = []
+                                temp_name = []
+                                sidlist = []
+                                temp_aca = filter(None, temp_aca)
+                                temp_name = filter(None, temp_name)
+                                sidlist = filter(None, sidlist)
+
                             temp_lflag = [0 for z in range(len(temp_name))]
 
                             anamelist = []
@@ -1895,15 +2004,19 @@ def acaUpdateSchedule(request):
                         stable.save()
 
                     elif 0 < i < len(time) - 1:
-                        temp_aca = [a.strip() for a in academy[i].split(',')]
-                        temp_name = [n.strip() for n in name2[i].split(',')]
-                        sidlist = [s.strip() for s in sid[i].split(',')]
+			try:
+                            academy = StudentInfo.objects.filter(id__in = [int(s) for s in sid[i].split(',')])
+                            temp_aca = [a.aid_id for a in academy]
+                            temp_name = [n.strip() for n in name2[i].split(',')]
+                            sidlist = [s.strip() for s in sid[i].split(',')]
 
-
-                        # student = StudentInfo.objects.filter(aid__contains=[ a for a in temp_aca]).filter(sname__in=[ stu for stu in temp_name ])
-                        #
-                        # for s in student:
-                        #     sidtemp.append(s.id)
+                        except:
+                            temp_aca = []
+                            temp_name = []
+                            sidlist = []
+                            temp_aca = filter(None, temp_aca)
+                            temp_name = filter(None, temp_name)
+                            sidlist = filter(None, sidlist)
 
                         temp_lflag = [0 for z in range(len(temp_name))]
 
