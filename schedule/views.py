@@ -1320,7 +1320,6 @@ def acaUpdateSchedule(request):
             req = request.POST.getlist('req[]')
             name = request.POST.getlist('name[]')
             name2 = request.POST.getlist('name[]')
-            academy = request.POST.getlist('academy[]')
             load = request.POST.getlist('load[]')
             sid = request.POST.getlist('sid[]')
             aid = int(request.POST.get('aca'))
@@ -1340,22 +1339,18 @@ def acaUpdateSchedule(request):
             area = Area.objects.all()
             branch = Branch.objects.filter(areaid = areaid)
 
-            try:
-                alist_temp = list(set([i for i in academy if i is not None and i != '']))
-                alist_temp2 = ','.join(alist_temp)
-                alist_temp3 = list(set(alist_temp2.split(',')))
-                alist = []
-
-                for a in alist_temp3:
-                    alist.append(int(a))
-
-            except:
-                return HttpResponse('error1')
-
             slist_temp = list(set([i for i in sid if i is not None and i != '']))
             slist_temp2 = ','.join(slist_temp)
             slist_temp3 = list(set(slist_temp2.split(',')))
+            slist = []
 
+            for s in slist_temp3:
+                slist.append(int(s))
+
+            slist_temp3 = slist
+            academy = StudentInfo.objects.filter(id__in = slist_temp3)
+            alist = [a.aid_id for a in academy]
+            
             stime = int(time[0].split(':')[0] + time[0].split(':')[1])
             etime = int(time[-1].split(':')[0] + time[-1].split(':')[1])
 
