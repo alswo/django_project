@@ -172,9 +172,7 @@ class Grade(models.Model):
     name = models.CharField(max_length = 30)
 
 class PersonalInfo(models.Model):
-    branch = models.ForeignKey(Branch)
-    name = models.CharField(max_length = 10)
-    pin_number = models.CharField(max_length = 20)
+    pin_number = models.CharField(max_length = 7)
 
 class StudentInfo(models.Model):
     aid = models.ForeignKey('Academy', null=True)
