@@ -332,11 +332,11 @@ def getStudentInfo(request):
 
         try:
             sInfo = StudentInfo.objects.get(pin_number = pin_number)
-
+            
             studentInfo = {}
 
             studentInfo['sid'] = sInfo.id
-            studentInfo['aid'] = sInfo.aid
+            studentInfo['aid'] = sInfo.aid_id
             studentInfo['phone'] = sInfo.phone1
             studentInfo['pin'] = sInfo.pin_number
 	    studentInfo['grade'] = sInfo.grade
