@@ -6,5 +6,6 @@ urlpatterns = patterns('',
     url(r'^listStudents$', views.listStudents),
     url(r'^addStudentsForm$', views.addStudentsForm),
     url(r'^addStudents$', views.addStudents),
+    url(r'^updateStudentsForm$', views.updateStudentsForm),
     url(r'^addClassForm$', views.addClassForm),
 )
