@@ -172,6 +172,7 @@ class Grade(models.Model):
     name = models.CharField(max_length = 30)
 
 class PersonalInfo(models.Model):
+    #pass
     pin_number = models.CharField(max_length = 7)
 
 class StudentInfo(models.Model):
@@ -184,12 +185,15 @@ class StudentInfo(models.Model):
     phone1 = models.IntegerField()
     phonelist = ArrayField(models.IntegerField(null = True, blank = True,default=0),default=0)
     pin_number = models.CharField(max_length = 20, default=get_random_string(length=20))
-    #personinfo = models.ForeignKey(PersonalInfo, on_delete=models.CASCADE)
     personinfo = models.ForeignKey(PersonalInfo, blank=True, null=True)
-    parents_phonenumber = models.CharField(max_length=15, null = True, blank = True)
-    grandparents_phonenumber = models.CharField(max_length=15, null = True, blank = True)
-    self_phonenumber = models.CharField(max_length=15, null = True, blank = True)
-    care_phonenumber = models.CharField(max_length=15, null = True, blank = True)
+    parents_phonenumber = models.CharField(max_length=15, null = True)
+    grandparents_phonenumber = models.CharField(max_length=15, null = True)
+    self_phonenumber = models.CharField(max_length=15, null = True)
+    care_phonenumber = models.CharField(max_length=15, null = True)
+
+    birth_year = models.CharField(max_length=4, null=True)
+    birth_day = models.CharField(max_length=4, null=True)
+    billing_date = models.CharField(max_length=2, null=True)
 
     def __unicode__(self):
         return u"{0} // {1} // {2} // {3} // {4}".format(self.bname,self.aname,self.sname,self.grade,self.phone1)
