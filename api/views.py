@@ -26,6 +26,16 @@ def getResponse(debug, code, msg):
 	else:
 		return JsonResponse({'code': code, 'msg': msg})
 
+def authPinNumber(sid, pin_number):
+	if sid == None or pin_number == None:
+		return False
+
+	try:
+		if (pin_number == StudentInfo.objects.get(id=sid).personinfo.pin_number):
+			return True
+	except:
+		return False
+
 # Create your views here.
 def getRealtimeLocation(request):
     if request.method == "GET":
