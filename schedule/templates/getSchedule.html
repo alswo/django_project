@@ -103,7 +103,18 @@ function callNumber(num){
                               {% endif %}
                               <ul class="dropdown-menu pull-right">
                                 <li><a href="#">{% for aname in si.aname %}{{aname}}{% endfor %}</a></li>
-                                <li><a href='tel:0{{si.phone1}}'>전화하기</a></li>
+				{% if si.parents_phonenumber %}
+                                <li><a href='tel:{{si.parents_phonenumber}}'>부모님전화</a></li>
+				{% endif %}
+				{% if si.self_phonenumber %}
+                                <li><a href='tel:{{si.self_phonenumber}}'>학생전화</a></li>
+				{% endif %}
+				{% if si.care_phonenumber %}
+                                <li><a href='tel:{{si.care_phonenumber}}'>돌봄맘전화</a></li>
+				{% endif %}
+				{% if si.grandparents_phonenumber %}
+                                <li><a href='tel:{{si.grandparents_phonenumber}}'>조부모님전화</a></li>
+				{% endif %}
                                 {% if f == 0 %}
                                 <li><a href='javascript:todayLoad({{si.id}},{{s.id}});'>오늘안타요</a></li>
                                 {% elif f == 1 %}
