@@ -27,6 +27,8 @@ def getResponse(debug, code, msg):
 		return JsonResponse({'code': code, 'msg': msg})
 
 def authPinNumber(sid, pin_number):
+	return True
+
 	if sid == None or pin_number == None:
 		return False
 
@@ -56,6 +58,10 @@ def getRealtimeLocation(request):
 		debug = 1
 	else:
 		debug = 0
+
+	if (authPinNumber(request.GET.get('sid'), request.GET.get('pin_number')) == False):
+ 		msg = "파라미터가 유효하지 않습니다."
+		return getResponse(debug, 400, msg)
 
         if (sid and len(sid) > 0):
 	    try:
@@ -155,6 +161,10 @@ def getSchedulesForStudent(request):
 	else:
 		debug = 0
 
+	if (authPinNumber(request.GET.get('sid'), request.GET.get('pin_number')) == False):
+ 		msg = "파라미터가 유효하지 않습니다."
+		return getResponse(debug, 400, msg)
+
         if (sid and len(sid) > 0):
 	    try:
             	student = StudentInfo.objects.get(id = sid)
@@ -236,6 +246,10 @@ def getRouteMap(request):
 		debug = 1
 	else:
 		debug = 0
+
+	if (authPinNumber(request.GET.get('sid'), request.GET.get('pin_number')) == False):
+ 		msg = "파라미터가 유효하지 않습니다."
+		return getResponse(debug, 400, msg)
 
 	if (sid and len(sid) > 0 and inventory_id and len(inventory_id)):
 		try:
