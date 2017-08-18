@@ -82,6 +82,10 @@ def invenToJson(invens):
                     sInfo['grade'] = studentInfo.grade
                     sInfo['phone1'] = studentInfo.phone1
                     sInfo['phonelist'] = studentInfo.phonelist
+                    sInfo['parents_phonenumber'] = studentInfo.parents_phonenumber
+                    sInfo['grandparents_phonenumber'] = studentInfo.grandparents_phonenumber
+                    sInfo['self_phonenumber'] = studentInfo.self_phonenumber
+                    sInfo['care_phonenumber'] = studentInfo.care_phonenumber
 
 		except:
 		    HttpResponse(si)
