@@ -3,6 +3,7 @@ from passenger.models import StudentInfo, PersonalInfo
 from schedule.models import Branch
 from django.utils.crypto import get_random_string
 import re
+
 import sys
 
 def getHangul(str):
@@ -12,6 +13,7 @@ def getHangul(str):
 	m = hangul.match(str)
 	if (str != m.group()):
 		sys.stderr.write("str = [" + str + "] ==> [" + m.group() + "]\n")
+
 	return m.group()
 
 def compareLists(name1, item1, list1, name2, item2, list2):

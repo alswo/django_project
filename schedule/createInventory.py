@@ -135,9 +135,11 @@ class UpdateInven:
                     stable.save()
 
     def setWeek1(self):
+        inven = Inventory.objects.create(carnum = 0, bid = 0, snum = 0, day = 'fake', alist = '{}', slist = '{}',anamelist='{}', etime = 0, stime = 0, week1 = 1, week2 = 1, week3 = 1) 
+        
         for j in range(3):
             for d in self.day:
-                ei = EditedInven(carnum = self.carnum, bid = self.bid, snum = self.snum, day = d, alist = self.alist, anamelist = self.anamelist_inven, slist = self.slist, stime = self.stime, etime = self.etime, req = self.req, week = j+1)
+                ei = EditedInven(iid_id = inven.id, carnum = self.carnum, bid = self.bid, snum = self.snum, day = d, alist = self.alist, anamelist = self.anamelist_inven, slist = self.slist, stime = self.stime, etime = self.etime, req = self.req, week = j+1)
                 ei.save()
                 eiid = ei.id
 
@@ -178,9 +180,11 @@ class UpdateInven:
                         estable.save()
 
     def setWeek2(self):
+        inven = Inventory.objects.create(carnum = 0, bid = 0, snum = 0, day = 'fake', alist = '{}', slist = '{}',anamelist='{}', etime = 0, stime = 0, week1 = 0, week2 = 1, week3 = 1)
+ 
         for j in range(2):
             for d in self.day:
-                ei = EditedInven(carnum = self.carnum, bid = self.bid, snum = self.snum, day = d, alist = self.alist, anamelist = self.anamelist_inven, slist = self.slist, stime = self.stime, etime = self.etime, req = self.req, week = j+1)
+                ei = EditedInven(iid_id = inven.id, carnum = self.carnum, bid = self.bid, snum = self.snum, day = d, alist = self.alist, anamelist = self.anamelist_inven, slist = self.slist, stime = self.stime, etime = self.etime, req = self.req, week = j+1)
                 ei.save()
                 eiid = ei.id
 
@@ -221,8 +225,10 @@ class UpdateInven:
                         estable.save()
 
     def setWeek3(self):
+        inven = Inventory.objects.create(carnum = 0, bid = 0, snum = 0, day = 'fake', alist = '{}', slist = '{}',anamelist='{}', etime = 0, stime = 0, week1 = 0, week2 = 0, week3 = 1)
+        
         for d in self.day:
-            ei = EditedInven(carnum = self.carnum, bid = self.bid, snum = self.snum, day = d, alist = self.alist, anamelist = self.anamelist_inven, slist = self.slist, stime = self.stime, etime = self.etime, req = self.req, week = week)
+            ei = EditedInven(iid_id = inven.id, carnum = self.carnum, bid = self.bid, snum = self.snum, day = d, alist = self.alist, anamelist = self.anamelist_inven, slist = self.slist, stime = self.stime, etime = self.etime, req = self.req, week = self.week)
             ei.save()
             eiid = ei.id
 
