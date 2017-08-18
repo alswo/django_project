@@ -6,7 +6,8 @@
 			<table class="table table-striped" data-toggle="table" cellspacing="0" width="100%" id="studentListTable">
 				<thead>
 					<th data-field="name" data-sortable="true">이름</th>
-					<th data-field="contact" data-sortable="true">연락처</th>
+					<th data-field="contact" data-sortable="true">부모님연락처</th>
+					<th data-fiedl="age" data-sortable="true">나이</th>
 					<th data-sortable="false">PIN</th>
 					<th data-sortable="false">수정</th>
 					<th data-sortable="false">삭제</th>
@@ -20,6 +21,8 @@
 						<td>
 		{{student.phonenumber}}
 						</td>
+						<td>
+		{% if student.age %} {{student.age}} {% endif %}
 						<td>
 		{{student.info.personinfo.pin_number}}
 						</td>

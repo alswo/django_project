@@ -5,8 +5,9 @@ from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from passenger.models import Academy, StudentInfo, PersonalInfo
 from schedule.models import Branch
-from util.PhoneNumber import CleanPhoneNumber
+from util.PhoneNumber import CleanPhoneNumber, FormatPhoneNumber
 from util.PersonalInfoUtil import compareLists, saveNewPersonInfo2
+from datetime import datetime
 import re
 
 # Create your views here.
@@ -15,10 +16,8 @@ class BeautifyStudent :
 	def __init__(self):
 		self.info = ''
 		self.phonenumber = ''
+		self.age = None
 
-def beautify_phonenumber(number):
-	str_number = str(number)
-	return re.sub(r'^(\d{2})(\d+)(\d{4})$', r'0\1-\2-\3', str_number)
 
 def compareStudents(student1, student2):
 	if (student1.bid == student2.bid and student1.sname == student2.sname):
@@ -65,20 +64,29 @@ def listStudents(request):
 	for student in students:
 		beautifyStudent = BeautifyStudent()
 		beautifyStudent.info = student
-		beautifyStudent.phonenumber  = beautify_phonenumber(student.phone1)
+		beautifyStudent.phonenumber  = FormatPhoneNumber(student.parents_phonenumber)
+		if (student.birth_year):
+			beautifyStudent.age = datetime.now().year - int(student.birth_year) + 1
 		beautifyStudents.append(beautifyStudent)
 
 	return render(request, 'listStudents.html', {'students': beautifyStudents});
 
 @login_required
 def addStudentsForm(request):
-	return render(request, 'addUpdateStudentsForm.html', {'age_range': range(5, 16), 'billing_range': range(1, 31)})
+	return render(request, 'addUpdateStudentsForm.html', )
 
 @login_required
 def updateStudentsForm(request):
 	sid = request.GET.get('sid')
-	student = StudentInfo.objects.get(id=sid)
-	return render(request, 'addUpdateStudentsForm.html', {'student': student, 'age_range': range(5, 16), 'billing_range': range(1, 31)})
+	try:
+		student = StudentInfo.objects.get(id=sid)
+	except StudentInfo.DoesNotExist:
+		return HttpResponse("존재하지 않는 학생입니다.")
+
+	age = None
+	if (student.birth_year):
+		age = datetime.now().year - int(student.birth_year) + 1
+	return render(request, 'addUpdateStudentsForm.html', {'student': student, 'age': age})
 
 @csrf_exempt
 @login_required
@@ -107,22 +115,28 @@ def addStudents(request):
 	care_phonenumber = CleanPhoneNumber(request.POST.get('care_phonenumber'))
 	age = request.POST.get('age')
 	billing_date = request.POST.get('billing_date')
-	## TODO : modify 2017 to current year
 	if age:
-		birth_year = str(2017 - int(age) + 1)
+		birth_year = str(datetime.now().year - int(age) + 1)
 	else:
 		brith_year = "1900"
+
+	birmon = request.POST.get('birmon')
+	birday = request.POST.get('birday')
+
+	if (birmon and birday):
+		birthday = '%02d%02d' % (int(birmon), int(birday))
 
 	students = StudentInfo.objects.filter(bid=academy.bid, aid=aid, sname=sname)
 	studentinfo = StudentInfo(bid=academy.bid, sname=sname, bname=bname, phone1=0, aid=aid, aname=institute, parents_phonenumber=parents_phonenumber, grandparents_phonenumber=grandparents_phonenumber, self_phonenumber=self_phonenumber, care_phonenumber=care_phonenumber, birth_year=birth_year, billing_date=billing_date, phonelist=None)
 
+	# same person in the same academy
 	for student in students:
 		if compareStudents(student, studentinfo):
 			return HttpResponse("동일한 학생이 존재합니다.")
 
 
 	# for PersonalINfo
-	# same person
+	# same person in another academy
 	try:
 		people = PersonalInfo.objects.filter(name = studentinfo.sname, branch_id = studentinfo.bid)
 		found = False
