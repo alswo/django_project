@@ -36,6 +36,7 @@ def getRealtimeLocation(request):
         rawhm = t.timeToRawHM()
         hm = t.timeToHM()
         sid = request.GET.get('sid')
+	inventory_id = request.GET.get('inventory_id')
         carnum = -1
         iid = ""
         siid = ""
@@ -64,9 +65,19 @@ def getRealtimeLocation(request):
 		today = request.GET.get('today')
 		d = request.GET.get('d')
 
-        today_inventories = Inventory.objects.filter(day=d)
-        today_inventory_ids = today_inventories.values('id')
-        scheduletables = ScheduleTable.objects.filter(iid_id__in = today_inventory_ids).filter(slist__contains = [sid]).order_by('-time')
+        #today_inventories = Inventory.objects.filter(day=d)
+        #today_inventory_ids = today_inventories.values('id')
+	try:
+		inventory = Inventory.objects.get(id=int(inventory_id))
+	except Inventory.DoesNotExist:
+ 		msg = "파라미터가 유효하지 않습니다."
+		return getResponse(debug, 400, msg)
+
+	if (inventory.day != d):
+		msg = str(inventory.carnum) + "호차가 아직 출발 전입니다."
+		return getResponse(debug, 202, msg)
+
+        scheduletables = ScheduleTable.objects.filter(iid_id = int(inventory_id)).filter(slist__contains = [sid]).order_by('-time')
         if (len(scheduletables) <= 0):
 	    msg = sname + "님은 오늘 스케쥴이 없습니다."
 	    return getResponse(debug, 204, msg)
