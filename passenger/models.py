@@ -184,7 +184,7 @@ class StudentInfo(models.Model):
     grade = models.IntegerField(null = True, blank = True)
     phone1 = models.IntegerField()
     phonelist = ArrayField(models.IntegerField(null = True, blank = True,default=0),default=0)
-    pin_number = models.CharField(max_length = 20, default=uuid.uuid4().hex[:10].upper(), unique=True)
+    pin_number = models.CharField(max_length = 20, default=uuid.uuid4().hex[:10].upper())
     #personinfo = models.ForeignKey(PersonalInfo, on_delete=models.CASCADE)
     personinfo = models.ForeignKey(PersonalInfo, blank=True, null=True)
     parents_phonenumber = models.CharField(max_length=15, null = True, blank = True)

@@ -149,16 +149,16 @@ def weekly_update():
 				stable.save()
 
 
-	Inventory.objects.filter(week1=1,week2=1,week3=1,editedinvens=None).delete()
+	#Inventory.objects.filter(week1=1,week2=1,week3=1,editedinvens=None).delete()
 
-	createdInvenWeek1 = EditedInven.objects.filter(week=1).filter(iid_id = None)
-	for ciw1 in createdInvenWeek1:
-		createdScheduleTablesWeek1 = ciw1.editedscheduletables.all()
+	#createdInvenWeek1 = EditedInven.objects.filter(week=1).filter(iid_id = None)
+	#for ciw1 in createdInvenWeek1:
+	#	createdScheduleTablesWeek1 = ciw1.editedscheduletables.all()
 
-		inven = Inventory.objects.create(carnum = ciw1.carnum, bid = ciw1.bid, snum = ciw1.snum, day = ciw1.day , alist=ciw1.alist, anamelist = ciw1.anamelist, slist=ciw1.slist, stime = ciw1.stime, etime = ciw1.etime, req=ciw1.req, memo=ciw1.memo, week1 = 1, week2 = 1, week3 = 1)
+	#	inven = Inventory.objects.create(carnum = ciw1.carnum, bid = ciw1.bid, snum = ciw1.snum, day = ciw1.day , alist=ciw1.alist, anamelist = ciw1.anamelist, slist=ciw1.slist, stime = ciw1.stime, etime = ciw1.etime, req=ciw1.req, memo=ciw1.memo, week1 = 1, week2 = 1, week3 = 1)
 
-		for cstw1 in createdScheduleTablesWeek1:
-			ScheduleTable.objects.create(iid = inven, time = cstw1.time, addr = cstw1.addr, req = cstw1.req, alist=cstw1.alist, anamelist=cstw1.anamelist,slist=cstw1.slist,sname=cstw1.sname, tflag=cstw1.tflag, lflag=cstw1.lflag)
+	#	for cstw1 in createdScheduleTablesWeek1:
+	#		ScheduleTable.objects.create(iid = inven, time = cstw1.time, addr = cstw1.addr, req = cstw1.req, alist=cstw1.alist, anamelist=cstw1.anamelist,slist=cstw1.slist,sname=cstw1.sname, tflag=cstw1.tflag, lflag=cstw1.lflag)
 
 	#week1 editedInven, createdInven delete(include referenced tables)
 	EditedInven.objects.filter(week=1).prefetch_related('editedscheduletables').delete()
