@@ -26,18 +26,6 @@ def getResponse(debug, code, msg):
 	else:
 		return JsonResponse({'code': code, 'msg': msg})
 
-def authPinNumber(sid, pin_number):
-	return True
-
-	if sid == None or pin_number == None:
-		return False
-
-	try:
-		if (pin_number == StudentInfo.objects.get(id=sid).personinfo.pin_number):
-			return True
-	except:
-		return False
-
 # Create your views here.
 def getRealtimeLocation(request):
     if request.method == "GET":
@@ -48,6 +36,7 @@ def getRealtimeLocation(request):
         rawhm = t.timeToRawHM()
         hm = t.timeToHM()
         sid = request.GET.get('sid')
+	inventory_id = request.GET.get('inventory_id')
         carnum = -1
         iid = ""
         siid = ""
@@ -58,10 +47,6 @@ def getRealtimeLocation(request):
 		debug = 1
 	else:
 		debug = 0
-
-	if (authPinNumber(request.GET.get('sid'), request.GET.get('pin_number')) == False):
- 		msg = "파라미터가 유효하지 않습니다."
-		return getResponse(debug, 400, msg)
 
         if (sid and len(sid) > 0):
 	    try:
@@ -80,9 +65,19 @@ def getRealtimeLocation(request):
 		today = request.GET.get('today')
 		d = request.GET.get('d')
 
-        today_inventories = Inventory.objects.filter(day=d)
-        today_inventory_ids = today_inventories.values('id')
-        scheduletables = ScheduleTable.objects.filter(iid_id__in = today_inventory_ids).filter(slist__contains = [sid]).order_by('-time')
+        #today_inventories = Inventory.objects.filter(day=d)
+        #today_inventory_ids = today_inventories.values('id')
+	try:
+		inventory = Inventory.objects.get(id=int(inventory_id))
+	except Inventory.DoesNotExist:
+ 		msg = "파라미터가 유효하지 않습니다."
+		return getResponse(debug, 400, msg)
+
+	if (inventory.day != d):
+		msg = str(inventory.carnum) + "호차가 아직 출발 전입니다."
+		return getResponse(debug, 202, msg)
+
+        scheduletables = ScheduleTable.objects.filter(iid_id = int(inventory_id)).filter(slist__contains = [sid]).order_by('-time')
         if (len(scheduletables) <= 0):
 	    msg = sname + "님은 오늘 스케쥴이 없습니다."
 	    return getResponse(debug, 204, msg)
@@ -160,10 +155,6 @@ def getSchedulesForStudent(request):
 		debug = 1
 	else:
 		debug = 0
-
-	if (authPinNumber(request.GET.get('sid'), request.GET.get('pin_number')) == False):
- 		msg = "파라미터가 유효하지 않습니다."
-		return getResponse(debug, 400, msg)
 
         if (sid and len(sid) > 0):
 	    try:
@@ -246,10 +237,6 @@ def getRouteMap(request):
 		debug = 1
 	else:
 		debug = 0
-
-	if (authPinNumber(request.GET.get('sid'), request.GET.get('pin_number')) == False):
- 		msg = "파라미터가 유효하지 않습니다."
-		return getResponse(debug, 400, msg)
 
 	if (sid and len(sid) > 0 and inventory_id and len(inventory_id)):
 		try:
@@ -346,11 +333,11 @@ def getStudentInfo(request):
 
         try:
             sInfo = StudentInfo.objects.get(pin_number = pin_number)
-            
+
             studentInfo = {}
 
             studentInfo['sid'] = sInfo.id
-            studentInfo['aid'] = sInfo.aid_id
+            studentInfo['aid'] = sInfo.aid
             studentInfo['phone'] = sInfo.phone1
             studentInfo['pin'] = sInfo.pin_number
 	    studentInfo['grade'] = sInfo.grade
