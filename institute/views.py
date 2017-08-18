@@ -17,6 +17,7 @@ class BeautifyStudent :
 		self.info = ''
 		self.phonenumber = ''
 		self.age = None
+		self.billing_date = None
 
 
 def compareStudents(student1, student2):
@@ -83,14 +84,15 @@ def updateStudentsForm(request):
 	except StudentInfo.DoesNotExist:
 		return HttpResponse("존재하지 않는 학생입니다.")
 
-	age = None
+	beautifyStudent = BeautifyStudent()
+	beautifyStudent.info = student
 	if (student.birth_year):
-		age = datetime.now().year - int(student.birth_year) + 1
-	return render(request, 'addUpdateStudentsForm.html', {'student': student, 'age': age})
+		beautifyStudent.age = datetime.now().year - int(student.birth_year) + 1
+	return render(request, 'addUpdateStudentsForm.html', {'student': beautifyStudent})
 
 @csrf_exempt
 @login_required
-def addStudents(request):
+def addStudent(request):
 	if request.user.is_staff :
 		institute = request.session.get('institute', None)
 	else :
@@ -105,7 +107,7 @@ def addStudents(request):
 		return HttpResponse("학원 권한이 필요합니다.")
 
 	bname = Branch.objects.get(id=academy.bid).bname
-	aid = Academy.objects.get(name=institute).id
+	academy = Academy.objects.get(name=institute)
 	sname = request.POST.get('sname')
 	if sname:
 		sname.strip()
@@ -126,8 +128,8 @@ def addStudents(request):
 	if (birmon and birday):
 		birthday = '%02d%02d' % (int(birmon), int(birday))
 
-	students = StudentInfo.objects.filter(bid=academy.bid, aid=aid, sname=sname)
-	studentinfo = StudentInfo(bid=academy.bid, sname=sname, bname=bname, phone1=0, aid=aid, aname=institute, parents_phonenumber=parents_phonenumber, grandparents_phonenumber=grandparents_phonenumber, self_phonenumber=self_phonenumber, care_phonenumber=care_phonenumber, birth_year=birth_year, billing_date=billing_date, phonelist=None)
+	students = StudentInfo.objects.filter(bid=academy.bid, aid=academy, sname=sname)
+	studentinfo = StudentInfo(bid=academy.bid, sname=sname, bname=bname, phone1=0, aid=academy, aname=institute, parents_phonenumber=parents_phonenumber, grandparents_phonenumber=grandparents_phonenumber, self_phonenumber=self_phonenumber, care_phonenumber=care_phonenumber, birth_year=birth_year, billing_date=billing_date, phonelist=None)
 
 	# same person in the same academy
 	for student in students:
@@ -138,28 +140,69 @@ def addStudents(request):
 	# for PersonalINfo
 	# same person in another academy
 	try:
-		people = PersonalInfo.objects.filter(name = studentinfo.sname, branch_id = studentinfo.bid)
 		found = False
-		for person in people:
-			try :
-				another = StudentInfo.objects.get(personinfo = person)
-			except :
-				continue
-			if compareStudents(studentinfo, another):
-				studentinfo.personinfo = person
+		anotherStudents = StudentInfo.objects.filter(sname = studentinfo.sname, bid = studentinfo.bid)
+		for anotherStudent in anotherStudents:
+			if compareStudents(studentinfo, anotherStudent):
+				studentinfo.personinfo = anotherStudent.personinfo
 				#studentinfo.save(update_fields=['personinfo'])
 				found = True
 				break
 		if (found == False):
 			saveNewPersonInfo2(studentinfo)
 
-	except PersonalInfo.DoesNotExist:
+	except StudentInfo.DoesNotExist:
 		# add PersnoalInfo if there is no record
 		saveNewPersonInfo2(studentinfo)
 
 	studentinfo.save()
 
 	return redirect(addStudentsForm)
+
+@csrf_exempt
+@login_required
+def updateStudent(request):
+	if request.user.is_staff :
+		institute = request.session.get('institute', None)
+	else :
+		institute = request.user.first_name
+
+	if institute:
+		try:
+			academy = Academy.objects.get(name = institute)
+		except AcademyDeosNotExist:
+			return HttpResponse("학원 검색에 실패했습니다.")
+	else:
+		return HttpResponse("학원 권한이 필요합니다.")
+
+	sid = request.POST.get('sid')
+
+	student = None
+	age = None
+	try:
+		student = StudentInfo.objects.get(id=sid)
+
+		student.sname = request.POST.get('sname')
+		student.parent_phonenumber = request.POST.get('parent_phonenumber')
+		student.grandparent_phonenumber = request.POST.get('grandparent_phonenumber')
+		student.self_phonenumber = request.POST.get('self_phonenumber')
+		student.care_phonenumber = request.POST.get('care_phonenumber')
+		if (request.POST.get('age')):
+			age = int(request.POST.get('age'))
+			student.birth_year = str(datetime.now().year - age + 1)
+		if (request.POST.get('billing_date')):
+			student.billing_date = request.POST.get('billing_date')
+	except:
+		return HttpResponse("학생 수정에 에러가 발생했습니다.")
+
+	student.save()
+	beautifyStudent = BeautifyStudent()
+	beautifyStudent.info = student
+	beautifyStudent.age = age
+	if (student.billing_date):
+		beautifyStudent.billing_date = int(student.billing_date)
+
+	return render(request, 'addUpdateStudentsForm.html', {'student': beautifyStudent})
 
 @login_required
 def addClassForm(request):

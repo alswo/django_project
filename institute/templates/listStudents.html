@@ -19,10 +19,10 @@
 		{{student.info.sname}}
 						</td>
 						<td>
-		{{student.phonenumber}}
+		{% if student.phonenumber %} {{student.phonenumber}} {% endif %}
 						</td>
 						<td>
-		{% if student.age %} {{student.age}} {% endif %}
+		{% if student.age %} {{student.age}}세 {% endif %}
 						<td>
 		{{student.info.personinfo.pin_number}}
 						</td>
