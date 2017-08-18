@@ -88,6 +88,8 @@ def updateStudentsForm(request):
 	beautifyStudent.info = student
 	if (student.birth_year):
 		beautifyStudent.age = datetime.now().year - int(student.birth_year) + 1
+	if (student.billing_date):
+		beautifyStudent.billing_date = int(student.billing_date)
 	return render(request, 'addUpdateStudentsForm.html', {'student': beautifyStudent})
 
 @csrf_exempt

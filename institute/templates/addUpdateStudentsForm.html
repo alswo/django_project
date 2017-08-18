@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+{% block content %}
+<DIV class="row">
+	<DIV class="col-md-12">
+		<DIV class="table-reponsive">
+			<FORM role="form" autocomplete="off" action={% if student %} "updateStudent" {% else %} "addStudent" {% endif %} method="POST" id="addStudentsForm">
+				{% if student and student.info %}
+				<INPUT type='hidden' name='sid' value='{{student.info.id}}'>
+				{% endif %}
+				<FIELDSET class="fsStyle">
+					<DIV class="row collapse in">
+						<DIV class="col-md-2">
+						</DIV>
+						<DIV class="col-md-2">
+							<label>이름</label>
+						</DIV>
+						<DIV class="col-md-4 input-div">
+							<input type='text' name='sname' id='sname' maxlength='10' class="form-control" {% if student %} value="{{student.info.sname}}" {% endif %}/>
+						</DIV>
+					</DIV>
+					<BR>
+					<DIV class="row collapse in">
+						<DIV class="col-md-2">
+						</DIV>
+						<DIV class="col-md-2">
+							<label>연락처</label>
+							<label>( 4개 연락처 중에 최소 하나는 필수로 입력하셔야 합니다. )</label>
+						</DIV>
+						<DIV class="col-md-4">
+							<DIV class="row input-group" id="phonediv1">
+								<span class="input-group-btn"><button class="btn btn-default" type="button">부모님</button></span> 
+								<input placeholder="전화번호" type='text' id='parents_phonenumber' name='parents_phonenumber' maxlength='15' class="form-control" {% if student.info.parents_phonenumber %} value="{{student.info.parents_phonenumber}}" {% endif %}/>
+							</DIV>
+							<BR>
+								<DIV class="row input-group" id="phonediv1">
+								<span class="input-group-btn"><button class="btn btn-default" type="button">할아버지/할머니</button></span> 
+								<input placeholder="전화번호" type='text' id='grandparents_phonenumber' name='grandparents_phonenumber' maxlength='15' class="form-control" {% if student.info.grandparents_phonenumber %} value="{{student.info.grandparents_phonenumber}}" {% endif %}/>
+							</DIV>
+							<BR>
+								<DIV class="row input-group" id="phonediv1">
+								<span class="input-group-btn"><button class="btn btn-default" type="button">학생</button></span> 
+								<input placeholder="전화번호" type='text' id='self_phonenumber' name='self_phonenumber' maxlength='15' class="form-control" {% if student.info.self_phonenumber %} value="{{student.info.self_phonenumber}}" {% endif %}/>
+							</DIV>
+							<BR>
+								<DIV class="row input-group" id="phonediv1">
+								<span class="input-group-btn"><button class="btn btn-default" type="button">돌봄</button></span> 
+								<input placeholder="전화번호" type='text' id='care_phonenumber' name='care_phonenumber' maxlength='15' class="form-control" {% if student.info.care_phonenumber %} value="{{student.info.care_phonenumber}}" {% endif %}/>
+							</DIV>
+						</DIV>
+					</DIV>
+					<BR>
+					<DIV class="row collapse in">
+						<DIV class="col-md-2">
+						</DIV>
+						<DIV class="col-md-2">
+							<label>나이</label>
+						</DIV>
+						<DIV class="col-md-4 input-div">
+							<select class="form-control" name='age'>
+									<option value="">선택안함</option>
+								{% for i in age_range %}
+									<option value="{{i}}" {% if student and student.age == i %} selected {% endif %} >{{i}}세</option>
+								{% endfor %}
+							</select>
+						</DIV>
+					</DIV>
+					<BR>
+					<!-- DIV class="row collapse in">
+						<DIV class="col-md-2">
+						</DIV>
+						<DIV class="col-md-2">
+							<label>생일</label>
+						</DIV>
+						<DIV class="col-md-2 input-div">
+							<select class="form-control" name='birmon'>
+								{% for i in month_range %}
+									<option value="{{i}}">{{i}}월</option>
+								{% endfor %}
+							</select>
+						</DIV>
+						<DIV class="col-md-2 input-div">
+							<select class="form-control" name='birday'>
+								{% for i in billing_range %}
+									<option value="{{i}}">{{i}}일</option>
+								{% endfor %}
+							</select>
+						</DIV>
+					</DIV>
+					<BR //-->
+					<DIV class="row collapse in">
+						<DIV class="col-md-2">
+						</DIV>
+						<DIV class="col-md-2">
+							<label>결제일</label>
+						</DIV>
+						<DIV class="col-md-4 input-div">
+							<select class="form-control" name='billing_date'>
+									<option value="">선택안함</option>
+								{% for i in billing_range %}
+									<option value="{{i}}" {% if student.billing_date and student.billing_date == i %} selected {% endif %}>매월 {{i}} 일</option>
+								{% endfor %}
+							</select>
+						</DIV>
+					</DIV>
+					<BR>
+					<DIV class="row collapse in">
+						<DIV class="col-md-2">
+						</DIV>
+						<DIV class="col-md-2">
+							<button id="addsubmit" class="form-control">{% if student %} 수정 {% else %} 추가 {% endif %}</button>
+						</DIV>
+					</DIV>
+				</FIELDSET>
+			</FORM>
+		</DIV>
+	</DIV>
+</DIV>
+
+<SCRIPT>
+$(document).ready(function(){
+    var next = 1;
+    $(".add-more").click(function(e){
+        e.preventDefault();
+        var addto = "#phonediv" + next;
+        next = next + 1;
+        var newIn = '<DIV class="row input-group" id="phonediv' + next + '"><input placeholder="전화번호" type="text" id="phone' + next + '" name="phone[]" maxlength="15" class="form-control" />';
+	newIn += '<span class="input-group-btn"><button class="btn btn-danger btn-block btn-lg remove-me" id="remove' + next + '"><span class="glyphicon glyphicon-minus"></span></button></span></DIV>';
+        $(addto).after(newIn);
+        
+            $('.remove-me').click(function(e){
+                e.preventDefault();
+                var fieldNum = this.id.substr('remove'.length);
+                var fieldID = "#phonediv" + fieldNum;
+                $(fieldID).remove();
+            });
+    });
+
+	$('#addsubmit').click(function(e) {
+		if (validateName($('#sname').val()) == false) {
+			alert("입력값이 올바르지 않습니다.");
+			e.preventDefault();
+		}
+		if (validatePhoneNumber($('#parents_phonenumber').val())
+			|| validatePhoneNumber($('#grandparents_phonenumber').val())
+			|| validatePhoneNumber($('#self_phonenumber').val())
+			|| validatePhoneNumber($('#care_phonenumber').val())) {
+		}
+		else {
+			alert("입력값이 올바르지 않습니다.");
+			e.preventDefault();
+		}
+	});
+
+	$('#datepicker').datepicker( { changeYear: false, format: 'dd/mm',});
+});
+
+function validateName(name) {
+	if (!name) {
+		return false;
+	} 
+	name = name.replace(/[\s]/g, '');
+
+	if (name.length < 2) {
+		return false;
+	}
+
+	return true;
+}
+
+function validatePhoneNumber(phonenumber) {
+	phonenumber = phonenumber.replace(/[^0-9]/g, '');
+	if (phonenumber.length < 10) {
+		return false;
+	}
+
+	return true;
+}
+
+</SCRIPT>
+{% endblock content %}
