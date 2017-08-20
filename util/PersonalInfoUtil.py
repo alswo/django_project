@@ -118,7 +118,7 @@ def saveNewPersonInfo2(student):
 	for sibling in siblings:
 		if findSibling(sibling, student):
 			if (sibling.personinfo):
-				pin_number = sibling.pin_number
+				pin_number = sibling.personinfo.pin_number
 				break
 
 	person = PersonalInfo(pin_number = pin_number)
