@@ -1,71 +1,13 @@
-<HTML>
-<HEAD>
-	<meta charset="utf-8">
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.20.1/vis.min.js"></script>
-	<link href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.20.1/vis.min.css" rel="stylesheet" type="text/css" />
-    <script src="/static/js/jquery-1.10.2.js"></script>
-    <link href="/static/css/bootstrap.min.css" rel="stylesheet">
-    <script src="/static/js/bootstrap.min.js"></script>
-	<style type="text/css">
-
-    .vis-item.green {
-      background-color: greenyellow;
-      border-color: green;
-    }
-    .vis-item.green a:link{
-      color: black;
-    }
-    .vis-item.green a:visited{
-      color: black;
-    }
-
-    /* create a custom sized dot at the bottom of the red item */
-    .vis-item.red {
-      background-color: red;
-      border-color: darkred;
-      color: white;
-    }
-    .vis-item.red a:link{
-      color: black;
-    }
-    .vis-item.red a:visited{
-      color: black;
-    }
-
-    .vis-item.orange {
-      background-color: gold;
-      border-color: orange;
-    }
-    .vis-item.orange a:link{
-      color: black;
-    }
-    .vis-item.orange a:visited{
-      color: black;
-    }
-
-    .vis-item.grey {
-      background-color: #7A7F7F;
-      border-color: grey;
-    }
-    .vis-item.grey a:link{
-      color: black;
-    }
-    .vis-item.grey a:visited{
-      color: black;
-    }
-
-	</style>
-
-</HEAD>
-<BODY>
+{% extends "../../institute/templates/base.html" %}
+{% block content %}
 	<DIV class='row'>
 		<DIV class='col-md-12'>
 			<p>
 		</DIV>
 	</DIV>
-	<FORM action='inventories'>
+	<FORM action='inventories' id='inventoryForm'>
 	<DIV class='row'>
-		<DIV class='col-md-2'>
+		<!-- DIV class='col-md-2'>
 		</DIV>
 		<DIV class='col-md-1'>
 					학생수
@@ -110,12 +52,28 @@
 					<button type="button" class="vis-item red">..</button>
 				</DIV>
 			</DIV>
+		</DIV //-->
+		<DIV class='col-md-3'>
+				<SELECT name="bid" class="form-control" id="branchSelect">
+					<OPTION value = "0">지역선택</OPTION>
+					{% for branch in branches %}
+					<OPTION value = "{{branch.id}}" {% if bid == branch.id %} selected {% endif %}> {{branch.bname}} </OPTION>
+					{% endfor %}
+				<SELECT>
 		</DIV>
-		<DIV class='col-md-1'>
-				<SELECT name="aid" class="form-control">
+		<DIV class='col-md-2'>
+				<SELECT name="day" class="form-control" id="daySelect">
+					<OPTION value = "0">요일</OPTION>
+					{% for d in dayrange %}
+					<OPTION value = "{{d}}" {% if day == d %} selected {% endif %}> {{d}} </OPTION>
+					{% endfor %}
+				<SELECT>
+		</DIV>
+		<DIV class='col-md-3'>
+				<SELECT name="aid" class="form-control" id="academySelect">
 					<OPTION value = "0">학원선택</OPTION>
-					{% for aca in academies %}
-					<OPTION value = "{{aca.id}}" {% if aid == aca.id %} selected {% endif %}> {{aca.name}} </OPTION>
+					{% for academy in academies %}
+					<OPTION value = "{{academy.id}}" {% if aid == academy.id %} selected {% endif %}> {{academy.name}} </OPTION>
 					{% endfor %}
 				<SELECT>
 		</DIV>
@@ -164,6 +122,9 @@
 	};
 	var timeline = new vis.Timeline(container, items, options);
 	timeline.setGroups(groups);
+
+	$('#branchSelect,#academySelect,#daySelect').change(function() {
+		$('#inventoryForm').submit();
+	});
 </SCRIPT>
-</BODY>
-</HTML>
+{% endblock content %}

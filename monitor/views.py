@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
-from django.shortcuts import render_to_response
+from django.shortcuts import render_to_response, render
 from django.http import HttpResponse
+from django.contrib.auth.decorators import login_required
 from schedule.models import Inventory, ScheduleTable, RealtimeLocation
 from schedule.views import get_difference
 from passenger.dateSchedule import timeToDate
@@ -24,9 +25,10 @@ def makeTimeStr(inttime):
 	timestr = "%04d" % inttime
 	return [timestr[:2], timestr[2:]]
 
+@login_required
 def inventories(request):
 	t = timeToDate()
-	d = t.timeToD()
+	today = t.timeToD()
 
 	green_numofstudent = 2
 	orange_numofstudent = 5
@@ -41,10 +43,22 @@ def inventories(request):
 	else :
 		aid = 0
 
+	if (request.GET.get('bid')) :
+		bid = int(request.GET.get('bid'))
+	else :
+		bid = 1
+
+	if (request.GET.get('day')) :
+		day = request.GET.get('day')
+	else :
+		day = today
+
+
 	crowdedbuses = []
 	shuttles = {}
+	
 
-	inventories = Inventory.objects.filter(day = d, bid = 1)
+	inventories = Inventory.objects.filter(day = day, bid = bid)
 	for inventory in inventories:
 		crowdedbus = CrowdedBus()
 		crowdedbus.carnum = inventory.carnum
@@ -56,13 +70,15 @@ def inventories(request):
 		crowdedbuses.append(crowdedbus)
 		shuttles[inventory.carnum] = 1
 
-	academies = Academy.objects.filter(bid = 1).order_by('name')
+	academies = Academy.objects.filter(bid = bid).order_by('name')
+
 	try:
-		aname = Academy.objects.get(id = aid).name
+		aname = academies.get(id = aid).name
 	except Academy.DoesNotExist:
 		aname = ""
+		aid = 0
 
-	return render_to_response('crowdedbus.html', {'crowdedbuses': crowdedbuses, 'shuttles': shuttles.keys(), 'green_numofstudent': green_numofstudent, 'orange_numofstudent': orange_numofstudent, 'range': range(10), 'academies': academies, 'aid': aid, 'aname': aname, 'day': d})
+	return render(request, 'crowdedbus.html', {'crowdedbuses': crowdedbuses, 'shuttles': shuttles.keys(), 'green_numofstudent': green_numofstudent, 'orange_numofstudent': orange_numofstudent, 'range': range(10), 'dayrange': ['월', '화', '수', '목', '금', '토'], 'academies': academies, 'aid': aid, 'aname': aname, 'bid': bid, 'day': day})
 
 
 def setTimeDelta(time1, timedelta):
@@ -135,7 +151,7 @@ def shuttles(request):
 
 		inven_id = inventory.id
 
-	return render_to_response('shuttles.html', {'msg': msg, 'invens': invens})
+	return render(request, 'shuttles.html', {'msg': msg, 'invens': invens})
 	#return HttpResponse('\n'.join('{}: {}'.format(*k) for k in enumerate(invens['shuttle']['carnum'])))
 	#return HttpResponse(msg)
 	#return HttpResponse("diff1 = " + str(diff1) + ", diff2 = " + str(diff2))

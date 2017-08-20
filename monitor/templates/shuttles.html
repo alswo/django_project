@@ -1,27 +1,10 @@
-<HTML>
-<HEAD>
-	<meta charset="utf-8">
-	<meta http-equiv="refresh" content="10" />
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.20.1/vis.min.js"></script>
-	<link href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.20.1/vis.min.css" rel="stylesheet" type="text/css" />
-	<style type="text/css">
-
-    .vis-item.orange {
-      background-color: gold;
-      border-color: orange;
-    }
-    .vis-item.vis-selected.orange {
-      /* custom colors for selected orange items */
-      background-color: orange;
-      border-color: orangered;
-    }
-	</style>
-
-</HEAD>
-<BODY>
+{% extends "../../institute/templates/base.html" %}
+{% block content %}
+<DIV>
 {% for inven in invens %}
 	<div id="timeline_{{inven.id}}"></div>
 {% endfor %}
+</DIV>
 <script>
 	var container;
 	var items;
@@ -79,5 +62,4 @@
 	{% endfor %}
 	
 </script>
-</BODY>
-</HTML>
+{% endblock content %}

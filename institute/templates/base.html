@@ -12,6 +12,8 @@
 	<link rel="stylesheet" href="/static/css/jquery.timepicker.css">
 	<link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
 	<link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.15/css/jquery.dataTables.css">
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.20.1/vis.min.css" rel="stylesheet" type="text/css" />
+	<link href="/static/css/monitor.css" rel="stylesheet">
   
 
 	<script src="/static/js/jquery-3.1.0.min.js"></script>
@@ -22,6 +24,7 @@
 	<script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
 	<script src="/static/js/plugins/proj4.js"></script>
 	<script type="text/javascript" charset="utf8" src="//cdn.datatables.net/1.10.15/js/jquery.dataTables.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.20.1/vis.min.js"></script>
 <style>
 .entry:not(:first-of-type)
 {
@@ -97,18 +100,18 @@
               <li class="">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">학원생 <span class="caret"></span></a>
                 <ul class="dropdown-menu">
-                  <li><a href="listStudents">보기</a></li>
-                  <li><a href="addStudentsForm">추가</a></li>
+                  <li><a href="/institute/listStudents">보기</a></li>
+                  <li><a href="/institute/addStudentsForm">추가</a></li>
                 </ul>
               </li>
               <li class="dropdown">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">학원수업 <span class="caret"></span></a>
                 <ul class="dropdown-menu">
                   <li><a href="#">보기</a></li>
-                  <li><a href="addClassForm">추가</a></li>
+                  <li><a href="/institute/addClassForm">추가</a></li>
                 </ul>
               </li>
-              <li><a href="#">Contact</a></li>
+              <!-- li><a href="#">Contact</a></li //-->
 {% if request.user.is_authenticated and request.user.is_staff %}
               <li class="dropdown">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">학원선택<span class="caret"></span></a>
@@ -118,6 +121,22 @@
                   <li {% if request.session.instituteid == academy.id %} class="hiddenactive"{% endif %}><a href="#" class="selectInstitute" data-instituteid="{{academy.id}}">{{academy.name}}</a></li>
                   <!-- li role="separator" class="divider"></li//-->
 		  {% endfor %}
+                </ul>
+              </li>
+
+              <li class="dorpdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">모니터<span class="caret"></span></a>
+                <ul class="dropdown-menu">
+                  <li><a href="/monitor/inventories">인벤토리</a></li>
+                  <li><a href="/monitor/shuttles">셔틀버스</a></li>
+                </ul>
+              </li>
+
+              <li class="dorpdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">동선계산<span class="caret"></span></a>
+                <ul class="dropdown-menu">
+                  <li><a href="/opti" target="_blank">V1</a></li>
+                  <li><a href="/opti2" target="_blank">V2</a></li>
                 </ul>
               </li>
 {% endif %}
@@ -145,9 +164,10 @@
 $(document).ready(function () {
 	// bold on current position
 	$(".nav").find(".active").removeClass("active");
-	var urls = $(location).attr('pathname').split('/');
-	var url = urls[urls.length - 1];
-	var obj = $(".nav").find("[href=" + url + "]");
+	//var urls = $(location).attr('pathname').split('/');
+	//var url = urls[urls.length - 1];
+	var url = $(location).attr('pathname');
+	var obj = $(".nav").find("[href='" + url + "']");
 	// li -> ul(dropdown) -> li -> a 
 	obj.parents('li').addClass("active");
 	obj.parents('li').parents('li').addClass("active");
