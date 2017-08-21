@@ -103,6 +103,7 @@ function callNumber(num){
                               {% endif %}
                               <ul class="dropdown-menu pull-right">
                                 <li><a href="#">{% for aname in si.aname %}{{aname}}{% endfor %}</a></li>
+                                <!-- li><a href='tel:0{{si.phone1}}'>전화걸기</a></li //-->
 				{% if si.parents_phonenumber %}
                                 <li><a href='tel:{{si.parents_phonenumber}}'>부모님전화</a></li>
 				{% endif %}

@@ -11,6 +11,10 @@ def getHangul(str):
 	#hangul = re.compile('([\xE0-\xFF][\x80-\xFF][\x80-\xFF])+')
 	hangul = re.compile(u'([\uAC00-\uD7A3])+')
 	m = hangul.match(str)
+	if (m==None):
+		sys.stderr.write("str = [" + str + "]:none\n")
+		sys.exit()
+		
 	if (str != m.group()):
 		sys.stderr.write("str = [" + str + "] ==> [" + m.group() + "]\n")
 
@@ -18,9 +22,11 @@ def getHangul(str):
 
 def compareLists(name1, item1, list1, name2, item2, list2):
         if (getHangul(name1) != getHangul(name2)):
+		#print "name not equal"
 		return False
 
 	if ((len(str(item1)) < 9) or (len(str(item2)) < 9)):
+		#print "length error"
 		return False
 
 	compList1 = []
@@ -77,16 +83,21 @@ def findSibling(student1, student2):
 
 def saveNewPersonInfo(student):
 	# for sibling
-	people = PersonalInfo.objects.all()
 	pin_number = get_random_string(length=7)
-	for person in people:
-		try : 
-			another = StudentInfo.objects.get(personinfo = person, bid = student.bid)
-		except :
-			continue
-		if compareLists(student.sname, student.phone1, student.phonelist, another.sname, another.phone1, another.phonelist):
-			pin_number = person.pin_number
+	others = StudentInfo.objects.filter(bid = student.bid)
+	for other in others:
+		if compareLists(student.sname, student.phone1, student.phonelist, other.sname, other.phone1, other.phonelist):
+			student.personinfo = other.personinfo
+			student.save()
 			break
+
+	siblings = StudentInfo.objects.filter(bid = student.bid)
+	for sibling in siblings:
+		# different name but same phone number
+		if compareLists(u"가", student.phone1, student.phonelist, u"가", sibling.phone1, sibling.phonelist):
+			if (sibling.personinfo):
+				pin_number = sibling.personinfo.pin_number
+				break
 
 	person = PersonalInfo(pin_number = pin_number)
 	person.save()
@@ -95,23 +106,20 @@ def saveNewPersonInfo(student):
 	
 def saveNewPersonInfo2(student):
 	# for sibling
-	people = PersonalInfo.objects.all()
 	pin_number = get_random_string(length=7)
-	for person in people:
-		try : 
-			otherStudents = StudentInfo.objects.filter(personinfo = person, bid = student.bid)
-		except :
-			continue
-		for otherStudent in otherStudents:
-			if findSamePerson(student, otherStudent):
-				pin_number = person.pin_number
-				break
+	others = StudentInfo.objects.filter(bid = student.bid)
+	for other in others:
+		if findSamePerson(student, other):
+			student.personinfo = other.personinfo
+			student.save()
+			return
 
 	siblings = StudentInfo.objects.filter(bid = student.bid)
 	for sibling in siblings:
 		if findSibling(sibling, student):
-			pin_number = sibling.pin_number
-			break
+			if (sibling.personinfo):
+				pin_number = sibling.personinfo.pin_number
+				break
 
 	person = PersonalInfo(pin_number = pin_number)
 	person.save()
