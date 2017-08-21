@@ -8,5 +8,7 @@ urlpatterns = patterns('',
     url(r'^addStudent$', views.addStudent),
     url(r'^updateStudentsForm$', views.updateStudentsForm),
     url(r'^updateStudent$', views.updateStudent),
+    url(r'^deleteStudent$', views.deleteStudent),
     url(r'^addClassForm$', views.addClassForm),
+    url(r'^getHistory$', views.getHistory),
 )

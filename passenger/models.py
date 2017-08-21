@@ -184,6 +184,7 @@ class StudentInfo(models.Model):
     phone1 = models.IntegerField()
     phonelist = ArrayField(models.IntegerField(null = True, blank = True,default=0),default=0)
     pin_number = models.CharField(max_length = 20, default=uuid.uuid4().hex[:10].upper())
+    deleted_date = models.DateField(null=True)
     #personinfo = models.ForeignKey(PersonalInfo, on_delete=models.CASCADE)
     personinfo = models.ForeignKey(PersonalInfo, null=True)
     parents_phonenumber = models.CharField(max_length=15, null = True)

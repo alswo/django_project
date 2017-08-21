@@ -23,6 +23,7 @@ import logging
 import collections
 import re
 from schedule.createInventory import UpdateInven
+from schedule.maintainTodayLoad import getUnloadSid, getTflag
 
 class TimeHistory:
 	def __init__(self):
@@ -1080,7 +1081,9 @@ def updateSchedule(request):
             #week0 update
             else:
                 Inventory.objects.filter(id=iid).update(snum = snum, alist=alist, anamelist = anamelist_inven, slist=slist_temp3, stime = stime, etime = etime, carnum = carnum)
-
+                
+		unloadSidList = getUnloadSid(iid) 
+                
                 #delete stable before updateing stable
                 delete_stable = ScheduleTable.objects.filter(iid_id=iid)
                 delete_stable.delete()
@@ -1110,7 +1113,7 @@ def updateSchedule(request):
                             temp_name = filter(None, temp_name)
                             sidlist = filter(None, sidlist)
 
-                        temp_lflag = [0 for z in range(len(temp_name))]
+                        temp_tflag = getTflag(sidlist,unloadSidList)
 
                         anamelist = []
 
@@ -1118,7 +1121,7 @@ def updateSchedule(request):
                             aname = Academy.objects.get(id = aid)
                             anamelist.append(aname.name)
 
-                        stable = ScheduleTable(iid_id = iid, time = time[i], addr = addr[i], req = req[i], alist=temp_aca, anamelist = anamelist, slist=sidlist, sname=temp_name, tflag=temp_lflag, lflag=load[i])
+                        stable = ScheduleTable(iid_id = iid, time = time[i], addr = addr[i], req = req[i], alist=temp_aca, anamelist = anamelist, slist=sidlist, sname=temp_name, tflag=temp_tflag, lflag=load[i])
                         stable.save()
 
                 if searchTime == '':
@@ -1988,6 +1991,8 @@ def acaUpdateSchedule(request):
             else:
                 Inventory.objects.filter(id=iid).update(snum = snum, alist=alist, anamelist = anamelist_inven, slist=slist_temp3, stime = stime, etime = etime)
 
+                unloadSidList = getUnloadSid(iid)
+
                 #delete stable before updateing stable
                 delete_stable = ScheduleTable.objects.filter(iid_id=iid)
                 delete_stable.delete()
@@ -2017,7 +2022,7 @@ def acaUpdateSchedule(request):
                             temp_name = filter(None, temp_name)
                             sidlist = filter(None, sidlist)
 
-                        temp_lflag = [0 for z in range(len(temp_name))]
+                        temp_tflag = getTflag(sidlist, unloadSidList)
 
                         anamelist = []
 
@@ -2025,7 +2030,7 @@ def acaUpdateSchedule(request):
                             aname = Academy.objects.get(id = aid)
                             anamelist.append(aname.name)
 
-                        stable = ScheduleTable(iid_id = iid, time = time[i], addr = addr[i],req = req[i], alist=temp_aca, anamelist = anamelist, slist=sidlist, sname=temp_name, tflag=temp_lflag, lflag=load[i])
+                        stable = ScheduleTable(iid_id = iid, time = time[i], addr = addr[i],req = req[i], alist=temp_aca, anamelist = anamelist, slist=sidlist, sname=temp_name, tflag=temp_tflag, lflag=load[i])
                         stable.save()
 
                 #redirect

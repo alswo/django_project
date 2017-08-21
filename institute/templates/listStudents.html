@@ -16,8 +16,8 @@
 			"{% if student.phonenumber %}{{student.phonenumber}}{% endif %}",
 			"{% if student.age %}{{student.age}}세{% endif %}",
 			"{{student.info.personinfo.pin_number}}",
-			'<p data-placement="top" data-toggle="tooltip" title="Edit" class="p_bottom_0"><button class="btn btn-primary btn-sm updateStudent" data-title="Edit" data-toggle="modal" data-sid="{{student.info.id}}" data-target="#edit" ><span class="glyphicon glyphicon-pencil"></span></button></p>',
-			'<p data-placement="top" data-toggle="tooltip" title="Delete"><button class="btn btn-danger btn-sm" data-title="Delete" data-toggle="modal" data-sid="{{student.info.sname}}" data-target="#delete" ><span class="glyphicon glyphicon-trash"></span></button></p>',
+			'<p data-placement="top" data-toggle="tooltip" title="Edit" class="p_bottom_0"><button class="btn btn-primary btn-sm updateStudent" data-title="Edit" data-sid="{{student.info.id}}" data-target="#edit" ><span class="glyphicon glyphicon-pencil"></span></button></p>',
+			'<p data-placement="top" data-toggle="tooltip" title="Delete"><button class="btn btn-danger btn-sm deleteStudent" data-title="Delete" data-sid="{{student.info.id}}" data-target="#delete" ><span class="glyphicon glyphicon-trash"></span></button></p>',
 		],
 		{% endfor %}
 	];
@@ -38,11 +38,22 @@
 		$('.updateStudent').on('click', function(e) {
 			location.href = "updateStudentsForm?sid=" + $(this).data('sid')
 		});
+		$('.deleteStudent').on('click', function(e) {
+			location.href = "deleteStudent?sid=" + $(this).data('sid')
+		});
 
 		// every event is deleted when paging
 		$('#studentListTable').on( 'draw.dt', function () {
 			$('.updateStudent').on('click', function(e) {
 				location.href = "updateStudentsForm?sid=" + $(this).data('sid')
+			});
+			$('.deleteStudent').on('click', function(e) {
+				if (confirm("학생 삭제를 하시겠습니까?")) {
+					location.href = "deleteStudent?sid=" + $(this).data('sid')
+				}
+				else {
+					return false;
+				}
 			});
 		} );
 	});

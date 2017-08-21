@@ -243,8 +243,8 @@ function setRealtimeLocation(element, carnum, schedule_time) {
   //  if (tayoaudio) {
 	// tayoaudio.pause();
   //  }
-
-   // 이미 click 된 상태면 return
+   
+// 이미 click 된 상태면 return
    if (element.style.backgroundColor == bgcolor) {
        if (Date.now() >= lastfiretime + 10000) {
            return;
