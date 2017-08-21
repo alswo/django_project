@@ -240,10 +240,6 @@ function setRealtimeLocation(element, carnum, schedule_time) {
    var opacity_ratio = 1.0;
    var bgcolor = 'rgb(29, 173, 104)';
 
-   if (tayoaudio) {
-	tayoaudio.pause();
-   }
-
    // 이미 click 된 상태면 return
    if (element.style.backgroundColor == bgcolor) {
        if (Date.now() >= lastfiretime + 10000) {
