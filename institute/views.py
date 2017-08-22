@@ -144,7 +144,7 @@ def addStudent(request):
 	care_phonenumber = CleanPhoneNumber(request.POST.get('care_phonenumber'))
 	age = request.POST.get('age')
 	billing_date = request.POST.get('billing_date')
-	birth_year = "1900"
+	birth_year = None
 	if age:
 		birth_year = str(timezone.now().year - int(age) + 1)
 
