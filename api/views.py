@@ -346,7 +346,7 @@ def getStudentInfo(request):
 
         except:
 
-            msg = 'PIN does not exist'
+            msg = 'PIN값을 다시 입력해주세요'
 
             return getResponse(debug,400,msg)
 
