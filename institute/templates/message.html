@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+<DIV class="panel panel-warning">
+	<DIV class="panel-body">{{msg}}</DIV>
+</DIV>
+
+<SCRIPT>
+	$(function() {
+		setTimeout( function() {
+			window.location.replace('{{redirect_url}}');
+		}, 3000);
+	});
+</SCRIPT>
+{% endblock content %}
