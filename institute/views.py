@@ -120,9 +120,18 @@ def updateStudentsForm(request):
 @csrf_exempt
 @login_required
 def addStudent(request):
-	rv = checkAuth(request)
-	if (rv != None):
-		return rv
+	if request.user.is_staff :
+		institute = request.session.get('institute', None)
+	else :
+		institute = request.user.first_name
+
+	if institute:
+		try:
+			academy = Academy.objects.get(name = institute)
+		except AcademyDeosNotExist:
+			return render(request, 'message.html', {'msg': "학원 검색에 실패했습니다.", 'redirect_url': request.META['HTTP_REFERER']})
+	else:
+		return render(request, 'message.html', {'msg': "학원 권한이 필요합니다.", 'redirect_url': request.META['HTTP_REFERER']})
 
 	bname = Branch.objects.get(id=academy.bid).bname
 	academy = Academy.objects.get(name=institute)
@@ -135,10 +144,9 @@ def addStudent(request):
 	care_phonenumber = CleanPhoneNumber(request.POST.get('care_phonenumber'))
 	age = request.POST.get('age')
 	billing_date = request.POST.get('billing_date')
+	birth_year = "1900"
 	if age:
 		birth_year = str(timezone.now().year - int(age) + 1)
-	else:
-		brith_year = "1900"
 
 	birmon = request.POST.get('birmon')
 	birday = request.POST.get('birday')
@@ -175,7 +183,8 @@ def addStudent(request):
 
 	studentinfo.save()
 
-	return redirect(addStudentsForm)
+	return render(request, 'message.html', {'msg': "학원생 추가 성공했습니다.", 'redirect_url': request.META['HTTP_REFERER']})
+	#return redirect(addStudentsForm)
 
 @csrf_exempt
 @login_required
