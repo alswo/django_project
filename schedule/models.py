@@ -162,3 +162,9 @@ class RealtimeLocation(models.Model):
     date = models.CharField(max_length=10)
     schedule_time = models.CharField(max_length=10)
     departure_time = models.CharField(max_length=10)
+
+class TodayLoadTimeLog(models.Model):
+    sid = models.ForeignKey('passenger.StudentInfo')
+    stable = models.ForeignKey(ScheduleTable)
+    reqtime = models.CharField(max_length = 20)
+

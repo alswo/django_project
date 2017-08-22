@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from django.shortcuts import render_to_response, redirect
 from django.template import RequestContext
-from schedule.models import HistoryScheduleTable, Inventory, ScheduleTable, Building, Branch, InventoryRequest, Area, Car, RealtimeLocation, EditedInven, EditedScheduleTable
+from schedule.models import HistoryScheduleTable, Inventory, ScheduleTable, Building, Branch, InventoryRequest, Area, Car, RealtimeLocation, EditedInven, EditedScheduleTable, TodayLoadTimeLog
 from passenger.models import Academy, Group, StudentInfo, Profile
 from django.db.models import Q
 from django.db.models import Prefetch
@@ -134,7 +134,7 @@ def todayLoad(request):
     if request.method == "POST":
         sid = int(request.POST.get('sid'))
         stableid = int(request.POST.get('stableid'))
-
+        
         stable = ScheduleTable.objects.get(id = stableid)
         temp_tflag = stable.tflag
         slist = stable.slist
@@ -151,6 +151,10 @@ def todayLoad(request):
 
         stable.tflag = temp_tflag
         stable.save()
+
+        reqtime = str(datetime.datetime.now())[:16]
+	
+        TodayLoadTimeLog.objects.create(sid_id = sid , stable_id = stableid, reqtime = reqtime) 
 
         return HttpResponse(button_flag)
 
