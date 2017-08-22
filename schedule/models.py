@@ -93,7 +93,7 @@ class HistoryScheduleTable(models.Model):
     iid = models.ForeignKey(Inventory,related_name='historyscheduletables')
     carnum = models.IntegerField()
     time = models.CharField(max_length = 10,null=True,blank=True)
-    addr = models.CharField(max_length = 30,null=True,blank=True)
+    addr = models.CharField(max_length = 60,null=True,blank=True)
     req = models.CharField(max_length = 20,null=True,blank=True)
     alist = ArrayField(models.IntegerField(null=True,blank=True),null=True,blank=True)
     academies = models.ManyToManyField('passenger.Academy')
