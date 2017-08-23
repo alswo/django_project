@@ -172,6 +172,7 @@ def realtimeLocationHistory(request):
 	cur_date = request.GET.get('cur_date')
 	if (cur_date == None):
 		t = timeToDate()
+		t.setDiffTime(-24*60*60)
 		cur_date = t.timeToYmd()
 
 	for car in cars:
