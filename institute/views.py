@@ -4,10 +4,11 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from passenger.models import Academy, StudentInfo, PersonalInfo
-from schedule.models import Branch
+from schedule.models import Branch, HistoryScheduleTable
 from util.PhoneNumber import CleanPhoneNumber, FormatPhoneNumber
 from util.PersonalInfoUtil import compareLists, saveNewPersonInfo2
 from django.utils import timezone
+import datetime
 import re
 
 # Create your views here.
@@ -247,6 +248,24 @@ def deleteStudent(request):
 @login_required
 def addClassForm(request):
 	return render(request, 'addClassForm.html')
+
+class TimeHistory:
+	def __init__(self):
+		self.carnum = -1
+		self.academies = set()
+		self.scheduletable = list()
+		self.warning = 0
+
+class DailyHistory:
+	def __init__(self):
+		self.date = ""
+		self.timehistory = list()
+
+## HH:MM ==> HHMM
+def convertDateFormat(str):
+	ret = str.replace(':', '')
+	#ret.replace(':', '')
+	return int(ret)
 
 
 @csrf_exempt
