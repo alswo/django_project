@@ -1,0 +1,70 @@
+{% extends "../../institute/templates/base.html" %}
+{% block content %}
+<DIV>
+	<div class="row">
+		<div class="col-md-3" id="embeddingDatePicker">
+		<form action="realtimeLocationHistory" method="GET" id="realtimeLocationHistory">
+		<input type="text" name="cur_date" value="{{cur_date}}" class="form-control calendar"/>
+		</form>
+		</div>
+	</div>
+	<p>
+	<div id="timeline"></div>
+</DIV>
+<SCRIPT>
+	var today = new Date();
+	var items = new vis.DataSet();
+
+	var groups = new vis.DataSet([
+	{% for history in histories %}
+	{id : {{history.carnum}}, content: '{{history.carnum}}호차', value:{{history.carnum}}},
+	{% endfor %}
+	]);
+
+	$(function() {
+		$('input[name="cur_date"]').daterangepicker({
+			singleDatePicker: true,
+			showDropDowns: true,
+			autoApply: true,
+			autoUpdate: true,
+			locale: {
+				format: 'YYYY-MM-DD'
+			}
+		},
+		function(start, end, label) {
+			$('input[name="cur_date"]').val(moment(start).format('YYYY-MM-DD'));
+			$('#realtimeLocationHistory').submit();
+		});
+	});
+	
+	function setHourMin(dateObj, hourmin) {
+		dateObj.setHours(hourmin.split(':')[0]);
+		dateObj.setMinutes(hourmin.split(':')[1]);
+
+		return dateObj;
+	}
+
+	container = document.getElementById('timeline');
+	{% for history in histories %}
+		{% for scheduletable in history.historyscheduletables %}
+			today = setHourMin(today, "{{scheduletable.schedule_time}}");
+			items.add({
+				group: {{history.carnum}},
+				content: "{{scheduletable.addr}}",
+				start: new Date(today),
+				className: '{{scheduletable.color}}',
+			});
+		{% endfor %}
+	{% endfor %}
+
+		var options = {
+			groupOrder: function(a, b) {
+				return a.value - b.value;
+			},
+			zoomMin: 1000 * 60 * 60 * 14,
+		}
+		timeline = new vis.Timeline(container, items, null, options);
+		timeline.setGroups(groups);
+	
+</SCRIPT>
+{% endblock content %}
