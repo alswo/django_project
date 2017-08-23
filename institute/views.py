@@ -271,6 +271,23 @@ def convertDateFormat(str):
 @csrf_exempt
 @login_required
 def getHistory(request):
+    if request.user.is_staff :
+        institute = request.session.get('institute', None)
+    else :
+        institute = request.user.first_name
+
+    if institute:
+        try:
+            academy = Academy.objects.get(name = institute)
+        except AcademyDeosNotExist:
+            return render(request, 'message.html', {'msg': "학원 검색에 실패했습니다.", 'redirect_url': request.META['HTTP_REFERER']})
+    else:
+        return render(request, 'message.html', {'msg': "학원 권한이 필요합니다.", 'redirect_url': request.META['HTTP_REFERER']})
+
+    rv = checkAuth(request)
+    if (rv != None):
+        return rv
+
     if request.method == 'GET':
     	aid = request.GET.get('aid')
     	daterange = request.GET.get('daterange')
