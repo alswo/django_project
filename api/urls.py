@@ -3,6 +3,7 @@ from api import views
 
 urlpatterns = patterns('',
     url(r'^getRealtimeLocation$', views.getRealtimeLocation),
+    url(r'^getRealtimeLocationDebug$', views.getRealtimeLocationDebug),
     url(r'^getSchedulesForStudent$', views.getSchedulesForStudent),
     url(r'^getRouteMap$', views.getRouteMap),
     url(r'^listNotice$', views.listNotice),
