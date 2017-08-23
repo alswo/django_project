@@ -90,7 +90,8 @@ class EditedScheduleTable(models.Model):
 class HistoryScheduleTable(models.Model):
     #date = models.DateField(auto_now=True)
     date = models.CharField(max_length=10,null=True,blank=True)
-    iid = models.ForeignKey(Inventory,related_name='historyscheduletables')
+    #iid = models.ForeignKey(Inventory,related_name='historyscheduletables')
+    iid_id = models.IntegerField()
     carnum = models.IntegerField()
     time = models.CharField(max_length = 10,null=True,blank=True)
     addr = models.CharField(max_length = 60,null=True,blank=True)
@@ -102,10 +103,12 @@ class HistoryScheduleTable(models.Model):
     lflag = models.IntegerField()
 
     def __unicode__(self):
-        return u"{0} {1} {2}".format(self.time,self.iid, self.addr)
+        return u"{0} {1} {2}".format(self.time,self.iid_id, self.addr)
+        #return u"{0} {1} {2}".format(self.time,self.iid, self.addr)
 
     class Meta:
-        ordering = ['iid', 'time']
+        ordering = ['iid_id', 'time']
+        #ordering = ['iid', 'time']
 
 class InventoryRequest(models.Model):
     iid = models.ForeignKey(Inventory,related_name='inventoryrequest')
