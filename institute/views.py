@@ -201,8 +201,8 @@ def updateStudent(request):
 		student = StudentInfo.objects.get(id=sid)
 
 		student.sname = request.POST.get('sname')
-		student.parent_phonenumber = request.POST.get('parent_phonenumber')
-		student.grandparent_phonenumber = request.POST.get('grandparent_phonenumber')
+		student.parents_phonenumber = request.POST.get('parents_phonenumber')
+		student.grandparents_phonenumber = request.POST.get('grandparents_phonenumber')
 		student.self_phonenumber = request.POST.get('self_phonenumber')
 		student.care_phonenumber = request.POST.get('care_phonenumber')
 		if (request.POST.get('age')):
