@@ -1,0 +1,87 @@
+    .vis-item.green {
+      background-color: greenyellow;
+      border-color: green;
+    }
+    .vis-item.green a:link{
+      color: black;
+    }
+    .vis-item.green a:visited{
+      color: black;
+    }
+
+    /* create a custom sized dot at the bottom of the red item */
+    .vis-item.red {
+      background-color: red;
+      border-color: darkred;
+      color: white;
+    }
+    .vis-item.red a:link{
+      color: black;
+    }
+    .vis-item.red a:visited{
+      color: black;
+    }
+
+    .vis-item.orange {
+      background-color: gold;
+      border-color: orange;
+    }
+    .vis-item.orange a:link{
+      color: black;
+    }
+    .vis-item.orange a:visited{
+      color: black;
+    }
+    .vis-item.green {
+      background-color: greenyellow;
+      border-color: green;
+    }
+    .vis-item.green a:link{
+      color: black;
+    }
+    .vis-item.green a:visited{
+      color: black;
+    }
+
+    /* create a custom sized dot at the bottom of the red item */
+    .vis-item.red {
+      background-color: red;
+      border-color: darkred;
+      color: white;
+    }
+    .vis-item.red a:link{
+      color: black;
+    }
+    .vis-item.red a:visited{
+      color: black;
+    }
+
+    .vis-item.orange {
+      background-color: gold;
+      border-color: orange;
+    }
+
+    .vis-item.orange a:link{
+      color: black;
+    }
+    .vis-item.orange a:visited{
+      color: black;
+    }
+
+    .vis-item.grey {
+      background-color: #7A7F7F;
+      border-color: grey;
+    }
+    .vis-item.grey a:link{
+      color: black;
+    }
+    .vis-item.grey a:visited{
+      color: black;
+    }
+
+    .vis-item.vis-selected.orange {
+      /* custom colors for selected orange items */
+      background-color: orange;
+      border-color: orangered;
+    }
+
