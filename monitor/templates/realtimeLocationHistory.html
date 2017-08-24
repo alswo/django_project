@@ -2,24 +2,29 @@
 {% block content %}
 <DIV>
 	<div class="row">
-		<div class="col-md-3" id="embeddingDatePicker">
 		<form action="realtimeLocationHistory" method="GET" id="realtimeLocationHistory">
-		<input type="text" name="cur_date" value="{{cur_date}}" class="form-control calendar"/>
+			<div class="col-md-2">
+				<select name="area_id" class="form-control" id="areaSelect">
+				{% for area in areas %}
+					<option value = "{{area.id}}" {% if area.id == area_id %}"selected"{% endif %}>{{area.name}}</option>
+				{% endfor %}
+				</select>
+			</div>
+			<div class="col-md-3" id="embeddingDatePicker">
+				<input type="text" name="cur_date" value="{{cur_date}}" class="form-control calendar"/>
+			</div>
 		</form>
-		</div>
 	</div>
 	<p>
-	<div id="timeline"></div>
+	{% for history in histories %}
+	<div id="timeline_{{history.carnum}}"></div>
+	{% endfor %}
 </DIV>
 <SCRIPT>
 	var today = new Date();
 	var items = new vis.DataSet();
 
-	var groups = new vis.DataSet([
-	{% for history in histories %}
-	{id : {{history.carnum}}, content: '{{history.carnum}}호차', value:{{history.carnum}}},
-	{% endfor %}
-	]);
+	var groups;
 
 	$(function() {
 		$('input[name="cur_date"]').daterangepicker({
@@ -36,6 +41,10 @@
 			$('#realtimeLocationHistory').submit();
 		});
 	});
+
+	$("#areaSelect").change(function() {
+		$('#realtimeLocationHistory').submit();
+	});
 	
 	function setHourMin(dateObj, hourmin) {
 		dateObj.setHours(hourmin.split(':')[0]);
@@ -44,8 +53,17 @@
 		return dateObj;
 	}
 
-	container = document.getElementById('timeline');
+	var options = {
+		groupOrder: function(a, b) {
+			return a.value - b.value;
+		},
+		zoomMin: 1000 * 60 * 60 * 14,
+	}
 	{% for history in histories %}
+		items = new vis.DataSet();
+		groups = new vis.DataSet([
+			{id : {{history.carnum}}, content: '{{history.carnum}}호차', value:{{history.carnum}}},
+		]);
 		{% for scheduletable in history.historyscheduletables %}
 			today = setHourMin(today, "{{scheduletable.schedule_time}}");
 			items.add({
@@ -55,16 +73,11 @@
 				className: '{{scheduletable.color}}',
 			});
 		{% endfor %}
-	{% endfor %}
-
-		var options = {
-			groupOrder: function(a, b) {
-				return a.value - b.value;
-			},
-			zoomMin: 1000 * 60 * 60 * 14,
-		}
+		container = document.getElementById('timeline_{{history.carnum}}');
 		timeline = new vis.Timeline(container, items, null, options);
 		timeline.setGroups(groups);
+	{% endfor %}
+
 	
 </SCRIPT>
 {% endblock content %}

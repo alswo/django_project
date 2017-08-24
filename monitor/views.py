@@ -2,7 +2,7 @@
 from django.shortcuts import render_to_response, render
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
-from schedule.models import Inventory, ScheduleTable, HistoryScheduleTable, RealtimeLocation, Car
+from schedule.models import Inventory, ScheduleTable, HistoryScheduleTable, RealtimeLocation, Car, Area
 from schedule.views import get_difference
 from passenger.dateSchedule import timeToDate
 from passenger.models import Academy
@@ -167,7 +167,14 @@ class HistoryScheduleTableWithRealtimeLocation:
 
 def realtimeLocationHistory(request):
 	realtimeLocationHistories = list()
-	cars = Car.objects.all().order_by('carname')
+	#cars = Car.objects.all().order_by('carname')
+	area_id = request.GET.get('area_id')
+	if (area_id == None):
+		area_id = "1"
+
+	areas = Area.objects.all().order_by('name')
+
+	cars = Car.objects.filter(branchid__areaid_id = int(area_id)).order_by('carname')
 	cursor = connection.cursor()
 	cur_date = request.GET.get('cur_date')
 	if (cur_date == None):
@@ -204,4 +211,4 @@ def realtimeLocationHistory(request):
 		realtimeLocationHistories.append(realtimeLocationHistory)
 
 	#return render(request, 'realtimeLocationHistory.html', {'histories': realtimeLocationHistories, 'cur_date': cur_date.replace("-", "/")})
-	return render(request, 'realtimeLocationHistory.html', {'histories': realtimeLocationHistories, 'cur_date': cur_date})
+	return render(request, 'realtimeLocationHistory.html', {'histories': realtimeLocationHistories, 'cur_date': cur_date, 'areas': areas, 'area_id': area_id})
