@@ -6,7 +6,7 @@
 			<div class="col-md-2">
 				<select name="area_id" class="form-control" id="areaSelect">
 				{% for area in areas %}
-					<option value = "{{area.id}}" {% if area.id == area_id %}"selected"{% endif %}>{{area.name}}</option>
+					<option value = "{{area.id}}" {% if area.id == area_id %}selected{% endif %}>{{area.name}}</option>
 				{% endfor %}
 				</select>
 			</div>

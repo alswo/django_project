@@ -183,7 +183,7 @@ def realtimeLocationHistory(request):
 		cur_date = t.timeToYmd()
 
 	for car in cars:
-		cursor.execute("select addr, lflag, time, departure_time from schedule_historyscheduletable history LEFT OUTER JOIN (SELECT carnum, schedule_time, MIN(departure_time) AS departure_time FROM schedule_realtimelocation WHERE date = '%s' group by carnum, schedule_time) realtimelocation ON( realtimelocation.schedule_time = history.time) WHERE history.date = '%s' and history.carnum = %s" % (cur_date, cur_date, car.carname));
+		cursor.execute("select addr, lflag, time, departure_time from schedule_historyscheduletable history LEFT OUTER JOIN (SELECT carnum, schedule_time, MIN(departure_time) AS departure_time FROM schedule_realtimelocation WHERE date = '%s' and carnum = %s group by carnum, schedule_time) realtimelocation ON( realtimelocation.schedule_time = history.time) WHERE history.date = '%s' and history.carnum = %s" % (cur_date, car.carname, cur_date, car.carname));
 
 		realtimeLocationHistory = RealtimeLocationHistory()
 		realtimeLocationHistory.carnum = car.carname
@@ -211,4 +211,4 @@ def realtimeLocationHistory(request):
 		realtimeLocationHistories.append(realtimeLocationHistory)
 
 	#return render(request, 'realtimeLocationHistory.html', {'histories': realtimeLocationHistories, 'cur_date': cur_date.replace("-", "/")})
-	return render(request, 'realtimeLocationHistory.html', {'histories': realtimeLocationHistories, 'cur_date': cur_date, 'areas': areas, 'area_id': area_id})
+	return render(request, 'realtimeLocationHistory.html', {'histories': realtimeLocationHistories, 'cur_date': cur_date, 'areas': areas, 'area_id': int(area_id)})
