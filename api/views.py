@@ -2,7 +2,7 @@
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from django.utils import timezone
-from schedule.models import RealtimeLocation, Inventory, ScheduleTable
+from schedule.models import RealtimeLocation, Inventory, ScheduleTable, Car
 from passenger.models import StudentInfo, Academy
 from passenger.dateSchedule import timeToDate
 from api.models import Notice
@@ -218,6 +218,13 @@ def getSchedulesForStudent(request):
 		#data['institute_name'] = list(map(lambda x: (Academy.objects.get(id=x)).name, (set(scheduletable.iid.alist) & set(student.aid))))
 		data['institute_name'] = Academy.objects.get(id=student.aid_id).name
 		data['scheduletable_id'] = scheduletable.id
+
+		try :
+			car = Car.objects.get(carname=scheduletable.iid.carnum)
+			data['driver_telephone'] = "0" + str(car.driver)
+		except Car.DoesNotExist:
+			data['driver_telephone'] = ''
+
 		if scheduletable.lflag == 1:
 			data['lflag'] = '등원'
 		elif scheduletable.lflag == 0:
