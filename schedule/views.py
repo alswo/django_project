@@ -170,7 +170,11 @@ def getSchedule(request):
 
 	t = timeToDate()
         today = t.timeToYmd()
-        realtimelocation = RealtimeLocation.objects.filter(date=today, carnum=car).order_by('schedule_time').last()
+       	realtimelocation = RealtimeLocation.objects.filter(date=today, carnum=car).order_by('schedule_time').last()
+	if (day and t.timeToD() == day):
+		pass
+	elif (realtimelocation != None):
+		realtimelocation = None
 
         if request.user.is_staff:
             invens = Inventory.objects.filter(bid = bid).filter(alist__contains = [aid]).filter(day = day)
@@ -183,7 +187,7 @@ def getSchedule(request):
 
                 contacts = invenToJson(invens)
 
-                return render_to_response('getCarSchedule.html', {"contacts": contacts,"car": car, 'user':request.user, 'realtimelocation':realtimelocation})
+                return render_to_response('getCarSchedule.html', {"contacts": contacts,"car": car, 'user':request.user, 'realtimelocation':realtimelocation, 'day':day})
 
             return render_to_response('getSchedule.html', {"contacts": contacts, "bid" : bid, "aid" : aid,'user':request.user})
 
