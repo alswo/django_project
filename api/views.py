@@ -5,7 +5,7 @@ from django.utils import timezone
 from schedule.models import RealtimeLocation, Inventory, ScheduleTable, Car
 from passenger.models import StudentInfo, Academy
 from passenger.dateSchedule import timeToDate
-from api.models import Notice
+from api.models import Notice, Clauses
 import json
 from django.views.decorators.csrf import csrf_exempt
 from datetime import datetime, timedelta
@@ -308,6 +308,15 @@ def getRouteMap(request):
 		sequence += 1
 
 	return JsonResponse(msg)
+
+def getClauses(request):
+	clauses = Clauses.objects.all().order_by('datetime').last()
+
+	data = {}
+	data['memberClauses'] = clauses.memberClauses
+	data['personalInfoClauses'] = clauses.personalInfoClauses
+
+	return JsonResponse(data)
 
 def listNotice(request):
 	notices = Notice.objects.all().order_by('datetime')

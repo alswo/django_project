@@ -12,3 +12,8 @@ class Notice(models.Model):
 	title = models.CharField(max_length=50)
 	datetime = models.DateTimeField(default=timezone.now)
 	content = models.TextField()
+
+class Clauses(models.Model):
+	datetime = models.DateTimeField(default=timezone.now)
+	memberClauses = models.TextField()
+	personalInfoClauses = models.TextField()
