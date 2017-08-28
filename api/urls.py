@@ -10,4 +10,5 @@ urlpatterns = patterns('',
     url(r'^getNotice$', views.getNotice),
     url(r'^getClauses$', views.getClauses),
     url(r'^getStudentInfo$', views.getStudentInfo),
+    url(r'^getStudentInfo2$', views.getStudentInfo2),
 )

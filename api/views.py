@@ -3,7 +3,7 @@ from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from django.utils import timezone
 from schedule.models import RealtimeLocation, Inventory, ScheduleTable, Car
-from passenger.models import StudentInfo, Academy
+from passenger.models import StudentInfo, Academy, PersonalInfo
 from passenger.dateSchedule import timeToDate
 from api.models import Notice, Clauses
 import json
@@ -388,6 +388,49 @@ def getStudentInfo(request):
 
             msg = 'PIN값을 다시 입력해주세요'
 
+            return getResponse(debug,400,msg)
+
+@csrf_exempt
+def getStudentInfo2(request):
+    if request.method == "POST":
+        pin_number = request.POST.get('pin_number')
+
+	debug = 0
+
+        try:
+            #sInfo = StudentInfo.objects.get(pin_number = pin_number)
+            pInfos = PersonalInfo.objects.filter(pin_number = pin_number)
+            studentInfos = list()
+            for pInfo in pInfos:
+	        sInfos = StudentInfo.objects.filter(personinfo = pInfo)
+                for sInfo in sInfos:
+
+                    studentInfo = {}
+    
+                    studentInfo['sid'] = sInfo.id
+                    studentInfo['aid'] = sInfo.aid_id
+                    studentInfo['parents_phonenumber'] = sInfo.parents_phonenumber
+                    studentInfo['grandparents_phonenumber'] = sInfo.grandparents_phonenumber
+                    studentInfo['self_phonenumber'] = sInfo.self_phonenumber
+                    studentInfo['care_phonenumber'] = sInfo.care_phonenumber
+                    studentInfo['pin'] = pin_number
+	            studentInfo['birth_year'] = sInfo.birth_year
+
+                    studentInfos.append(studentInfo)
+
+            msg = {}
+            msg['students'] = studentInfos
+
+            return JsonResponse(msg)
+
+        except PersonalInfo.DoesNotExist:
+            msg = 'PIN값을 다시 입력해주세요'
+            return getResponse(debug,401,msg)
+        except StudentInfo.DoesNotExist:
+            msg = 'PIN값을 다시 입력해주세요'
+            return getResponse(debug,402,msg)
+        except:
+            msg = 'PIN값을 다시 입력해주세요'
             return getResponse(debug,400,msg)
 
 def todayLoad(request):
