@@ -5,6 +5,7 @@ from django.dispatch import receiver
 from django.contrib.postgres.fields import ArrayField
 from schedule.models import Branch
 from django.db import models
+from django.utils import timezone
 import datetime
 import uuid
 #from simple_history.models import HistoricalRecords
@@ -24,6 +25,9 @@ def create_user_profile(sender, instance, created, **kwargs):
 @receiver(post_save, sender=User)
 def save_user_profile(sender, instance, **kwargs):
     instance.profile.save()
+
+def set_current_date_time():
+    return str(timezone.now())[:19]
 
 class Group(models.Model):
     gname = models.CharField(max_length = 80, null = True, blank = True)
@@ -173,6 +177,7 @@ class Grade(models.Model):
 class PersonalInfo(models.Model):
     #pass
     pin_number = models.CharField(max_length = 7)
+    created_time = models.CharField(max_length = 19, default = set_current_date_time())
 
 class StudentInfo(models.Model):
     aid = models.ForeignKey('Academy', null=True)
@@ -185,7 +190,6 @@ class StudentInfo(models.Model):
     phonelist = ArrayField(models.IntegerField(null = True, blank = True,default=0),default=0)
     pin_number = models.CharField(max_length = 20, default=uuid.uuid4().hex[:10].upper())
     deleted_date = models.DateField(null=True)
-    #personinfo = models.ForeignKey(PersonalInfo, on_delete=models.CASCADE)
     personinfo = models.ForeignKey(PersonalInfo, null=True)
     parents_phonenumber = models.CharField(max_length=15, null = True)
     grandparents_phonenumber = models.CharField(max_length=15, null = True)
@@ -195,6 +199,8 @@ class StudentInfo(models.Model):
     birth_year = models.CharField(max_length=4, null=True)
     birth_day = models.CharField(max_length=4, null=True)
     billing_date = models.CharField(max_length=2, null=True)
+
+    created_time = models.CharField(max_length = 19, default = set_current_date_time())
 
     def __unicode__(self):
         return u"{0} // {1} // {2} // {3} // {4}".format(self.bname,self.aname,self.sname,self.grade,self.phone1)
