@@ -409,12 +409,14 @@ def getStudentInfo2(request):
     
                     studentInfo['sid'] = sInfo.id
                     studentInfo['aid'] = sInfo.aid_id
+                    studentInfo['name'] = sInfo.sname
                     studentInfo['parents_phonenumber'] = sInfo.parents_phonenumber
                     studentInfo['grandparents_phonenumber'] = sInfo.grandparents_phonenumber
                     studentInfo['self_phonenumber'] = sInfo.self_phonenumber
                     studentInfo['care_phonenumber'] = sInfo.care_phonenumber
                     studentInfo['pin'] = pin_number
 	            studentInfo['birth_year'] = sInfo.birth_year
+	            studentInfo['personinfo_id'] = sInfo.personinfo_id
 
                     studentInfos.append(studentInfo)
 
