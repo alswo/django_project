@@ -218,7 +218,7 @@ def getSchedule(request):
 
             contacts = invenToJson(invens)
 
-            return render_to_response('getCarSchedule.html', {"contacts": contacts,"car": car, 'user':request.user, 'realtimelocation':realtimelocation})
+            return render_to_response('getCarSchedule.html', {"contacts": contacts,"car": car, 'user':request.user, 'realtimelocation':realtimelocation, 'day':day})
 
         return HttpResponse('로그인 후 사용해주세요.')
 
