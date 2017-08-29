@@ -4,10 +4,11 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from passenger.models import Academy, StudentInfo, PersonalInfo
-from schedule.models import Branch
+from schedule.models import Branch, HistoryScheduleTable
 from util.PhoneNumber import CleanPhoneNumber, FormatPhoneNumber
 from util.PersonalInfoUtil import compareLists, saveNewPersonInfo2
 from django.utils import timezone
+import datetime
 import re
 
 # Create your views here.
@@ -201,8 +202,8 @@ def updateStudent(request):
 		student = StudentInfo.objects.get(id=sid)
 
 		student.sname = request.POST.get('sname')
-		student.parent_phonenumber = request.POST.get('parent_phonenumber')
-		student.grandparent_phonenumber = request.POST.get('grandparent_phonenumber')
+		student.parents_phonenumber = request.POST.get('parents_phonenumber')
+		student.grandparents_phonenumber = request.POST.get('grandparents_phonenumber')
 		student.self_phonenumber = request.POST.get('self_phonenumber')
 		student.care_phonenumber = request.POST.get('care_phonenumber')
 		if (request.POST.get('age')):
@@ -248,10 +249,45 @@ def deleteStudent(request):
 def addClassForm(request):
 	return render(request, 'addClassForm.html')
 
+class TimeHistory:
+	def __init__(self):
+		self.carnum = -1
+		self.academies = set()
+		self.scheduletable = list()
+		self.warning = 0
+
+class DailyHistory:
+	def __init__(self):
+		self.date = ""
+		self.timehistory = list()
+
+## HH:MM ==> HHMM
+def convertDateFormat(str):
+	ret = str.replace(':', '')
+	#ret.replace(':', '')
+	return int(ret)
+
 
 @csrf_exempt
 @login_required
 def getHistory(request):
+    if request.user.is_staff :
+        institute = request.session.get('institute', None)
+    else :
+        institute = request.user.first_name
+
+    if institute:
+        try:
+            academy = Academy.objects.get(name = institute)
+        except AcademyDeosNotExist:
+            return render(request, 'message.html', {'msg': "학원 검색에 실패했습니다.", 'redirect_url': request.META['HTTP_REFERER']})
+    else:
+        return render(request, 'message.html', {'msg': "학원 권한이 필요합니다.", 'redirect_url': request.META['HTTP_REFERER']})
+
+    rv = checkAuth(request)
+    if (rv != None):
+        return rv
+
     if request.method == 'GET':
     	aid = request.GET.get('aid')
     	daterange = request.GET.get('daterange')

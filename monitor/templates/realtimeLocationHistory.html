@@ -1,0 +1,83 @@
+{% extends "../../institute/templates/base.html" %}
+{% block content %}
+<DIV>
+	<div class="row">
+		<form action="realtimeLocationHistory" method="GET" id="realtimeLocationHistory">
+			<div class="col-md-2">
+				<select name="area_id" class="form-control" id="areaSelect">
+				{% for area in areas %}
+					<option value = "{{area.id}}" {% if area.id == area_id %}selected{% endif %}>{{area.name}}</option>
+				{% endfor %}
+				</select>
+			</div>
+			<div class="col-md-3" id="embeddingDatePicker">
+				<input type="text" name="cur_date" value="{{cur_date}}" class="form-control calendar"/>
+			</div>
+		</form>
+	</div>
+	<p>
+	{% for history in histories %}
+	<div id="timeline_{{history.carnum}}"></div>
+	{% endfor %}
+</DIV>
+<SCRIPT>
+	var today = new Date();
+	var items = new vis.DataSet();
+
+	var groups;
+
+	$(function() {
+		$('input[name="cur_date"]').daterangepicker({
+			singleDatePicker: true,
+			showDropDowns: true,
+			autoApply: true,
+			autoUpdate: true,
+			locale: {
+				format: 'YYYY-MM-DD'
+			}
+		},
+		function(start, end, label) {
+			$('input[name="cur_date"]').val(moment(start).format('YYYY-MM-DD'));
+			$('#realtimeLocationHistory').submit();
+		});
+	});
+
+	$("#areaSelect").change(function() {
+		$('#realtimeLocationHistory').submit();
+	});
+	
+	function setHourMin(dateObj, hourmin) {
+		dateObj.setHours(hourmin.split(':')[0]);
+		dateObj.setMinutes(hourmin.split(':')[1]);
+
+		return dateObj;
+	}
+
+	var options = {
+		groupOrder: function(a, b) {
+			return a.value - b.value;
+		},
+		zoomMin: 1000 * 60 * 60 * 14,
+	}
+	{% for history in histories %}
+		items = new vis.DataSet();
+		groups = new vis.DataSet([
+			{id : {{history.carnum}}, content: '{{history.carnum}}호차', value:{{history.carnum}}},
+		]);
+		{% for scheduletable in history.historyscheduletables %}
+			today = setHourMin(today, "{{scheduletable.schedule_time}}");
+			items.add({
+				group: {{history.carnum}},
+				content: "{{scheduletable.addr}}",
+				start: new Date(today),
+				className: '{{scheduletable.color}}',
+			});
+		{% endfor %}
+		container = document.getElementById('timeline_{{history.carnum}}');
+		timeline = new vis.Timeline(container, items, null, options);
+		timeline.setGroups(groups);
+	{% endfor %}
+
+	
+</SCRIPT>
+{% endblock content %}

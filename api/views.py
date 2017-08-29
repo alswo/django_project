@@ -2,10 +2,10 @@
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from django.utils import timezone
-from schedule.models import RealtimeLocation, Inventory, ScheduleTable
-from passenger.models import StudentInfo, Academy
+from schedule.models import RealtimeLocation, Inventory, ScheduleTable, Car
+from passenger.models import StudentInfo, Academy, PersonalInfo
 from passenger.dateSchedule import timeToDate
-from api.models import Notice
+from api.models import Notice, Clauses
 import json
 from django.views.decorators.csrf import csrf_exempt
 from datetime import datetime, timedelta
@@ -27,6 +27,30 @@ def getResponse(debug, code, msg):
 		return JsonResponse({'code': code, 'msg': msg})
 
 # Create your views here.
+def getRealtimeLocationDebug(request):
+	if request.method == "GET":
+		debug_id = request.GET.get('debug_id')
+		if (debug_id == None):
+			debug_id = '0'
+		msg = ""
+	
+		if (debug_id == '401'):
+			msg = "해당 사용자가 존재하지 않습니다."
+		elif (debug_id == '400'):
+ 			msg = "파라미터가 유효하지 않습니다."
+		elif (debug_id == '202'):
+			msg = "0호차가 아직 출발 전입니다."
+		elif (debug_id == '204'):
+			msg = "홍유정님은 오늘 스케쥴이 없습니다."
+		elif (debug_id == '203'):
+			msg = "0호차 셔틀버스의 운행 스케쥴이 종료되었습니다."
+		elif (debug_id == '201'):
+			msg = "0호차가 출발했습니다."
+		elif (debug_id == '200'):
+			msg = "0호차가 30분 후 도착합니다."
+
+		return getResponse(0, int(debug_id), msg)
+
 def getRealtimeLocation(request):
     if request.method == "GET":
 	max_diff = 10
@@ -111,7 +135,7 @@ def getRealtimeLocation(request):
 			msg = str(carnum) + "호차가 출발했습니다."
 			return getResponse(debug, 201, msg)
 
-		    msg = str(carnum) + "호차가"  + str(waittime) + "분 후 도착합니다."
+		    msg = str(carnum) + "호차가 "  + str(waittime) + "분 후 도착합니다."
 		    return getResponse(debug, 200, msg)
                 ## 다음 inventory 로..
                 else:
@@ -194,6 +218,13 @@ def getSchedulesForStudent(request):
 		#data['institute_name'] = list(map(lambda x: (Academy.objects.get(id=x)).name, (set(scheduletable.iid.alist) & set(student.aid))))
 		data['institute_name'] = Academy.objects.get(id=student.aid_id).name
 		data['scheduletable_id'] = scheduletable.id
+
+		try :
+			car = Car.objects.get(carname=scheduletable.iid.carnum)
+			data['driver_telephone'] = "0" + str(car.driver)
+		except Car.DoesNotExist:
+			data['driver_telephone'] = ''
+
 		if scheduletable.lflag == 1:
 			data['lflag'] = '등원'
 		elif scheduletable.lflag == 0:
@@ -278,6 +309,15 @@ def getRouteMap(request):
 
 	return JsonResponse(msg)
 
+def getClauses(request):
+	clauses = Clauses.objects.all().order_by('datetime').last()
+
+	data = {}
+	data['memberClauses'] = clauses.memberClauses
+	data['personalInfoClauses'] = clauses.personalInfoClauses
+
+	return JsonResponse(data)
+
 def listNotice(request):
 	notices = Notice.objects.all().order_by('datetime')
 
@@ -348,6 +388,51 @@ def getStudentInfo(request):
 
             msg = 'PIN값을 다시 입력해주세요'
 
+            return getResponse(debug,400,msg)
+
+@csrf_exempt
+def getStudentInfo2(request):
+    if request.method == "POST":
+        pin_number = request.POST.get('pin_number')
+
+	debug = 0
+
+        try:
+            #sInfo = StudentInfo.objects.get(pin_number = pin_number)
+            pInfos = PersonalInfo.objects.filter(pin_number = pin_number)
+            studentInfos = list()
+            for pInfo in pInfos:
+	        sInfos = StudentInfo.objects.filter(personinfo = pInfo)
+                for sInfo in sInfos:
+
+                    studentInfo = {}
+    
+                    studentInfo['sid'] = sInfo.id
+                    studentInfo['aid'] = sInfo.aid_id
+                    studentInfo['name'] = sInfo.sname
+                    studentInfo['parents_phonenumber'] = sInfo.parents_phonenumber
+                    studentInfo['grandparents_phonenumber'] = sInfo.grandparents_phonenumber
+                    studentInfo['self_phonenumber'] = sInfo.self_phonenumber
+                    studentInfo['care_phonenumber'] = sInfo.care_phonenumber
+                    studentInfo['pin'] = pin_number
+	            studentInfo['birth_year'] = sInfo.birth_year
+	            studentInfo['personinfo_id'] = sInfo.personinfo_id
+
+                    studentInfos.append(studentInfo)
+
+            msg = {}
+            msg['students'] = studentInfos
+
+            return JsonResponse(msg)
+
+        except PersonalInfo.DoesNotExist:
+            msg = 'PIN값을 다시 입력해주세요'
+            return getResponse(debug,401,msg)
+        except StudentInfo.DoesNotExist:
+            msg = 'PIN값을 다시 입력해주세요'
+            return getResponse(debug,402,msg)
+        except:
+            msg = 'PIN값을 다시 입력해주세요'
             return getResponse(debug,400,msg)
 
 def todayLoad(request):

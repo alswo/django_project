@@ -123,10 +123,12 @@ class PoiGraph(Graph):
 
     def set_everyweight(self):
 
+    	#urlstr = "http://route-tayotayo.edticket.com:8080/routes/routeSequential30?version=1"
+    	#urlstr = "https://apis.skplanetx.com/tmap/routes"
 	urlstr = "http://route-tayotayo.edticket.com:8080/routes"
 	payload = {'appKey': '9c78e49d-c72c-36a6-8e25-5c249e9291a3', 'version': '1', 'reqCoordType': self.reqCoordType}
-        r = requests.get(urlstr, params=payload)
-        r.json()
+        #r = requests.get(urlstr, params=payload)
+        #r.json()
         for v in self.get_vertices():
             vertex = self.get_vertex(v)
             for n in self.get_vertices():
@@ -141,14 +143,18 @@ class PoiGraph(Graph):
                 payload['endX'] = neighbor.lon
                 payload['endY'] = neighbor.lat
 
-                r = requests.get(urlstr, params=payload)
-                if r.status_code == requests.codes.ok:
-                    response = r.json()
-                    weight = response['features'][0]['properties']['totalTime']
-                else:
-                    weight = 0
+		try:
+                	r = requests.get(urlstr, params=payload, timeout=1)
+                	if r.status_code == requests.codes.ok:
+                    		response = r.json()
+                    		weight = response['features'][0]['properties']['totalTime']
+                	else:
+                    		weight = 0
+		except:
+			weight = 0
 
                 self.add_edge(v, n, weight)
+		#sys.stderr.write("[" + v + "]->[" + n + "]\n")
 
     def get_json(self, objparam, routes):
         total_weight = 0
@@ -291,12 +297,22 @@ def travel(aGraph, vertex, endvertex, weight, visited):
         resultlist.append(resultset)
         return resultlist
 
+
+    #sys.stderr.write ("vertex = " + vertex.get_id() + "\n")
+    #sys.stderr.write ("len(get_vertices) = " + str(len(aGraph.get_vertices())) + "\n")
+    #sys.stderr.write ("len(visitedlist) = " + str(len(visitedlist)) + "\n")
+    #for v in aGraph.get_vertices():
+        #sys.stderr.write ("v[" + v + "]\n")
+    #for v in visitedlist:
+        #sys.stderr.write ("list[" + v.get_id() + "]\n")
+
     for n in vertex.adjacent:
         if n in visitedlist:
             continue 
         if n == endvertex:
             continue
 
+        #sys.stderr.write ("travel(), n = " + n.get_id() + ":" + str(len(visitedlist)) + "\n")
         result = travel(aGraph, n, endvertex, weight + vertex.get_weight(n), visitedlist)
         if (result != None):
             resultlist.extend(result)
@@ -470,28 +486,39 @@ if __name__ == '__main__':
 
     g = PoiGraph()
 
-    #g.add_vertex('낙원중학교', '14148317.661607', '4494878.084352', 0)
-    #g.add_vertex('낙생고등학교', '14148809.322692', '4493197.096773', 5)
-    #g.add_vertex('원마을현대힐스테이트', '14148219.329390', '4494726.671574', 1)
-    #g.add_vertex('판교도서관', '14147628.099206', '4493893.745713', 0)
+    #received_json_data = {"reqCoordType":"WGS84GEO","resCoordType":"WGS84GEO","startName":"롯데슈퍼 마두점S","startX":"126.78855157890416","startY":"37.65634555673625","endName":"롯데슈퍼 마두점E","endX":"126.78855157890416","endY":"37.65634555673625","viaPoints":[{"viaPointName":"신한은행ATM 숲속마을3단지지점1","viaPointId":"신한은행ATM 숲속마을3단지지점","index":0,"viaX":"126.79587345576675","viaY":"37.66746213182238"},{"viaPointName":"초가집부동산2","viaPointId":"초가집부동산","index":1,"viaX":"126.78136699892669","viaY":"37.67008120080965"},{"viaPointName":"냉천초교사거리3","viaPointId":"냉천초교사거리","index":2,"viaX":"126.78628980707647","viaY":"37.66726844410171"},{"viaPointName":"일산풍동성원상떼빌5차아파트4","viaPointId":"일산풍동성원상떼빌5차아파트","index":3,"viaX":"126.79618620241394","viaY":"37.665844531450055"},{"viaPointName":"숲속마을9단지성원상떼빌아파트5","viaPointId":"숲속마을9단지성원상떼빌아파트","index":4,"viaX":"126.80349292119143","viaY":"37.673205346565005"},{"viaPointName":"위시티4단지자이아파트6","viaPointId":"위시티4단지자이아파트","index":5,"viaX":"126.81491126609298","viaY":"37.67979023664351"},{"viaPointName":"요진와이하우스아파트7","viaPointId":"요진와이하우스아파트","index":6,"viaX":"126.78788057333918","viaY":"37.675369262123496"},{"viaPointName":"일산위시티자이1단지아파트8","viaPointId":"일산위시티자이1단지아파트","index":7,"viaX":"126.81193195989","viaY":"37.683425402573185"},{"viaPointName":"신한은행ATM 숲속마을3단지지점9","viaPointId":"신한은행ATM 숲속마을3단지지점","index":8,"viaX":"126.79587345576675","viaY":"37.66746213182238"},{"viaPointName":"초가집10","viaPointId":"초가집","index":9,"viaX":"126.78603613240159","viaY":"37.648372776944214"},{"viaPointName":"성원1차아파트11","viaPointId":"성원1차아파트","index":10,"viaX":"126.7956692115661","viaY":"37.664261523640405"},{"viaPointName":"하늘마을5단지휴먼시아아파트12","viaPointId":"하늘마을5단지휴먼시아아파트","index":11,"viaX":"126.78777150159623","viaY":"37.67703766117442"},{"viaPointName":"하늘마을1단지휴먼시아아파트13","viaPointId":"하늘마을1단지휴먼시아아파트","index":12,"viaX":"126.78003518085113","viaY":"37.680378598312835"}]}
+    received_json_data = {"reqCoordType":"WGS84GEO","resCoordType":"WGS84GEO","startName":"롯데슈퍼 마두점S","startX":"126.78855157890416","startY":"37.65634555673625","endName":"롯데슈퍼 마두점E","endX":"126.78855157890416","endY":"37.65634555673625","viaPoints":[{"viaPointName":"신한은행ATM 숲속마을3단지지점1","viaPointId":"신한은행ATM 숲속마을3단지지점","index":0,"viaX":"126.79587345576675","viaY":"37.66746213182238"},{"viaPointName":"초가집부동산2","viaPointId":"초가집부동산","index":1,"viaX":"126.78136699892669","viaY":"37.67008120080965"},{"viaPointName":"냉천초교사거리3","viaPointId":"냉천초교사거리","index":2,"viaX":"126.78628980707647","viaY":"37.66726844410171"},{"viaPointName":"일산풍동성원상떼빌5차아파트4","viaPointId":"일산풍동성원상떼빌5차아파트","index":3,"viaX":"126.79618620241394","viaY":"37.665844531450055"},{"viaPointName":"숲속마을9단지성원상떼빌아파트5","viaPointId":"숲속마을9단지성원상떼빌아파트","index":4,"viaX":"126.80349292119143","viaY":"37.673205346565005"},{"viaPointName":"위시티4단지자이아파트6","viaPointId":"위시티4단지자이아파트","index":5,"viaX":"126.81491126609298","viaY":"37.67979023664351"},{"viaPointName":"요진와이하우스아파트7","viaPointId":"요진와이하우스아파트","index":6,"viaX":"126.78788057333918","viaY":"37.675369262123496"},{"viaPointName":"일산위시티자이1단지아파트8","viaPointId":"일산위시티자이1단지아파트","index":7,"viaX":"126.81193195989","viaY":"37.683425402573185"},{"viaPointName":"신한은행ATM 숲속마을3단지지점9","viaPointId":"신한은행ATM 숲속마을3단지지점","index":8,"viaX":"126.79587345576675","viaY":"37.66746213182238"},{"viaPointName":"초가집10","viaPointId":"초가집","index":9,"viaX":"126.78603613240159","viaY":"37.648372776944214"},{"viaPointName":"성원1차아파트11","viaPointId":"성원1차아파트","index":10,"viaX":"126.7956692115661","viaY":"37.664261523640405"},{"viaPointName":"하늘마을5단지휴먼시아아파트12","viaPointId":"하늘마을5단지휴먼시아아파트","index":11,"viaX":"126.78777150159623","viaY":"37.67703766117442"}]}
 
-    g.add_vertex('A', '14148317.661607', '4494878.084352', 0)
-    g.add_vertex('B', '14148809.322692', '4493197.096773', 1)
-    g.add_vertex('C', '14148219.329390', '4494726.671574', 10)
-    g.add_vertex('D', '14147628.099206', '4493893.745713', 0)
+    g.add_vertex(received_json_data['startName'], received_json_data['startX'], received_json_data['startY'], 0)
+    for viaPoint in received_json_data['viaPoints']:
+        if 'viaPoints' not in viaPoint:
+            numPassenger = '1'
+        else:
+            numPassenger = viaPoint['viaPointNumPassenger']
+        g.add_vertex(viaPoint['viaPointName'], viaPoint['viaX'], viaPoint['viaY'], numPassenger)
+    g.add_vertex(received_json_data['endName'], received_json_data['endX'], received_json_data['endY'], 0)
+
+     
+
+    #g.add_vertex('A', '14148317.661607', '4494878.084352', 0)
+    #g.add_vertex('B', '14148809.322692', '4493197.096773', 1)
+    #g.add_vertex('C', '14148219.329390', '4494726.671574', 10)
+    #g.add_vertex('D', '14147628.099206', '4493893.745713', 0)
 
     g.set_everyweight()
 
-    print 'Graph data:'
-    for v in g:
-        for w in v.get_connections():
-            vid = v.get_id()
-            wid = w.get_id()
-            print '( %s , %s, %3d)'  % ( vid, wid, v.get_weight(w))
+    #print 'Graph data:'
+    #for v in g:
+        #for w in v.get_connections():
+            #vid = v.get_id()
+            #wid = w.get_id()
+            #print '( %s , %s, %3d)'  % ( vid, wid, v.get_weight(w))
 
             
     #result = travelling_salesman(g, g.get_vertex('원마을현대힐스테이트'), g.get_vertex('판교도서관'))
-    result = standard_deviation(g, g.get_vertex('A'), g.get_vertex('A'))
+    #result = travelling_salesman(g, g.get_vertex(received_json_data['startName']), g.get_vertex(received_json_data['endName']))
+    result = prim(g, g.get_vertex(received_json_data['startName']), g.get_vertex(received_json_data['endName']))
+    #result = standard_deviation(g, g.get_vertex('A'), g.get_vertex('A'))
     print result
     #travelling_salesman(g, g.get_vertex('원마을현대힐스테이트'))
 

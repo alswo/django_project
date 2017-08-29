@@ -2,11 +2,12 @@
 from django.shortcuts import render_to_response, render
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
-from schedule.models import Inventory, ScheduleTable, RealtimeLocation
+from schedule.models import Inventory, ScheduleTable, HistoryScheduleTable, RealtimeLocation, Car, Area
 from schedule.views import get_difference
 from passenger.dateSchedule import timeToDate
 from passenger.models import Academy
 from datetime import datetime
+from django.db import connection
 
 # Create your views here.
 
@@ -152,7 +153,62 @@ def shuttles(request):
 		inven_id = inventory.id
 
 	return render(request, 'shuttles.html', {'msg': msg, 'invens': invens})
-	#return HttpResponse('\n'.join('{}: {}'.format(*k) for k in enumerate(invens['shuttle']['carnum'])))
-	#return HttpResponse(msg)
-	#return HttpResponse("diff1 = " + str(diff1) + ", diff2 = " + str(diff2))
-	#return HttpResponse(inven_id)
+
+class RealtimeLocationHistory:
+	def __init__(self):
+		self.carnum = 0
+		self.historyscheduletables = None
+
+class HistoryScheduleTableWithRealtimeLocation:
+	def __init__(self):
+		schedule_time = None
+		color = 'grey'
+		addr = None
+
+def realtimeLocationHistory(request):
+	realtimeLocationHistories = list()
+	#cars = Car.objects.all().order_by('carname')
+	area_id = request.GET.get('area_id')
+	if (area_id == None):
+		area_id = "1"
+
+	areas = Area.objects.all().order_by('name')
+
+	cars = Car.objects.filter(branchid__areaid_id = int(area_id)).order_by('carname')
+	cursor = connection.cursor()
+	cur_date = request.GET.get('cur_date')
+	if (cur_date == None):
+		t = timeToDate()
+		t.setDiffTime(-24*60*60)
+		cur_date = t.timeToYmd()
+
+	for car in cars:
+		cursor.execute("select addr, lflag, time, departure_time from schedule_historyscheduletable history LEFT OUTER JOIN (SELECT carnum, schedule_time, MIN(departure_time) AS departure_time FROM schedule_realtimelocation WHERE date = '%s' and carnum = %s group by carnum, schedule_time) realtimelocation ON( realtimelocation.schedule_time = history.time) WHERE history.date = '%s' and history.carnum = %s" % (cur_date, car.carname, cur_date, car.carname));
+
+		realtimeLocationHistory = RealtimeLocationHistory()
+		realtimeLocationHistory.carnum = car.carname
+		realtimeLocationHistory.historyscheduletables = list()
+
+		for row in cursor.fetchall():
+			h = HistoryScheduleTableWithRealtimeLocation()
+			h.schedule_time = row[2]
+			if (row[1] == 2):
+				h.addr = '출발'
+			elif (row[1] == 3):
+				h.addr = '도착'
+			else:
+				h.addr = row[0]
+
+			if (row[3] == None):
+				h.color = 'red'
+			elif (get_difference(row[3], row[2]) >= 3):
+				h.color = 'orange'
+			else:
+				h.color = 'green'
+
+			realtimeLocationHistory.historyscheduletables.append(h)
+
+		realtimeLocationHistories.append(realtimeLocationHistory)
+
+	#return render(request, 'realtimeLocationHistory.html', {'histories': realtimeLocationHistories, 'cur_date': cur_date.replace("-", "/")})
+	return render(request, 'realtimeLocationHistory.html', {'histories': realtimeLocationHistories, 'cur_date': cur_date, 'areas': areas, 'area_id': int(area_id)})
