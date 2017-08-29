@@ -43,6 +43,7 @@ def setSession(request):
 	try:
 		request.session['instituteid'] = int(instituteid)
 		request.session['institute'] = Academy.objects.get(id = instituteid).name
+		
 	except Academy.DoesNotExist:
 		del request.session['institute']
 		del request.session['instituteid']
@@ -355,4 +356,3 @@ def getHistory(request):
         #return HttpResponse("error occured", "aid = ", aid, "startdate = ", startdate, "enddate = ", enddate)
 
     return render(request, 'getHistory.html', {"history": history, "academy": allacademy, "aid" : aid, 'aname': aname, 'total_count': total_count, 'uniq_count': uniq_count, 'startdate': startdate, 'enddate': enddate, 'user':request.user})
-
