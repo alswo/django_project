@@ -458,11 +458,11 @@ def todayLoad(request):
             return getResponse(debug, 400, msg)
         
         temp_tflag = stable.tflag
-
+        #load to unload
         if temp_tflag[temp_index] == 0:
             temp_tflag[temp_index] = 1
             button_flag = 0
-
+        #unload to load
         elif temp_tflag[temp_index] == 1:
             temp_tflag[temp_index] = 0
             button_flag = 1
