@@ -12,4 +12,5 @@ urlpatterns = patterns('',
     url(r'^getStudentInfo$', views.getStudentInfo),
     url(r'^getStudentInfo2$', views.getStudentInfo2),
     url(r'^todayLoad$', views.todayLoad),
+    url(r'^checkLoadState$', views.checkLoadState),
 )

@@ -228,7 +228,7 @@ def getSchedulesForStudent(request):
 		if scheduletable.lflag == 1:
 			data['lflag'] = '등원'
 		elif scheduletable.lflag == 0:
-			data['lflag'] = '하원'
+            		data['lflag'] = '하원'
 
 		#if scheduletable.iid.day in msg['schedules'].keys():
 			#pass
@@ -480,4 +480,36 @@ def todayLoad(request):
             return getResponse(debug,201,msg)
 
 
+def checkLoadState(request):
+    if request.method == "GET":
+        sTableId = int(request.GET.get('scheduletable_id'))
+        sid = int(request.GET.get('sid'))
+	msg = {}
+        try:
+            sTable = ScheduleTable.objects.get(id = sTableId)
+            slist = sTable.slist
+            tflag = sTable.tflag
+        except ScheduleTable.DoesNotExist:
+            msg = 'ScheduleTable이 존재하지 않습니다.'
+            return getResponse(debug, 400, msg)
+         
+        if len(sTable.slist) != len(sTable.tflag):
+            msg['message'] = 'ScheduleTable의 slist와 tflag의 길이가 다릅니다.'
+            return getResponse(debug, 400, msg) 
+        try:
+            sIndex = slist.index(sid)
 
+        except ValueError:
+            msg = 'sid가 ScheduleTable안에 존재하지 않습니다.'
+            return getResponse(debug, 400, msg)
+
+        debug = 0
+        if tflag[sIndex] == 0:
+            msg['state'] = 'load'
+            return getResponse(debug,200,msg)
+        elif tflag[sIndex] == 1:
+            msg['state'] = 'unload'
+            return getResponse(debug,201,msg)
+        else:
+            msg = 'schedule table의 tflag값에 오류가 있습니다.'
+            return getResponse(debug, 401, msg)
