@@ -435,19 +435,29 @@ def getStudentInfo2(request):
             msg = 'PIN값을 다시 입력해주세요'
             return getResponse(debug,400,msg)
 
+@csrf_exempt
 def todayLoad(request):
-    if request.method == "GET":
-        sid = request.GET.get('sid')
-        sTableId = request.GET.get('sTableId')
-        iId = request.GET.get('iId')
+    if request.method == "POST":
+        sid = int(request.POST.get('sid'))
+        sTableId = int(request.POST.get('scheduletable_id'))
 
-        stable = ScheduleTable.objects.get(id = sTableId)
+        debug = 0
+        try:
+            stable = ScheduleTable.objects.get(id = sTableId)
 
-        offset_list = stable.slist
-        offset = offset_list.index(sid)
+        except ScheduleTable.DoesNotExist:
+            msg = 'ScheduleTable이 존재하지 않습니다.'
+            return getResponse(debug, 400, msg) 
+        
+        try:
+            offset_list = stable.slist    
+            temp_index = offset_list.index(sid)
+        
+        except ValueError:
+            msg = 'sid가 ScheduleTable안에 존재하지 않습니다.'
+            return getResponse(debug, 400, msg)
         
         temp_tflag = stable.tflag
-        temp_index = offset
 
         if temp_tflag[temp_index] == 0:
             temp_tflag[temp_index] = 1
@@ -460,6 +470,14 @@ def todayLoad(request):
         stable.tflag = temp_tflag
         stable.save()
 
-        return HttpResponse(button_flag)
+	msg = {} 
+        if button_flag == 0:
+            msg['state'] = 'load to unload'
+            return getResponse(debug,200,msg)
+
+        elif button_flag == 1:
+            msg['state'] = 'unload to load' 
+            return getResponse(debug,201,msg)
+
 
 
