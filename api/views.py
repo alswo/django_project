@@ -91,7 +91,7 @@ def getRealtimeLocation(request):
 
         #today_inventories = Inventory.objects.filter(day=d)
         #today_inventory_ids = today_inventories.values('id')
-	if (inventroy_id == None):
+	if (inventory_id == None):
  		msg = "파라미터가 유효하지 않습니다."
 		return getResponse(debug, 400, msg)
 
