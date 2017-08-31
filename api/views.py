@@ -233,7 +233,7 @@ def getSchedulesForStudent(request):
 		if scheduletable.lflag == 1:
 			data['lflag'] = '등원'
 		elif scheduletable.lflag == 0:
-			data['lflag'] = '하원'
+            		data['lflag'] = '하원'
 
 		#if scheduletable.iid.day in msg['schedules'].keys():
 			#pass
@@ -445,24 +445,34 @@ def getStudentInfo2(request):
             msg = 'PIN값을 다시 입력해주세요'
             return getResponse(debug,400,msg)
 
+@csrf_exempt
 def todayLoad(request):
-    if request.method == "GET":
-        sid = request.GET.get('sid')
-        sTableId = request.GET.get('sTableId')
-        iId = request.GET.get('iId')
+    if request.method == "POST":
+        sid = int(request.POST.get('sid'))
+        sTableId = int(request.POST.get('scheduletable_id'))
 
-        stable = ScheduleTable.objects.get(id = sTableId)
+        debug = 0
+        try:
+            stable = ScheduleTable.objects.get(id = sTableId)
 
-        offset_list = stable.slist
-        offset = offset_list.index(sid)
+        except ScheduleTable.DoesNotExist:
+            msg = 'ScheduleTable이 존재하지 않습니다.'
+            return getResponse(debug, 400, msg) 
+        
+        try:
+            offset_list = stable.slist    
+            temp_index = offset_list.index(sid)
+        
+        except ValueError:
+            msg = 'sid가 ScheduleTable안에 존재하지 않습니다.'
+            return getResponse(debug, 400, msg)
         
         temp_tflag = stable.tflag
-        temp_index = offset
-
+        #load to unload
         if temp_tflag[temp_index] == 0:
             temp_tflag[temp_index] = 1
             button_flag = 0
-
+        #unload to load
         elif temp_tflag[temp_index] == 1:
             temp_tflag[temp_index] = 0
             button_flag = 1
@@ -470,6 +480,46 @@ def todayLoad(request):
         stable.tflag = temp_tflag
         stable.save()
 
-        return HttpResponse(button_flag)
+	msg = {} 
+        if button_flag == 0:
+            msg['state'] = 'load to unload'
+            return getResponse(debug,200,msg)
+
+        elif button_flag == 1:
+            msg['state'] = 'unload to load' 
+            return getResponse(debug,201,msg)
 
 
+def checkLoadState(request):
+    if request.method == "GET":
+        sTableId = int(request.GET.get('scheduletable_id'))
+        sid = int(request.GET.get('sid'))
+	msg = {}
+        try:
+            sTable = ScheduleTable.objects.get(id = sTableId)
+            slist = sTable.slist
+            tflag = sTable.tflag
+        except ScheduleTable.DoesNotExist:
+            msg = 'ScheduleTable이 존재하지 않습니다.'
+            return getResponse(debug, 400, msg)
+         
+        if len(sTable.slist) != len(sTable.tflag):
+            msg['message'] = 'ScheduleTable의 slist와 tflag의 길이가 다릅니다.'
+            return getResponse(debug, 400, msg) 
+        try:
+            sIndex = slist.index(sid)
+
+        except ValueError:
+            msg = 'sid가 ScheduleTable안에 존재하지 않습니다.'
+            return getResponse(debug, 400, msg)
+
+        debug = 0
+        if tflag[sIndex] == 0:
+            msg['state'] = 'load'
+            return getResponse(debug,200,msg)
+        elif tflag[sIndex] == 1:
+            msg['state'] = 'unload'
+            return getResponse(debug,201,msg)
+        else:
+            msg = 'schedule table의 tflag값에 오류가 있습니다.'
+            return getResponse(debug, 401, msg)

@@ -6,6 +6,7 @@ def getAcademy(request):
 		academies = Academy.objects.all().order_by('name')
 		branches = Branch.objects.all().order_by('bname')
 		displayname = request.session.get('institute', request.user.first_name)
-		return {'branches': branches, 'academies' : academies, 'displayname' : displayname, 'age_range': range(5, 20), 'billing_range': range(1, 32), 'month_range': range(1, 13)}
+		instituteid = request.session.get('instituteid')
+		return {'branches': branches, 'academies' : academies, 'displayname' : displayname,'instituteid' : instituteid, 'age_range': range(5, 20), 'billing_range': range(1, 32), 'month_range': range(1, 13)}
 
 	return {}

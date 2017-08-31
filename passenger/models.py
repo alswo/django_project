@@ -201,6 +201,7 @@ class StudentInfo(models.Model):
     billing_date = models.CharField(max_length=2, null=True)
 
     created_time = models.CharField(max_length = 19, default = set_current_date_time())
+    sended_time = models.CharField(max_length = 20, null = True)
 
     def __unicode__(self):
         return u"{0} // {1} // {2} // {3} // {4}".format(self.bname,self.aname,self.sname,self.grade,self.phone1)

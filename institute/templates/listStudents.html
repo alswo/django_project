@@ -16,6 +16,7 @@
 			"{% if student.phonenumber %}{{student.phonenumber}}{% endif %}",
 			"{% if student.age %}{{student.age}}세{% endif %}",
 			"{{student.info.personinfo.pin_number}}",
+			"<input type='checkbox' name='sid[]' value='{{student.info.id}}'>&nbsp&nbsp최근전송날짜:",
 			'<p data-placement="top" data-toggle="tooltip" title="Edit" class="p_bottom_0"><button class="btn btn-primary btn-sm updateStudent" data-title="Edit" data-sid="{{student.info.id}}" data-target="#edit" ><span class="glyphicon glyphicon-pencil"></span></button></p>',
 			'<p data-placement="top" data-toggle="tooltip" title="Delete"><button class="btn btn-danger btn-sm deleteStudent" data-title="Delete" data-sid="{{student.info.id}}" data-target="#delete" ><span class="glyphicon glyphicon-trash"></span></button></p>',
 		],
@@ -29,6 +30,7 @@
 				{ title : "부모님연락처" },
 				{ title : "나이" },
 				{ title : "PIN" },
+				{ sTitle : 'PIN전송&nbsp&nbsp<button type="button" class="btn btn-primary btn-xs preventSorting sendMessage" value=0 >선택전송</button>&nbsp&nbsp<button type="button" class="btn btn-info btn-xs preventSorting sendMessage" value=1>전체전송</button>' },
 				{ title : "수정" },
 				{ title : "삭제" },
 			],
@@ -55,7 +57,28 @@
 					return false;
 				}
 			});
-		} );
+		});
+
+		$('.sendMessage').on('click', function(){
+			//val == 1 -> 전체전송 val == 0 -> 선택전송
+			var kind = $(this).val();
+      var sid = $('input:checkbox[name="sid[]"]:checked').map(function(){return parseInt($(this).val())}).get();
+
+			$.ajax({
+        type: 'POST',
+        url: 'http://test.edticket.com/message/sendMessage',
+        data: {
+					kind: kind,
+					sid: sid
+        },
+        success: function(data) {
+        }
+      });
+		});
+
+		$('.preventSorting').on('click', function(e){
+       e.stopPropagation();
+    });
 	});
 </SCRIPT>
 {% endblock content %}

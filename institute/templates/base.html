@@ -17,7 +17,7 @@
 	<link href="/static/css/monitor.css" rel="stylesheet">
 	<link href="{% static 'css/timeline.css' %}" rel="stylesheet">
 	<link rel="stylesheet" type="text/css" href="http://cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.css" />
-  
+
 
 	<script src="/static/js/jquery-3.1.0.min.js"></script>
     	<script src="/static/js/jquery-ui.js"></script>
@@ -145,7 +145,7 @@
               </li>
               <li><a href="/institute/getHistory">정산</a></li>
               <!-- li><a href="#">Contact</a></li //-->
-{% if request.user.is_authenticated and request.user.is_staff %}
+       {% if request.user.is_authenticated and request.user.is_staff %}
               <li class="dropdown">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">학원선택<span class="caret"></span></a>
                 <ul class="dropdown-menu">
@@ -192,7 +192,7 @@
     </div>
 
 	</DIV>
-	
+
 <SCRIPT>
 
 $(document).ready(function () {
@@ -202,7 +202,7 @@ $(document).ready(function () {
 	//var url = urls[urls.length - 1];
 	var url = $(location).attr('pathname');
 	var obj = $(".nav").find("[href='" + url + "']");
-	// li -> ul(dropdown) -> li -> a 
+	// li -> ul(dropdown) -> li -> a
 	obj.parents('li').addClass("active");
 	obj.parents('li').parents('li').addClass("active");
 	//obj.parent().addClass("active");
