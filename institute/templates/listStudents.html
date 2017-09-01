@@ -12,9 +12,6 @@
 	var dataSet = [
 		{% for student in students %}
 		[
-{% if not instituteid %}
-			"{{student.info.aid.name}}",
-{% endif %}
 			"{{student.info.sname}}",
 			"{% if student.phonenumber %}{{student.phonenumber}}{% endif %}",
 			"{% if student.age %}{{student.age}}세{% endif %}",
@@ -29,14 +26,11 @@
 		var table = $('#studentListTable').DataTable({
 			data : dataSet,
 			columns : [
-{% if not instituteid %}
-				{ title : "학원" },
-{% endif %}
 				{ title : "이름" },
 				{ title : "부모님연락처" },
 				{ title : "나이" },
 				{ title : "PIN" },
-				{ sTitle : 'PIN전송&nbsp&nbsp<button type="button" class="btn btn-primary btn-xs preventSorting sendMessage" value=0 >선택전송</button>&nbsp&nbsp<button type="button" class="btn btn-info btn-xs preventSorting sendMessage" value=1>전체전송</button>' },
+				{ sTitle : 'PIN전송&nbsp&nbsp<button type="button" class="btn btn-primary btn-xs preventSorting sendMessage" value=0 >신규선택전송</button>&nbsp&nbsp<button type="button" class="btn btn-info btn-xs preventSorting sendMessage" value=1>신규전체전송</button>&nbsp&nbsp<button type="button" class="btn btn-success btn-xs preventSorting sendMessage" value=2>기존전체전송</button>&nbsp&nbsp<button type="button" class="btn btn-warning btn-xs preventSorting sendMessage" value=3>핀선택재전송</button>' },
 				{ title : "수정" },
 				{ title : "삭제" },
 			],
