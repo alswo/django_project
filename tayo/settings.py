@@ -32,6 +32,8 @@ INSTALLED_APPS = [
     'corsheaders',
     'fcm',
     'util',
+    'fcmdev',
+    'fcm_django',
 ]
 
 MIDDLEWARE_CLASSES = [

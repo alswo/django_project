@@ -1,6 +1,11 @@
 from django.conf.urls import url, include
 from django.contrib import admin
+from fcm_django.api.rest_framework import FCMDeviceViewSet, FCMDeviceAuthorizedViewSet
+from rest_framework.routers import DefaultRouter
+from rest_framework.documentation import include_docs_urls
 
+router = DefaultRouter()
+router.register(r'devices', FCMDeviceViewSet)
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
@@ -14,6 +19,8 @@ urlpatterns = [
     url(r'^getToken',include('firebase.urls')),
     url(r'^monitor/',include('monitor.urls')),
     url(r'^fcm/', include('fcm.urls')),
+    url(r'^fcmdev/',include('fcmdev.urls')),
+    url(r'^', include(router.urls)),
     url(
         r'^accounts/login/',
         'django.contrib.auth.views.login',
