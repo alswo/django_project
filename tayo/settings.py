@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     'firebase',
     'api',
     'institute',
+    'indicator',
     'corsheaders',
     'fcm',
     'util',
