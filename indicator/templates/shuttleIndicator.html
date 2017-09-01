@@ -1,0 +1,39 @@
+{% extends "../../institute/templates/base.html" %}
+{% block content %}
+<DIV class="row">
+	<form action="shuttleIndicator">
+	<DIV class="col-md-2">
+		<SELECT name="area_id" class="form-control" id="areaSelect">
+		{% for area in areas %}
+			<OPTION value="{{area.id}}" {% if area.id == area_id %}selected{% endif %}>{{area.name}}<
+		{% endfor %}
+		</SELECT>
+	</DIV>
+	</form>
+</DIV>
+<DIV id="chart"></DIV>
+<SCRIPT>
+
+var chartData = {};
+var data = [];
+{% for key, values in carChartData.items %}
+	chartData['{{key}}'] = {};
+	chartData['{{key}}']['x'] = [];
+	chartData['{{key}}']['y'] = [];
+	chartData['{{key}}']['type'] = 'scatter';
+	chartData['{{key}}']['mode'] = 'lines';
+	chartData['{{key}}']['name'] = '{{key}}';
+	{% for value in values %}
+		chartData['{{key}}']['x'].push('{{value.date}}');
+		chartData['{{key}}']['y'].push({{value.num}});
+	{% endfor %}
+	data.push(chartData['{{key}}']);
+{% endfor %}
+
+var layout = {
+	title: '버스별 운행스케쥴 갯수'
+}
+
+Plotly.newPlot('chart', data, layout);
+</SCRIPT>
+{% endblock content %}
