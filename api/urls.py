@@ -13,4 +13,7 @@ urlpatterns = patterns('',
     url(r'^getStudentInfo2$', views.getStudentInfo2),
     url(r'^todayLoad$', views.todayLoad),
     url(r'^checkLoadState$', views.checkLoadState),
+    url(r'^experienceGetSchedulesForStudent$', views.experienceGetSchedulesForStudent),
+    url(r'^experienceGetRealtimeLocation$', views.experienceGetRealtimeLocation),
+    url(r'^experienceGetRouteMap$', views.experienceGetRouteMap),
 )
