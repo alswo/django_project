@@ -38,7 +38,8 @@ def sendMessage(request):
             sInfo = StudentInfo.objects.filter(id__in = sid)
             for s in sInfo:
                 pInfo = PersonalInfo.objects.get(id = s.personinfo_id )
-                text = s.sname + '의 핀번호는 ' + pInfo.pin_number +'입니다'        
+                text = "학부모님 안녕하세요?\\n드디어, 셔틀타요 어플리케이션이 출시되었습니다.\\n이제 아이의 차량 승/하차 시간, 아이가 탑승할 차량의 실시간 위치를 확인할 수 있습니다.\\n스마트폰으로 아래의 링크에 접속하시면 다운로드 할 수 있습니다.\\n앞으로 지속적으로 발전하는 셔틀타요가 되겠습니다.\\n감사합니다.\\n\\n안드로이드 다운로드 링크:\\nwww.tayotayo.net\\n\\n아이폰 다운로드 링크:\\nwww.tayotayo.net\\n\\n"+ s.sname + '의 고유 핀번호:' + pInfo.pin_number     
+                text_2 = "학무보님 안녕하세요?\\n셔틀타요 어플리케이션 이용방법을 안내드립니다.\\n" 
                 to = s.parents_phonenumber[1:]
                 
                 status = sendPin(token, text, to)
