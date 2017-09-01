@@ -473,11 +473,11 @@ def todayLoad(request):
 	msg = {} 
         if button_flag == 0:
             msg['state'] = 'load to unload'
-            return getResponse(debug,200,msg)
+            return getResponse(debug,201,msg)
 
         elif button_flag == 1:
             msg['state'] = 'unload to load' 
-            return getResponse(debug,201,msg)
+            return getResponse(debug,200,msg)
 
 
 def checkLoadState(request):
