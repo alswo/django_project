@@ -57,7 +57,7 @@ def getRealtimeLocation(request):
         t = timeToDate()
         d = t.timeToD()
         today = t.timeToYmd()
-        rawhm = t.timeToRawHM()
+        rawhm = int(t.timeToRawHM())
         hm = t.timeToHM()
         sid = request.GET.get('sid')
 	inventory_id = request.GET.get('inventory_id')
@@ -110,7 +110,7 @@ def getRealtimeLocation(request):
 	inventory = Inventory.objects.get(id = scheduletables.first().iid_id)
         if (inventory.etime < rawhm):
 	    carnum = inventory.carnum
-	    msg = str(carnum) + "호차 셔틀버스의 운행 스케쥴이 종료되었습니다."
+	    msg = str(carnum) + "호차 셔틀버스의 운행 스케쥴이 종료되었습니다2. '" + str(rawhm) + "'" + str(inventory.etime) + "'"
 	    return getResponse(debug, 203, msg)
 
         for scheduletable in scheduletables:
@@ -144,7 +144,7 @@ def getRealtimeLocation(request):
             else:
 		carnum = inventory.carnum
 		if (rawhm - inventory.etime < 10):
-		    msg = str(carnum) + "호차 셔틀버스의 운행 스케쥴이 종료되었습니다."
+		    msg = str(carnum) + "호차 셔틀버스의 운행 스케쥴이 종료되었습니다." + str(rawhm)
 		    return getResponse(debug, 203, msg)
 		else:
 		    msg = str(carnum) + "호차가 아직 출발 전입니다."
