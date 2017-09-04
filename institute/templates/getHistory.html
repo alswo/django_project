@@ -49,7 +49,7 @@
 					<div class="col-md-5" align="center">
 				총운행횟수 : <span id="total_count"></span><br>
 						<div class="etc">
-				정상(<span id="normal_count"></span>) + 2배(<span id="double_count"></span>) + 동승자없음(<span id="nopassenger_count"></span>)<br>
+				정상(<span id="normal_count"></span>) + 2배(<span id="double_count"></span>) + 동승자없음(<span id="nopassenger_count"></span>) + 동승자없음&2배(<span id="nopassenger_double_count"></span>)<br>
 				예상 과금횟수 : <span id="uniq_count">{{ uniq_count }}</span><br>
 						</div>
 					</div>
@@ -119,6 +119,7 @@
 							<option>선택</option>
 							<option>X 2 (가격 2배)</option>
 							<option>동승자 없음</option>
+							<option>X 2 (가격 2배) & 동승자 없음</option>
 						</select>
 						<button class="btn-xs btn-danger glyphicon glyphicon-remove table-remove"></button>
 					</div>
@@ -258,6 +259,7 @@ function calculate() {
 	var normal_count = 0;
 	var double_count = 0;
 	var nopassenger_count = 0;
+	var nopassenger_double_count = 0;
 
 	var priceoptions = $('.priceoption');
 	for (i=0; i<priceoptions.length; i++) {
@@ -268,6 +270,9 @@ function calculate() {
 		else if (priceoption_value === "동승자 없음") {
 			nopassenger_count++;
 		}
+		else if (priceoption_value == "X 2 (가격 2배) & 동승자 없음") {
+			nopassenger_double_count++;
+		} 
 		else {
 			normal_count++;
 		}
@@ -281,9 +286,10 @@ function calculate() {
 	$('#normal_count')[0].innerText = numberWithCommas(normal_count);
 	$('#double_count')[0].innerText = numberWithCommas(double_count);
 	$('#nopassenger_count')[0].innerText = numberWithCommas(nopassenger_count);
-	$('#total_count')[0].innerText = numberWithCommas(normal_count + double_count + nopassenger_count);
-	$('#calculate_amount')[0].innerText = numberWithCommas(normal_count * per_amount_value + double_count * 2 * per_amount_value + nopassenger_count * (per_amount_value - 3000));
-	$('#pay_amount')[0].innerText = numberWithCommas((normal_count * per_amount_value + double_count * 2 * per_amount_value + nopassenger_count * (per_amount_value - 3000) )* (100 - discount_rate_value)/ 100);
+	$('#nopassenger_double_count')[0].innerText = numberWithCommas(nopassenger_double_count);
+	$('#total_count')[0].innerText = numberWithCommas(normal_count + double_count + nopassenger_count + nopassenger_double_count);
+	$('#calculate_amount')[0].innerText = numberWithCommas(normal_count * per_amount_value + double_count * 2 * per_amount_value + nopassenger_count * (per_amount_value - 3000) + nopassenger_double_count * (per_amount_value - 3000) * 2);
+	$('#pay_amount')[0].innerText = numberWithCommas((normal_count * per_amount_value + double_count * 2 * per_amount_value + nopassenger_count * (per_amount_value - 3000) + nopassenger_double_count * (per_amount_value - 3000) * 2 )* (100 - discount_rate_value)/ 100);
 	return null;
 }
 
@@ -377,8 +383,8 @@ $("#pdfdown").click(function() {
 	var normal_count = $('#normal_count')[0].innerText;
 	var double_count = $('#double_count')[0].innerText;
 	var nopassenger_count = $('#nopassenger_count')[0].innerText;
-	var total_count = parseInt(normal_count) + parseInt(double_count) + parseInt(nopassenger_count);
-	var memo = $('#memo')[0].value;
+	var nopassenger_double_count = $('#nopassenger_double_count')[0].innerText;
+	var total_count = parseInt(normal_count) + parseInt(double_count) + parseInt(nopassenger_count) + parseInt(nopassenger_double_count);
 	var str = "";
 	var dd = {};
 	dd['style'] = { header: { fontSize: 22, bold: true} };
@@ -387,7 +393,8 @@ $("#pdfdown").click(function() {
 	dd['content'].push({text: "<{{aname}} {{startdate}} ~ {{enddate}} 이용내역>", fontSize: 15, bold: true, alignment: 'center'});
 	dd['content'].push({text: "\n\n총 " + total_count + "회 운행", fontSize: 12, bold: true});
 
-        if (memo) {
+        if ($('#memo') && $('#memo')[0]) {
+		var memo = $('#memo')[0].value;
 		dd['content'].push({text: memo + '\n\n', fontSize: 11});
 	}
 	if (normal_count > 0) {
@@ -411,6 +418,14 @@ $("#pdfdown").click(function() {
 			str += " + ";
 		}
 		per_amount_value = numberWithCommas(numberWithoutCommas(per_amount_value) - 3000);
+		str += '(' + per_amount_value + ' x ' + nopassenger_count + ') ';
+	}
+	if (nopassenger_double_count > 0) {
+		dd['content'].push({text: "-- 동승자없이 (X2): : " + nopassenger_double_count + "회 운행", fontSize: 11});
+		if (str != "") {
+			str += " + ";
+		}
+		per_amount_value = numberWithCommas(numberWithoutCommas(per_amount_value) - 3000) * 2;
 		str += '(' + per_amount_value + ' x ' + nopassenger_count + ') ';
 	}
 	dd['content'].push({text: '\n\n이용료: ' + str + ' = ' + calculate_amount + '원\n', fontSize: 12});

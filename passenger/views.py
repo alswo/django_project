@@ -569,3 +569,6 @@ def studentInfo(request):
             data = serialize('json', aca)
 
             return HttpResponse(data, content_type="application/json" )
+
+def robots(request):
+	return render_to_response('passenger/robots.txt', content_type="text/plain")
