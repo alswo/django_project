@@ -471,7 +471,10 @@ def getSchedulesForStudent(request):
 
 		try :
 			car = Car.objects.get(carname=scheduletable.iid.carnum)
-			data['driver_telephone'] = "0" + str(car.driver)
+			if car.passenger and len(str(car.passenger)) > 9 :
+				data['driver_telephone'] = '0' + str(car.passenger)
+			else :
+				data['driver_telephone'] = "0" + str(car.driver)
 		except Car.DoesNotExist:
 			data['driver_telephone'] = ''
 
