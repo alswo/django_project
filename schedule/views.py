@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import logging
 from django.shortcuts import render_to_response, redirect
 from django.template import RequestContext
 from schedule.models import HistoryScheduleTable, Inventory, ScheduleTable, Building, Branch, InventoryRequest, Area, Car, RealtimeLocation, EditedInven, EditedScheduleTable, TodayLoadTimeLog
@@ -19,7 +20,6 @@ from django.core.serializers import serialize
 import datetime
 import operator
 import json
-import logging
 import collections
 import re
 from schedule.createInventory import UpdateInven

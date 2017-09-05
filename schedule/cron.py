@@ -205,3 +205,13 @@ def weekly_update():
 		tempInven.week2 = 1
 	 	tempInven.week3 = 1
 	 	tempInven.save()
+
+def resetTodayLoad():
+    sTable = ScheduleTable.objects.all()
+
+    for s in sTable:
+        lenSlist = len(s.slist)
+        s.slist = [0]*lenSlist
+        s.save()
+
+
