@@ -1,6 +1,6 @@
 from django.conf.urls import patterns, url, include
 from message import views
 
-urlpatterns = patterns('',
+urlpatterns = [
     url(r'^sendMessage$', views.sendMessage),
-)
+]
