@@ -29,10 +29,10 @@ def run(*args):
 		inventories = Inventory.objects.filter(alist__contains = [academy.id])
 		scheduleTables = ScheduleTable.objects.filter(alist__contains = [academy.id])
 
-		inventoryNum = inventories.count()
-		scheduleTableNum = scheduleTables.count()
+		inventorynum = inventories.count()
+		scheduletablenum = scheduleTables.count()
 		studentInfoSet = set(list(scheduleTables.exclude(slist__exact='{}').annotate(sid = Func(F('slist'), function='unnest')).values_list('sid', flat=True))) & set(academyStudentList)
-		studentInfoNum = len(studentInfoSet)
+		studentinfonum = len(studentInfoSet)
 
 		#For day
 		dayInventories = inventories.filter(day = current_day)
@@ -40,52 +40,52 @@ def run(*args):
 
 		# model filter 로 처리하려 했는데.. 실패
 		#dayStudentCount = dayScheduleTables.exclude(slist__exact='{}').annotate(sid = Func(F('slist'), function='unnest')).values_list('sid').filter(sid__in = academyStudentList).count()
-		dayInventoryNum = dayInventories.count()
-		dayScheduleTableNum = dayScheduleTables.count()
+		dayinventorynum = dayInventories.count()
+		dayscheduletablenum = dayScheduleTables.count()
 		dayStudentInfoSet = set(list(dayScheduleTables.exclude(slist__exact='{}').annotate(sid = Func(F('slist'), function='unnest')).values_list('sid', flat=True))) & set(academyStudentList)
-		dayStudentInfoNum = len(dayStudentInfoSet)
+		daystudentinfonum = len(dayStudentInfoSet)
 
 
-		instituteIndicator = InstituteIndicator(date = today, inventoryNum = inventoryNum, scheduleTableNum = scheduleTableNum, studentInfoNum = studentInfoNum, academy = academy, dayInventoryNum = dayInventoryNum, dayScheduleTableNum = dayScheduleTableNum, dayStudentInfoNum = dayStudentInfoNum)
+		instituteIndicator = InstituteIndicator(date = today, inventorynum = inventorynum, scheduletablenum = scheduletablenum, studentinfonum = studentinfonum, academy = academy, dayinventorynum = dayinventorynum, dayscheduletablenum = dayscheduletablenum, daystudentinfonum = daystudentinfonum)
 		instituteIndicator.save()
-		print "[tot] name = {0}, studentNum = {1}, inventoryNum = {2}, scheduleTableNum = {3}".format(academy.name, studentInfoNum, inventoryNum, scheduleTableNum)
-		print "[day] name = {0}, studentNum = {1}, inventoryNum = {2}, scheduleTableNum = {3}".format(academy.name, dayStudentInfoNum, dayInventoryNum, dayScheduleTableNum)
+		#print "[tot] name = {0}, studentNum = {1}, inventorynum = {2}, scheduletablenum = {3}".format(academy.name, studentinfonum, inventorynum, scheduletablenum)
+		#print "[day] name = {0}, studentNum = {1}, inventorynum = {2}, scheduletablenum = {3}".format(academy.name, daystudentinfonum, dayinventorynum, dayscheduletablenum)
 
-		totalInventoryNum += inventoryNum
-		totalScheduleTableNum += scheduleTableNum
-		totalStudentinfoNum += studentInfoNum
+		totalInventoryNum += inventorynum
+		totalScheduleTableNum += scheduletablenum
+		totalStudentinfoNum += studentinfonum
 		
-	print "totalinvennum = {0}".format(totalInventoryNum)
-	print "totalschedulenum = {0}".format(totalScheduleTableNum)
-	print "totalstudentnum = {0}".format(totalStudentinfoNum)
+	#print "totalinvennum = {0}".format(totalInventoryNum)
+	#print "totalschedulenum = {0}".format(totalScheduleTableNum)
+	#print "totalstudentnum = {0}".format(totalStudentinfoNum)
 
 	totalInventoryNum = 0
 	totalScheduleTableNum = 0
 	totalStudentinfoNum = 0
 	for car in Car.objects.all():
 		inventories = Inventory.objects.filter(carnum = car.carname)
-		inventoryNum = inventories.count()
-		scheduleTableNum = 0
-		studentInfoNum = 0
+		inventorynum = inventories.count()
+		scheduletablenum = 0
+		studentinfonum = 0
 		for inventory in inventories:
-			scheduleTableNum += inventory.scheduletables.all().count()
-			studentInfoNum +=  inventory.scheduletables.exclude(slist__exact='{}').annotate(sid = Func(F('slist'), function='unnest')).count()
+			scheduletablenum += inventory.scheduletables.all().count()
+			studentinfonum +=  inventory.scheduletables.exclude(slist__exact='{}').annotate(sid = Func(F('slist'), function='unnest')).count()
 
 		dayInventories = inventories.filter(day = current_day)
-		dayInventoryNum = dayInventories.count()
-		dayScheduleTableNum = 0
-		dayStudentInfoNum = 0
+		dayinventorynum = dayInventories.count()
+		dayscheduletablenum = 0
+		daystudentinfonum = 0
 		for inventoy in dayInventories:
-			dayScheduleTableNum += inventory.scheduletables.all().count()
-			dayStudentInfoNum +=  inventory.scheduletables.exclude(slist__exact='{}').annotate(sid = Func(F('slist'), function='unnest')).count()
-		shuttleIndicator = ShuttleIndicator(date = today, inventoryNum = inventoryNum, scheduleTableNum = scheduleTableNum, studentInfoNum = studentInfoNum, car = car, dayInventoryNum = dayInventoryNum, dayScheduleTableNum = dayScheduleTableNum, dayStudentInfoNum = dayStudentInfoNum)
+			dayscheduletablenum += inventory.scheduletables.all().count()
+			daystudentinfonum +=  inventory.scheduletables.exclude(slist__exact='{}').annotate(sid = Func(F('slist'), function='unnest')).count()
+		shuttleIndicator = ShuttleIndicator(date = today, inventorynum = inventorynum, scheduletablenum = scheduletablenum, studentinfonum = studentinfonum, car = car, dayinventorynum = dayinventorynum, dayscheduletablenum = dayscheduletablenum, daystudentinfonum = daystudentinfonum)
 		shuttleIndicator.save()
-		print "[tot] carname = {0}, studentNum = {1}, inventoryNum = {2}, scheduleTableNum = {3}".format(car.carname, studentInfoNum, inventoryNum, scheduleTableNum)
-		print "[day] carname = {0}, studentNum = {1}, inventoryNum = {2}, scheduleTableNum = {3}".format(car.carname, dayStudentInfoNum, dayInventoryNum, dayScheduleTableNum)
-		totalInventoryNum += inventoryNum
-		totalScheduleTableNum += scheduleTableNum
-		totalStudentinfoNum += studentInfoNum
+		#print "[tot] carname = {0}, studentNum = {1}, inventorynum = {2}, scheduletablenum = {3}".format(car.carname, studentinfonum, inventorynum, scheduletablenum)
+		#print "[day] carname = {0}, studentNum = {1}, inventorynum = {2}, scheduletablenum = {3}".format(car.carname, daystudentinfonum, dayinventorynum, dayscheduletablenum)
+		totalInventoryNum += inventorynum
+		totalScheduleTableNum += scheduletablenum
+		totalStudentinfoNum += studentinfonum
 		
-	print "totalinvennum = {0}".format(totalInventoryNum)
-	print "totalschedulenum = {0}".format(totalScheduleTableNum)
-	print "totalstudentnum = {0}".format(totalStudentinfoNum)
+	#print "totalinvennum = {0}".format(totalInventoryNum)
+	#print "totalschedulenum = {0}".format(totalScheduleTableNum)
+	#print "totalstudentnum = {0}".format(totalStudentinfoNum)
