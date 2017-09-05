@@ -25,7 +25,7 @@ def shuttleIndicator(request):
 			shIndicators = ShuttleIndicator.objects.filter(car__branchid__areaid_id = int(area))
 		else:
 			shIndicators = ShuttleIndicator.objects.all()
-		shuttleIndicators = shIndicators.values('date').annotate(num = F('dayScheduleTableNum'), name = F('car__carname'))
+		shuttleIndicators = shIndicators.values('date').annotate(num = F('dayscheduletablenum'), name = F('car__carname'))
 
 	for shuttleIndicator in shuttleIndicators:
 		chartData = ChartData()
