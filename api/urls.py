@@ -1,7 +1,7 @@
-from django.conf.urls import patterns, url, include
+from django.conf.urls import url, include
 from api import views
 
-urlpatterns = patterns('',
+urlpatterns = [
     url(r'^getRealtimeLocation$', views.getRealtimeLocation),
     url(r'^getRealtimeLocationDebug$', views.getRealtimeLocationDebug),
     url(r'^getSchedulesForStudent$', views.getSchedulesForStudent),
@@ -16,4 +16,4 @@ urlpatterns = patterns('',
     url(r'^experienceGetSchedulesForStudent$', views.experienceGetSchedulesForStudent),
     url(r'^experienceGetRealtimeLocation$', views.experienceGetRealtimeLocation),
     url(r'^experienceGetRouteMap$', views.experienceGetRouteMap),
-)
+]
