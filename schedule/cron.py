@@ -210,8 +210,8 @@ def resetTodayLoad():
     sTable = ScheduleTable.objects.all()
 
     for s in sTable:
-        lenSlist = len(s.slist)
-        s.slist = [0]*lenSlist
+        lenTflag = len(s.tflag)
+        s.tflag = [0]*tflag
         s.save()
 
 
