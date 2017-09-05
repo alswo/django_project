@@ -115,7 +115,7 @@
 			            		{% endfor %}
 					</div>
 					<div class="col-xs-4" align="right">
-						<select class="selectpicker price_item priceoption">
+						<select class="selectpicker price_item priceoption timehistoryoption">
 							<option>선택</option>
 							<option>X 2 (가격 2배)</option>
 							<option>동승자 없음</option>
@@ -425,7 +425,7 @@ $("#pdfdown").click(function() {
 		if (str != "") {
 			str += " + ";
 		}
-		per_amount_value = numberWithCommas(numberWithoutCommas(per_amount_value) - 3000) * 2;
+		per_amount_value = numberWithCommas((numberWithoutCommas(per_amount_value) - 3000) * 2);
 		str += '(' + per_amount_value + ' x ' + nopassenger_count + ') ';
 	}
 	dd['content'].push({text: '\n\n이용료: ' + str + ' = ' + calculate_amount + '원\n', fontSize: 12});
@@ -452,6 +452,12 @@ $("#pdfdown").click(function() {
 			var timehistoryinfostr = "";
 			for (var k=0; k<timehistoryinfo.length; k++) {
 				timehistoryinfostr += timehistoryinfo[k].innerHTML + " ";
+			}
+
+
+			var timehistoryoption = timehistory[j].getElementsByClassName("timehistoryoption");
+			if (timehistoryoption[0].selectedIndex != 0) {
+				timehistoryinfostr += "   [" + timehistoryoption[0].options[timehistoryoption[0].selectedIndex].text + "]";
 			}
 			dd['content'].push({text: timehistoryinfostr});
 

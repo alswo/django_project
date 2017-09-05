@@ -1,7 +1,7 @@
-from django.conf.urls import patterns, url, include
+from django.conf.urls import url, include
 from optimizer import views
 
-urlpatterns = patterns('',
+urlpatterns = [
     url(r'^getRoute$', views.getRoute),
     url(r'^getRouteSequential$', views.getRouteSequential),
-)
+]
