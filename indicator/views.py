@@ -2,7 +2,7 @@
 from django.shortcuts import render
 from django.db.models import F, Sum
 from indicator.models import ShuttleIndicator
-from schedule.models import Car
+from schedule.models import Car, Area
 
 class ChartData:
 	def __init__(self):
@@ -15,6 +15,8 @@ def shuttleIndicator(request):
 	if request.method == 'GET':
 		mode = request.GET.get('mode', 'every')
 		area = request.GET.get('area')
+
+	areas = Area.objects.all()
 
 	carChartData = {}
 	
@@ -35,4 +37,4 @@ def shuttleIndicator(request):
 			carChartData[shuttleIndicator['name']] = list()
 		carChartData[shuttleIndicator['name']].append(chartData)
 		
-	return render(request, 'shuttleIndicator.html', {'carChartData':carChartData})
+	return render(request, 'shuttleIndicator.html', {'carChartData':carChartData, 'areas':areas})
