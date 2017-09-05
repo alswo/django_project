@@ -12,9 +12,6 @@
 	var dataSet = [
 		{% for student in students %}
 		[
-			{% if not instituteid %}
-			"{{student.info.aid.name}}",
-			{% endif %}
 			"{{student.info.sname}}",
 			"{% if student.phonenumber %}{{student.phonenumber}}{% endif %}",
 			"{% if student.age %}{{student.age}}세{% endif %}",
@@ -29,9 +26,6 @@
 		var table = $('#studentListTable').DataTable({
 			data : dataSet,
 			columns : [
-				{% if not instituteid %}
-				{ title : "학원" },
-				{% endif %}
 				{ title : "이름" },
 				{ title : "부모님연락처" },
 				{ title : "나이" },
@@ -78,7 +72,7 @@
 					sid: sid
         },
         success: function(data) {
-					console.log(data)
+					location.reload();
         }
       });
 		});
