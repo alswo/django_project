@@ -70,7 +70,7 @@ class PhoneList(models.Model):
     for a in aca:
         ACA = ACA + ((a.id, a.name),)
         ACA_2 = ACA_2 + ((a.name, a.name),)
-    print(ACA)
+    #print(ACA)
     name = models.CharField(max_length = 10)
     aid = models.IntegerField(choices = ACA)
     aname = models.CharField(choices = ACA_2, max_length=30)

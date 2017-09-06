@@ -1,5 +1,6 @@
 from django.conf.urls import url, include
 from django.contrib import admin
+from django.contrib.auth import views as auth_views
 
 
 urlpatterns = [
@@ -16,13 +17,13 @@ urlpatterns = [
     url(r'^fcm/', include('fcm.urls')),
     url(
         r'^accounts/login/',
-        'django.contrib.auth.views.login',
+        auth_views.login,
         name='login',
         kwargs={
             'template_name': 'login.html'
         }
     ),
-    url(r'^logout/$', 'django.contrib.auth.views.logout', {
+    url(r'^logout/$', auth_views.logout, {
         'next_page': '/accounts/login',
         }, name='logout_url'
     ),

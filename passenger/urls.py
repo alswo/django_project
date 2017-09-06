@@ -1,7 +1,7 @@
-from django.conf.urls import patterns, url, include
+from django.conf.urls import url, include
 from passenger import views
 
-urlpatterns = patterns('',
+urlpatterns = [
     url(r'^$', views.main),
     url(r'^schedule', views.schedule),
     url(r'^safetyTayo', views.safetyTayo),
@@ -30,4 +30,4 @@ urlpatterns = patterns('',
     url(r'^getDriButton', views.getDriButton),
     url(r'^studentInfo', views.studentInfo),
     url(r'^robots.txt$', views.robots),
-)
+]
