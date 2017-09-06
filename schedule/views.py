@@ -80,6 +80,7 @@ def invenToJson(invens):
                     sInfo['name'] = studentInfo.sname
                     sInfo['aid'] = studentInfo.aid
                     sInfo['aname'] = academy.name
+                    sInfo['aphone'] = academy.phone_1
                     sInfo['grade'] = studentInfo.grade
                     sInfo['phone1'] = studentInfo.phone1
                     sInfo['phonelist'] = studentInfo.phonelist
