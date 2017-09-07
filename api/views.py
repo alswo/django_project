@@ -20,9 +20,11 @@ def get_difference(time1, time2):
 def format_hm(time):
     return (time[:2] + ':' + time[2:])
 
-def getResponse(debug, code, msg):
+def getResponse(debug, code, msg, waittime=-1):
 	if (debug == 1):
 		return HttpResponse(msg)
+	elif (waittime >= 0):
+		return JsonResponse({'code': code, 'msg': msg, 'waittime': waittime})
 	else:
 		return JsonResponse({'code': code, 'msg': msg})
 
@@ -33,6 +35,7 @@ def getRealtimeLocationDebug(request):
 		if (debug_id == None):
 			debug_id = '0'
 		msg = ""
+		waittime = -1
 	
 		if (debug_id == '401'):
 			msg = "해당 사용자가 존재하지 않습니다."
@@ -48,8 +51,9 @@ def getRealtimeLocationDebug(request):
 			msg = "0호차가 출발했습니다."
 		elif (debug_id == '200'):
 			msg = "0호차가 30분 후 도착합니다."
+			waittime = 30
 
-		return getResponse(0, int(debug_id), msg)
+		return getResponse(0, int(debug_id), msg, waittime)
 
 def getRealtimeLocation(request):
     if request.method == "GET":
@@ -140,7 +144,7 @@ def getRealtimeLocation(request):
 			return getResponse(debug, 201, msg)
 
 		    msg = str(carnum) + "호차가 "  + str(waittime) + "분 후 도착합니다."
-		    return getResponse(debug, 200, msg)
+		    return getResponse(debug, 200, msg, waittime)
                 ## 다음 inventory 로..
                 else:
                     continue
@@ -361,7 +365,7 @@ def experienceGetSchedulesForStudent(request):
 
 def experienceGetRealtimeLocation(request):
 	msg = "4호차가 7분 후 도착합니다."
-	return getResponse(0, 200, msg)
+	return getResponse(0, 200, msg, 7)
 
 def experienceGetRouteMap(request):
         t = timeToDate()
