@@ -35,31 +35,31 @@ INSTALLED_APPS = [
 ]
 
 #LOGGING = {
-    #'version': 1,
-    #'disable_existing_loggers': True,
-    #'formatters': {
-        #'standard': {
-            #'format': '%(asctime)s|%(levelname)s|%(message)s',
-            #'datefmt' : "%d/%b/%Y %H:%M:%S"
-        #}
-    #},
-    #'handlers': {
-        #'file': {
-            #'level':'DEBUG',
-            #'class':'logging.handlers.RotatingFileHandler',
-            #'filename':'/root/debug/debug.log',
-            #'maxBytes':10192*10192*1,
-            #'backupCount':7,
-            #'formatter':'standard'
-        #},
-    #},
-    #'loggers':{
-        #'django':{
-            #'handlers':['file'],
-            #'level': 'DEBUG',
-            #'propagate':True,
-        #}
-    #}
+#    'version': 1,
+#    'disable_existing_loggers': True,
+#    'formatters': {
+#        'standard': {
+#            'format': '%(asctime)s|%(levelname)s|%(message)s',
+#            'datefmt' : "%d/%b/%Y %H:%M:%S"
+#        }
+#    },
+#    'handlers': {
+#        'file': {
+#            'level':'DEBUG',
+#            'class':'logging.handlers.RotatingFileHandler',
+#            'filename':'/root/debug/debug.log',
+#            'maxBytes':10192*10192*1,
+#            'backupCount':10,
+#            'formatter':'standard'
+#        },
+#    },
+#    'loggers':{
+#        'django':{
+#            'handlers':['file'],
+#            'level': 'DEBUG',
+#            'propagate':True,
+#        }
+#    }
 #}
 
 MIDDLEWARE_CLASSES = [
