@@ -10,6 +10,7 @@ from util.PersonalInfoUtil import compareLists, saveNewPersonInfo2
 from django.utils import timezone
 import datetime
 import re
+from django.db.models import Min
 
 # Create your views here.
 
@@ -17,6 +18,7 @@ class BeautifyStudent :
 	def __init__(self):
 		self.info = ''
 		self.phonenumber = ''
+		self.other_phone = False
 		self.age = None
 		self.billing_date = None
 
@@ -56,13 +58,18 @@ def checkAuth(request):
 	else :
 		institute = request.user.first_name
 
+	if (request.META['HTTP_REFERER'] == None):
+		redirect_url = 'http://' + request.META['SERVER_NAME'] + '/institute/listStudents';
+	else:
+		redirect_url = request.META['HTTP_REFERER']
+
 	if institute:
 		try:
 			academy = Academy.objects.get(name = institute)
 		except AcademyDeosNotExist:
-			return render(request, 'message.html', {'msg': "학원 검색에 실패했습니다.", 'redirect_url': request.META['HTTP_REFERER']})
+			return render(request, 'message.html', {'msg': "학원 검색에 실패했습니다.", 'redirect_url': redirect_url})
 	else:
-		return render(request, 'message.html', {'msg': "학원 권한이 필요합니다.", 'redirect_url': request.META['HTTP_REFERER']})
+		return render(request, 'message.html', {'msg': "학원 권한이 필요합니다.", 'redirect_url': redirect_url})
 
 	return None
 
@@ -85,6 +92,8 @@ def listStudents(request):
 		beautifyStudent = BeautifyStudent()
 		beautifyStudent.info = student
 		beautifyStudent.phonenumber  = FormatPhoneNumber(student.parents_phonenumber)
+		beautifyStudent.other_phone = student.grandparents_phonenumber or student.care_phonenumber or student.self_phonenumber
+
 		if (student.birth_year):
 			beautifyStudent.age = timezone.now().year - int(student.birth_year) + 1
 		beautifyStudents.append(beautifyStudent)
@@ -251,15 +260,25 @@ def addClassForm(request):
 	return render(request, 'addClassForm.html')
 
 class TimeHistory:
+	BILLING_NORMAL = 0
+	BILLING_OVERPEOPLE = 2
+	BILLING_PASSENGER = 4
+	BILLING_OVERTIME = 8
+	BILLING_NONCHARGE = 16
 	def __init__(self):
 		self.carnum = -1
 		self.academies = set()
 		self.scheduletable = list()
-		self.warning = 0
+		self.warning = False
+		self.first_time = 0
+		self.last_time = 0
+                self.lflag = False
 
 class DailyHistory:
 	def __init__(self):
 		self.date = ""
+		self.weekday = ""
+		self.billing_code = 0
 		self.timehistory = list()
 
 ## HH:MM ==> HHMM
@@ -268,6 +287,27 @@ def convertDateFormat(str):
 	#ret.replace(':', '')
 	return int(ret)
 
+def maskingName(str):
+	return str[:1] + '**'
+
+def convertMins(timestr):
+	timestr = timestr.strip()
+	mins = int(timestr[:2]) * 60 + int(timestr[3:])
+	return mins
+
+def chooseBillingCode(first_time, last_time, isShare, student_num, passenger):
+	code = 0
+	if ((not isShare) and (last_time - first_time > 35)):
+		code = TimeHistory.BILLING_OVERTIME | code
+	if (student_num > 5):
+		code = TimeHistory.BILLING_OVERPEOPLE | code
+	if (passenger == True):
+		code = TimeHistory.BILLING_PASSENGER | code
+
+	if (code == 0):
+		code = TimeHistory.BILLING_NORMAL 
+
+	return code
 
 @csrf_exempt
 @login_required
@@ -289,70 +329,129 @@ def getHistory(request):
     if (rv != None):
         return rv
 
+    carid = 0
+
     if request.method == 'GET':
     	aid = request.GET.get('aid')
     	daterange = request.GET.get('daterange')
         startdate = request.GET.get('startdate')
         enddate = request.GET.get('enddate')
+        carid = request.GET.get('carid')
     elif request.method == 'POST':
     	aid = request.POST.get('aid')
     	daterange = request.POST.get('daterange')
         startdate = request.POST.get('startdate')
         enddate = request.POST.get('enddate')
+        carid = request.POST.get('carid')
+
+    if (carid == None or carid == 'all'):
+        carid = 0
+    else:
+        carid = int(carid)
 
     if daterange is not None and daterange != '':
     	(startdate, enddate) = daterange.split(' - ')
 
     history = []
-    allacademy = Academy.objects.all().order_by('name')
 
     total_count = 0
-    uniq_count = 0
     aname = ""
+    academy = None
+    day_dict = {'Mon':'월', 'Tue':'화', 'Wed':'수', 'Thu':'목', 'Fri':'금', 'Sat':'토', 'Sun':'일'}
+    cars = set()
 
 
     if aid is not None and aid != '' and startdate is not None and startdate != '' and enddate is not None and enddate != '':
         start_date = datetime.date(*map(int, startdate.split('-')))
         end_date = datetime.date(*map(int, enddate.split('-')))
         total_days = (end_date - start_date).days + 1
-	aname = Academy.objects.get(pk=aid).name
+        academy = Academy.objects.get(pk=aid)
+	#aname = Academy.objects.get(pk=aid).name
         for day_number in range(total_days):
             single_date = (start_date + datetime.timedelta(days = day_number)).strftime('%Y-%m-%d')
             schedules = []
 
-            #return HttpResponse(single_date)
-            iids = HistoryScheduleTable.objects.filter(alist__contains = [aid]).filter(date = single_date).order_by('time').values_list('iid_id', flat=True).distinct()
-            uniq_iids = reduce(lambda x,y: x+[y] if x==[] or x[-1] != y else x, iids, [])
+            #iids = HistoryScheduleTable.objects.filter(alist__contains = [aid]).filter(date = single_date).values_list('iid_id', flat=True).distinct()
+            uniq_iids = HistoryScheduleTable.objects.filter(alist__contains = [aid]).filter(date = single_date).values('iid_id').annotate(min_time = Min('time')).order_by('min_time').values_list('iid_id', flat=True)
 
             last_time = 0
             dailyHistory = DailyHistory()
             dailyHistory.date = single_date
+            dailyHistory.weekday = day_dict[(start_date + datetime.timedelta(days = day_number)).strftime('%a')]
             for i in uniq_iids:
-                academyset = set()
                 scheduletable = HistoryScheduleTable.objects.filter(date = single_date).order_by('time').filter(iid_id = i)
-                #return HttpResponse(str(len(scheduletable)))
                 if len(scheduletable) > 0:
 
                     timeHistory = TimeHistory()
                     timeHistory.scheduletable = scheduletable
                     timeHistory.carnum = scheduletable[0].carnum
+                    cars.add(timeHistory.carnum)
                     index = 0
+                    studentNum = 0
+                    sharingFlag = False
+                    isPassenger = False
+                    lflag_on_count = 0
+                    lflag_off_count = 0
                     for schedule in scheduletable:
+                        for student in schedule.members.all():
+                            if student.aid != Academy.objects.get(id = aid):
+                                sharingFlag = True
+                            else:
+                                studentNum += 1
+                                if ((student.birth_year == None) or ((timezone.now().year - int(student.birth_year) + 1) <= 13)):
+                                    isPassenger = True
+
+                        if (schedule.lflag == 1):
+                                lflag_on_count += 1
+                        elif (schedule.lflag == 0):
+                                lflag_off_count += 1
+
                         for academy in schedule.academies.all():
 		            timeHistory.academies.add(academy.name)
 
-                        if (index == 0 and last_time > convertDateFormat(schedule.time)):
-                            timeHistory.warning = 1
-                        last_time = convertDateFormat(schedule.time)
+                        if (index == 0):
+                            timeHistory.first_time = convertMins(schedule.time)
+                        timeHistory.last_time = convertMins(schedule.time)
                         index += 1
 
+                    if (lflag_on_count > lflag_off_count):
+                        timeHistory.lflag = True
+
+                    timeHistory.billing_code = chooseBillingCode(timeHistory.first_time, timeHistory.last_time, sharingFlag, studentNum, isPassenger)
                     dailyHistory.timehistory.append(timeHistory)
                     total_count += 1
-                    if (timeHistory.warning != 1):
-                        uniq_count += 1
             if len(dailyHistory.timehistory) > 0:
                 history.append(dailyHistory)
+
+            for h in dailyHistory.timehistory:
+                fire = False
+                warning_set = set()
+                for inner_h in dailyHistory.timehistory:
+                    if (fire == False and h != inner_h):
+                        continue
+                    elif (h == inner_h):
+                        fire = True
+                        continue
+                    elif (h.warning == True):
+                        continue
+                    else:
+                        if (h.lflag == inner_h.lflag and h.last_time > inner_h.first_time):
+                            warning_set.add(h)
+                            warning_set.add(inner_h)
+
+                if (len(warning_set) > academy.maxvehicle):
+                    sorted_warning = sorted(warning_set, key=lambda timehistory: timehistory.billing_code, reverse=True)
+                    for i_warning in range(academy.maxvehicle, len(sorted_warning)):
+                        sorted_warning[i_warning].warning = True
+
+        rem = 0
+        if (carid != 0):
+            for dailyHistory in history:
+                dailyHistory.timehistory[:] = [x for x in dailyHistory.timehistory if x.carnum == carid]
+                #if len(dailyHistory.timehistory) == 0:
+                    #history.remove(dailyHistory)
+                  
     #else :
         #return HttpResponse("error occured", "aid = ", aid, "startdate = ", startdate, "enddate = ", enddate)
 
-    return render(request, 'getHistory.html', {"history": history, "academy": allacademy, "aid" : aid, 'aname': aname, 'total_count': total_count, 'uniq_count': uniq_count, 'startdate': startdate, 'enddate': enddate, 'user':request.user})
+    return render(request, 'getHistory.html', {"history": history, "academy" : academy, 'total_count': total_count, 'startdate': startdate, 'enddate': enddate, 'user':request.user, 'cars':sorted(cars), 'carid':carid})

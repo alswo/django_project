@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load bitwise_tags %}
 {% block content %}
 
     <div class="container" id='report'>
@@ -13,11 +14,20 @@
 			</div>
 			<div class="panel-body">
         			<form action="getHistory" method="POST">
-            			<div class="col-md-5">
+            			<div class="col-md-3">
                 			<label>학원</label> 
                 			<select class="form-control" id="aid" name="aid">
-                        			{% for aca in academy %}
-                        			<option value="{{aca.id}}" {% if aca.id == aid|add:0 %} selected {% endif %}>{{aca.name}}</option>
+                        			{% for aca in academies %}
+                        			<option value="{{aca.id}}" {% if aca.id == academy.id %} selected {% endif %}>{{aca.name}}</option>
+                        			{% endfor %}
+                			</select>
+            			</div>
+            			<div class="col-md-2">
+                			<label>차량별</label> 
+                			<select class="form-control" id="carid" name="carid">
+                        			<option value="all">모든차량</option>
+                        			{% for carnum in cars %}
+                        			<option value="{{carnum}}" {% if carnum == carid %} selected {% endif %}>{{carnum}}호차</option>
                         			{% endfor %}
                 			</select>
             			</div>
@@ -49,18 +59,13 @@
 					<div class="col-md-5" align="center">
 				총운행횟수 : <span id="total_count"></span><br>
 						<div class="etc">
-				정상(<span id="normal_count"></span>) + 2배(<span id="double_count"></span>) + 동승자없음(<span id="nopassenger_count"></span>) + 동승자없음&2배(<span id="nopassenger_double_count"></span>)<br>
-				예상 과금횟수 : <span id="uniq_count">{{ uniq_count }}</span><br>
+				일반(<span id="normal_count"></span>) + 동승자 포함(<span id="passenger_count"></span>) + 5인 초과(<span id="overpeople_count"></span>) + 30분 초과(<span id="overtime_count"></span>)<br>
+				동승자 포함, 5인 초과(<span id="passenger_overpeople_count"></span>) + 동승자 포함, 30분 초과(<span id="passenger_overtime_count"></span>)<br>
+				비과금 횟수: <span id="noncharge_count"></span><br>
+				예상 과금횟수 : <span id="uniq_count"></span><br>
 						</div>
 					</div>
 					<div class="col-md-3" align="left">
-				X 운행요금
-				<select class="selectpicker price_item" id="per_amount">
-					<option>7,500원</option>
-					<option>9,000원</option>
-					<option selected>11,000원</option>
-					<option>12,500원</option>
-				</select> 
 				<br>
 				X ( - 특별할인 )
 				<select class="selectpicker price_item" id="discount_rate"> 
@@ -99,7 +104,7 @@
                 <div class="col-md-10">
                     <div class="panel panel-primary">
                         <div class="panel-heading">
-                        <button type="button" class="btn-md btn-primary dailyhistory.date"> {{ dailyhistory.date}} </button>
+                        <button type="button" class="btn-md btn-primary dailyhistory.date"> {{ dailyhistory.date}} ({{ dailyhistory.weekday }})</button>
                         </div>
                     <div class="panel-body">
                     {% for timehistory in dailyhistory.timehistory %}
@@ -110,20 +115,20 @@
 			{% endif %}
                             <div class="panel-heading">
 				<div class="row">
-					<div class="col-xs-8">
+					<div class="col-xs-6">
                                 		<button type="button" class="btn-xs btn-warning timehistoryinfo"> {{ timehistory.carnum }}호차 </button>
                                     		{% for academy in timehistory.academies %}
                                     		<button type="button" class="btn-xs btn-warning timehistoryinfo"> {{ academy }} </button>
 			            		{% endfor %}
 					</div>
-					<div class="col-xs-4" align="right">
-						<select class="selectpicker price_item priceoption timehistoryoption">
-							<option>선택</option>
-							<option>X 2 (가격 2배)</option>
-							<option>동승자 없음</option>
-							<option>X 2 (가격 2배) & 동승자 없음</option>
+					<div class="col-xs-6" align="right">
+						<select class="price_item priceoption timehistoryoption" multiple="multiple">
+							<option value="{% get_constants 'BILLING_PASSENGER' %}" {% if timehistory.billing_code|isPassenger %} selected="selected" {% endif %}>동승자 포함</option>
+							<option value="{% get_constants 'BILLING_OVERPEOPLE' %}" {% if timehistory.billing_code|isOverPeople %} selected="selected" {% endif %}>5인 초과 (+1,500원)</option>
+							<option value="{% get_constants 'BILLING_OVERTIME' %}" {% if timehistory.billing_code|isOverTime %} selected="selected" {% endif %}>30분 초과(X2)</option>
+							<option value="16" {% if timehistory.warning == 1 %} selected="selected" {% endif %}>비과금</option>
 						</select>
-						<button class="btn-xs btn-danger glyphicon glyphicon-remove table-remove"></button>
+						<!-- button class="btn-xs btn-danger glyphicon glyphicon-remove table-remove"></button //-->
 					</div>
 				</div>
                             </div>
@@ -145,7 +150,7 @@
                                                 <td> 
                                                 {% for student in s.members.all %}
                                                     <button type="button" class="load btn-xs btn-primary student.sname" id='student.sname'>
-                                                    {{ student.sname }} </button>
+                                                    {% if student.aid_id == academy.id %} {{ student.sname }} {% else %} {{student.sname|masking}} {% endif %} </button>
                                                     <ul class="dropdown-menu pull-right">
                                                     </ul>
                                                 {% endfor %}
@@ -235,6 +240,9 @@ var waitingDialog = waitingDialog || (function ($) {
 })(jQuery);
 
 function numberWithCommas(x) {
+	if (!x) {
+		return 0;
+	}
 	x = x.toString();
 	var pattern = /(-?\d+)(\d{3})/;
 	while (pattern.test(x)) {
@@ -262,36 +270,74 @@ function calculate() {
 	var double_count = 0;
 	var nopassenger_count = 0;
 	var nopassenger_double_count = 0;
+	var dictObject = {};
+	var total = 0;
+	var uniq_count = 0;
 
 	var priceoptions = $('.priceoption');
 	for (i=0; i<priceoptions.length; i++) {
-		priceoption_value = $.trim(priceoptions[i].options[priceoptions[i].selectedIndex].value);
-		if (priceoption_value === "X 2 (가격 2배)") {
-			double_count++;
+		per_amount_value = 7500;
+		values = $(priceoptions[i]).val();
+		var sum = 0;
+
+		for (j=0; j<values.length; j++) {
+			if (parseInt(values[j]) == 16) {
+				sum = parseInt(values[j]);
+			}
+			else {
+				sum += parseInt(values[j]);
+			}
 		}
-		else if (priceoption_value === "동승자 없음") {
-			nopassenger_count++;
+		if (dictObject[sum]) {
+			dictObject[sum] += 1;
 		}
-		else if (priceoption_value == "X 2 (가격 2배) & 동승자 없음") {
-			nopassenger_double_count++;
-		} 
 		else {
-			normal_count++;
+			dictObject[sum] = 1;
 		}
+		
+		priceoption_value = "";
 	}
 
+	for (var key in dictObject) {
+		total += dictObject[key];
+	}
+
+
 	var per_amount = $('#per_amount')[0];
-	var per_amount_value = numberWithoutCommas(per_amount.options[per_amount.selectedIndex].value);
+	//var per_amount_value = numberWithoutCommas(per_amount.options[per_amount.selectedIndex].value);
 	var discount_rate = $('#discount_rate')[0];
 	var discount_rate_value = numberWithoutCommas(discount_rate.options[discount_rate.selectedIndex].value);
+	var per_amount_value = {% if academy.bid == 11 or academy.bid == 12 %} 9000 {% else %} 7500 {% endif %};
+	var passenger_amount_value = {% if academy.bid == 11 or academy.bid == 12 %} 5000 {% else %} 3500 {% endif %};
+
+
+
+	normal_count = dictObject[{% get_constants 'BILLING_NORMAL' %}] || 0;
+	overpeople_count = dictObject[{% get_constants 'BILLING_OVERPEOPLE' %}] || 0;
+	passenger_count = dictObject[{% get_constants 'BILLING_PASSENGER' %}] || 0;
+	overtime_count = dictObject[{% get_constants 'BILLING_OVERTIME' %}] || 0;
+	passenger_overtime_count = dictObject[{% get_constants 'BILLING_PASSENGER' %} + {% get_constants 'BILLING_OVERTIME' %}] || 0;
+	passenger_overpeople_count = dictObject[{% get_constants 'BILLING_PASSENGER' %} + {% get_constants 'BILLING_OVERPEOPLE' %}] || 0;
+	noncharge_count = dictObject[{% get_constants 'BILLING_NONCHARGE' %}] || 0;
+	uniq_count = total - noncharge_count;
+
+	calculate_amount = normal_count * per_amount_value + passenger_count * (per_amount_value + passenger_amount_value) + overpeople_count * (per_amount_value + 1500) + overtime_count * (per_amount_value * 2) + passenger_overtime_count * (per_amount_value + passenger_amount_value) * 2 + passenger_overpeople_count * (per_amount_value + passenger_amount_value + 1500);
 
 	$('#normal_count')[0].innerText = numberWithCommas(normal_count);
-	$('#double_count')[0].innerText = numberWithCommas(double_count);
-	$('#nopassenger_count')[0].innerText = numberWithCommas(nopassenger_count);
-	$('#nopassenger_double_count')[0].innerText = numberWithCommas(nopassenger_double_count);
-	$('#total_count')[0].innerText = numberWithCommas(normal_count + double_count + nopassenger_count + nopassenger_double_count);
-	$('#calculate_amount')[0].innerText = numberWithCommas(normal_count * per_amount_value + double_count * 2 * per_amount_value + nopassenger_count * (per_amount_value - 3000) + nopassenger_double_count * (per_amount_value - 3000) * 2);
-	$('#pay_amount')[0].innerText = numberWithCommas((normal_count * per_amount_value + double_count * 2 * per_amount_value + nopassenger_count * (per_amount_value - 3000) + nopassenger_double_count * (per_amount_value - 3000) * 2 )* (100 - discount_rate_value)/ 100);
+	$('#passenger_count')[0].innerText = numberWithCommas(passenger_count);
+	$('#overpeople_count')[0].innerText = numberWithCommas(overpeople_count);
+	$('#overtime_count')[0].innerText = numberWithCommas(overtime_count);
+	$('#passenger_overtime_count')[0].innerText = numberWithCommas(passenger_overtime_count);
+	$('#passenger_overpeople_count')[0].innerText = numberWithCommas(passenger_overpeople_count);
+	//$('#overtime_overpeople_count')[0].innerText = numberWithCommas(dictObject[12]);
+	$('#noncharge_count')[0].innerText = numberWithCommas(noncharge_count);
+	$('#uniq_count')[0].innerText = numberWithCommas(uniq_count);
+
+	$('#total_count')[0].innerText = numberWithCommas(total);
+	$('#calculate_amount')[0].innerText = numberWithCommas(calculate_amount);
+	console.log("calculate_amount = " +  $('#calculate_amount')[0].innerText);
+	$('#pay_amount')[0].innerText = numberWithCommas(calculate_amount * (100 - discount_rate_value)/ 100);
+
 	return null;
 }
 
@@ -369,6 +415,11 @@ $("#add-memo").click(function(event) {
 		`;
 });
 
+$(document).ready(function() {
+	$('.timehistoryoption').multiselect({
+		nonSelectedText: '일반'
+	});
+});
 
 $("#pdfdown").click(function() {
 	waitingDialog.show(); 
@@ -379,7 +430,7 @@ $("#pdfdown").click(function() {
 	var pay_amount = $("#pay_amount")[0].innerText;
 	var calculate_amount = $("#calculate_amount")[0].innerText;
 	var per_amount = $('#per_amount')[0];
-	var per_amount_value = per_amount.options[per_amount.selectedIndex].value;
+	var per_amount_value = "0"
 	var discount_rate = $('#discount_rate')[0];
 	var discount_rate_value = discount_rate.options[discount_rate.selectedIndex].value;
 	var normal_count = $('#normal_count')[0].innerText;
@@ -392,7 +443,7 @@ $("#pdfdown").click(function() {
 	dd['style'] = { header: { fontSize: 22, bold: true} };
 	dd['content'] = [];
 
-	dd['content'].push({text: "<{{aname}} {{startdate}} ~ {{enddate}} 이용내역>", fontSize: 15, bold: true, alignment: 'center'});
+	dd['content'].push({text: "<{{academy.aname}} {{startdate}} ~ {{enddate}} 이용내역>", fontSize: 15, bold: true, alignment: 'center'});
 	dd['content'].push({text: "\n\n총 " + total_count + "회 운행", fontSize: 12, bold: true});
 
         if ($('#memo') && $('#memo')[0]) {
@@ -432,7 +483,7 @@ $("#pdfdown").click(function() {
 	}
 	dd['content'].push({text: '\n\n이용료: ' + str + ' = ' + calculate_amount + '원\n', fontSize: 12});
 	if (discount_rate_value != '0%') {
-		dd['content'].push({text: '{{aname}} 특별할인 ' + discount_rate_value + '\n', fontSize: 12});
+		dd['content'].push({text: '{{academy.aname}} 특별할인 ' + discount_rate_value + '\n', fontSize: 12});
 	}
 	dd['content'].push({text: '\n결제금액: ' + pay_amount + '원 \n\n', fontSize: 13, bold: true});
 
@@ -492,7 +543,7 @@ $("#pdfdown").click(function() {
 		dd['content'].push({text: '   \n'});
 	}
 
-	var filename = "{{ startdate }}_{{ enddate }}_{{ aname }}.pdf";
+	var filename = "{{ startdate }}_{{ enddate }}_{{ academy.aname }}.pdf";
 	pdfMake.createPdf(dd).download(filename);
 
 });
