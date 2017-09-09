@@ -148,12 +148,12 @@
                                                 <td class="s.addr"> 
                                                 {% if s.lflag == 2 %} 출발 {% elif s.lflag == 3 %} 도착 {% else %} {{ s.addr }} {% endif %} </td>
                                                 <td> 
-                                                {% for student in s.members.all %}
-                                                    <button type="button" class="load btn-xs btn-primary student.sname" id='student.sname'>
+                                                  {% for student in s.members.all %}
+                                                    <button type="button" class="load btn-xs {% if student.id|contained:s.offmembers.all %} btn-default {% else %} btn-primary {% endif %} student.sname" id='student.sname'>
                                                     {% if student.aid_id == academy.id %} {{ student.sname }} {% else %} {{student.sname|masking}} {% endif %} </button>
                                                     <ul class="dropdown-menu pull-right">
                                                     </ul>
-                                                {% endfor %}
+                                                  {% endfor %}
                                                 <br>
                                                 </td>
                                             </tr>

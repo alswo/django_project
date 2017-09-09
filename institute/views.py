@@ -92,7 +92,7 @@ def listStudents(request):
 		beautifyStudent = BeautifyStudent()
 		beautifyStudent.info = student
 		beautifyStudent.phonenumber  = FormatPhoneNumber(student.parents_phonenumber)
-		beautifyStudent.other_phone = student.grandparents_phonenumber or student.care_phonenumber or student.self_phonenumber
+		beautifyStudent.other_phone = student.grandparents_phonenumber or student.parents_phonenumber or student.self_phonenumber
 
 		if (student.birth_year):
 			beautifyStudent.age = timezone.now().year - int(student.birth_year) + 1
@@ -365,7 +365,7 @@ def getHistory(request):
         start_date = datetime.date(*map(int, startdate.split('-')))
         end_date = datetime.date(*map(int, enddate.split('-')))
         total_days = (end_date - start_date).days + 1
-        academy = Academy.objects.get(pk=aid)
+        academy = Academy.objects.get(id=aid)
 	#aname = Academy.objects.get(pk=aid).name
         for day_number in range(total_days):
             single_date = (start_date + datetime.timedelta(days = day_number)).strftime('%Y-%m-%d')
@@ -394,7 +394,7 @@ def getHistory(request):
                     lflag_off_count = 0
                     for schedule in scheduletable:
                         for student in schedule.members.all():
-                            if student.aid != Academy.objects.get(id = aid):
+                            if student.aid != academy:
                                 sharingFlag = True
                             else:
                                 studentNum += 1
@@ -406,8 +406,8 @@ def getHistory(request):
                         elif (schedule.lflag == 0):
                                 lflag_off_count += 1
 
-                        for academy in schedule.academies.all():
-		            timeHistory.academies.add(academy.name)
+                        for aca in schedule.academies.all():
+		            timeHistory.academies.add(aca.name)
 
                         if (index == 0):
                             timeHistory.first_time = convertMins(schedule.time)

@@ -31,3 +31,10 @@ def isOverPeople(value):
 def isOverTime(value):
     return bool(value & TimeHistory.BILLING_OVERTIME)
 
+@register.filter
+def contained(item, itemlist):
+    for i in itemlist:
+        if item == i.id:
+            return True
+
+    return False
