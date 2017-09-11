@@ -174,6 +174,7 @@ def addStudent(request):
 			return render(request, 'message.html', {'msg': "동일한 학생이 존재합니다.", 'redirect_url': request.META['HTTP_REFERER']})
 
 
+	rv = True
 	# for PersonalINfo
 	# same person in another academy
 	try:
@@ -186,11 +187,14 @@ def addStudent(request):
 				found = True
 				break
 		if (found == False):
-			saveNewPersonInfo2(studentinfo)
+			rv = saveNewPersonInfo2(studentinfo)
 
 	except StudentInfo.DoesNotExist:
 		# add PersnoalInfo if there is no record
-		saveNewPersonInfo2(studentinfo)
+		rv = saveNewPersonInfo2(studentinfo)
+
+	if (rv == False):
+		return render(request, 'message.html', {'msg': '학원생 추가 실해했습니다. error : Too many retry for make random pin_number', 'redirect_url': request.META['HTTP_REFERER']})
 
 	studentinfo.save()
 

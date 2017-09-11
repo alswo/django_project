@@ -83,7 +83,7 @@ def findSibling(student1, student2):
 
 def saveNewPersonInfo(student):
 	# for sibling
-	pin_number = get_random_string(length=7)
+	pin_number = None
 	others = StudentInfo.objects.filter(bid = student.bid)
 	for other in others:
 		if compareLists(student.sname, student.phone1, student.phonelist, other.sname, other.phone1, other.phonelist):
@@ -99,14 +99,27 @@ def saveNewPersonInfo(student):
 				pin_number = sibling.personinfo.pin_number
 				break
 
+	if (pin_number == None):
+		for i in range (0, 5):
+			try:
+				pin_number = get_random_string(length=7)
+				PersonalInfo.objects.get(pin_number = pin_number)
+				pin_number = None
+			except PersonalInfo.DoesNotExist:
+				break
+		if (pin_number == None):
+			return False
+
 	person = PersonalInfo(pin_number = pin_number)
 	person.save()
 	student.personinfo = person
 	student.save(update_fields=['personinfo'])
+
+	return True
 	
 def saveNewPersonInfo2(student):
 	# for sibling
-	pin_number = get_random_string(length=7)
+	pin_number = None
 	others = StudentInfo.objects.filter(bid = student.bid)
 	for other in others:
 		if findSamePerson(student, other):
@@ -121,8 +134,21 @@ def saveNewPersonInfo2(student):
 				pin_number = sibling.personinfo.pin_number
 				break
 
+	if (pin_number == None):
+		for i in range (0, 5):
+			try:
+				pin_number = get_random_string(length=7)
+				PersonalInfo.objects.get(pin_number = pin_number)
+				pin_number = None
+			except PersonalInfo.DoesNotExist:
+				break
+		if (pin_number == None):
+			return False
+
 	person = PersonalInfo(pin_number = pin_number)
 	person.save()
 	student.personinfo = person
 	student.save()
+
+	return True
 	
