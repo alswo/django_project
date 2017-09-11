@@ -211,7 +211,7 @@ def resetTodayLoad():
 
     for s in sTable:
         lenTflag = len(s.tflag)
-        s.tflag = [0]*tflag
+        s.tflag = [0]*lenTflag
         s.save()
 
 
