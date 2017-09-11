@@ -25,14 +25,12 @@ INSTALLED_APPS = [
     'django_extensions',
     'rest_framework',
     'simple_history',
-    'firebase',
     'api',
     'institute',
     'indicator',
     'corsheaders',
     'fcm',
     'util',
-    'traccar',
 ]
 
 #LOGGING = {
