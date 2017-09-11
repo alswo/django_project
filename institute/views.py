@@ -304,9 +304,11 @@ def chooseBillingCode(first_time, last_time, isShare, student_num, passenger):
 
 	if (student_num <= 0):
 		code = TimeHistory.BILLING_NONCHARGE | code
+
+	## overtime 과 overpeople 은 동시에 setting 되지 않음
 	if ((not isShare) and (last_time - first_time > 35)):
 		code = TimeHistory.BILLING_OVERTIME | code
-	if (student_num > 5):
+	elif (student_num > 5):
 		code = TimeHistory.BILLING_OVERPEOPLE | code
 	if (passenger == True):
 		code = TimeHistory.BILLING_PASSENGER | code

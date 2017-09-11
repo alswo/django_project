@@ -80,6 +80,8 @@
 				<br>
 			
 					</div>
+					<span id="per_amount_value" style="display: none"></span>
+					<span id="passenger_amount_value" style="display: none"></span>
 					<span id="calculate_amount" style="display: none"></span>
 					<div class="col-md-2" align="right">
 				= 이용요금 <br>: <span id="pay_amount"></span> 원<br>
@@ -276,12 +278,11 @@ function calculate() {
 
 	var priceoptions = $('.priceoption');
 	for (i=0; i<priceoptions.length; i++) {
-		per_amount_value = 7500;
 		values = $(priceoptions[i]).val();
 		var sum = 0;
 
 		for (j=0; j<values.length; j++) {
-			if (parseInt(values[j]) == 16) {
+			if (parseInt(values[j]) == {% get_constants 'BILLING_NONCHARGE' %}) {
 				sum = parseInt(values[j]);
 			}
 			else {
@@ -303,8 +304,6 @@ function calculate() {
 	}
 
 
-	var per_amount = $('#per_amount')[0];
-	//var per_amount_value = numberWithoutCommas(per_amount.options[per_amount.selectedIndex].value);
 	var discount_rate = $('#discount_rate')[0];
 	var discount_rate_value = numberWithoutCommas(discount_rate.options[discount_rate.selectedIndex].value);
 	var per_amount_value = {% if academy.bid == 11 or academy.bid == 12 %} 9000 {% else %} 7500 {% endif %};
@@ -329,9 +328,11 @@ function calculate() {
 	$('#overtime_count')[0].innerText = numberWithCommas(overtime_count);
 	$('#passenger_overtime_count')[0].innerText = numberWithCommas(passenger_overtime_count);
 	$('#passenger_overpeople_count')[0].innerText = numberWithCommas(passenger_overpeople_count);
-	//$('#overtime_overpeople_count')[0].innerText = numberWithCommas(dictObject[12]);
 	$('#noncharge_count')[0].innerText = numberWithCommas(noncharge_count);
 	$('#uniq_count')[0].innerText = numberWithCommas(uniq_count);
+
+	$('#per_amount_value')[0].innerText = numberWithCommas(per_amount_value);
+	$('#passenger_amount_value')[0].innerText = numberWithCommas(passenger_amount_value);
 
 	$('#total_count')[0].innerText = numberWithCommas(total);
 	$('#calculate_amount')[0].innerText = numberWithCommas(calculate_amount);
@@ -427,17 +428,25 @@ $("#pdfdown").click(function() {
 		waitingDialog.hide();
 	}, 4000);
 
+
+
 	var pay_amount = $("#pay_amount")[0].innerText;
 	var calculate_amount = $("#calculate_amount")[0].innerText;
-	var per_amount = $('#per_amount')[0];
-	var per_amount_value = "0"
+	var per_amount_value = $('#per_amount_value')[0].innerText;
+	var passenger_amount_value = $('#passenger_amount_value')[0].innerText;
 	var discount_rate = $('#discount_rate')[0];
 	var discount_rate_value = discount_rate.options[discount_rate.selectedIndex].value;
+
 	var normal_count = $('#normal_count')[0].innerText;
-	var double_count = $('#double_count')[0].innerText;
-	var nopassenger_count = $('#nopassenger_count')[0].innerText;
-	var nopassenger_double_count = $('#nopassenger_double_count')[0].innerText;
-	var total_count = parseInt(normal_count) + parseInt(double_count) + parseInt(nopassenger_count) + parseInt(nopassenger_double_count);
+	var passenger_count = $('#passenger_count')[0].innerText;
+	var overpeople_count = $('#overpeople_count')[0].innerText;
+	var overtime_count = $('#overtime_count')[0].innerText;
+	var passenger_overtime_count = $('#passenger_overtime_count')[0].innerText;
+	var passenger_overpeople_count = $('#passenger_overpeople_count')[0].innerText;
+	var noncharge_count = $('#noncharge_count')[0].innerText;
+	var uniq_count = $('#uniq_count')[0].innerText;
+	var total_count = $('#total_count')[0].innerText;
+
 	var str = "";
 	var dd = {};
 	dd['style'] = { header: { fontSize: 22, bold: true} };
@@ -451,35 +460,46 @@ $("#pdfdown").click(function() {
 		dd['content'].push({text: memo + '\n\n', fontSize: 11});
 	}
 	if (normal_count > 0) {
-		dd['content'].push({text: "-- 정상: " + normal_count + "회 운행", fontSize: 11});
+		dd['content'].push({text: "-- 일반: " + normal_count + "회 운행", fontSize: 11});
 		if (str != "") {
 			str += " + ";
 		}
 		str += '(' + per_amount_value + ' x ' + normal_count + ') ';
 	}
-	if (double_count > 0) {
-		dd['content'].push({text: "-- X2: " + double_count + "회 운행", fontSize: 11});
+	if (passenger_count > 0) {
+		dd['content'].push({text: "-- 동승자 포함: " + passenger_count + "회 운행", fontSize: 11});
 		if (str != "") {
 			str += " + ";
 		}
-		per_amount_value = numberWithCommas(numberWithoutCommas(per_amount_value) * 2);
-		str += '(' + per_amount_value + ' x ' + double_count + ') ';
+		str += '(' + numberWithCommas(parseInt(numberWithoutCommas(per_amount_value)) + parseInt(numberWithoutCommas(passenger_amount_value))) + ' x ' + passenger_count + ') ';
 	}
-	if (nopassenger_count > 0) {
-		dd['content'].push({text: "-- 동승자없이: : " + nopassenger_count + "회 운행", fontSize: 11});
+	if (overpeople_count > 0) {
+		dd['content'].push({text: "-- 5인 초과: " + overpeople_count + "회 운행", fontSize: 11});
 		if (str != "") {
 			str += " + ";
 		}
-		per_amount_value = numberWithCommas(numberWithoutCommas(per_amount_value) - 3000);
-		str += '(' + per_amount_value + ' x ' + nopassenger_count + ') ';
+		str += '(' + numberWithCommas(parseInt(numberWithoutCommas(per_amount_value)) + 1500) + ' x ' + overpeople_count + ') ';
 	}
-	if (nopassenger_double_count > 0) {
-		dd['content'].push({text: "-- 동승자없이 (X2): : " + nopassenger_double_count + "회 운행", fontSize: 11});
+	if (overtime_count > 0) {
+		dd['content'].push({text: "-- 30분 초과: : " + overtime_count + "회 운행", fontSize: 11});
 		if (str != "") {
 			str += " + ";
 		}
-		per_amount_value = numberWithCommas((numberWithoutCommas(per_amount_value) - 3000) * 2);
-		str += '(' + per_amount_value + ' x ' + nopassenger_count + ') ';
+		str += '(' +  numberWithCommas(parseInt(numberWithoutCommas(per_amount_value)) * 2) + ' x ' + overtime_count + ') ';
+	}
+	if (passenger_overpeople_count > 0) {
+		dd['content'].push({text: "-- 동승자 포함, 5인 초과: : " + passenger_overpeople_count + "회 운행", fontSize: 11});
+		if (str != "") {
+			str += " + ";
+		}
+		str += '(' +  numberWithCommas(parseInt(numberWithoutCommas(per_amount_value)) + parseInt(numberWithoutCommas(passenger_amount_value)) + 1500) + ' x ' + passenger_overpeople_count + ') ';
+	}
+	if (passenger_overtime_count > 0) {
+		dd['content'].push({text: "-- 동승자 포함, 30분 초과: : " + passenger_overtime_count + "회 운행", fontSize: 11});
+		if (str != "") {
+			str += " + ";
+		}
+		str += '(' +  numberWithCommas((parseInt(numberWithoutCommas(per_amount_value)) + parseInt(numberWithoutCommas(passenger_amount_value))) * 2) + ' x ' + passenger_overtime_count + ') ';
 	}
 	dd['content'].push({text: '\n\n이용료: ' + str + ' = ' + calculate_amount + '원\n', fontSize: 12});
 	if (discount_rate_value != '0%') {
@@ -507,10 +527,16 @@ $("#pdfdown").click(function() {
 				timehistoryinfostr += timehistoryinfo[k].innerHTML + " ";
 			}
 
-
-			var timehistoryoption = timehistory[j].getElementsByClassName("timehistoryoption");
-			if (timehistoryoption[0].selectedIndex != 0) {
-				timehistoryinfostr += "   [" + timehistoryoption[0].options[timehistoryoption[0].selectedIndex].text + "]";
+			timehistoryoption = $(timehistory[j]).find('.timehistoryoption option:selected');
+			if (timehistoryoption.length > 0) {
+				timehistoryinfostr += "   [";
+				timehistoryoption.each(function(i, value) {
+					timehistoryinfostr += $(value).text();
+					if (i < timehistoryoption.length - 1) {
+						timehistoryinfostr += ", ";
+					}
+				});
+				timehistoryinfostr += "]";
 			}
 			dd['content'].push({text: timehistoryinfostr});
 
@@ -528,13 +554,20 @@ $("#pdfdown").click(function() {
 				}
 				rows[1] = {'text': $.trim(scheduletable[k].getElementsByClassName("s.addr")[0].innerHTML), 'fillColor': fillColor};
 				var students = scheduletable[k].getElementsByClassName("student.sname");
+				var studentNames = [];
 				for (var l=0; l<students.length; l++) {
-					studentnames += $.trim(students[l].innerHTML);
+					var name = $.trim(students[l].innerHTML);
 					if (l < students.length -1) {
-						studentnames += ", ";
+						name += ", ";
+					}
+					studentNames[l] = {'text': name};
+					if ($(students[l]).hasClass('btn-default')) {
+						studentNames[l]['decoration'] = 'lineThrough';
+						studentNames[l]['decorationStyle'] = 'double';
 					}
 				}
-				rows[2] = studentnames;
+				rows[2] = {};
+				rows[2]['text'] = studentNames;
 				timetable['body'].push(rows);
 			}
 			dd['content'].push({table: timetable});
