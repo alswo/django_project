@@ -4,3 +4,5 @@ migrations/
 local_settings.py
 logs/
 logs/*
+traccar/
+traccar/*
