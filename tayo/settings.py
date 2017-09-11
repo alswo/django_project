@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'fcm',
     'util',
+    'traccar',
 ]
 
 #LOGGING = {
