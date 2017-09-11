@@ -126,7 +126,7 @@
 							<option value="{% get_constants 'BILLING_PASSENGER' %}" {% if timehistory.billing_code|isPassenger %} selected="selected" {% endif %}>동승자 포함</option>
 							<option value="{% get_constants 'BILLING_OVERPEOPLE' %}" {% if timehistory.billing_code|isOverPeople %} selected="selected" {% endif %}>5인 초과 (+1,500원)</option>
 							<option value="{% get_constants 'BILLING_OVERTIME' %}" {% if timehistory.billing_code|isOverTime %} selected="selected" {% endif %}>30분 초과(X2)</option>
-							<option value="16" {% if timehistory.warning == 1 %} selected="selected" {% endif %}>비과금</option>
+							<option value="{% get_constants 'BILLING_NONCHARGE' %}" {% if timehistory.warning == True %} selected="selected" {% endif %}>비과금</option>
 						</select>
 						<!-- button class="btn-xs btn-danger glyphicon glyphicon-remove table-remove"></button //-->
 					</div>
