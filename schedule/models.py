@@ -98,7 +98,9 @@ class HistoryScheduleTable(models.Model):
     req = models.CharField(max_length = 20,null=True,blank=True)
     alist = ArrayField(models.IntegerField(null=True,blank=True),null=True,blank=True)
     academies = models.ManyToManyField('passenger.Academy')
-    members = models.ManyToManyField('passenger.StudentInfo')
+    #members = models.ManyToManyField('passenger.StudentInfo')
+    members = models.ManyToManyField('passenger.StudentInfo', related_name='scheduled_members')
+    offmembers = models.ManyToManyField('passenger.StudentInfo', related_name='off_members')
     tflag = ArrayField(models.IntegerField(null=True,blank=True),null=True,blank=True)
     lflag = models.IntegerField()
 
