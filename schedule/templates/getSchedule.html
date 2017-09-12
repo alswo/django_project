@@ -62,7 +62,7 @@ function callNumber(num){
 
         <div class="col-md-10 col-xs-12">
             {% for c in contacts %}
-            <div class="panel panel-default">
+            <div class="panel {% if c.passenger == 0 %}panel-success{% else %}panel-default{% endif %}">
               <!-- Default panel contents -->
               <div class="panel-heading">
                 <button type="button" class="btn btn-small btn-warning" role="button" data-toggle="collapse" href="#collapsePhone{{c.id}}" onclick="getCarPhone(this, {{c.carnum}},{{c.id}})" aria-expanded="false" aria-controls="collapseExample">{{c.carnum}}호차</button>
