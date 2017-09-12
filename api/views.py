@@ -662,6 +662,8 @@ def getStudentInfo2(request):
         try:
             #sInfo = StudentInfo.objects.get(pin_number = pin_number)
             pInfos = PersonalInfo.objects.filter(pin_number = pin_number)
+            if len(pInfos) <= 0:
+                raise PersonalInfo.DoesNotExist
             studentInfos = list()
             for pInfo in pInfos:
 	        sInfos = StudentInfo.objects.filter(personinfo = pInfo)

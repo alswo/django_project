@@ -9,6 +9,13 @@ import simplejson
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
+def get_offmember_list(tflag, slist):
+	ret = []
+	for idx, t in enumerate(tflag):
+		if t == 1:
+			ret.append(slist[idx])
+
+	return ret
 
 def store_historyschedule():
 	t = timeToDate()
@@ -17,17 +24,27 @@ def store_historyschedule():
 	d = t.timeToD()
 
 	inventories = Inventory.objects.filter(day=d).select_related()
+	#print "# of inventory = " + str(len(inventories))
 	for inventory in inventories:
 		scheduletables = ScheduleTable.objects.filter(iid_id = inventory.id)
+		#print "# of scheduletables = " + str(len(scheduletables))
 		for scheduletable in scheduletables:
 			hst = HistoryScheduleTable(date=ymd, iid_id=scheduletable.iid_id, carnum=inventory.carnum, time=scheduletable.time, addr=scheduletable.addr, alist=scheduletable.alist, tflag=scheduletable.tflag, lflag=scheduletable.lflag, req=scheduletable.req)
 			hst.save()
-                	for sid in scheduletable.slist:
-                    	    student = StudentInfo.objects.get(id=sid)
-                    	    hst.members.add(student)
-                	for aid in scheduletable.alist:
-                    	    academy = Academy.objects.get(id=aid)
-                    	    hst.academies.add(academy)
+			try :
+				for sid in scheduletable.slist:
+					student = StudentInfo.objects.get(id=sid)
+					hst.members.add(student)
+				for aid in scheduletable.alist:
+					academy = Academy.objects.get(id=aid)
+					hst.academies.add(academy)
+
+				offmembers = get_offmember_list(scheduletable.tflag, scheduletable.slist)
+				for offmember in offmembers:
+					student = StudentInfo.objects.get(id=offmember)
+					hst.offmembers.add(student)
+			except Exception as e:
+				print(e)
 
 
 def store_historyschedule_old():

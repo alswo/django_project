@@ -15,8 +15,8 @@ def getHangul(str):
 		sys.stderr.write("str = [" + str + "]:none\n")
 		sys.exit()
 		
-	if (str != m.group()):
-		sys.stderr.write("str = [" + str + "] ==> [" + m.group() + "]\n")
+	#if (str != m.group()):
+		#sys.stderr.write("str = [" + str + "] ==> [" + m.group() + "]\n")
 
 	return m.group()
 
@@ -103,7 +103,9 @@ def saveNewPersonInfo(student):
 		for i in range (0, 5):
 			try:
 				pin_number = get_random_string(length=7)
-				PersonalInfo.objects.get(pin_number = pin_number)
+				personinfos = PersonalInfo.objects.filter(pin_number = pin_number)
+				if (len(personinfos) == 0):
+					raise PersonalInfo.DoesNotExist
 				pin_number = None
 			except PersonalInfo.DoesNotExist:
 				break
@@ -138,7 +140,9 @@ def saveNewPersonInfo2(student):
 		for i in range (0, 5):
 			try:
 				pin_number = get_random_string(length=7)
-				PersonalInfo.objects.get(pin_number = pin_number)
+				personinfo = PersonalInfo.objects.filter(pin_number = pin_number)
+				if (len(personinfo) == 0):
+					raise PersonalInfo.DoesNotExist
 				pin_number = None
 			except PersonalInfo.DoesNotExist:
 				break

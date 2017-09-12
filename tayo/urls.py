@@ -12,7 +12,6 @@ urlpatterns = [
     url(r'^institute/',include('institute.urls')),
     url(r'^indicator/',include('indicator.urls')),
     url(r'^message/',include('message.urls')),
-    url(r'^getToken',include('firebase.urls')),
     url(r'^monitor/',include('monitor.urls')),
     url(r'^fcm/', include('fcm.urls')),
     url(

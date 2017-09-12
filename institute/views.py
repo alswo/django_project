@@ -11,6 +11,7 @@ from django.utils import timezone
 import datetime
 import re
 from django.db.models import Min
+import math
 
 # Create your views here.
 
@@ -264,11 +265,11 @@ def addClassForm(request):
 	return render(request, 'addClassForm.html')
 
 class TimeHistory:
-	BILLING_NORMAL = 0
-	BILLING_OVERPEOPLE = 2
-	BILLING_PASSENGER = 4
-	BILLING_OVERTIME = 8
-	BILLING_NONCHARGE = 16
+	BILLING_NORMAL = 0b0000
+	BILLING_OVERPEOPLE = 0b0001
+	BILLING_PASSENGER = 0b0010
+	BILLING_OVERTIME = 0b0100
+	BILLING_NONCHARGE = 0b1000
 	def __init__(self):
 		self.carnum = -1
 		self.academies = set()
@@ -277,6 +278,7 @@ class TimeHistory:
 		self.first_time = 0
 		self.last_time = 0
                 self.lflag = False
+		self.studentnum = 0
 
 class DailyHistory:
 	def __init__(self):
@@ -301,9 +303,14 @@ def convertMins(timestr):
 
 def chooseBillingCode(first_time, last_time, isShare, student_num, passenger):
 	code = 0
+
+	if (student_num <= 0):
+		code = TimeHistory.BILLING_NONCHARGE | code
+
+	## overtime 과 overpeople 은 동시에 setting 되지 않음
 	if ((not isShare) and (last_time - first_time > 35)):
 		code = TimeHistory.BILLING_OVERTIME | code
-	if (student_num > 5):
+	elif (student_num > 5):
 		code = TimeHistory.BILLING_OVERPEOPLE | code
 	if (passenger == True):
 		code = TimeHistory.BILLING_PASSENGER | code
@@ -397,11 +404,17 @@ def getHistory(request):
                     lflag_on_count = 0
                     lflag_off_count = 0
                     for schedule in scheduletable:
+                        #timeHistory.studentnum += schedule.members.count()
                         for student in schedule.members.all():
                             if student.aid != academy:
                                 sharingFlag = True
                             else:
                                 studentNum += 1
+                                timeHistory.studentnum += 1
+				for offmember in schedule.offmembers.all():
+					if (offmember == student):
+                                                #return HttpResponse("offmember = " + str(offmember.id))
+						studentNum -= 1
                                 if ((student.birth_year == None) or ((timezone.now().year - int(student.birth_year) + 1) <= 13)):
                                     isPassenger = True
 
@@ -422,40 +435,71 @@ def getHistory(request):
                         timeHistory.lflag = True
 
                     timeHistory.billing_code = chooseBillingCode(timeHistory.first_time, timeHistory.last_time, sharingFlag, studentNum, isPassenger)
+                    if (timeHistory.billing_code & TimeHistory.BILLING_NONCHARGE):
+                        timeHistory.warning = True
                     dailyHistory.timehistory.append(timeHistory)
                     total_count += 1
             if len(dailyHistory.timehistory) > 0:
                 history.append(dailyHistory)
 
+
+            standard_h = None
+            warning_set = set()
+            studentNum = 0
             for h in dailyHistory.timehistory:
                 fire = False
-                warning_set = set()
-                for inner_h in dailyHistory.timehistory:
-                    if (fire == False and h != inner_h):
-                        continue
-                    elif (h == inner_h):
-                        fire = True
-                        continue
-                    elif (h.warning == True):
-                        continue
-                    else:
-                        if (h.lflag == inner_h.lflag and h.last_time > inner_h.first_time):
-                            warning_set.add(h)
-                            warning_set.add(inner_h)
 
-                if (len(warning_set) > academy.maxvehicle):
-                    sorted_warning = sorted(warning_set, key=lambda timehistory: timehistory.billing_code, reverse=True)
-                    for i_warning in range(academy.maxvehicle, len(sorted_warning)):
-                        sorted_warning[i_warning].warning = True
+                if ((standard_h == None) or (standard_h.last_time < h.first_time)):
+                    if (len(warning_set) > 0):
+                        # warning 처리
+                        # 학생 수가 많아서 어쩔 수 없이 차량이 많아진 경우는 maxvehicle 보다 우선시한다.
+                        maxvehicle = max(academy.maxvehicle, int(math.ceil(float(studentNum)/10.0)))
+                        if (len(warning_set) > maxvehicle):
+                            sorted_warning = sorted(warning_set, key=lambda timehistory: timehistory.billing_code, reverse=True)
+                            for i_warning in range(maxvehicle, len(sorted_warning)):
+                                sorted_warning[i_warning].warning = True 
+                    standard_h = h
+                    warning_set = set()
+                    studentNum = h.studentnum
+                    if not (h.billing_code & TimeHistory.BILLING_NONCHARGE):
+                        warning_set.add(h)
+                else:
+                    studentNum += h.studentnum
+                    if not (h.billing_code & TimeHistory.BILLING_NONCHARGE):
+                        warning_set.add(h)
+
+		#if (h.warning == True):
+			#continue
+
+		#maxvehicle = academy.maxvehicle
+
+                #studentNum = h.studentnum
+                #for inner_h in dailyHistory.timehistory:
+                    #if (fire == False and h != inner_h):
+                        #continue
+                    #elif (h == inner_h):
+                        #fire = True
+                    #else:
+                        #if (h.lflag == inner_h.lflag and h.last_time > inner_h.first_time):
+                            #studentNum += inner_h.studentnum
+                            #if not (h.billing_code & TimeHistory.BILLING_NONCHARGE):
+                                #warning_set.add(h)
+                    	    #if not (inner_h.billing_code & TimeHistory.BILLING_NONCHARGE):
+                                #warning_set.add(inner_h)
+
+                #necessaryVehicle = int(math.ceil(float(studentNum)/10.0))
+                #if (necessaryVehicle > maxvehicle):
+                    #maxvehicle = necessaryVehicle
+
+                #if (len(warning_set) > maxvehicle):
+                    #sorted_warning = sorted(warning_set, key=lambda timehistory: timehistory.billing_code, reverse=True)
+                    #for i_warning in range(maxvehicle, len(sorted_warning)):
+                        #sorted_warning[i_warning].warning = True
+
 
         rem = 0
         if (carid != 0):
             for dailyHistory in history:
                 dailyHistory.timehistory[:] = [x for x in dailyHistory.timehistory if x.carnum == carid]
-                #if len(dailyHistory.timehistory) == 0:
-                    #history.remove(dailyHistory)
-                  
-    #else :
-        #return HttpResponse("error occured", "aid = ", aid, "startdate = ", startdate, "enddate = ", enddate)
 
     return render(request, 'getHistory.html', {"history": history, "academy" : academy, 'total_count': total_count, 'startdate': startdate, 'enddate': enddate, 'user':request.user, 'cars':sorted(cars), 'carid':carid})
