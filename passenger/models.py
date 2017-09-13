@@ -27,7 +27,7 @@ def save_user_profile(sender, instance, **kwargs):
     instance.profile.save()
 
 def set_current_date_time():
-    return str(timezone.now())[:19]
+    return str(datetime.datetime.now())[:19]
 
 class Group(models.Model):
     gname = models.CharField(max_length = 80, null = True, blank = True)
