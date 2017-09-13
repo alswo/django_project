@@ -56,10 +56,10 @@ def invenToJson(invens):
         inventory['req'] = i.req
         inventory['memo'] = i.memo
         inventory['passenger'] = 1
-        
+
         for studentInfo in i.slist:
             try:
-                sInfo = StudentInfo.objects.get(id = studentInfo)        
+                sInfo = StudentInfo.objects.get(id = studentInfo)
             except StudentInfo.DoesNotExist:
                 continue
 
@@ -146,7 +146,7 @@ def todayLoad(request):
     if request.method == "POST":
         sid = int(request.POST.get('sid'))
         stableid = int(request.POST.get('stableid'))
-        
+
         stable = ScheduleTable.objects.get(id = stableid)
         temp_tflag = stable.tflag
         slist = stable.slist
@@ -165,8 +165,8 @@ def todayLoad(request):
         stable.save()
 
         reqtime = str(datetime.datetime.now())[:16]
-	
-        TodayLoadTimeLog.objects.create(sid_id = sid , stable_id = stableid, reqtime = reqtime) 
+
+        TodayLoadTimeLog.objects.create(sid_id = sid , stable_id = stableid, reqtime = reqtime)
 
         return HttpResponse(button_flag)
 
@@ -183,6 +183,7 @@ def getSchedule(request):
 	t = timeToDate()
         today = t.timeToYmd()
        	realtimelocation = RealtimeLocation.objects.filter(date=today, carnum=car).order_by('schedule_time').last()
+		
 	if (day and t.timeToD() == day):
 		pass
 	elif (realtimelocation != None):
@@ -199,9 +200,9 @@ def getSchedule(request):
 
                 contacts = invenToJson(invens)
 
-                return render_to_response('getCarSchedule.html', {"contacts": contacts,"car": car, 'user':request.user, 'realtimelocation':realtimelocation, 'day':day})
+                return render_to_response('getCarSchedule.html', {"day" : day,"contacts": contacts,"car": car, 'user':request.user, 'realtimelocation':realtimelocation, 'day':day})
 
-            return render_to_response('getSchedule.html', {"contacts": contacts, "bid" : bid, "aid" : aid,'user':request.user})
+            return render_to_response('getSchedule.html', {"day" : day, "contacts": contacts, "bid" : bid, "aid" : aid,'user':request.user})
 
         elif request.user.groups.filter(name__in = ['academy']).exists():
             if day:
@@ -210,7 +211,7 @@ def getSchedule(request):
 
                 contacts = invenToJson(invens)
 
-                return render_to_response('getSchedule.html', {"contacts": contacts, "bid" : bid, "aid" : aid,'user':request.user})
+                return render_to_response('getSchedule.html', {"day" : day, "contacts": contacts, "bid" : bid, "aid" : aid,'user':request.user})
 
             else:
                 profile = Profile.objects.get(user=request.user)
@@ -222,7 +223,7 @@ def getSchedule(request):
                 list_invensid = []
                 contacts = invenToJson(invens)
 
-                return render_to_response('getSchedule.html', {"contacts": contacts, "bid" : bid, "aid" : aid,'user':request.user})
+                return render_to_response('getSchedule.html', {"day" : day, "contacts": contacts, "bid" : bid, "aid" : aid,'user':request.user})
 
         elif request.user.groups.filter(name__in = ['driver']).exists():
             branch = Car.objects.get(carname = car)
@@ -230,7 +231,7 @@ def getSchedule(request):
 
             contacts = invenToJson(invens)
 
-            return render_to_response('getCarSchedule.html', {"contacts": contacts,"car": car, 'user':request.user, 'realtimelocation':realtimelocation, 'day':day})
+            return render_to_response('getCarSchedule.html', {"day" : day, "contacts": contacts,"car": car, 'user':request.user, 'realtimelocation':realtimelocation, 'day':day})
 
         return HttpResponse('로그인 후 사용해주세요.')
 
@@ -1101,9 +1102,9 @@ def updateSchedule(request):
             #week0 update
             else:
                 Inventory.objects.filter(id=iid).update(snum = snum, alist=alist, anamelist = anamelist_inven, slist=slist_temp3, stime = stime, etime = etime, carnum = carnum)
-                
-		unloadSidList = getUnloadSid(iid) 
-                
+
+		unloadSidList = getUnloadSid(iid)
+
                 #delete stable before updateing stable
                 delete_stable = ScheduleTable.objects.filter(iid_id=iid)
                 delete_stable.delete()
@@ -1377,7 +1378,7 @@ def acaUpdateSchedule(request):
             slist_temp3 = slist
             academy = StudentInfo.objects.filter(id__in = slist_temp3)
             alist = [a.aid_id for a in academy]
-            
+
             stime = int(time[0].split(':')[0] + time[0].split(':')[1])
             etime = int(time[-1].split(':')[0] + time[-1].split(':')[1])
 
