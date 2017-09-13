@@ -55,6 +55,17 @@ def invenToJson(invens):
         inventory['week3'] = i.week3
         inventory['req'] = i.req
         inventory['memo'] = i.memo
+        inventory['passenger'] = 1
+        
+        for studentInfo in i.slist:
+            try:
+                sInfo = StudentInfo.objects.get(id = studentInfo)        
+            except StudentInfo.DoesNotExist:
+                continue
+
+            if sInfo.birth_year == None or int(sInfo.birth_year) > 2004:
+                inventory['passenger'] = 0
+                break
 
         schedules = ScheduleTable.objects.filter(iid = i.id)
 

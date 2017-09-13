@@ -66,7 +66,7 @@ function callNumber(num){
 
         <div class="col-md-10 col-xs-12">
             {% for c in contacts %}
-            <div class="panel panel-default">
+            <div class="panel {% if c.passenger == 0%}panel-success{% else %}panel-default{% endif %}">
               <!-- Default panel contents -->
               <div class="panel-heading">
                 <button type="button" class="btn btn-small btn-warning">{{c.carnum}}호차</button>
