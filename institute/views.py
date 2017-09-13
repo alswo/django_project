@@ -449,7 +449,7 @@ def getHistory(request):
             for h in dailyHistory.timehistory:
                 fire = False
 
-                if ((standard_h == None) or (standard_h.last_time < h.first_time)):
+                if ((standard_h == None) or (standard_h.last_time <= h.first_time)):
                     if (len(warning_set) > 0):
                         # warning 처리
                         # 학생 수가 많아서 어쩔 수 없이 차량이 많아진 경우는 maxvehicle 보다 우선시한다.
