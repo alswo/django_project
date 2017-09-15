@@ -178,9 +178,6 @@ def getSchedule(request):
         aid = request.GET.get('aid')
         day = request.GET.get('day')
         uid = request.user.id
-       
-         
-        cars = Car.objects.filter(branchid_id = bid)
 
 	t = timeToDate()
         today = t.timeToYmd()
@@ -192,11 +189,13 @@ def getSchedule(request):
 		realtimelocation = None
 
         if request.user.is_staff:
+            
             invens = Inventory.objects.filter(bid = bid).filter(alist__contains = [aid]).filter(day = day)
             list_invensid = []
             contacts = invenToJson(invens)
 
             if car:
+                cars = Car.objects.filter(branchid_id = bid)
                 branch = Car.objects.get(carname = car)
                 invens = Inventory.objects.filter(carnum=car).filter(day = day)
 
