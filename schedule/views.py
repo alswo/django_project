@@ -178,7 +178,9 @@ def getSchedule(request):
         aid = request.GET.get('aid')
         day = request.GET.get('day')
         uid = request.user.id
-
+       
+         
+        cars = Car.objects.filter(branchid_id = bid)
 
 	t = timeToDate()
         today = t.timeToYmd()
@@ -200,7 +202,7 @@ def getSchedule(request):
 
                 contacts = invenToJson(invens)
 
-                return render_to_response('getCarSchedule.html', {"day" : day,"contacts": contacts,"car": car, 'user':request.user, 'realtimelocation':realtimelocation, 'day':day})
+                return render_to_response('getCarSchedule.html', {"cars" : cars, "bid": bid, "contacts": contacts,"car": car, 'user':request.user, 'realtimelocation':realtimelocation, 'day':day})
 
             return render_to_response('getSchedule.html', {"day" : day, "contacts": contacts, "bid" : bid, "aid" : aid,'user':request.user})
 
@@ -231,7 +233,7 @@ def getSchedule(request):
 
             contacts = invenToJson(invens)
 
-            return render_to_response('getCarSchedule.html', {"day" : day, "contacts": contacts,"car": car, 'user':request.user, 'realtimelocation':realtimelocation, 'day':day})
+            return render_to_response('getCarSchedule.html', {"bid": bid, "cars":cars, "day" : day, "contacts": contacts,"car": car, 'user':request.user, 'realtimelocation':realtimelocation, 'day':day})
 
         return HttpResponse('로그인 후 사용해주세요.')
 

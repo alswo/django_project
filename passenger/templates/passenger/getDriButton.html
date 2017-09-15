@@ -1,5 +1,5 @@
 {% load staticfiles %}
 {% for c in carlist %}
-<button type="button" class="btn btn-info btn-lg" onclick="location.href='inventory/getSchedule?car={{c.carname}}&day=월'">{{c.carname}}호차</button>
+<button type="button" class="btn btn-info btn-lg" onclick="location.href='inventory/getSchedule?bid={{c.branchid_id}}&car={{c.carname}}&day=월'">{{c.carname}}호차</button>
 </div>
 {% endfor %}

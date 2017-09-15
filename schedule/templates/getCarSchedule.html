@@ -1,318 +1,322 @@
 {% load staticfiles %}
 <html>
+
 <head>
-    <script src="{% static 'js/jquery-1.10.2.js' %}"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.3.7/js/tether.min.js"></script>
-    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
-    <script src="{% static 'js/bootstrap.min.js' %}"></script>
-    <link href="{% static 'css/timeline.css' %}" rel="stylesheet">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-<style>
-.thstyle3 {
-  text-align: center;
-  width: 22.5%;
-}
+  <script src="{% static 'js/jquery-1.10.2.js' %}"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.3.7/js/tether.min.js"></script>
+  <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+  <script src="{% static 'js/bootstrap.min.js' %}"></script>
+  <link href="{% static 'css/timeline.css' %}" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <style>
+    .thstyle3 {
+      text-align: center;
+      width: 22.5%;
+    }
 
-td {
-  font-size: 22;
-}
+    td {
+      font-size: 22;
+    }
 
-li {
-  font-size: 22;
-}
+    li {
+      font-size: 22;
+    }
 
-.dropdown-toggle {
-  font-size: 20;
-}
+    .dropdown-toggle {
+      font-size: 20;
+    }
 
-.departure-button {
-  font-size: 20;
-  background-color: #FFFFFF;
-  border: 2px solid #1DAD68; /* Green */
-  color: #1DAD68;
-  opacity: 1.0;
-}
+    .departure-button {
+      font-size: 20;
+      background-color: #FFFFFF;
+      border: 2px solid #1DAD68;
+      /* Green */
+      color: #1DAD68;
+      opacity: 1.0;
+    }
 
-.btn-small {
-  padding: 0.5px 0.5px;
-  margin-bottom: 1px;
-}
+    .btn-small {
+      padding: 0.5px 0.5px;
+      margin-bottom: 1px;
+    }
 
-</style>
-
-<script>
-function callNumber(num){
-    location.href=”tel:”+num;
+    .btn-car{
+      padding: 0.5px 0.5px;
+    }
+    .dropdown-menu {
+      left: 50%;
+      right: auto;
+      text-align: center;
+      transform: translate(-50%, 0);
 }
-</script>
+  </style>
+
+  <script>
+    function callNumber(num) {
+      location.href = ”tel: ”+num;
+    }
+  </script>
 </head>
+
 <body>
   <div class="container">
+    {% if user.is_staff %}
     <br>
-        <div class="row day" align="center">
-          <button type="button" class="btn btn-danger" onclick="location.href='/'">홈</button>
-          <button type="button" class="{% if day == '월' %}btn btn-primary{% else %} btn btn-info {% endif %}" onclick="location.href='getSchedule?car={{car}}&day=월', toggleCheckClicked(this);">월</button>
-          <button type="button" class="{% if day == '화' %}btn btn-primary{% else %} btn btn-info {% endif %}" onclick="location.href='getSchedule?car={{car}}&day=화'">화</button>
-          <button type="button" class="{% if day == '수' %}btn btn-primary{% else %} btn btn-info {% endif %}" onclick="location.href='getSchedule?car={{car}}&day=수'">수</button>
-          <button type="button" class="{% if day == '목' %}btn btn-primary{% else %} btn btn-info {% endif %}" onclick="location.href='getSchedule?car={{car}}&day=목'">목</button>
-          <button type="button" class="{% if day == '금' %}btn btn-primary{% else %} btn btn-info {% endif %}" onclick="location.href='getSchedule?car={{car}}&day=금'">금</button>
-          <button type="button" class="{% if day == '토' %}btn btn-primary{% else %} btn btn-info {% endif %}" onclick="location.href='getSchedule?car={{car}}&day=토'">토</button>
-          <!--<button type="button" class="btn btn-primary" onclick="window.print()">출력</button>-->
-        </div>
-        <br>
+    <div class="row" align="center">
+    <div class="btn-group" >
+      <button type="button" class="btn btn-success btn-car dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">호차선택</button>
+      <div class="dropdown-menu">
+        {% for c in cars %}
+        <a class="btn btn-small btn-success" type="button" href="getSchedule?bid={{c.branchid_id}}&car={{c.carname}}&day={{day}}">{{c.carname}}호차</a>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  {% endif %}
+    <br>
+    <div class="row day" align="center">
+      <button type="button" class="btn btn-danger" onclick="location.href='/'">홈</button>
+      <button type="button" class="{% if day == '월' %}btn btn-primary{% else %} btn btn-info {% endif %}" onclick="location.href='getSchedule?bid={{bid}}&car={{car}}&day=월', toggleCheckClicked(this);">월</button>
+      <button type="button" class="{% if day == '화' %}btn btn-primary{% else %} btn btn-info {% endif %}" onclick="location.href='getSchedule?bid={{bid}}&car={{car}}&day=화'">화</button>
+      <button type="button" class="{% if day == '수' %}btn btn-primary{% else %} btn btn-info {% endif %}" onclick="location.href='getSchedule?bid={{bid}}&car={{car}}&day=수'">수</button>
+      <button type="button" class="{% if day == '목' %}btn btn-primary{% else %} btn btn-info {% endif %}" onclick="location.href='getSchedule?bid={{bid}}&car={{car}}&day=목'">목</button>
+      <button type="button" class="{% if day == '금' %}btn btn-primary{% else %} btn btn-info {% endif %}" onclick="location.href='getSchedule?bid={{bid}}&car={{car}}&day=금'">금</button>
+      <button type="button" class="{% if day == '토' %}btn btn-primary{% else %} btn btn-info {% endif %}" onclick="location.href='getSchedule?bid={{bid}}&car={{car}}&day=토'">토</button>
+      <!--<button type="button" class="btn btn-primary" onclick="window.print()">출력</button>-->
+    </div>
+    <br>
     <div class="row schedule">
-        <div class="col-md-1"></div>
+      <div class="col-md-1"></div>
 
-        <div class="col-md-10 col-xs-12">
-            {% for c in contacts %}
-            <div class="panel {% if c.passenger == 0%}panel-success{% else %}panel-default{% endif %}">
-              <!-- Default panel contents -->
-              <div class="panel-heading">
-                <button type="button" class="btn btn-small btn-warning">{{c.carnum}}호차</button>
-                <button type="button" class="btn btn-small btn-warning">{{c.day}}요일</button>
-                {% for aname in c.anamelist %}
-                {% for aid in c.alist %}
-                  {% if forloop.counter == forloop.parentloop.counter %}
-                      <button type="button" class="btn btn-small btn-warning" role="button" data-toggle="collapse" href="#collapsePhone{{c.id}}" onclick="getAcaPhone(this, {{aid}},{{c.id}})" aria-expanded="false" aria-controls="collapseExample">{{aname}}</button>
-                  {% endif %}
-                {% endfor %}
-                {% endfor %}
-                <div class="collapse" id="collapsePhone{{c.id}}">
-                </div>
-              </div>
-              <div class="panel-body">
-                {{c.req}}
-              </div>
-            <table class="table table-bordered table-responsive">
-                <thead>
-                    <tr>
-                        <th>시간</th>
-                        <th>주소</th>
-                        <th class="thstyle3">이름</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for s in c.schedule %}
-                    {% if s.lflag == 1 %}
-                    <tr class="alert alert-info">
-                    {% elif s.lflag == 0 %}
-                    <tr class="alert alert-danger">
-                    {% endif %}
-                    {% if s.lflag == 0 or s.lflag == 1 %}
-                        <td><button type="button" class="load btn btn-small btn-space departure-button" id="departurebutton{{c.id}}_{{forloop.counter}}" onclick="setRealtimeLocation(this, {{c.carnum}}, '{{s.time}}');" disabled>{{s.time}}</button></td>
-                        <td><strong>{{s.addr}}</strong></td>
-                        <td>
-                          {% for f in s.tflag %}
-                            {% for si in s.sinfo %}
-                            {% if forloop.counter == forloop.parentloop.counter %}
-                            <div class="dropdown">
-                                  <button type="button" id="{{c.id}}{{s.id}}{{forloop.counter}}" class="load btn btn-small btn-space {% if f == 0 %} btn-primary {% elif f == 2 %} btn-warning blink {% else %} btn-default {% endif %} dropdown-toggle" data-toggle="dropdown">
+      <div class="col-md-10 col-xs-12">
+        {% for c in contacts %}
+        <div class="panel {% if c.passenger == 0%}panel-success{% else %}panel-default{% endif %}">
+          <!-- Default panel contents -->
+          <div class="panel-heading">
+            <button type="button" class="btn btn-small btn-warning">{{c.carnum}}호차</button>
+            <button type="button" class="btn btn-small btn-warning">{{c.day}}요일</button> {% for aname in c.anamelist %} {% for aid in c.alist %} {% if forloop.counter == forloop.parentloop.counter %}
+            <button type="button" class="btn btn-small btn-warning" role="button" data-toggle="collapse" href="#collapsePhone{{c.id}}" onclick="getAcaPhone(this, {{aid}},{{c.id}})" aria-expanded="false" aria-controls="collapseExample">{{aname}}</button>            {% endif %} {% endfor %} {% endfor %}
+            <div class="collapse" id="collapsePhone{{c.id}}">
+            </div>
+          </div>
+          <div class="panel-body">
+            {{c.req}}
+          </div>
+          <table class="table table-bordered table-responsive">
+            <thead>
+              <tr>
+                <th>시간</th>
+                <th>주소</th>
+                <th class="thstyle3">이름</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for s in c.schedule %} {% if s.lflag == 1 %}
+              <tr class="alert alert-info">
+                {% elif s.lflag == 0 %}
+                <tr class="alert alert-danger">
+                  {% endif %} {% if s.lflag == 0 or s.lflag == 1 %}
+                  <td><button type="button" class="load btn btn-small btn-space departure-button" id="departurebutton{{c.id}}_{{forloop.counter}}" onclick="setRealtimeLocation(this, {{c.carnum}}, '{{s.time}}');" disabled>{{s.time}}</button></td>
+                  <td><strong>{{s.addr}}</strong></td>
+                  <td>
+                    {% for f in s.tflag %} {% for si in s.sinfo %} {% if forloop.counter == forloop.parentloop.counter %}
+                    <div class="dropdown">
+                      <button type="button" id="{{c.id}}{{s.id}}{{forloop.counter}}" class="load btn btn-small btn-space {% if f == 0 %} btn-primary {% elif f == 2 %} btn-warning blink {% else %} btn-default {% endif %} dropdown-toggle" data-toggle="dropdown">
                                     {{si.name}}
                                   </button>
-                              <ul class="dropdown-menu pull-right">
-                                <li><a href="tel:{{si.aphone}}">{{si.aname}}</a></li>
-                                {% if si.parents_phonenumber %}
-                                <li><a href='tel:{{si.parents_phonenumber}}'>부모님전화</a></li>
-				{% endif %}
-                                {% if si.self_phonenumber %}
-                                <li><a href='tel:{{si.self_phonenumber}}'>학생전화</a></li>
-				{% endif %}
-                                {% if si.care_phonenumber %}
-                                <li><a href='tel:{{si.care_phonenumber}}'>돌봄맘전화</a></li>
-				{% endif %}
-                                {% if si.grandparents_phonenumber %}
-                                <li><a href='tel:{{si.grandparents_phonenumber}}'>조부모님전화</a></li>
-				{% endif %}
-                              </ul>
-                              <br>
-                            </div>
-                            {% endif %}
-                            {% endfor %}
-                          {% endfor %}
-                        </td>
-                    {% endif %}
-                    {% if s.lflag == 0 %}
-                    </tr>
-                    {% endif %}
-                    {% if s.lflag == 2 %}
-                    <tr>
-                        <td><button type="button" class="load btn btn-small btn-space departure-button" id="departurebutton{{c.id}}_{{forloop.counter}}" onclick="setRealtimeLocation(this, {{c.carnum}}, '{{s.time}}');">{{s.time}}</button></td>
-                        <td>출발</td>
-                        <td></td>
-                    </tr>
-                    {% endif %}
-                    {% if s.lflag == 3 %}
-                    <tr>
-                        <td><button type="button" class="load btn btn-small btn-space departure-button" id="departurebutton{{c.id}}_{{forloop.counter}}" onclick="setRealtimeLocation(this, {{c.carnum}}, '{{s.time}}');" disabled>{{s.time}}</button></td>
-                        <td>도착</td>
-                        <td></td>
-                    </tr>
-                    {% endif %}
-                    {% endfor %}
-                </tbody>
-            </table>
-          </div>
-          <br><br>
-          {% endfor %}
+                      <ul class="dropdown-menu pull-right">
+                        <li><a href="tel:{{si.aphone}}">{{si.aname}}</a></li>
+                        {% if si.parents_phonenumber %}
+                        <li><a href='tel:{{si.parents_phonenumber}}'>부모님전화</a></li>
+                        {% endif %} {% if si.self_phonenumber %}
+                        <li><a href='tel:{{si.self_phonenumber}}'>학생전화</a></li>
+                        {% endif %} {% if si.care_phonenumber %}
+                        <li><a href='tel:{{si.care_phonenumber}}'>돌봄맘전화</a></li>
+                        {% endif %} {% if si.grandparents_phonenumber %}
+                        <li><a href='tel:{{si.grandparents_phonenumber}}'>조부모님전화</a></li>
+                        {% endif %}
+                      </ul>
+                      <br>
+                    </div>
+                    {% endif %} {% endfor %} {% endfor %}
+                  </td>
+                  {% endif %} {% if s.lflag == 0 %}
+                </tr>
+                {% endif %} {% if s.lflag == 2 %}
+                <tr>
+                  <td><button type="button" class="load btn btn-small btn-space departure-button" id="departurebutton{{c.id}}_{{forloop.counter}}" onclick="setRealtimeLocation(this, {{c.carnum}}, '{{s.time}}');">{{s.time}}</button></td>
+                  <td>출발</td>
+                  <td></td>
+                </tr>
+                {% endif %} {% if s.lflag == 3 %}
+                <tr>
+                  <td><button type="button" class="load btn btn-small btn-space departure-button" id="departurebutton{{c.id}}_{{forloop.counter}}" onclick="setRealtimeLocation(this, {{c.carnum}}, '{{s.time}}');" disabled>{{s.time}}</button></td>
+                  <td>도착</td>
+                  <td></td>
+                </tr>
+                {% endif %} {% endfor %}
+            </tbody>
+          </table>
         </div>
-        <div class="col-md-1"></div>
-<script>
-var tatyoaudio;
+        <br><br> {% endfor %}
+      </div>
+      <div class="col-md-1"></div>
+      <script>
+        var tatyoaudio;
 
-function dropdown(t,offset,invenid,stableid,choice) {
-    var choice = choice
-    $.ajax({
-        url: "/inventory/todayLoad",
-        type: "GET",
-        data: {
-          offset: offset,
-          invenid: invenid,
-          stableid: stableid,
-        },
-        success: function(data) {
-          if (choice == 0){
-            $("ul", t.parent).html("<li><a href='#'>"+data['aname']+"</a></li><li><a href='tel:0"+data['phone1']+"'>학생전화</a></li><li><a href='#' class='pphone'></a></li>");
-          }
-          else if (choice == 1){
-            $("ul", t.parent).html("<li><a href='#'>"+data['aname']+"</a></li><li><a href='tel:0"+data['phone1']+"'>학생전화</a></li><li><a href='#' class='pphone'></a></li>");
-          }
+        function dropdown(t, offset, invenid, stableid, choice) {
+          var choice = choice
+          $.ajax({
+            url: "/inventory/todayLoad",
+            type: "GET",
+            data: {
+              offset: offset,
+              invenid: invenid,
+              stableid: stableid,
+            },
+            success: function(data) {
+              if (choice == 0) {
+                $("ul", t.parent).html("<li><a href='#'>" + data['aname'] + "</a></li><li><a href='tel:0" + data['phone1'] + "'>학생전화</a></li><li><a href='#' class='pphone'></a></li>");
+              } else if (choice == 1) {
+                $("ul", t.parent).html("<li><a href='#'>" + data['aname'] + "</a></li><li><a href='tel:0" + data['phone1'] + "'>학생전화</a></li><li><a href='#' class='pphone'></a></li>");
+              }
+            }
+          });
         }
-    });
-}
 
-function getAcaPhone(e, aid,fc){
-  $.ajax({
-      url: "/inventory/getAcaPhone",
-      type: "GET",
-      data: {
-        aid: aid,
-      },
-      success: function(data) {
-        $('#collapsePhone'+fc).html("<br><a class='btn-xs btn-info' href='tel:"+data["phonelist"][0]+"'>전화1</a>&nbsp&nbsp<a class='btn-xs btn-info' href='tel:"+data["phonelist"][1]+"'>전화2</a>");
-      }
-  });
-}
+        function getAcaPhone(e, aid, fc) {
+          $.ajax({
+            url: "/inventory/getAcaPhone",
+            type: "GET",
+            data: {
+              aid: aid,
+            },
+            success: function(data) {
+              $('#collapsePhone' + fc).html("<br><a class='btn-xs btn-info' href='tel:" + data["phonelist"][0] + "'>전화1</a>&nbsp&nbsp<a class='btn-xs btn-info' href='tel:" + data["phonelist"][1] + "'>전화2</a>");
+            }
+          });
+        }
 
-setInterval(function(){blink()}, 1000);
+        setInterval(function() {
+          blink()
+        }, 1000);
 
-function blink() {
-        $(".blink").fadeTo(100, 0.1).fadeTo(200, 1.0);
-}
+        function blink() {
+          $(".blink").fadeTo(100, 0.1).fadeTo(200, 1.0);
+        }
 
-// equivalent to $(document).ready()
-$(function () {
-   var postindex = -1;
-   if ("{{realtimelocation.schedule_time}}" == "") {
-      return;
-   }
-   $(".departure-button").each(function(i, obj) {
-      if (obj.innerHTML <= "{{realtimelocation.schedule_time}}") {
-          if (obj.innerHTML == "{{realtimelocation.schedule_time}}") {
-              obj.innerHTML += " <i class=\"fa fa-bus\"></i>";
-              postindex = i;
+        // equivalent to $(document).ready()
+        $(function() {
+          var postindex = -1;
+          if ("{{realtimelocation.schedule_time}}" == "") {
+            return;
           }
-          obj.style.backgroundColor = 'rgb(29, 173, 104)';
-          obj.style.color = "#FFFFFF";
-          obj.style.opacity = 1.0;
-          obj.disabled = true;
-      }
-      else if (postindex != -1 && i == postindex + 1) {
-          obj.disabled = false;
-      }
-   });
-});
+          $(".departure-button").each(function(i, obj) {
+            if (obj.innerHTML <= "{{realtimelocation.schedule_time}}") {
+              if (obj.innerHTML == "{{realtimelocation.schedule_time}}") {
+                obj.innerHTML += " <i class=\"fa fa-bus\"></i>";
+                postindex = i;
+              }
+              obj.style.backgroundColor = 'rgb(29, 173, 104)';
+              obj.style.color = "#FFFFFF";
+              obj.style.opacity = 1.0;
+              obj.disabled = true;
+            } else if (postindex != -1 && i == postindex + 1) {
+              obj.disabled = false;
+            }
+          });
+        });
 
-$(function () {
+        $(function() {
 
-   refresh = setInterval(refreshfunc, 60000);
-});
+          refresh = setInterval(refreshfunc, 60000);
+        });
 
-function refreshfunc() {
-   location.reload();
-}
+        function refreshfunc() {
+          location.reload();
+        }
 
 
-var curtime;
-function setRealtimeLocation(element, carnum, schedule_time) {
-   var elementid = element.id;
-   var elementids = elementid.split('_');
-   var opacity_ratio = 1.0;
-   var bgcolor = 'rgb(29, 173, 104)';
+        var curtime;
 
-   var d = new Date();
-   var week = new Array('일', '월', '화', '수', '목', '금', '토');
+        function setRealtimeLocation(element, carnum, schedule_time) {
+          var elementid = element.id;
+          var elementids = elementid.split('_');
+          var opacity_ratio = 1.0;
+          var bgcolor = 'rgb(29, 173, 104)';
 
-   if (week[d.getDay()] != '{{day}}') {
-       return;
-   }
-   // 이미 click 된 상태면 return
-   if (element.style.backgroundColor == bgcolor) {
-       if (Date.now() >= lastfiretime + 10000) {
-           return;
-       }
-       element.style.backgroundColor = '#FFFFFF';
-       element.style.color = "#1DAD68";
-       element.style.opacity = opacity_ratio;
-       element.innerHTML = element.innerHTML.replace(" <i class=\"fa fa-bus\"></i>", "");
+          var d = new Date();
+          var week = new Array('일', '월', '화', '수', '목', '금', '토');
 
-       elem = document.getElementById(elementids[0] + '_' + (parseInt(elementids[1]) - 1));
-       if (elem) {
-           elem.innerHTML += " <i class=\"fa fa-bus\"></i>";
-       }
-       clearTimeout(curtime);
+          if (week[d.getDay()] != '{{day}}') {
+            return;
+          }
+          // 이미 click 된 상태면 return
+          if (element.style.backgroundColor == bgcolor) {
+            if (Date.now() >= lastfiretime + 10000) {
+              return;
+            }
+            element.style.backgroundColor = '#FFFFFF';
+            element.style.color = "#1DAD68";
+            element.style.opacity = opacity_ratio;
+            element.innerHTML = element.innerHTML.replace(" <i class=\"fa fa-bus\"></i>", "");
 
-       elem = document.getElementById(elementids[0] + '_' + (parseInt(elementids[1]) + 1));
-       if (elem) {
-           elem.disabled = true;
-       }
-       return;
-   }
+            elem = document.getElementById(elementids[0] + '_' + (parseInt(elementids[1]) - 1));
+            if (elem) {
+              elem.innerHTML += " <i class=\"fa fa-bus\"></i>";
+            }
+            clearTimeout(curtime);
 
-   // 앞의 정류장들이 모두 click 되어야 진행
-   for (i=1; i<elementids[1]; i++) {
-       if (document.getElementById(elementids[0] + '_' + i).style.backgroundColor != bgcolor) {
-           return;
-       }
-   }
+            elem = document.getElementById(elementids[0] + '_' + (parseInt(elementids[1]) + 1));
+            if (elem) {
+              elem.disabled = true;
+            }
+            return;
+          }
 
-   var i=0;
-   for (i=1; i<elementids[1]; i++) {
-       elem = document.getElementById(elementids[0] + '_' + i);
-       if (elem.style.backgroundColor == bgcolor) {
-           elem.innerHTML = elem.innerHTML.replace(" <i class=\"fa fa-bus\"></i>", "");
-           elem.disabled = true;
-       }
-   }
-   if (element.style.backgroundColor != bgcolor) {
-       element.style.backgroundColor = bgcolor;
-       element.style.color = "#FFFFFF";
-       element.style.opacity = opacity_ratio;
-       element.innerHTML += " <i class=\"fa fa-bus\"></i>";
-   }
-   elem = document.getElementById(elementids[0] + '_' + (i + 1));
-   if (elem) {
-       elem.disabled = false;
-   }
+          // 앞의 정류장들이 모두 click 되어야 진행
+          for (i = 1; i < elementids[1]; i++) {
+            if (document.getElementById(elementids[0] + '_' + i).style.backgroundColor != bgcolor) {
+              return;
+            }
+          }
 
-   clearInterval(refresh);
-   refresh = setInterval(refreshfunc, 60000);
+          var i = 0;
+          for (i = 1; i < elementids[1]; i++) {
+            elem = document.getElementById(elementids[0] + '_' + i);
+            if (elem.style.backgroundColor == bgcolor) {
+              elem.innerHTML = elem.innerHTML.replace(" <i class=\"fa fa-bus\"></i>", "");
+              elem.disabled = true;
+            }
+          }
+          if (element.style.backgroundColor != bgcolor) {
+            element.style.backgroundColor = bgcolor;
+            element.style.color = "#FFFFFF";
+            element.style.opacity = opacity_ratio;
+            element.innerHTML += " <i class=\"fa fa-bus\"></i>";
+          }
+          elem = document.getElementById(elementids[0] + '_' + (i + 1));
+          if (elem) {
+            elem.disabled = false;
+          }
 
-   curtime = setTimeout(function() {
-       $.ajax({
-           url: "/inventory/setRealtimeLocation",
-           type: "GET",
-           data: {
-               carnum: carnum,
-               schedule_time: schedule_time,
-           },
-           success: function(data) {
-           }
-       });
-   }, 12000);
-   lastfiretime = Date.now();
-}
+          clearInterval(refresh);
+          refresh = setInterval(refreshfunc, 60000);
 
-</script>
+          curtime = setTimeout(function() {
+            $.ajax({
+              url: "/inventory/setRealtimeLocation",
+              type: "GET",
+              data: {
+                carnum: carnum,
+                schedule_time: schedule_time,
+              },
+              success: function(data) {}
+            });
+          }, 12000);
+          lastfiretime = Date.now();
+        }
+      </script>
 
 </html>
