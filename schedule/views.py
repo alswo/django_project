@@ -63,7 +63,7 @@ def invenToJson(invens):
             except StudentInfo.DoesNotExist:
                 continue
 
-            if sInfo.birth_year == None or int(sInfo.birth_year) > 2004:
+            if sInfo.birth_year == None or ((datetime.datetime.now().year - int(sInfo.birth_year) + 1) <= 13):
                 inventory['passenger'] = 0
                 break
 

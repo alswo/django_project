@@ -78,6 +78,7 @@ function callNumber(num){
                   {% endif %}
                 {% endfor %}
                 {% endfor %}
+		{% if c.passenger == 0 %} [동승자 필요] {% endif %}
                 <div class="collapse" id="collapsePhone{{c.id}}">
                 </div>
               </div>
