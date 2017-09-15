@@ -59,10 +59,11 @@ def checkAuth(request):
 	else :
 		institute = request.user.first_name
 
-	if (request.META['HTTP_REFERER'] == None):
-		redirect_url = 'http://' + request.META['SERVER_NAME'] + '/institute/listStudents';
-	else:
-		redirect_url = request.META['HTTP_REFERER']
+	redirect_url = request.META.get('HTTP_REFERER', 'http://' + request.META.get('SERVER_NAME') + '/institute/listStudents')
+	#if (request.META['HTTP_REFERER'] == None):
+		#redirect_url = 'http://' + request.META['SERVER_NAME'] + '/institute/listStudents'
+	#else:
+		#redirect_url = request.META['HTTP_REFERER']
 
 	if institute:
 		try:
