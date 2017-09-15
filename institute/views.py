@@ -415,7 +415,7 @@ def getHistory(request):
 					if (offmember == student):
                                                 #return HttpResponse("offmember = " + str(offmember.id))
 						studentNum -= 1
-                                if ((student.birth_year == None) or ((timezone.now().year - int(student.birth_year) + 1) <= 13)):
+                                if ((student.birth_year == None) or ((datetime.datetime.now().year - int(student.birth_year) + 1) <= 13)):
                                     isPassenger = True
 
                         if (schedule.lflag == 1):
