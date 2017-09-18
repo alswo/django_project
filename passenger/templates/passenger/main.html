@@ -131,7 +131,7 @@
             <br>
             {% endif %}
             {% if user|in_group:"academy"%}
-            <button id="dLabel" type="button" class="btn btn-primary btn-lg btn-block"  onclick="location.href='/inventory/getSchedule'"data-toggle="modal" data-target="#getschedule">학원용 스케쥴보기 (NEW)</button>
+            <button id="dLabel" type="button" class="btn btn-primary btn-lg btn-block"  onclick="location.href='/inventory/getSchedule'"data-toggle="modal" data-target="#getschedule">학원용 스케쥴보기</button>
             <br>
             {% endif %}
             {% if user.is_staff or user|in_group:"driver" %}

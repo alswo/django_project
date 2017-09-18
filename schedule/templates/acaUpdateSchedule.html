@@ -214,7 +214,7 @@
   <br> {% for c in contacts %}
   <div class="row">
     <div class="col-md-1"></div>
-    <div class="col-md-10" style="background-color:rgb(201, 214, 222); height: auto; width: 100%">
+    <div class="col-md-10" style="border-radius: 25px; {% if c.week1 == 1 or c.week2 == 1 or c.week3 == 1 %}background-color: #EFB2B2;{% else %}background-color:#ABE8D0;{% endif %} height: auto; width: 100%" height: auto; width: 100%">
       <div class="col-md-12" style="margin:10px">
         <!-- br>
         <div class="row">
