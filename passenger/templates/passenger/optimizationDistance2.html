@@ -397,7 +397,7 @@ console.log($('.markerInfo')[i].parentNode);
     };
 
     console.log("algorithm = " + algorithm);
-    xmlhttp.open("POST", "/optimizer/getRoute?reqCoordType=WGS84GEO&algorithm=" + algorithm);
+    xmlhttp.open("POST", "http://route2-tayotayo.edticket.com/optimizer/getRoute?reqCoordType=WGS84GEO&algorithm=" + algorithm);
     xmlhttp.setRequestHeader("Content-Type", "application/json");
     xmlhttp.send(JSON.stringify(jsonObj));
 
