@@ -13,30 +13,23 @@ app.config_from_object('django.conf:settings', namespace='CELERY')
 app.autodiscover_tasks()
 app.conf.timezone = 'Asia/Seoul'
 app.conf.enable_utc = True
-#app.conf.timezone = 'America/Chicago'
-#app.conf.timezone = 'Europe/London'
+app.conf.broker_url = 'amqp://guest@localhost//'
+app.conf.accept_content = ['application/json']
 app.conf.beat_schedule = {
-	'say-hello': {
-		'task': 'schedule.tasks.say_hello',
-		'schedule': crontab(hour=16, minute='*'),
+	#'say-hello': {
+		#'task': 'schedule.tasks.say_hello',
+		#'schedule': crontab(hour=16, minute='*'),
+	#},
+	'store-historyschedule': {
+		'task': 'schedule.tasks.store_historyschedule',
+		'schedule': crontab(hour=23, minute=1),
 	},
-	#'store-historyschedule': {
-		#'task': 'schedule.tasks.store_historyschedule',
-		#'schedule': crontab(hour=11, minute=24),
-	#},
+	'weekly-update': {
+		'task': 'schedule.tasks.weekly_update',
+		'schedule': crontab(hour=23, minute=30, day_of_week='sun'),
+	},
+	'resetTodayLoad': {
+		'task': 'schedule.tasks.resetTodayLoad',
+		'schedule': crontab(hour=23, minute=30, day_of_week='sat'),
+	},
 }
-#CELERY_ENABLE_UTC = False,
-#timezone = 'Asia/Seoul',
-
-#app.conf.beat_schedule = {
-	#'store-historyschedule': {
-		#'task': 'store_historyschedule',
-		#'schedule': crontab(hour=18, minute=48),
-	#},
-#}
-
-
-
-@app.task(bind=True)
-def debug_task(self):
-	print('Request: {0!r}'.format(self.request))

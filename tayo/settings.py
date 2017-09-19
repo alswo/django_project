@@ -157,19 +157,6 @@ PROJECT_ROOT = os.path.normpath(os.path.dirname(__file__))
 STATIC_ROOT = os.path.join(PROJECT_ROOT, 'static')
 STATIC_URL = '/static/'
 
-
-
-#CELERY_RESULT_BACKEND = 'django-db'
-CELERY_BROKER_URL = 'amqp://guest@localhost//'
-CELERY_ACCEPT_CONTENT = ['application/json']
-CELERY_RESULT_SERIALIZER = 'json'
-CELERY_TASK_SERIALIZER = 'json'
-CELERY_ENABLE_UTC = True
-#CELERY_TIMEZONE = 'Asia/Seoul'
-#CELERY_IMPORTS = (
-	#'schedule.tasks',
-#)
-
 try:
 	from local_settings import *
 except ImportError as e:
