@@ -150,14 +150,14 @@ class Car(models.Model):
         ordering=['carname']
 
 class Building(models.Model):
-    branch = Branch.objects.all()
+    #branch = Branch.objects.all()
 
-    BRANCH = ()
+    #BRANCH = ()
 
-    for b in branch:
-        BRANCH = BRANCH + ((b.id, b.bname),)
+    #for b in branch:
+        #BRANCH = BRANCH + ((b.id, b.bname),)
 
-    branchid = models.IntegerField(choices = BRANCH,default=1)
+    branchid = models.IntegerField(default=1)
     name = models.CharField(max_length=20)
     lon = models.FloatField()
     lat = models.FloatField()
