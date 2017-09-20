@@ -1040,7 +1040,7 @@ def acaUpdateSchedule(request):
 
                 #update inventory editedinven
                 if eInven_index == 0:
-                    eInven_index = checkEditedInven(iid, week)
+                    uInven.update_edited_inven(iid,1)
 
                     contacts = []
 
@@ -1062,7 +1062,7 @@ def acaUpdateSchedule(request):
                     inven.week3 = 1
                     inven.save()
                    
-                    uInven.create_edited_stable(eiid) 
+                    uInven.create_edited_stable(e3iid) 
 
                     contacts = []
                     
