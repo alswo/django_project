@@ -214,7 +214,7 @@
   <br> {% for c in contacts %}
   <div class="row">
     <div class="col-md-1"></div>
-    <div class="col-md-10" style="border-radius: 25px; {% if c.week1 == 1 or c.week2 == 1 or c.week3 == 1 %}background-color: #EFB2B2;{% else %}background-color:#ABE8D0;{% endif %} height: auto; width: 100%" height: auto; width: 100%">
+    <div class="col-md-10" style="border-radius: 25px; {% if c.week1 == 1 or c.week2 == 1 or c.week3 == 1 %}background-color: #EFB2B2;{% else %}background-color:#ABE8D0;{% endif %} height: auto; width: 100%" height: auto; width: 100%>
       <div class="col-md-12" style="margin:10px">
         <!-- br>
         <div class="row">
@@ -287,7 +287,7 @@
                   <td data-name="req" class="tdstyle3">
                     <select name="req[]" form="scheduleform{{c.id}}">
   			                 <option value="">없음</option>
-  			                 <option value="데려와주세요" {% if s.req == "데려와주세요" %} selected {% endif %} >데려와주세요</option>
+  			                 <option value="데려와주세요" {% if es.req == "데려와주세요" %} selected {% endif %} >데려와주세요</option>
   		              </select>
                   </td>
                   <td data-name="name" class="inputTd tdstyle2">
@@ -398,8 +398,13 @@
               <input class="hidden" name='searchTime' value="{{searchTime}}" form="scheduleform{{c.id}}" />
               <input class="hidden" name='day' value="{{day}}" form="scheduleform{{c.id}}" />
               <input class="hidden" name="update" value="1" form="scheduleform{{c.id}}" />
+              <input class="hidden" name="option" value="" form="scheduleform{{c.id}}" />
               <input id="carnum{{c.id}}" type="hidden" name="carnum" value="{{c.carnum}}" form="scheduleform{{c.id}}">
+              {% if c.get_cname == 'editedinven'%}
               <button type="submit" class="btn btn-success pull-right">저장</button>
+              {% else %}
+              <button type="submit" class="btn btn-success pull-right" onclick="updateInven(this);">저장</button>
+              {% endif %}
             </form>
             {% if c.get_cname == 'editedinven' or week == 0 %}
             <form class="savedelete submitForm" action="acaUpdateSchedule" method="post" id="deleteform{{c.id}}" onSubmit="return confirm('정말 삭제 하시겠어요?');">
@@ -653,5 +658,12 @@
       }
       sibling_sid.value = delete_sid
     });
+    function updateInven(e){
+      if(window.confirm('1,2,3주 전체 변경하시겠어요?')){
+        $(e).parent().children("[name='option']").val(1)
+      }else{
+        $(e).parent().children("[name='option']").val(0)
+      }
+    }
     </script>
     {% endblock content %}
