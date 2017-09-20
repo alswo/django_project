@@ -1,3 +1,6 @@
+
+
+
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
@@ -16,7 +19,7 @@ import ast
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
-def today_schedule():
+def today():
     time = timeToDate()
     date = time.timeToD()
 
@@ -25,7 +28,7 @@ def today_schedule():
     inventorys = Inventory.objects.filter(day = date).prefetch_related('scheduletables').reverse()
 
     for inven in inventorys:
-        scheduleTables.extend(inven.scheduletables.all()) #금일 에 해당하는 모든 인벤토리 객체를 scheduleTables 로..
+        scheduleTables.extend(inven.scheduletables.all())
 
     count_slist = []
     for schTable in scheduleTables:
@@ -57,16 +60,16 @@ def today_schedule():
         count = module_push_content['count']-1
         if count == 0:
             i += 1
-            msg = "\t\t오늘 " + module_push_content['aname'] + " 등원을 위한 " + module_push_content['time'] + " [" + module_push_content['addr'] + "] 승차 스케줄이 있습니다\n"
-            msg = msg.decode('utf-8').encode('utf-8')
+            msg = "오늘 " + module_push_content['sname'] + " 학생의 " + module_push_content['aname'] + " 등원을 위한 " + module_push_content['time'] + " [" + module_push_content['addr'] + "] 승차 스케줄이 있습니다"
+
             push_msg_test(module_push_content['sid'], module_push_content['pin'], msg)
             #notice_to_slack(module_push_content['sid'], msg)
             #push_msg_test(module_push_content['sid'], module_push_content['pin'], msg)
         else:
             i += 1
-            msg = "\t\t오늘 " + module_push_content['aname'] + " 등원을 위한 " + module_push_content['time'] + " [" + module_push_content['addr'] + "]승차 외" + str(count) + "건의 스케줄이 있습니다.\n"
-            msg = msg.decode('utf-8').encode('utf-8')
-            push_msg_test(module_push_content['sid'], module_push_content['pin'], msg)
+            msg = "오늘 " + module_push_content['aname'] + " 등원을 위한 " + module_push_content['time'] + " [" + module_push_content['addr'] + "]승차 외" + str(count) + "건의 스케줄이 있습니다."
+
+            push_msg(module_push_content['sid'], module_push_content['pin'], msg)
             #notice_to_slack(module_push_content['sid'], msg)
             #push_msg_test(module_push_content['sid'], module_push_content['pin'], msg)
 
@@ -85,10 +88,10 @@ def push_msg(sid, pin, msg):
             token = f.registration_id
             types = f.type
             if types == 'android':
-                payload = '{\n    "to" : "' + token + '","priority" : "high", "content-available" : "true","collapse_key" : "Updates Available" ,"notification": {\t  "body" : "'+msg+'","title" : "shuttle tayo", "sound":"default", "color":"#0066ff"},\t}'
+                payload = '{\n    "to" : "' + str(token) + '","priority" : "high", "content-available" : "true","collapse_key" : "Updates Available" ,"notification": {\t  "body" : "'+str(msg)+'","title" : "shuttle tayo", "sound":"default", "color":"#0066ff"},\t}'
             elif types == 'ios':
 
-                payload = '{\n    "to" : "' + token + '","badge" : "'+badgeCount.toString()+'","priority" : "high", "content-available" : "true","collapse_key" : "Updates Available" ,"notification": {\t  "body" : "'+msg+'","title" : "shuttle tayo", "sound":"default", "color":"#0066ff"},\t}'
+                payload = '{\n    "to" : "' + str(token) + '","badge" : "'+badgeCount.toString()+'","priority" : "high", "content-available" : "true","collapse_key" : "Updates Available" ,"notification": {\t  "body" : "'+str(msg)+'","title" : "shuttle tayo", "sound":"default", "color":"#0066ff"},\t}'
 
             try:
                 response = requests.request('POST', url, data=payload,headers=headers)
@@ -141,7 +144,7 @@ def test():
                     try:
                         sInfo = StudentInfo.objects.get(id=key)
                     except StudentInfo.DoesNotExist:
-                        print ("-------------------"+str(sInfo.id))
+                        #print ("-------------------"+str(sInfo.id))
                         error_count += 1
                         sInfo = None
                         break
@@ -149,6 +152,7 @@ def test():
 
                         pin = PersonalInfo.objects.get(id = sInfo.personinfo_id)
                         module_push_content = {}
+                        module_push_content['sname'] = sInfo.sname
                         module_push_content['time'] = schTable.time
                         module_push_content['addr'] = schTable.addr
                         module_push_content['aname'] = sInfo.aname
@@ -161,12 +165,12 @@ def test():
         count = module_push_content['count']-1
         if count == 0:
             msg_count += 1
-            msg = "오늘 " + module_push_content['aname'] + " 등원을 위한 " + module_push_content['time'] + " [" + module_push_content['addr'] + "] 승차 스케줄이 있습니다"
+            msg = "오늘 " + module_push_content['sname'] + " 학생의 " + module_push_content['aname'] + " 등원을 위한 " + module_push_content['time'] + " [" + module_push_content['addr'] + "] 승차 스케줄이 있습니다"
             #msg = msg.decode('utf-8').encode('utf-8')
             msg_test(module_push_content['pin'], msg)
         else:
             msg_count += 1
-            msg = "오늘 " + module_push_content['aname'] + " 등원을 위한 " + module_push_content['time'] + " [" + module_push_content['addr'] + "]승차 외" + str(count) + "건의 스케줄이 있습니다."
+            msg = "오늘 " + module_push_content['sname'] + " 학생의 " + module_push_content['aname'] + " 등원을 위한 " + module_push_content['time'] + " [" + module_push_content['addr'] + "]승차 외" + str(count) + "건의 스케줄이 있습니다."
             #msg = msg.decode('utf-8').encode('utf-8')
             msg_test(module_push_content['pin'], msg)
     print ("call"+ str(msg_count) +"error"+ str(error_count))
@@ -186,29 +190,24 @@ def msg_test(pin, msg):
 
 # def send(True, 'tUP3Ebh', 'dHKukmKTKsA:APA91bEpQzGdZA5xMAKV5rraIruTGfkmKd9tHfJzBWcZIvUjAt2ZVQcJ76ywlvrpsMpt8ghqh3llGhkiJxccXBAib4qRccJVp7JJs4Wj1HLPGH3kKAdO00SzibptgCrscXu9WD5s73TI', 'testest', 'ios'):
 def send(pushcheck, pin, token, msg, types):
-    print ("send"+msg)
     url = 'https://fcm.googleapis.com/fcm/send'
-    header = {'authorization': 'key=AAAAWVvmwNU:APA91bH0IjidQtMmX6q9SRVekZqzNmWKRR15mdjOFFAt05v3E7PziYRb7sLMbtCtNXZYyKrz--fKvoZdDY94yjOrH9G6z-axN7qWS7H5VMBRUy8Z6-dysdj9ZaCYrESl2wnIfOoSnh7X','content-type': 'application/json'}
+    headers = {'authorization': 'key=AAAAWVvmwNU:APA91bH0IjidQtMmX6q9SRVekZqzNmWKRR15mdjOFFAt05v3E7PziYRb7sLMbtCtNXZYyKrz--fKvoZdDY94yjOrH9G6z-axN7qWS7H5VMBRUy8Z6-dysdj9ZaCYrESl2wnIfOoSnh7X','content-type': 'application/json'}
     result = {}
     if pushcheck == False:
         print ("he/she doesn't want to receive push message.")
     else:
         if types == 'android':
-            payload = '{\n    "to" : "' + token + '","priority" : "high", "content-available" : "true","collapse_key" : "Updates Available" ,"notification": {\t  "body" : "'+msg+'","title" : "shuttle tayo", "sound":"default", "color":"#0066ff"},\t}'
+            payload = '{\n    "to" : "' + str(token) + '","priority" : "high", "content-available" : "true","collapse_key" : "Updates Available" ,"notification": {\t  "body" : "'+str(msg)+'","title" : "shuttle tayo", "sound":"default", "color":"#0066ff"},\t}'
         elif types == 'ios':
-            payload = '{\n    "to" : "' + token + '","priority" : "high", "content-available" : "true","collapse_key" : "Updates Available" ,"notification": {\t  "body" : "'+msg+'", "sound":"default", "color":"#0066ff"},\t}'
+            payload = '{\n    "to" : "' + str(token) + '","priority" : "high", "content-available" : "true","collapse_key" : "Updates Available" ,"notification": {\t  "body" : "'+str(msg)+'", "sound":"default", "color":"#0066ff"},\t}'
         try:
-            response = requests.request('POST', url, data=payload, headers=header)
-            print reponse.text
-            # try:
-            #     result = ast.literal_eval(response.text)
-            #     status = str(result['success'])
-            #     pushurl = 'http://mj.edticket.com/fcmdev/pushConfirmInfo'
-            #     data = "pin="+pin+"&confirming="+result+"&status="+status+"&token="+token
-            #     headers = {'content-type': "application/x-www-form-urlencoded"}
-            #     response = requests.request("POST", pushurl, data=data, headers=headers)
-            # except:
-            #     print "msg check error"
+            response = requests.request('POST', url, data=payload,headers=headers)
+            result = ast.literal_eval(response.text)
+            status = str(result['success'])
+            pushurl = 'http://mj.edticket.com/fcmdev/pushConfirmInfo'
+            data = "pin="+pin+"&confirming="+response.text+"&status="+status+"&token="+token
+            headers = {'content-type': "application/x-www-form-urlencoded"}
+            response = requests.request("POST", pushurl, data=data, headers=headers)
         except:
             print ("msg send error")
 
