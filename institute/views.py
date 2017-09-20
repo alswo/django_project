@@ -120,7 +120,7 @@ def updateStudentsForm(request):
 	try:
 		student = StudentInfo.objects.get(id=sid)
 	except StudentInfo.DoesNotExist:
-		return render(request, 'message.html', {'msg': "존재하지 않는 학생입니다.", 'redirect_url': request.META['HTTP_REFERER']})
+		return render(request, 'message.html', {'msg': "존재하지 않는 학생입니다.", 'redirect_url': request.META.get('HTTP_REFERER')})
 
 	beautifyStudent = BeautifyStudent()
 	beautifyStudent.info = student
@@ -142,9 +142,9 @@ def addStudent(request):
 		try:
 			academy = Academy.objects.get(name = institute)
 		except AcademyDeosNotExist:
-			return render(request, 'message.html', {'msg': "학원 검색에 실패했습니다.", 'redirect_url': request.META['HTTP_REFERER']})
+			return render(request, 'message.html', {'msg': "학원 검색에 실패했습니다.", 'redirect_url': request.META.get('HTTP_REFERER')})
 	else:
-		return render(request, 'message.html', {'msg': "학원 권한이 필요합니다.", 'redirect_url': request.META['HTTP_REFERER']})
+		return render(request, 'message.html', {'msg': "학원 권한이 필요합니다.", 'redirect_url': request.META.get('HTTP_REFERER')})
 
 	bname = Branch.objects.get(id=academy.bid).bname
 	academy = Academy.objects.get(name=institute)
@@ -173,7 +173,7 @@ def addStudent(request):
 	# same person in the same academy
 	for student in students:
 		if compareStudents(student, studentinfo):
-			return render(request, 'message.html', {'msg': "동일한 학생이 존재합니다.", 'redirect_url': request.META['HTTP_REFERER']})
+			return render(request, 'message.html', {'msg': "동일한 학생이 존재합니다.", 'redirect_url': request.META.get('HTTP_REFERER')})
 
 
 	rv = True
@@ -196,11 +196,11 @@ def addStudent(request):
 		rv = saveNewPersonInfo2(studentinfo)
 
 	if (rv == False):
-		return render(request, 'message.html', {'msg': '학원생 추가 실해했습니다. error : Too many retry for make random pin_number', 'redirect_url': request.META['HTTP_REFERER']})
+		return render(request, 'message.html', {'msg': '학원생 추가 실해했습니다. error : Too many retry for make random pin_number', 'redirect_url': request.META.get('HTTP_REFERER')})
 
 	studentinfo.save()
 
-	return render(request, 'message.html', {'msg': "학원생 추가 성공했습니다.", 'redirect_url': request.META['HTTP_REFERER']})
+	return render(request, 'message.html', {'msg': "학원생 추가 성공했습니다.", 'redirect_url': request.META.get('HTTP_REFERER')})
 	#return redirect(addStudentsForm)
 
 @csrf_exempt
@@ -228,7 +228,7 @@ def updateStudent(request):
 		if (request.POST.get('billing_date')):
 			student.billing_date = request.POST.get('billing_date')
 	except:
-		return render(request, 'message.html', {'msg': "학생 수정에 에러가 발생했습니다.", 'redirect_url': request.META['HTTP_REFERER']})
+		return render(request, 'message.html', {'msg': "학생 수정에 에러가 발생했습니다.", 'redirect_url': request.META.get('HTTP_REFERER')})
 
 	student.save()
 	beautifyStudent = BeautifyStudent()
@@ -251,14 +251,14 @@ def deleteStudent(request):
 		student = StudentInfo.objects.get(id=sid)
 	except:
 		msg = "'" + stduent.sname + "' 학생이 존재하지 않습니다."
-		return render(request, 'message.html', {'msg': msg, 'redirect_url': request.META['HTTP_REFERER']})
+		return render(request, 'message.html', {'msg': msg, 'redirect_url': request.META.get('HTTP_REFERER')})
 
 	student.deleted_date = timezone.now()
 	student.save(update_fields=['deleted_date'])
 
 	msg = "'" + student.sname + "' 학생이 삭제되었습니다."
 
-	return render(request, 'message.html', {'msg': msg, 'redirect_url': request.META['HTTP_REFERER']})
+	return render(request, 'message.html', {'msg': msg, 'redirect_url': request.META.get('HTTP_REFERER')})
 
 
 @login_required
@@ -333,9 +333,9 @@ def getHistory(request):
         try:
             academy = Academy.objects.get(name = institute)
         except AcademyDeosNotExist:
-            return render(request, 'message.html', {'msg': "학원 검색에 실패했습니다.", 'redirect_url': request.META['HTTP_REFERER']})
+            return render(request, 'message.html', {'msg': "학원 검색에 실패했습니다.", 'redirect_url': request.META.get('HTTP_REFERER')})
     else:
-        return render(request, 'message.html', {'msg': "학원 권한이 필요합니다.", 'redirect_url': request.META['HTTP_REFERER']})
+        return render(request, 'message.html', {'msg': "학원 권한이 필요합니다.", 'redirect_url': request.META.get('HTTP_REFERER')})
 
     rv = checkAuth(request)
     if (rv != None):
