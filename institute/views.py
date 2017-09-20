@@ -302,14 +302,18 @@ def convertMins(timestr):
 	mins = int(timestr[:2]) * 60 + int(timestr[3:])
 	return mins
 
-def chooseBillingCode(first_time, last_time, isShare, student_num, passenger):
+def chooseBillingCode(academy, first_time, last_time, isShare, student_num, passenger):
 	code = 0
+	overtime = 35
+
+	if (academy.bid == 11 or academy.bid == 12):
+		overtime = 50
 
 	if (student_num <= 0):
 		code = TimeHistory.BILLING_NONCHARGE | code
 
 	## overtime 과 overpeople 은 동시에 setting 되지 않음
-	if ((not isShare) and (last_time - first_time > 35)):
+	if ((not isShare) and (last_time - first_time > overtime)):
 		code = TimeHistory.BILLING_OVERTIME | code
 	elif (student_num > 5):
 		code = TimeHistory.BILLING_OVERPEOPLE | code
@@ -372,6 +376,8 @@ def getHistory(request):
     day_dict = {'Mon':'월', 'Tue':'화', 'Wed':'수', 'Thu':'목', 'Fri':'금', 'Sat':'토', 'Sun':'일'}
     cars = set()
 
+    overtime = 30
+
 
     if aid is not None and aid != '' and startdate is not None and startdate != '' and enddate is not None and enddate != '':
         start_date = datetime.date(*map(int, startdate.split('-')))
@@ -379,6 +385,10 @@ def getHistory(request):
         total_days = (end_date - start_date).days + 1
         academy = Academy.objects.get(id=aid)
 	#aname = Academy.objects.get(pk=aid).name
+
+        if (academy.bid == 11 or academy.bid == 12):
+            overtime = 45
+
         for day_number in range(total_days):
             single_date = (start_date + datetime.timedelta(days = day_number)).strftime('%Y-%m-%d')
             schedules = []
@@ -435,7 +445,7 @@ def getHistory(request):
                     if (lflag_on_count > lflag_off_count):
                         timeHistory.lflag = True
 
-                    timeHistory.billing_code = chooseBillingCode(timeHistory.first_time, timeHistory.last_time, sharingFlag, studentNum, isPassenger)
+                    timeHistory.billing_code = chooseBillingCode(academy, timeHistory.first_time, timeHistory.last_time, sharingFlag, studentNum, isPassenger)
                     if (timeHistory.billing_code & TimeHistory.BILLING_NONCHARGE):
                         timeHistory.warning = True
                     dailyHistory.timehistory.append(timeHistory)
@@ -503,4 +513,25 @@ def getHistory(request):
             for dailyHistory in history:
                 dailyHistory.timehistory[:] = [x for x in dailyHistory.timehistory if x.carnum == carid]
 
-    return render(request, 'getHistory.html', {"history": history, "academy" : academy, 'total_count': total_count, 'startdate': startdate, 'enddate': enddate, 'user':request.user, 'cars':sorted(cars), 'carid':carid})
+    return render(request, 'getHistory.html', {"history": history, "academy" : academy, 'total_count': total_count, 'startdate': startdate, 'enddate': enddate, 'user':request.user, 'cars':sorted(cars), 'carid':carid, 'overtime':overtime})
+
+
+@login_required
+def addAcademyForm(request):
+	rv = checkAuth(request)
+	if (rv != None):
+		return rv
+
+	return render(request, 'addAcademyForm.html', )
+
+@login_required
+def updateAcademy(request):
+	rv = checkAuth(request)
+	if (rv != None):
+		return rv
+
+	aid = request.POST.get('aid')
+	academy = Academy.objects.get(id = aid)
+
+	return render(request, 'addAcademyForm.html', {'academy' : academy})
+
