@@ -59,8 +59,8 @@
 					<div class="col-md-5" align="center">
 				총운행횟수 : <span id="total_count"></span><br>
 						<div class="etc">
-				일반(<span id="normal_count"></span>) + 동승자 포함(<span id="passenger_count"></span>) + 5인 초과(<span id="overpeople_count"></span>) + 30분 초과(<span id="overtime_count"></span>)<br>
-				동승자 포함, 5인 초과(<span id="passenger_overpeople_count"></span>) + 동승자 포함, 30분 초과(<span id="passenger_overtime_count"></span>)<br>
+				일반(<span id="normal_count"></span>) + 동승자 포함(<span id="passenger_count"></span>) + 5인 초과(<span id="overpeople_count"></span>) + {{overtime}}분 초과(<span id="overtime_count"></span>)<br>
+				동승자 포함, 5인 초과(<span id="passenger_overpeople_count"></span>) + 동승자 포함, {{overtime}}분 초과(<span id="passenger_overtime_count"></span>)<br>
 				비과금 횟수: <span id="noncharge_count"></span><br>
 				예상 과금횟수 : <span id="uniq_count"></span><br>
 						</div>
@@ -127,7 +127,7 @@
 						<select class="price_item priceoption timehistoryoption" multiple="multiple">
 							<option value="{% get_constants 'BILLING_PASSENGER' %}" {% if timehistory.billing_code|isPassenger %} selected="selected" {% endif %}>동승자 포함</option>
 							<option value="{% get_constants 'BILLING_OVERPEOPLE' %}" {% if timehistory.billing_code|isOverPeople %} selected="selected" {% endif %}>5인 초과 (+1,500원)</option>
-							<option value="{% get_constants 'BILLING_OVERTIME' %}" {% if timehistory.billing_code|isOverTime %} selected="selected" {% endif %}>30분 초과(X2)</option>
+							<option value="{% get_constants 'BILLING_OVERTIME' %}" {% if timehistory.billing_code|isOverTime %} selected="selected" {% endif %}>{{overtime}}분 초과(X2)</option>
 							<option value="{% get_constants 'BILLING_NONCHARGE' %}" {% if timehistory.warning == True %} selected="selected" {% endif %}>비과금</option>
 						</select>
 						<!-- button class="btn-xs btn-danger glyphicon glyphicon-remove table-remove"></button //-->
@@ -481,7 +481,7 @@ $("#pdfdown").click(function() {
 		str += '(' + numberWithCommas(parseInt(numberWithoutCommas(per_amount_value)) + 1500) + ' x ' + overpeople_count + ') ';
 	}
 	if (overtime_count > 0) {
-		dd['content'].push({text: "-- 30분 초과: : " + overtime_count + "회 운행", fontSize: 11});
+		dd['content'].push({text: "-- {{overtime}}분 초과: : " + overtime_count + "회 운행", fontSize: 11});
 		if (str != "") {
 			str += " + ";
 		}
@@ -495,7 +495,7 @@ $("#pdfdown").click(function() {
 		str += '(' +  numberWithCommas(parseInt(numberWithoutCommas(per_amount_value)) + parseInt(numberWithoutCommas(passenger_amount_value)) + 1500) + ' x ' + passenger_overpeople_count + ') ';
 	}
 	if (passenger_overtime_count > 0) {
-		dd['content'].push({text: "-- 동승자 포함, 30분 초과: : " + passenger_overtime_count + "회 운행", fontSize: 11});
+		dd['content'].push({text: "-- 동승자 포함, {{overtime}}분 초과: : " + passenger_overtime_count + "회 운행", fontSize: 11});
 		if (str != "") {
 			str += " + ";
 		}

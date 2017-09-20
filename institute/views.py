@@ -120,7 +120,7 @@ def updateStudentsForm(request):
 	try:
 		student = StudentInfo.objects.get(id=sid)
 	except StudentInfo.DoesNotExist:
-		return render(request, 'message.html', {'msg': "존재하지 않는 학생입니다.", 'redirect_url': request.META['HTTP_REFERER']})
+		return render(request, 'message.html', {'msg': "존재하지 않는 학생입니다.", 'redirect_url': request.META.get('HTTP_REFERER')})
 
 	beautifyStudent = BeautifyStudent()
 	beautifyStudent.info = student
@@ -142,9 +142,9 @@ def addStudent(request):
 		try:
 			academy = Academy.objects.get(name = institute)
 		except AcademyDeosNotExist:
-			return render(request, 'message.html', {'msg': "학원 검색에 실패했습니다.", 'redirect_url': request.META['HTTP_REFERER']})
+			return render(request, 'message.html', {'msg': "학원 검색에 실패했습니다.", 'redirect_url': request.META.get('HTTP_REFERER')})
 	else:
-		return render(request, 'message.html', {'msg': "학원 권한이 필요합니다.", 'redirect_url': request.META['HTTP_REFERER']})
+		return render(request, 'message.html', {'msg': "학원 권한이 필요합니다.", 'redirect_url': request.META.get('HTTP_REFERER')})
 
 	bname = Branch.objects.get(id=academy.bid).bname
 	academy = Academy.objects.get(name=institute)
@@ -173,7 +173,7 @@ def addStudent(request):
 	# same person in the same academy
 	for student in students:
 		if compareStudents(student, studentinfo):
-			return render(request, 'message.html', {'msg': "동일한 학생이 존재합니다.", 'redirect_url': request.META['HTTP_REFERER']})
+			return render(request, 'message.html', {'msg': "동일한 학생이 존재합니다.", 'redirect_url': request.META.get('HTTP_REFERER')})
 
 
 	rv = True
@@ -196,11 +196,11 @@ def addStudent(request):
 		rv = saveNewPersonInfo2(studentinfo)
 
 	if (rv == False):
-		return render(request, 'message.html', {'msg': '학원생 추가 실해했습니다. error : Too many retry for make random pin_number', 'redirect_url': request.META['HTTP_REFERER']})
+		return render(request, 'message.html', {'msg': '학원생 추가 실해했습니다. error : Too many retry for make random pin_number', 'redirect_url': request.META.get('HTTP_REFERER')})
 
 	studentinfo.save()
 
-	return render(request, 'message.html', {'msg': "학원생 추가 성공했습니다.", 'redirect_url': request.META['HTTP_REFERER']})
+	return render(request, 'message.html', {'msg': "학원생 추가 성공했습니다.", 'redirect_url': request.META.get('HTTP_REFERER')})
 	#return redirect(addStudentsForm)
 
 @csrf_exempt
@@ -228,7 +228,7 @@ def updateStudent(request):
 		if (request.POST.get('billing_date')):
 			student.billing_date = request.POST.get('billing_date')
 	except:
-		return render(request, 'message.html', {'msg': "학생 수정에 에러가 발생했습니다.", 'redirect_url': request.META['HTTP_REFERER']})
+		return render(request, 'message.html', {'msg': "학생 수정에 에러가 발생했습니다.", 'redirect_url': request.META.get('HTTP_REFERER')})
 
 	student.save()
 	beautifyStudent = BeautifyStudent()
@@ -251,14 +251,14 @@ def deleteStudent(request):
 		student = StudentInfo.objects.get(id=sid)
 	except:
 		msg = "'" + stduent.sname + "' 학생이 존재하지 않습니다."
-		return render(request, 'message.html', {'msg': msg, 'redirect_url': request.META['HTTP_REFERER']})
+		return render(request, 'message.html', {'msg': msg, 'redirect_url': request.META.get('HTTP_REFERER')})
 
 	student.deleted_date = timezone.now()
 	student.save(update_fields=['deleted_date'])
 
 	msg = "'" + student.sname + "' 학생이 삭제되었습니다."
 
-	return render(request, 'message.html', {'msg': msg, 'redirect_url': request.META['HTTP_REFERER']})
+	return render(request, 'message.html', {'msg': msg, 'redirect_url': request.META.get('HTTP_REFERER')})
 
 
 @login_required
@@ -302,14 +302,18 @@ def convertMins(timestr):
 	mins = int(timestr[:2]) * 60 + int(timestr[3:])
 	return mins
 
-def chooseBillingCode(first_time, last_time, isShare, student_num, passenger):
+def chooseBillingCode(academy, first_time, last_time, isShare, student_num, passenger):
 	code = 0
+	overtime = 35
+
+	if (academy.bid == 11 or academy.bid == 12):
+		overtime = 50
 
 	if (student_num <= 0):
 		code = TimeHistory.BILLING_NONCHARGE | code
 
 	## overtime 과 overpeople 은 동시에 setting 되지 않음
-	if ((not isShare) and (last_time - first_time > 35)):
+	if ((not isShare) and (last_time - first_time > overtime)):
 		code = TimeHistory.BILLING_OVERTIME | code
 	elif (student_num > 5):
 		code = TimeHistory.BILLING_OVERPEOPLE | code
@@ -333,9 +337,9 @@ def getHistory(request):
         try:
             academy = Academy.objects.get(name = institute)
         except AcademyDeosNotExist:
-            return render(request, 'message.html', {'msg': "학원 검색에 실패했습니다.", 'redirect_url': request.META['HTTP_REFERER']})
+            return render(request, 'message.html', {'msg': "학원 검색에 실패했습니다.", 'redirect_url': request.META.get('HTTP_REFERER')})
     else:
-        return render(request, 'message.html', {'msg': "학원 권한이 필요합니다.", 'redirect_url': request.META['HTTP_REFERER']})
+        return render(request, 'message.html', {'msg': "학원 권한이 필요합니다.", 'redirect_url': request.META.get('HTTP_REFERER')})
 
     rv = checkAuth(request)
     if (rv != None):
@@ -372,6 +376,8 @@ def getHistory(request):
     day_dict = {'Mon':'월', 'Tue':'화', 'Wed':'수', 'Thu':'목', 'Fri':'금', 'Sat':'토', 'Sun':'일'}
     cars = set()
 
+    overtime = 30
+
 
     if aid is not None and aid != '' and startdate is not None and startdate != '' and enddate is not None and enddate != '':
         start_date = datetime.date(*map(int, startdate.split('-')))
@@ -379,6 +385,10 @@ def getHistory(request):
         total_days = (end_date - start_date).days + 1
         academy = Academy.objects.get(id=aid)
 	#aname = Academy.objects.get(pk=aid).name
+
+        if (academy.bid == 11 or academy.bid == 12):
+            overtime = 45
+
         for day_number in range(total_days):
             single_date = (start_date + datetime.timedelta(days = day_number)).strftime('%Y-%m-%d')
             schedules = []
@@ -435,7 +445,7 @@ def getHistory(request):
                     if (lflag_on_count > lflag_off_count):
                         timeHistory.lflag = True
 
-                    timeHistory.billing_code = chooseBillingCode(timeHistory.first_time, timeHistory.last_time, sharingFlag, studentNum, isPassenger)
+                    timeHistory.billing_code = chooseBillingCode(academy, timeHistory.first_time, timeHistory.last_time, sharingFlag, studentNum, isPassenger)
                     if (timeHistory.billing_code & TimeHistory.BILLING_NONCHARGE):
                         timeHistory.warning = True
                     dailyHistory.timehistory.append(timeHistory)
@@ -503,4 +513,25 @@ def getHistory(request):
             for dailyHistory in history:
                 dailyHistory.timehistory[:] = [x for x in dailyHistory.timehistory if x.carnum == carid]
 
-    return render(request, 'getHistory.html', {"history": history, "academy" : academy, 'total_count': total_count, 'startdate': startdate, 'enddate': enddate, 'user':request.user, 'cars':sorted(cars), 'carid':carid})
+    return render(request, 'getHistory.html', {"history": history, "academy" : academy, 'total_count': total_count, 'startdate': startdate, 'enddate': enddate, 'user':request.user, 'cars':sorted(cars), 'carid':carid, 'overtime':overtime})
+
+
+@login_required
+def addAcademyForm(request):
+	rv = checkAuth(request)
+	if (rv != None):
+		return rv
+
+	return render(request, 'addAcademyForm.html', )
+
+@login_required
+def updateAcademy(request):
+	rv = checkAuth(request)
+	if (rv != None):
+		return rv
+
+	aid = request.POST.get('aid')
+	academy = Academy.objects.get(id = aid)
+
+	return render(request, 'addAcademyForm.html', {'academy' : academy})
+
