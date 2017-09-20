@@ -25,7 +25,6 @@ def getResponse(debug, code, msg):
 		return JsonResponse({'code': code, 'msg': msg})
 
 
-# 90% 완성?
 def run():
     time = timeToDate()
     date = time.timeToD()
@@ -37,16 +36,15 @@ def run():
         scheduletables = ScheduleTable.objects.filter(iid = inventory.id)
         for scheduletable in scheduletables:
             schedules.extend(scheduletable.slist)
-    #print (len(set(schedules)))
-    for inventory in inventorys:
-        scheduleTables.extend(inventory.scheduletables.all()) #금일 에 해당하는 모든 인벤토리 객체를 scheduleTables 로..
 
-    #print ("++++"+str(len(set(scheduleTables))))
+    for inventory in inventorys:
+        scheduleTables.extend(inventory.scheduletables.all())
+
     count_slist = []
 
     for schTable in scheduleTables:
         if len(schTable.slist) >= 1:
-            count_slist.extend(schTable.slist) #
+            count_slist.extend(schTable.slist)
 
     dict_slist = dict(Counter(count_slist))
 
@@ -61,8 +59,6 @@ def run():
                     try:
                         sInfo = StudentInfo.objects.get(id=key)
                     except StudentInfo.DoesNotExist:
-                        print ("-------------------"+str(sInfo.id))
-                        error_count += 1
                         sInfo = None
                         break
                     else:
@@ -81,14 +77,11 @@ def run():
 
         count = module_push_content['count']-1
         if count == 0:
-            msg_count += 1
             msg = "오늘 " + module_push_content['aname'] + " 등원을 위한 " + module_push_content['time'] + " [" + module_push_content['addr'] + "] 승차 스케줄이 있습니다"
             msg_test(module_push_content['sid'], module_push_content['pin'], msg)
         else:
-            msg_count += 1
             msg = "오늘 " + module_push_content['aname'] + " 등원을 위한 " + module_push_content['time'] + " [" + module_push_content['addr'] + "]승차 외" + str(count) + "건의 스케줄이 있습니다."
             msg_test(module_push_content['sid'], module_push_content['pin'], msg)
-    print ("call"+ str(msg_count) +"error"+ str(error_count))
 
 
 
@@ -109,9 +102,9 @@ def msg_test(sid, pin, msg):
                 print ("he/she doesn't want to receive push message.")
             else:
                 if types == 'android':
-                    payload = '{\n    "to" : "' + str(token) + '","priority" : "high", "content-available" : "true","collapse_key" : "Updates Available" ,"notification": {\t  "body" : "'+str(msg)+'","title" : "shuttle tayo", "sound":"default", "color":"#0066ff"},\t}'
+                    payload = '{\n    "to" : "' + str(token) + '","priority" : "high", "content-available" : "true","collapse_key" : "Updates Available" ,"notification": {\t  "body" : "'+str(msg)+'","title" : "셔틀타요", "sound":"default"},\t}'
                 elif types == 'ios':
-                    payload = '{\n    "to" : "' + str(token) + '","priority" : "high", "content-available" : "true","collapse_key" : "Updates Available" ,"notification": {\t  "body" : "'+str(msg)+'", "sound":"default", "color":"#0066ff"},\t}'
+                    payload = '{\n    "to" : "' + str(token) + '","priority" : "high", "content-available" : "true","collapse_key" : "Updates Available" ,"notification": {\t  "body" : "'+str(msg)+'", "sound":"default"},\t}'
                 try:
                     print sid
                     response = requests.request('POST', url, data=payload, headers=header)

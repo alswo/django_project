@@ -19,7 +19,7 @@ import ast
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
-def today():
+def today_schdule_notification():
     time = timeToDate()
     date = time.timeToD()
 
@@ -39,7 +39,7 @@ def today():
 
     push_content = []
 
-    i = 0
+
     for key, value in dict_slist.iteritems():
         for s in scheduleTables:
             if len(s.slist) >= 1:
@@ -59,14 +59,12 @@ def today():
                     break
         count = module_push_content['count']-1
         if count == 0:
-            i += 1
             msg = "오늘 " + module_push_content['sname'] + " 학생의 " + module_push_content['aname'] + " 등원을 위한 " + module_push_content['time'] + " [" + module_push_content['addr'] + "] 승차 스케줄이 있습니다"
 
             push_msg_test(module_push_content['sid'], module_push_content['pin'], msg)
             #notice_to_slack(module_push_content['sid'], msg)
             #push_msg_test(module_push_content['sid'], module_push_content['pin'], msg)
         else:
-            i += 1
             msg = "오늘 " + module_push_content['aname'] + " 등원을 위한 " + module_push_content['time'] + " [" + module_push_content['addr'] + "]승차 외" + str(count) + "건의 스케줄이 있습니다."
 
             push_msg(module_push_content['sid'], module_push_content['pin'], msg)

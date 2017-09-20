@@ -596,7 +596,7 @@ def getDeviceInfo(request):
 			msg = 'insert'
 			return getResponse(debug, 201, msg)
 	except:
-			msg = "error."
+			msg = "error"
 			return getResponse(debug, 400, msg)
 
 
