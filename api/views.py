@@ -5,6 +5,8 @@ from django.utils import timezone
 from schedule.models import RealtimeLocation, Inventory, ScheduleTable, Car
 from passenger.models import StudentInfo, Academy, PersonalInfo
 from passenger.dateSchedule import timeToDate
+from fcmdev.models import PropOfDevice
+from fcm_django.models import FCMDevice
 from api.models import Notice, Clauses
 import json
 from django.views.decorators.csrf import csrf_exempt
@@ -33,7 +35,7 @@ def getRealtimeLocationDebug(request):
 		if (debug_id == None):
 			debug_id = '0'
 		msg = ""
-	
+
 		if (debug_id == '401'):
 			msg = "해당 사용자가 존재하지 않습니다."
 		elif (debug_id == '400'):
@@ -416,7 +418,7 @@ def getStudentInfo2(request):
                 for sInfo in sInfos:
 
                     studentInfo = {}
-    
+
                     studentInfo['sid'] = sInfo.id
                     studentInfo['aid'] = sInfo.aid_id
                     studentInfo['name'] = sInfo.sname
@@ -457,16 +459,16 @@ def todayLoad(request):
 
         except ScheduleTable.DoesNotExist:
             msg = 'ScheduleTable이 존재하지 않습니다.'
-            return getResponse(debug, 400, msg) 
-        
+            return getResponse(debug, 400, msg)
+
         try:
-            offset_list = stable.slist    
+            offset_list = stable.slist
             temp_index = offset_list.index(sid)
-        
+
         except ValueError:
             msg = 'sid가 ScheduleTable안에 존재하지 않습니다.'
             return getResponse(debug, 400, msg)
-        
+
         temp_tflag = stable.tflag
         #load to unload
         if temp_tflag[temp_index] == 0:
@@ -480,13 +482,13 @@ def todayLoad(request):
         stable.tflag = temp_tflag
         stable.save()
 
-	msg = {} 
+	msg = {}
         if button_flag == 0:
             msg['state'] = 'load to unload'
             return getResponse(debug,201,msg)
 
         elif button_flag == 1:
-            msg['state'] = 'unload to load' 
+            msg['state'] = 'unload to load'
             return getResponse(debug,200,msg)
 
 
@@ -502,10 +504,10 @@ def checkLoadState(request):
         except ScheduleTable.DoesNotExist:
             msg = 'ScheduleTable이 존재하지 않습니다.'
             return getResponse(debug, 400, msg)
-         
+
         if len(sTable.slist) != len(sTable.tflag):
             msg['message'] = 'ScheduleTable의 slist와 tflag의 길이가 다릅니다.'
-            return getResponse(debug, 400, msg) 
+            return getResponse(debug, 400, msg)
         try:
             sIndex = slist.index(sid)
 
@@ -523,3 +525,59 @@ def checkLoadState(request):
         else:
             msg = 'schedule table의 tflag값에 오류가 있습니다.'
             return getResponse(debug, 401, msg)
+
+
+# @csrf_exempt
+# def getDeviceInfo(request):
+#     if request.method == 'POST':
+#         name = request.POST.get('name')
+#         registration_id = request.POST.get('registration_id')
+#         active = request.POST.get('active')
+#         osType = request.POST.get('type')
+#         device_id = request.POST.get('device_id')
+#         model = request.POST.get('model')
+#         version = request.POST.get('version')
+#         serial = request.POST.get('serial')
+#         manufacture = request.POST.get('manufacture')
+#         pin_number = request.POST.get('pin_number')
+#         push = request.POST.get('recvpush')
+#
+#         try:
+#             if push == 'false':
+#                 push = False
+#             else:
+#                 push = True
+#
+#             fcm_device = FCMDevice.objects.get(device_id=device_id)
+#             fcm_device.registration_id = registration_id
+#             fcm_device.save()
+#             prop_device = PropOfDevice.objects.get(device_id=device_id)
+#             prop_device.receivePush = push
+#             prop_device.save()
+#
+#             return HttpResponse('updated')
+#
+#         except FCMDevice.DoesNotExist:
+#             if push == 'false' :
+#                 push = False
+#             else:
+#                 push = True
+#
+#             fcmDevice = FCMDevice.objects.create(device_id=device_id,
+#                     name=name, registration_id=registration_id,
+#                     active=active, type=osType)
+#             fcmDevice.save()
+#             propofDevice = PropOfDevice.objects.create(
+#                 device_id=device_id,
+#                 pin_number=pin_number,
+#                 model=model,
+#                 version=version,
+#                 serial=serial,
+#                 manufacture=manufacture,
+#                 receivePush=push
+#                 )
+#
+#             propofDevice.save()
+#             return HttpResponse('insert')
+#         except ValueError as e:
+#             return HttpResponse(e)

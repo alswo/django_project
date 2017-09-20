@@ -16,10 +16,18 @@ class PropOfDevice(models.Model):
         null=True,
         unique=True,
         )
-    slist = ArrayField(models.IntegerField(null=True, blank=True,
-                       default=0))
     model = models.CharField(max_length=255, blank=True, null=True)
     version = models.CharField(max_length=255, blank=True, null=True)
     manufacture = models.CharField(max_length=255, blank=True,
                                    null=True)
     serial = models.CharField(max_length=255, blank=True, null=True)
+    pin_number = models.CharField(max_length = 20, null = False, default = "--")
+    receivePush = models.BooleanField(default=False)
+
+
+class PushConfirming(models.Model):
+    date = models.DateTimeField(auto_now_add=True, null=True)
+    pin = models.CharField(max_length=255, blank=True, null=True)
+    confirming = models.TextField()
+    status = models.BooleanField(default=True)
+    token = models.TextField(blank=True, null=True)
