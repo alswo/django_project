@@ -173,3 +173,12 @@ class TodayLoadTimeLog(models.Model):
     stable = models.ForeignKey(ScheduleTable)
     reqtime = models.CharField(max_length = 20)
 
+class Poi(models.Model):
+    lon = models.FloatField()
+    lat = models.FloatField()
+    address = models.CharField(max_length=40)
+
+class Location(models.Model):
+    branch = models.ForeignKey(Branch)
+    alias = models.CharField(max_length=40)
+    poi = models.ForeignKey(Poi)
