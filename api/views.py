@@ -21,9 +21,9 @@ def format_hm(time):
     return (time[:2] + ':' + time[2:])
 
 def getResponse(debug, code, msg, waittime=-1):
-	if (debug == 1):
-		return HttpResponse(msg)
-	elif (waittime >= 0):
+	#if (debug == 1):
+		#return HttpResponse(msg)
+	if (waittime >= 0):
 		return JsonResponse({'code': code, 'msg': msg, 'waittime': waittime})
 	else:
 		return JsonResponse({'code': code, 'msg': msg})
