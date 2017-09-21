@@ -87,7 +87,8 @@ def listStudents(request):
 		try:
 			academy = Academy.objects.get(name = institute)
 		except Academy.DoesNotExist:
-			return render(request, 'message.html', {'msg': "학원 검색에 실패했습니다.", 'redirect_url': redirect_url})
+			return render(request, 'message.html', {'msg': "학원 검색에 실패했습니다.", 'redirect_url': "http://www.edticket.com/institute/listStudents"})
+
 		students = StudentInfo.objects.filter(aid_id = academy.id).filter(deleted_date__isnull=True).order_by('sname')
 	else:
 		students = StudentInfo.objects.all().filter(deleted_date__isnull=True).order_by('sname')
