@@ -68,7 +68,7 @@ def checkAuth(request):
 	if institute:
 		try:
 			academy = Academy.objects.get(name = institute)
-		except AcademyDoesNotExist:
+		except Academy.DoesNotExist:
 			return render(request, 'message.html', {'msg': "학원 검색에 실패했습니다.", 'redirect_url': redirect_url})
 	else:
 		return render(request, 'message.html', {'msg': "학원 권한이 필요합니다.", 'redirect_url': redirect_url})
@@ -86,7 +86,7 @@ def listStudents(request):
 	if institute:
 		try:
 			academy = Academy.objects.get(name = institute)
-		except AcademyDoesNotExist:
+		except Academy.DoesNotExist:
 			return render(request, 'message.html', {'msg': "학원 검색에 실패했습니다.", 'redirect_url': redirect_url})
 		students = StudentInfo.objects.filter(aid_id = academy.id).filter(deleted_date__isnull=True).order_by('sname')
 	else:
