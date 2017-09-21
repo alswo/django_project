@@ -13,6 +13,6 @@ urlpatterns = patterns('',
     url(r'^getStudentInfo2$', views.getStudentInfo2),
     url(r'^todayLoad$', views.todayLoad),
     url(r'^checkLoadState$', views.checkLoadState),
-    url(r'^addDeviceInfo$', views.getDeviceInfo),
+    url(r'^getDeviceInfo$', views.getDeviceInfo),
     url(r'^pushConfirmInfo$', views.pushConfirmInfo),
 )

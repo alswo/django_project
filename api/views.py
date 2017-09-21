@@ -580,10 +580,9 @@ def getDeviceInfo(request):
 
         except FCMDevice.DoesNotExist:
 
-
-			fcmDevice = FCMDevice.objects.create(device_id=device_id,name=name, registration_id=registration_id,active=active, type=osType)
-			fcmDevice.save()
-			propofDevice = PropOfDevice.objects.create(
+		fcmDevice = FCMDevice.objects.create(device_id=device_id,name=name, registration_id=registration_id,active=active, type=osType)
+		fcmDevice.save()
+		propofDevice = PropOfDevice.objects.create(
                 device_id=device_id,
                 pin_number=pin_number,
                 model=model,
@@ -592,15 +591,12 @@ def getDeviceInfo(request):
                 manufacture=manufacture,
                 receivePush=push
                 )
-			propofDevice.save()
-			msg = 'insert'
-			return getResponse(debug, 201, msg)
+		propofDevice.save()
+		msg = 'insert'
+		return getResponse(debug, 201, msg)
 	except:
-			msg = "error"
-			return getResponse(debug, 400, msg)
-
-
-
+		msg = "error"
+		return getResponse(debug, 400, msg)
 
 
 @csrf_exempt
@@ -610,6 +606,7 @@ def pushConfirmInfo(request):
         confirming = request.POST.get('confirming')
         status = request.POST.get('status')
         token = request.POST.get('token')
+        sid = request.POST.get('sid')
         debug = request.POST.get('debug')
 
         if (debug):
@@ -624,7 +621,7 @@ def pushConfirmInfo(request):
         else:
             status = True
         try:
-            pushConfirm = PushConfirming.objects.create(pin=pin, confirming=confirming, status=status, token=token)
+            pushConfirm = PushConfirming.objects.create(sid = sid, pin=pin, confirming=confirming, status=status, token=token)
             pushConfirm.save()
             msg = "confirm"
             return getResponse(debug, 200, msg)
