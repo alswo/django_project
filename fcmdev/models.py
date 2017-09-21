@@ -21,13 +21,14 @@ class PropOfDevice(models.Model):
     manufacture = models.CharField(max_length=255, blank=True,
                                    null=True)
     serial = models.CharField(max_length=255, blank=True, null=True)
-    pin_number = models.CharField(max_length = 20, null = False, default = "--")
+    pin_number = models.CharField(max_length = 20, null = False, default = "-")
     receivePush = models.BooleanField(default=False)
 
 
 class PushConfirming(models.Model):
     date = models.DateTimeField(auto_now_add=True, null=True)
-    pin = models.CharField(max_length=255, blank=True, null=True)
     confirming = models.TextField()
+    sid = models.IntegerField(blank=True, null=True)
     status = models.BooleanField(default=True)
     token = models.TextField(blank=True, null=True)
+    pin = models.CharField(max_length=255, blank=True, null=True)

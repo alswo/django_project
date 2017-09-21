@@ -12,11 +12,8 @@ import sys
 import requests
 import simplejson
 import ast
-
 reload(sys)
 sys.setdefaultencoding('utf-8')
-
-
 
 def getResponse(debug, code, msg):
 	if (debug == 1):
@@ -32,21 +29,20 @@ def today_schedule_notification():
 
     scheduleTables = []
     schedules = []
-    inventorys = Inventory.objects.filter(day = '목').prefetch_related('scheduletables').reverse()
+    inventorys = Inventory.objects.filter(day = date).prefetch_related('scheduletables').reverse()
     for inventory in inventorys:
         scheduletables = ScheduleTable.objects.filter(iid = inventory.id)
         for scheduletable in scheduletables:
             schedules.extend(scheduletable.slist)
-    #print (len(set(schedules)))
-    for inventory in inventorys:
-        scheduleTables.extend(inventory.scheduletables.all()) #금일 에 해당하는 모든 인벤토리 객체를 scheduleTables 로..
 
-    #print ("++++"+str(len(set(scheduleTables))))
+    for inventory in inventorys:
+        scheduleTables.extend(inventory.scheduletables.all())
+
     count_slist = []
 
     for schTable in scheduleTables:
         if len(schTable.slist) >= 1:
-            count_slist.extend(schTable.slist) #
+            count_slist.extend(schTable.slist)
 
     dict_slist = dict(Counter(count_slist))
 
@@ -61,8 +57,6 @@ def today_schedule_notification():
                     try:
                         sInfo = StudentInfo.objects.get(id=key)
                     except StudentInfo.DoesNotExist:
-                        print ("-------------------"+str(sInfo.id))
-                        error_count += 1
                         sInfo = None
                         break
                     else:
@@ -72,6 +66,7 @@ def today_schedule_notification():
                         module_push_content['sname'] = sInfo.sname
                         module_push_content['time'] = schTable.time
                         module_push_content['addr'] = schTable.addr
+			module_push_content['lflag'] = schTable.lflag
                         module_push_content['aname'] = sInfo.aname
                         module_push_content['pin'] = pin.pin_number
                         module_push_content['sid'] = key
@@ -80,14 +75,23 @@ def today_schedule_notification():
                         break
 
         count = module_push_content['count']-1
+	lflag = module_push_content['lflag']
+	sname = module_push_content['sname'] = sInfo.sname
+
+	if lflag == 0:
+            flag = "하원을 위한"
+
+	elif lflag == 1:
+	    flag = "등원을 위한"
+	else:
+	    flag = "에 대한"
         if count == 0:
-            msg_count += 1
-            msg = "오늘 " + module_push_content['aname'] + " 등원을 위한 " + module_push_content['time'] + " [" + module_push_content['addr'] + "] 승차 스케줄이 있습니다"
+            msg = "오늘 " + sname + " 학생의 " + module_push_content['aname'] + " " + flag + " " + module_push_content['time'] + " [" + module_push_content['addr'] + "] 승차 스케줄이 있습니다"
             send_msg(module_push_content['sid'], module_push_content['pin'], msg)
         else:
-            msg_count += 1
-            msg = "오늘 " + module_push_content['aname'] + " 등원을 위한 " + module_push_content['time'] + " [" + module_push_content['addr'] + "]승차 외" + str(count) + "건의 스케줄이 있습니다."
+            msg = "오늘 " + sname + " 학생의 " + module_push_content['aname'] + " 등원을 위한 " + module_push_content['time'] + " [" + module_push_content['addr'] + "]승차 외" + str(count) + "건의 스케줄이 있습니다."
             send_msg(module_push_content['sid'], module_push_content['pin'], msg)
+
 
 
 def send_msg(sid, pin, msg):
@@ -102,22 +106,22 @@ def send_msg(sid, pin, msg):
         for f in fcm:
             token = f.registration_id
             types = f.type
-            print msg
+
             if pushcheck == False:
                 print ("he/she doesn't want to receive push message.")
             else:
                 if types == 'android':
-                    payload = '{\n    "to" : "' + str(token) + '","priority" : "high", "content-available" : "true","collapse_key" : "Updates Available" ,"notification": {\t  "body" : "'+str(msg)+'","title" : "shuttle tayo", "sound":"default", "color":"#0066ff"},\t}'
+                    payload = '{\n    "to" : "' + str(token) + '","priority" : "high", "content-available" : "true","collapse_key" : "Updates Available" ,"notification": {\t  "body" : "'+str(msg)+'","title" : "셔틀타요", "sound":"default"},\t}'
                 elif types == 'ios':
-                    payload = '{\n    "to" : "' + str(token) + '","priority" : "high", "content-available" : "true","collapse_key" : "Updates Available" ,"notification": {\t  "body" : "'+str(msg)+'", "sound":"default", "color":"#0066ff"},\t}'
+                    payload = '{\n    "to" : "' + str(token) + '","priority" : "high", "content-available" : "true","collapse_key" : "Updates Available" ,"notification": {\t  "body" : "'+str(msg)+'", "sound":"default"},\t}'
                 try:
-                    print sid
+                    sid = str(sid)
                     response = requests.request('POST', url, data=payload, headers=header)
                     try:
                         result = ast.literal_eval(response.text)
                         status = str(result['success'])
                         pushurl = 'http://mj.edticket.com/fcmdev/pushConfirmInfo'
-                        data = "pin="+pin+"&confirming="+response.text+"&status="+status+"&token="+token
+                        data = "pin="+pin+"&confirming="+response.text+"&status="+status+"&token="+token+"&sid="+sid
                         headers = {'content-type': "application/x-www-form-urlencoded"}
                         response = requests.request("POST", pushurl, data=data, headers=headers)
                     except:
