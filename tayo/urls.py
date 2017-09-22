@@ -1,8 +1,12 @@
 from django.conf.urls import url, include
 from django.contrib import admin
+<<<<<<< HEAD
 from fcm_django.api.rest_framework import FCMDeviceViewSet, FCMDeviceAuthorizedViewSet
 from rest_framework.routers import DefaultRouter
 from rest_framework.documentation import include_docs_urls
+=======
+from django.contrib.auth import views as auth_views
+>>>>>>> c70c00d3fe12bb407c572f4f2b2738759ab6d307
 
 router = DefaultRouter()
 router.register(r'devices', FCMDeviceViewSet)
@@ -16,20 +20,19 @@ urlpatterns = [
     url(r'^institute/',include('institute.urls')),
     url(r'^indicator/',include('indicator.urls')),
     url(r'^message/',include('message.urls')),
-    url(r'^getToken',include('firebase.urls')),
     url(r'^monitor/',include('monitor.urls')),
     url(r'^fcm/', include('fcm.urls')),
     url(r'^fcmdev/',include('fcmdev.urls')),
     url(r'^', include(router.urls)),
     url(
         r'^accounts/login/',
-        'django.contrib.auth.views.login',
+        auth_views.login,
         name='login',
         kwargs={
             'template_name': 'login.html'
         }
     ),
-    url(r'^logout/$', 'django.contrib.auth.views.logout', {
+    url(r'^logout/$', auth_views.logout, {
         'next_page': '/accounts/login',
         }, name='logout_url'
     ),

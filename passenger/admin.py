@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
-from passenger.models import Academy, Commute, Schedule, ShuttleSchedule, AcademySchedule, Group, PhoneList, ScheduleDate, StudentInfo,Community,Grade,Profile
+from passenger.models import Academy, Commute, Schedule, ShuttleSchedule, AcademySchedule, Group, ScheduleDate, StudentInfo,Community,Grade,Profile
 from simple_history.admin import SimpleHistoryAdmin
 from passenger.forms import StudentInfoForm, ProfileInfoForm, AcademyForm
 
@@ -39,8 +39,8 @@ class AcademyScheduleAdmin(admin.ModelAdmin):
 class GroupAdmin(admin.ModelAdmin):
     list_display = ('gname','gid')
 
-class PhoneListAdmin(admin.ModelAdmin):
-    list_display = ('name', 'aname')
+#class PhoneListAdmin(admin.ModelAdmin):
+    #list_display = ('name', 'aname')
 
 class ScheduleDateAdmin(admin.ModelAdmin):
     list_display = ('a_name', 'day', 'time')
@@ -69,7 +69,7 @@ admin.site.register(Schedule,ScheduleAdmin)
 admin.site.register(Academy,AcademyAdmin)
 admin.site.register(ShuttleSchedule,ShuttleScheduleAdmin)
 admin.site.register(AcademySchedule,AcademyScheduleAdmin)
-admin.site.register(PhoneList,PhoneListAdmin)
+#admin.site.register(PhoneList,PhoneListAdmin)
 admin.site.register(ScheduleDate, ScheduleDateAdmin)
 admin.site.register(StudentInfo, StudentInfoAdmin)
 admin.site.register(Community, CommunityAdmin)

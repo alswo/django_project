@@ -38,13 +38,29 @@ def sendMessage(request):
             sInfo = StudentInfo.objects.filter(aid_id = aid)
 
         for s in sInfo:
+            list_to = []
+            temp_to = {}
             pInfo = PersonalInfo.objects.get(id = s.personinfo_id )
             sname = s.sname
             aname = s.aname
-            to = s.parents_phonenumber[1:]
+            if s.parents_phonenumber:
+                to_parents = s.parents_phonenumber[1:]
+                temp_to["to"] = ("82"+ to_parents).encode('utf8')
+                list_to.append(temp_to)
+            
+            if s.self_phonenumber:
+                to_self = s.self_phonenumber[1:]
+                temp_to["to"] = ("82"+to_self).encode('utf8')
+                list_to.append(temp_to)
 
+            if s.grandparents_phonenumber:
+                to_grandparents = s.grandparents_phonenumber[1:]
+                temp_to["to"] = ("82"+ to_grandparents).encode('utf8')
+                list_to.append(temp_to)
+
+            list_to = json.dumps(list_to)
             pin = pInfo.pin_number
-            status = sendPin(token, kind, to, aname, sname, pin)
+            status = sendPin(token, kind, list_to, aname, sname, pin)
 
             if status == 'R000':
                 s.sended_time = reqtime
@@ -61,5 +77,5 @@ def sendMessage(request):
             else:
                 s.sended_time ='발송 실패'
             s.save()
-
-        return HttpResponse('success')
+ 
+        return HttpResponse(status)

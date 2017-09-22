@@ -22,9 +22,11 @@ def get_difference(time1, time2):
 def format_hm(time):
     return (time[:2] + ':' + time[2:])
 
-def getResponse(debug, code, msg):
-	if (debug == 1):
-		return HttpResponse(msg)
+def getResponse(debug, code, msg, waittime=-1):
+	#if (debug == 1):
+		#return HttpResponse(msg)
+	if (waittime >= 0):
+		return JsonResponse({'code': code, 'msg': msg, 'waittime': waittime})
 	else:
 		return JsonResponse({'code': code, 'msg': msg})
 
@@ -35,7 +37,12 @@ def getRealtimeLocationDebug(request):
 		if (debug_id == None):
 			debug_id = '0'
 		msg = ""
+<<<<<<< HEAD
 
+=======
+		waittime = -1
+	
+>>>>>>> c70c00d3fe12bb407c572f4f2b2738759ab6d307
 		if (debug_id == '401'):
 			msg = "해당 사용자가 존재하지 않습니다."
 		elif (debug_id == '400'):
@@ -50,8 +57,9 @@ def getRealtimeLocationDebug(request):
 			msg = "0호차가 출발했습니다."
 		elif (debug_id == '200'):
 			msg = "0호차가 30분 후 도착합니다."
+			waittime = 30
 
-		return getResponse(0, int(debug_id), msg)
+		return getResponse(0, int(debug_id), msg, waittime)
 
 def getRealtimeLocation(request):
     if request.method == "GET":
@@ -142,7 +150,7 @@ def getRealtimeLocation(request):
 			return getResponse(debug, 201, msg)
 
 		    msg = str(carnum) + "호차가 "  + str(waittime) + "분 후 도착합니다."
-		    return getResponse(debug, 200, msg)
+		    return getResponse(debug, 200, msg, waittime)
                 ## 다음 inventory 로..
                 else:
                     continue
@@ -163,6 +171,251 @@ def getRealtimeLocation(request):
 def makeTimeStr(inttime):
         timestr = "%04d" % inttime
         return timestr[:2] + ":" + timestr[2:]
+
+def makeHMstr(intTime):
+	hr = int(intTime / 60)
+	mn = intTime - (hr * 60)
+	return "%02d:%02d" % (hr, mn)
+
+def minusHM(strHM, intTime):
+	return makeHMstr(int(strHM[:2]) * 60 + int(strHM[3:]) - intTime)
+
+def plusHM(strHM, intTime):
+	return makeHMstr(int(strHM[:2]) * 60 + int(strHM[3:]) + intTime)
+
+def experienceGetSchedulesForStudent(request):
+        t = timeToDate()
+        d = t.timeToD()
+	startdayOfWeek = t.timeToStartDayOfWeek()
+	#current_time = str(timezone.now())[11:16]
+	current_time = t.timeToHM()
+	msg = {}
+	msg['sid'] = '0000'
+	msg['schedules'] = {}
+	daydictionary = {u'월':'mon', u'화':'tue', u'수':'wed', u'목':'thu', u'금':'fri', u'토':'sat', u'일':'sun'}
+	daylist = [u'월', u'화', u'수', u'목', u'금', u'토', u'일']
+
+	for day in daylist:
+		msg['schedules'][daydictionary[day]] = {}
+		msg['schedules'][daydictionary[day]]['list'] = list()
+		msg['schedules'][daydictionary[day]]['date'] = (startdayOfWeek + timedelta(days=daylist.index(day))).strftime("%Y.%m.%d")
+		if d == day :
+			msg['schedules'][daydictionary[day]]['today'] = True
+		else:
+			msg['schedules'][daydictionary[day]]['today'] = False
+
+	# monday
+	data = {}
+	data['time'] = '15:38'
+	data['addr'] = '풍덕천동 대우푸르지오 정거장'
+	data['carnum'] = 32
+	data['inventory_id'] = 0
+	data['start_time'] = '15:25'
+	data['end_time'] = '15:55'
+	data['institute_name'] = 'ABCD학원'
+	data['scheduletable_id'] = 0
+	data['driver_telephone'] = '000-0000-0000'
+	data['lflag'] = '등원'
+	msg['schedules']['mon']['list'].append(data)
+
+	data = {}
+	data['time'] = '17:45'
+	data['addr'] = '풍덕천동 대우푸르지오 정거장'
+	data['carnum'] = 32
+	data['inventory_id'] = 0
+	data['start_time'] = '17:35'
+	data['end_time'] = '18:00'
+	data['institute_name'] = 'ABCD학원'
+	data['scheduletable_id'] = 0
+	data['driver_telephone'] = '000-0000-0000'
+	data['lflag'] = '하원'
+	msg['schedules']['mon']['list'].append(data)
+
+	# tuesday
+	data = {}
+	data['time'] = '16:17'
+	data['addr'] = '소만 1단지 버스정류장'
+	data['carnum'] = 29
+	data['inventory_id'] = 0
+	data['start_time'] = '16:00'
+	data['end_time'] = '16:26'
+	data['institute_name'] = 'ABCD학원'
+	data['scheduletable_id'] = 0
+	data['driver_telephone'] = '000-0000-0000'
+	data['lflag'] = '등원'
+	msg['schedules']['tue']['list'].append(data)
+
+	data = {}
+	data['time'] = '19:18'
+	data['addr'] = '소만 1단지 버스정류장'
+	data['carnum'] = 29
+	data['inventory_id'] = 0
+	data['start_time'] = '19:00'
+	data['end_time'] = '19:26'
+	data['institute_name'] = 'ABCD학원'
+	data['scheduletable_id'] = 0
+	data['driver_telephone'] = '000-0000-0000'
+	data['lflag'] = '하원'
+	msg['schedules']['tue']['list'].append(data)
+
+	# wednesday
+	data = {}
+	data['time'] = '14:00'
+	data['addr'] = '서당초등학교 후문 앞'
+	data['carnum'] = 20
+	data['inventory_id'] = 0
+	data['start_time'] = '15:40'
+	data['end_time'] = '14:07'
+	data['institute_name'] = 'ABCD학원'
+	data['scheduletable_id'] = 0
+	data['driver_telephone'] = '000-0000-0000'
+	data['lflag'] = '등원'
+	msg['schedules']['wed']['list'].append(data)
+
+	data = {}
+	data['time'] = '16:10'
+	data['addr'] = '현대아파트 113동 앞'
+	data['carnum'] = 20
+	data['inventory_id'] = 0
+	data['start_time'] = '16:05'
+	data['end_time'] = '16:25'
+	data['institute_name'] = 'ABCD학원'
+	data['scheduletable_id'] = 0
+	data['driver_telephone'] = '000-0000-0000'
+	data['lflag'] = '하원'
+	msg['schedules']['wed']['list'].append(data)
+
+	# thursday
+	data = {}
+	data['time'] = '14:40'
+	data['addr'] = '위례별초 맞은편'
+	data['carnum'] = 13
+	data['inventory_id'] = 0
+	data['start_time'] = '14:35'
+	data['end_time'] = '15:05'
+	data['institute_name'] = 'ABCD학원'
+	data['scheduletable_id'] = 0
+	data['driver_telephone'] = '000-0000-0000'
+	data['lflag'] = '등원'
+	msg['schedules']['thu']['list'].append(data)
+
+	data = {}
+	data['time'] = '16:20'
+	data['addr'] = '센트럴푸르지오 정문 새싹정류장'
+	data['carnum'] = 32
+	data['inventory_id'] = 0
+	data['start_time'] = '16:05'
+	data['end_time'] = '16:25'
+	data['institute_name'] = 'ABCD학원'
+	data['scheduletable_id'] = 0
+	data['driver_telephone'] = '000-0000-0000'
+	data['lflag'] = '하원'
+	msg['schedules']['thu']['list'].append(data)
+
+	# friday
+	data = {}
+	data['time'] = '15:40'
+	data['addr'] = '한빛초 병설유치원'
+	data['carnum'] = 4
+	data['inventory_id'] = 0
+	data['start_time'] = '15:25'
+	data['end_time'] = '15:55'
+	data['institute_name'] = 'ABCD학원'
+	data['scheduletable_id'] = 0
+	data['driver_telephone'] = '000-0000-0000'
+	data['lflag'] = '등원'
+	msg['schedules']['fri']['list'].append(data)
+
+	data = {}
+	data['time'] = '16:59'
+	data['addr'] = '엠코센트로엘 정문'
+	data['carnum'] = 4
+	data['inventory_id'] = 0
+	data['start_time'] = '16:55'
+	data['end_time'] = '17:11'
+	data['institute_name'] = 'ABCD학원'
+	data['scheduletable_id'] = 0
+	data['driver_telephone'] = '000-0000-0000'
+	data['lflag'] = '하원'
+	msg['schedules']['fri']['list'].append(data)
+
+	# today
+	msg['schedules'][daydictionary[unicode(d)]]['list'] = list()
+	data = {}
+	data['time'] = current_time
+	data['addr'] = '위례초 정문'
+	data['carnum'] = 4
+	data['inventory_id'] = 0
+	data['start_time'] = minusHM(current_time, 15)
+	data['end_time'] = plusHM(current_time, 15)
+	data['institute_name'] = 'ABCD학원'
+	data['scheduletable_id'] = 0
+	data['driver_telephone'] = '000-0000-0000'
+	data['lflag'] = '등원'
+	msg['schedules'][daydictionary[unicode(d)]]['list'].append(data)
+
+	data = {}
+	data['time'] = plusHM(current_time, 120)
+	data['addr'] = '롯데캐슬 정문'
+	data['carnum'] = 4
+	data['inventory_id'] = 0
+	data['start_time'] = plusHM(current_time, 105)
+	data['end_time'] = plusHM(current_time, 135)
+	data['institute_name'] = 'ABCD학원'
+	data['scheduletable_id'] = 0
+	data['driver_telephone'] = '000-0000-0000'
+	data['lflag'] = '하원'
+	msg['schedules'][daydictionary[unicode(d)]]['list'].append(data)
+
+	return JsonResponse(msg)
+
+def experienceGetRealtimeLocation(request):
+	msg = "4호차가 7분 후 도착합니다."
+	return getResponse(0, 200, msg, 7)
+
+def experienceGetRouteMap(request):
+        t = timeToDate()
+	current_time = t.timeToHM()
+	msg = {}
+	msg['routemap'] = list()
+
+	data = {}
+	data['addr'] = '출발'
+	data['sequence'] = 1
+	data['time'] = minusHM(current_time, 15)
+	msg['routemap'].append(data)
+
+	data = {}
+	data['addr'] = '강동자이 프라자아파트 정문'
+	data['sequence'] = 2
+	data['time'] = minusHM(current_time, 10)
+	msg['routemap'].append(data)
+
+	data = {}
+	data['addr'] = '현대아파트 (현대중앙상가 앞)'
+	data['sequence'] = 3
+	data['time'] = minusHM(current_time, 7)
+	msg['routemap'].append(data)
+
+	data = {}
+	data['addr'] = '위례초 정문'
+	data['sequence'] = 4
+	data['time'] = current_time
+	msg['routemap'].append(data)
+
+	data = {}
+	data['addr'] = '도착'
+	data['sequence'] = 5
+	data['time'] = plusHM(current_time, 15)
+	msg['routemap'].append(data)
+
+	return JsonResponse(msg)
+
+def getSchedulesForStudent(request):
+    if request.method == "GET":
+	max_diff = 10
+	msg['schedules'][daydictionary[d]]['list'].append(data)
+	return JsonResponse(msg)
 
 def getSchedulesForStudent(request):
     if request.method == "GET":
@@ -228,7 +481,10 @@ def getSchedulesForStudent(request):
 
 		try :
 			car = Car.objects.get(carname=scheduletable.iid.carnum)
-			data['driver_telephone'] = "0" + str(car.driver)
+			if car.passenger and len(str(car.passenger)) > 9 :
+				data['driver_telephone'] = '0' + str(car.passenger)
+			else :
+				data['driver_telephone'] = "0" + str(car.driver)
 		except Car.DoesNotExist:
 			data['driver_telephone'] = ''
 
@@ -412,6 +668,8 @@ def getStudentInfo2(request):
         try:
             #sInfo = StudentInfo.objects.get(pin_number = pin_number)
             pInfos = PersonalInfo.objects.filter(pin_number = pin_number)
+            if len(pInfos) <= 0:
+                raise PersonalInfo.DoesNotExist
             studentInfos = list()
             for pInfo in pInfos:
 	        sInfos = StudentInfo.objects.filter(personinfo = pInfo)

@@ -25,16 +25,47 @@ INSTALLED_APPS = [
     'django_extensions',
     'rest_framework',
     'simple_history',
-    'firebase',
     'api',
     'institute',
     'indicator',
     'corsheaders',
     'fcm',
     'util',
+<<<<<<< HEAD
     'fcmdev',
     'fcm_django',
+=======
+    #'traccar',
+>>>>>>> c70c00d3fe12bb407c572f4f2b2738759ab6d307
 ]
+
+#LOGGING = {
+#    'version': 1,
+#    'disable_existing_loggers': True,
+#    'formatters': {
+#        'standard': {
+#            'format': '%(asctime)s|%(levelname)s|%(message)s',
+#            'datefmt' : "%d/%b/%Y %H:%M:%S"
+#        }
+#    },
+#    'handlers': {
+#        'file': {
+#            'level':'DEBUG',
+#            'class':'logging.handlers.RotatingFileHandler',
+#            'filename':'/root/debug/debug.log',
+#            'maxBytes':10192*10192*1,
+#            'backupCount':10,
+#            'formatter':'standard'
+#        },
+#    },
+#    'loggers':{
+#        'django':{
+#            'handlers':['file'],
+#            'level': 'DEBUG',
+#            'propagate':True,
+#        }
+#    }
+#}
 
 MIDDLEWARE_CLASSES = [
     'django.middleware.security.SecurityMiddleware',
@@ -106,6 +137,7 @@ CRONJOBS = [
     ('00 21 * * *', 'schedule.cron.store_historyschedule_old'),
     #('00 22 * * sun', 'schedule.cron.reset_lflag_on_every_schedule'),
     ('30 23 * * sun', 'schedule.cron.weekly_update'),
+    ('30 23 * * sat', 'schedule.cron.resetTodayLoad'),
     #('00 23 31 12 *', 'schedule.test.move_schedule'),
     #('00 23 31 12 *', 'schedule.test.regist_student')
 ]

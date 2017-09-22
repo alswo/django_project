@@ -39,7 +39,14 @@ function callNumber(num){
       <div class="col-md-4">
 
       </div>
-        <div class="col-md-4" align="center"><button type="button" class="btn btn-danger" onclick="location.href='/'">홈</button> <button type="button" class="btn btn-info" onclick="location.href='getSchedule?bid={{bid}}&aid={{aid}}&day=월'">월</button>  <button type="button" class="btn btn-info" onclick="location.href='getSchedule?bid={{bid}}&aid={{aid}}&day=화'">화</button>  <button type="button" class="btn btn-info" onclick="location.href='getSchedule?bid={{bid}}&aid={{aid}}&day=수'">수</button>  <button type="button" class="btn btn-info" onclick="location.href='getSchedule?bid={{bid}}&aid={{aid}}&day=목'">목</button>  <button type="button" class="btn btn-info" onclick="location.href='getSchedule?bid={{bid}}&aid={{aid}}&day=금'">금</button>  <button type="button" class="btn btn-info" onclick="location.href='getSchedule?bid={{bid}}&aid={{aid}}&day=토'">토</button></div>
+        <div class="col-md-4" align="center">
+          <button type="button" class="btn btn-danger" onclick="location.href='/'">홈</button>
+          <button type="button" class="{% if day == '월' %}btn btn-primary{% else %} btn btn-info {% endif %}" onclick="location.href='getSchedule?bid={{bid}}&aid={{aid}}&day=월'">월</button>
+          <button type="button" class="{% if day == '화' %}btn btn-primary{% else %} btn btn-info {% endif %}" onclick="location.href='getSchedule?bid={{bid}}&aid={{aid}}&day=화'">화</button>
+          <button type="button" class="{% if day == '수' %}btn btn-primary{% else %} btn btn-info {% endif %}" onclick="location.href='getSchedule?bid={{bid}}&aid={{aid}}&day=수'">수</button>
+          <button type="button" class="{% if day == '목' %}btn btn-primary{% else %} btn btn-info {% endif %}" onclick="location.href='getSchedule?bid={{bid}}&aid={{aid}}&day=목'">목</button>
+          <button type="button" class="{% if day == '금' %}btn btn-primary{% else %} btn btn-info {% endif %}" onclick="location.href='getSchedule?bid={{bid}}&aid={{aid}}&day=금'">금</button>
+          <button type="button" class="{% if day == '토' %}btn btn-primary{% else %} btn btn-info {% endif %}" onclick="location.href='getSchedule?bid={{bid}}&aid={{aid}}&day=토'">토</button></div>
       <div class="col-md-4">
 
       </div>
@@ -62,7 +69,7 @@ function callNumber(num){
 
         <div class="col-md-10 col-xs-12">
             {% for c in contacts %}
-            <div class="panel panel-default">
+            <div class="panel {% if c.passenger == 0 %}panel-success{% else %}panel-default{% endif %}">
               <!-- Default panel contents -->
               <div class="panel-heading">
                 <button type="button" class="btn btn-small btn-warning" role="button" data-toggle="collapse" href="#collapsePhone{{c.id}}" onclick="getCarPhone(this, {{c.carnum}},{{c.id}})" aria-expanded="false" aria-controls="collapseExample">{{c.carnum}}호차</button>
@@ -70,6 +77,7 @@ function callNumber(num){
                 {% for aname in c.anamelist %}
                 <button type="button" class="btn btn-small btn-warning">{{aname}}</button>
                 {% endfor %}
+		{% if c.passenger == 0 %} [동승자 필요] {% endif %}
                 <div class="collapse" id="collapsePhone{{c.id}}">
                 </div>
               </div>
@@ -203,7 +211,7 @@ function callNumber(num){
 function todayLoad(sid,stableid){
 
     var btnid = sid+''+stableid
-    
+
     $.ajax({
       url:"/inventory/todayLoad",
       type:"POST",
@@ -230,7 +238,7 @@ function getCarPhone(e, cid,fc){
         carnum: cid,
       },
       success: function(data) {
-        $('#collapsePhone'+fc).html("<br><a class='btn-xs btn-info' href='tel:"+data['phonelist'][0]+"'>기사님</a>&nbsp&nbsp<a class='btn-xs btn-info' href='tel:"+data['phonelist'][1]+"'>동승자</a>");
+        $('#collapsePhone'+fc).html("<br><a class='btn-xs btn-info' href='tel:0"+data['phonelist'][0]+"'>기사님</a>&nbsp&nbsp<a class='btn-xs btn-info' href='tel:0"+data['phonelist'][1]+"'>동승자</a>");
       }
   });
 

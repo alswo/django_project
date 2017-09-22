@@ -8,13 +8,13 @@ from passenger.models import Academy
 class BaseIndicator(models.Model):
 	date = models.CharField(max_length=10)
 	# following means total number
-	inventoryNum = models.IntegerField()
-	scheduleTableNum = models.IntegerField()
-	studentInfoNum = models.IntegerField()
+	inventorynum = models.IntegerField()
+	scheduletablenum = models.IntegerField()
+	studentinfonum = models.IntegerField()
 	# following means today's number
-	dayInventoryNum = models.IntegerField()
-	dayScheduleTableNum = models.IntegerField()
-	dayStudentInfoNum = models.IntegerField()
+	dayinventorynum = models.IntegerField()
+	dayscheduletablenum = models.IntegerField()
+	daystudentinfonum = models.IntegerField()
 
 	class Meta:
 		abstract = True

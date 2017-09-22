@@ -102,7 +102,7 @@
                 <a id="dLabel" type="button" href='inventory/updateSchedule' class="btn btn-primary btn-lg btn-block" aria-expanded="true">UPDATE SCHEDULE</a>
             <br>
             {% endif %}
-            {% if user.is_staff or user|in_group:"driver"%}
+            {% if user.is_staff %}
             <button id="dLabel" type="button" class="btn btn-primary btn-lg btn-block" data-toggle="modal" data-target="#getschedule">학원용 스케쥴보기</button>
             <div class="modal fade" id="getschedule" role="dialog">
                 <div class="modal-dialog">
@@ -131,7 +131,7 @@
             <br>
             {% endif %}
             {% if user|in_group:"academy"%}
-            <button id="dLabel" type="button" class="btn btn-primary btn-lg btn-block"  onclick="location.href='/inventory/getSchedule'"data-toggle="modal" data-target="#getschedule">학원용 스케쥴보기 (NEW)</button>
+            <button id="dLabel" type="button" class="btn btn-primary btn-lg btn-block"  onclick="location.href='/inventory/getSchedule'"data-toggle="modal" data-target="#getschedule">학원용 스케쥴보기</button>
             <br>
             {% endif %}
             {% if user.is_staff or user|in_group:"driver" %}

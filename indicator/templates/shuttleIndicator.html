@@ -5,7 +5,7 @@
 	<DIV class="col-md-2">
 		<SELECT name="area_id" class="form-control" id="areaSelect">
 		{% for area in areas %}
-			<OPTION value="{{area.id}}" {% if area.id == area_id %}selected{% endif %}>{{area.name}}<
+			<OPTION value="{{area.id}}" {% if area.id == area_id %}selected{% endif %}>{{area.name}}</OPTION>
 		{% endfor %}
 		</SELECT>
 	</DIV>

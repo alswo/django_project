@@ -1,7 +1,7 @@
-from django.conf.urls import patterns, url, include
+from django.conf.urls import url, include
 from schedule import views
 
-urlpatterns = patterns('',
+urlpatterns = [
     url(r'^putSchedule', views.putSchedule),
     url(r'^getSchedule', views.getSchedule),
     url(r'^todayLoad', views.todayLoad),
@@ -21,4 +21,4 @@ urlpatterns = patterns('',
     url(r'^moveCarInven', views.moveCarInven),
     url(r'^moveCarEditedInven', views.moveCarEditedInven),
     url(r'^busAcademy', views.busAcademy),
-)
+]

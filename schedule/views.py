@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import logging
 from django.shortcuts import render_to_response, redirect
 from django.template import RequestContext
 from schedule.models import HistoryScheduleTable, Inventory, ScheduleTable, Building, Branch, InventoryRequest, Area, Car, RealtimeLocation, EditedInven, EditedScheduleTable, TodayLoadTimeLog
@@ -19,10 +20,10 @@ from django.core.serializers import serialize
 import datetime
 import operator
 import json
-import logging
 import collections
 import re
-from schedule.createInventory import UpdateInven
+from schedule.updateInventory import UpdateInven 
+from schedule.createInventory import CreateInven
 from schedule.maintainTodayLoad import getUnloadSid, getTflag
 
 class TimeHistory:
@@ -55,6 +56,17 @@ def invenToJson(invens):
         inventory['week3'] = i.week3
         inventory['req'] = i.req
         inventory['memo'] = i.memo
+        inventory['passenger'] = 1
+
+        for studentInfo in i.slist:
+            try:
+                sInfo = StudentInfo.objects.get(id = studentInfo)
+            except StudentInfo.DoesNotExist:
+                continue
+
+            if sInfo.birth_year == None or ((datetime.datetime.now().year - int(sInfo.birth_year) + 1) <= 13):
+                inventory['passenger'] = 0
+                break
 
         schedules = ScheduleTable.objects.filter(iid = i.id)
 
@@ -80,6 +92,7 @@ def invenToJson(invens):
                     sInfo['name'] = studentInfo.sname
                     sInfo['aid'] = studentInfo.aid
                     sInfo['aname'] = academy.name
+                    sInfo['aphone'] = academy.phone_1
                     sInfo['grade'] = studentInfo.grade
                     sInfo['phone1'] = studentInfo.phone1
                     sInfo['phonelist'] = studentInfo.phonelist
@@ -102,6 +115,97 @@ def invenToJson(invens):
         contacts.append(inventory)
 
     return contacts
+
+#return inventory, editedInven where updateSchedule
+def getContacts(bid, day, carnum, week, searchTime, aid = -1):
+    
+    contacts = []
+    
+    if aid == -1:
+        if searchTime == '':
+            if week == 0:
+                contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(carnum = carnum).prefetch_related('scheduletables'))
+
+            elif week == 1:
+                contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(carnum = carnum).filter(week1 = 0).prefetch_related('scheduletables'))
+                contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(carnum = carnum).filter(week = 1).prefetch_related('editedscheduletables'))
+
+            elif week == 2:
+                contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(carnum = carnum).filter(week2 = 0).prefetch_related('scheduletables'))
+                contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(carnum = carnum).filter(week = 2).prefetch_related('editedscheduletables'))
+
+            elif week == 3:
+                contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(carnum = carnum).filter(week3 = 0).prefetch_related('scheduletables'))
+                contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(carnum = carnum).filter(week = 3).prefetch_related('editedscheduletables'))
+
+        else:
+            searchTime = int(searchTime)
+        
+            if week == 0:
+                contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).filter(carnum = carnum).prefetch_related('scheduletables'))
+
+            elif week == 1:
+                contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(week1=0).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).filter(carnum = carnum).prefetch_related('scheduletables'))
+                contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(week = 1).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).filter(carnum = carnum).prefetch_related('editedscheduletables'))
+
+            elif week == 2:
+                contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(week2=0).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).filter(carnum = carnum).prefetch_related('scheduletables'))
+                contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(week = 2).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).filter(carnum = carnum).prefetch_related('editedscheduletables'))
+
+
+            elif week == 3:
+                contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(week3=0).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).filter(carnum = carnum).prefetch_related('scheduletables'))
+                contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(week = 3).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).filter(carnum = carnum).prefetch_related('editedscheduletables'))
+
+    else:
+        if searchTime == '':
+
+            if week == 0:
+                contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).prefetch_related('scheduletables'))
+
+            elif week == 1:
+                contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week1 = 0).prefetch_related('scheduletables'))
+                contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week = 1).prefetch_related('editedscheduletables'))
+
+            elif week == 2:
+                contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week2 = 0).prefetch_related('scheduletables'))
+                contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week = 2).prefetch_related('editedscheduletables'))
+
+            elif week == 3:
+                contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week3 = 0).prefetch_related('scheduletables'))
+                contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week = 3).prefetch_related('editedscheduletables'))
+
+        else:
+            searchTime = int(searchTime)
+
+            if week == 0:
+                contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('scheduletables'))
+
+            elif week == 1:
+                contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week1=0).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('scheduletables'))
+                contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week = 1).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('editedscheduletables'))
+
+            elif week == 2:
+                contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week2=0).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('scheduletables'))
+                contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week = 2).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('editedscheduletables'))
+
+
+            elif week == 3:
+                contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week3=0).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('scheduletables'))
+                contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week = 3).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('editedscheduletables'))  
+
+    contacts = sorted(contacts, key=lambda x: x.stime,reverse=False)
+
+    return contacts
+
+def checkEditedInven(iid, week):
+    try:
+        eInven = EditedInven.objects.get(id = iid, week = week)
+        eInven_index = 0
+    except:
+        eInven_index = 1
+    
+    return eInven_index
 
 @csrf_exempt
 def getAcaPhone(request):
@@ -134,7 +238,7 @@ def todayLoad(request):
     if request.method == "POST":
         sid = int(request.POST.get('sid'))
         stableid = int(request.POST.get('stableid'))
-        
+
         stable = ScheduleTable.objects.get(id = stableid)
         temp_tflag = stable.tflag
         slist = stable.slist
@@ -153,8 +257,8 @@ def todayLoad(request):
         stable.save()
 
         reqtime = str(datetime.datetime.now())[:16]
-	
-        TodayLoadTimeLog.objects.create(sid_id = sid , stable_id = stableid, reqtime = reqtime) 
+
+        TodayLoadTimeLog.objects.create(sid_id = sid , stable_id = stableid, reqtime = reqtime)
 
         return HttpResponse(button_flag)
 
@@ -167,29 +271,31 @@ def getSchedule(request):
         day = request.GET.get('day')
         uid = request.user.id
 
-
 	t = timeToDate()
         today = t.timeToYmd()
        	realtimelocation = RealtimeLocation.objects.filter(date=today, carnum=car).order_by('schedule_time').last()
+		
 	if (day and t.timeToD() == day):
 		pass
 	elif (realtimelocation != None):
 		realtimelocation = None
 
         if request.user.is_staff:
+            
             invens = Inventory.objects.filter(bid = bid).filter(alist__contains = [aid]).filter(day = day)
             list_invensid = []
             contacts = invenToJson(invens)
 
             if car:
+                cars = Car.objects.filter(branchid_id = bid)
                 branch = Car.objects.get(carname = car)
                 invens = Inventory.objects.filter(carnum=car).filter(day = day)
 
                 contacts = invenToJson(invens)
 
-                return render_to_response('getCarSchedule.html', {"contacts": contacts,"car": car, 'user':request.user, 'realtimelocation':realtimelocation, 'day':day})
+                return render_to_response('getCarSchedule.html', {"cars" : cars, "bid": bid, "contacts": contacts,"car": car, 'user':request.user, 'realtimelocation':realtimelocation, 'day':day})
 
-            return render_to_response('getSchedule.html', {"contacts": contacts, "bid" : bid, "aid" : aid,'user':request.user})
+            return render_to_response('getSchedule.html', {"day" : day, "contacts": contacts, "bid" : bid, "aid" : aid,'user':request.user})
 
         elif request.user.groups.filter(name__in = ['academy']).exists():
             if day:
@@ -198,7 +304,7 @@ def getSchedule(request):
 
                 contacts = invenToJson(invens)
 
-                return render_to_response('getSchedule.html', {"contacts": contacts, "bid" : bid, "aid" : aid,'user':request.user})
+                return render_to_response('getSchedule.html', {"day" : day, "contacts": contacts, "bid" : bid, "aid" : aid,'user':request.user})
 
             else:
                 profile = Profile.objects.get(user=request.user)
@@ -210,15 +316,15 @@ def getSchedule(request):
                 list_invensid = []
                 contacts = invenToJson(invens)
 
-                return render_to_response('getSchedule.html', {"contacts": contacts, "bid" : bid, "aid" : aid,'user':request.user})
+                return render_to_response('getSchedule.html', {"day" : day, "contacts": contacts, "bid" : bid, "aid" : aid,'user':request.user})
 
         elif request.user.groups.filter(name__in = ['driver']).exists():
-            branch = Car.objects.get(carname = car)
+            cars = Car.objects.filter(branchid_id = bid)
             invens = Inventory.objects.filter(carnum=car).filter(day = day)
 
             contacts = invenToJson(invens)
 
-            return render_to_response('getCarSchedule.html', {"contacts": contacts,"car": car, 'user':request.user, 'realtimelocation':realtimelocation, 'day':day})
+            return render_to_response('getCarSchedule.html', {"bid": bid, "cars":cars, "day" : day, "contacts": contacts,"car": car, 'user':request.user, 'realtimelocation':realtimelocation, 'day':day})
 
         return HttpResponse('로그인 후 사용해주세요.')
 
@@ -258,10 +364,10 @@ def putSchedule(request):
 
         if not alist:
             alist = 0
-            putInven = UpdateInven(bid,carnum,day,req,time,addr,name,name2,load,sid,week,alist)
+            putInven = CreateInven(bid,carnum,day,req,time,addr,name,name2,load,sid,week,alist)
 
         if alist != None:
-            putInven = UpdateInven(bid,carnum,day,req,time,addr,name,name2,load,sid,week,alist)
+            putInven = CreateInven(bid,carnum,day,req,time,addr,name,name2,load,sid,week,alist)
 
         if putInven.setAlist() == 1:
             return HttpResponse('error setAlist')
@@ -320,44 +426,8 @@ def updateSchedule(request):
 	            week = int(week)
 
                 contacts = []
-
-                if searchTime == '':
-
-                    if week == 0:
-                        contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(carnum = carnum).prefetch_related('scheduletables'))
-
-                    elif week == 1:
-                        contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(carnum = carnum).filter(week1 = 0).prefetch_related('scheduletables'))
-                        contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(carnum = carnum).filter(week = 1).prefetch_related('editedscheduletables'))
-
-                    elif week == 2:
-                        contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(carnum = carnum).filter(week2 = 0).prefetch_related('scheduletables'))
-                        contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(carnum = carnum).filter(week = 2).prefetch_related('editedscheduletables'))
-
-                    elif week == 3:
-                        contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(carnum = carnum).filter(week3 = 0).prefetch_related('scheduletables'))
-                        contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(carnum = carnum).filter(week = 3).prefetch_related('editedscheduletables'))
-
-                else:
-                    searchTime = int(searchTime)
-
-                    if week == 0:
-                        contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).filter(carnum = carnum).prefetch_related('scheduletables'))
-
-                    elif week == 1:
-                        contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(week1=0).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).filter(carnum = carnum).prefetch_related('scheduletables'))
-                        contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(week = 1).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).filter(carnum = carnum).prefetch_related('editedscheduletables'))
-
-                    elif week == 2:
-                        contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(week2=0).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).filter(carnum = carnum).prefetch_related('scheduletables'))
-                        contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(week = 2).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).filter(carnum = carnum).prefetch_related('editedscheduletables'))
-
-
-                    elif week == 3:
-                        contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(week3=0).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).filter(carnum = carnum).prefetch_related('scheduletables'))
-                        contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(week = 3).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).filter(carnum = carnum).prefetch_related('editedscheduletables'))
-
-                contacts = sorted(contacts, key=lambda x: x.stime,reverse=False)
+                
+                contacts = getContacts(bid, day, carnum, week, searchTime)
 
                 return render_to_response('supdateSchedule.html',{"area":area,"searchTime":searchTime,"day":day,"branch":branch,"academy":academy,"carlist": carlist,"carnum": carnum,"bid":bid,"areaid": areaid,"week": week,"contacts":contacts,'user':request.user})
 
@@ -439,6 +509,7 @@ def updateSchedule(request):
             sid = request.POST.getlist('sid[]')
             bus_check = request.POST.get('bus_check')
 	    busAlist = request.POST.getlist('alist[]')
+            option = request.POST.get('option')
             #redirect
             carnum = int(request.POST.get('carnum'))
 
@@ -449,7 +520,8 @@ def updateSchedule(request):
             branch = Branch.objects.filter(areaid = areaid)
             #carlist for searching with carnum and redirection
             carlist = Car.objects.filter(branchid=bid)
-
+            
+            #버스인벤 체크 1 -> 버스인벤 수정, 2 -> 인벤수정
             if bus_check == '1':
                 alist = []
                 for a in busAlist:
@@ -480,111 +552,20 @@ def updateSchedule(request):
 
             snum = len(slist_temp3)
 
+            uInven = UpdateInven(bid, carnum, day, req, time,stime, etime, addr, name, name2, load, sid, week, alist, snum, anamelist_inven, slist_temp3)
+
             if week == 1:
-                try:
-                    eInven = EditedInven.objects.get(id = iid, week = week)
-                    eInven_index = 0;
-
-                except:
-                    eInven_index = 1;
-
+                eInven_index = checkEditedInven(iid, week)                
+            
                 #update inventory editedinven
                 if eInven_index == 0:
-                    editedInven = EditedInven.objects.get(id = iid)
-                    invenId = editedInven.iid_id
-
-                    editedInvenList = EditedInven.objects.filter(iid_id = invenId)
-
-                    for ei in editedInvenList:
-                        ei.carnum = carnum
-                        ei.bid = bid
-                        ei.snum = snum
-                        ei.day = day
-                        ei.alist = alist
-                        ei.anamelist = anamelist_inven
-                        ei.slist_temp3 = slist_temp3
-                        ei.stime = stime
-                        ei.etime = etime
-                        ei.save()
-
-                        delete_estable = EditedScheduleTable.objects.filter(ieid_id=ei.id)
-                        delete_estable.delete()
-
-                        # lflag load -> 1 unload ->0 start -> 2 end -> 3
-                        for i in range(len(time)):
-                            if i == 0:
-                                estable = EditedScheduleTable(ieid_id = ei.id, time = time[i], addr = addr[i], req = req[i], alist='{}', slist='{}', sname=list(name2[i]), tflag='{}', lflag=2)
-                                estable.save()
-
-                            elif i == len(time) - 1:
-                                estable = EditedScheduleTable(ieid_id = ei.id, time = time[i], addr = addr[i], req = req[i], alist='{}', slist='{}', sname=list(name2[i]), tflag='{}', lflag=3)
-                                estable.save()
-
-                            elif 0 < i < len(time) - 1:
-				try:
-                                    academy = StudentInfo.objects.filter(id__in = [int(s) for s in sid[i].split(',')])
-                                    temp_aca = [a.aid_id for a in academy]
-                                    temp_name = [n.strip() for n in name2[i].split(',')]
-                                    sidlist = [s.strip() for s in sid[i].split(',')]
-
-                                except:
-                                    temp_aca = []
-                                    temp_name = []
-                                    sidlist = []
-                                    temp_aca = filter(None, temp_aca)
-                                    temp_name = filter(None, temp_name)
-                                    sidlist = filter(None, sidlist)
-
-			        temp_lflag = [0 for z in range(len(temp_name))]
-
-                                anamelist = []
-
-                                for aid in temp_aca:
-                                    aname = Academy.objects.get(id = aid)
-                                    anamelist.append(aname.name)
-
-                                estable = EditedScheduleTable(ieid_id = ei.id, time = time[i], addr = addr[i], req = req[i], alist=temp_aca, anamelist = anamelist, slist=sidlist, sname=temp_name, tflag=temp_lflag, lflag=load[i])
-                                estable.save()
+                    uInven.update_edited_inven(iid,1)
 
                     contacts = []
-
-                    if searchTime == '':
-
-                        if week == 0:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(carnum = carnum).prefetch_related('scheduletables'))
-
-                        elif week == 1:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(carnum = carnum).filter(week1=0).prefetch_related('scheduletables'))
-                            contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(carnum = carnum).filter(week = 1).prefetch_related('editedscheduletables'))
-
-                        elif week == 2:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(carnum = carnum).filter(week2 = 0).prefetch_related('scheduletables'))
-                            contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(carnum = carnum).filter(week = 2).prefetch_related('editedscheduletables'))
-
-                        elif week == 3:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(carnum = carnum).filter(week3 = 0).prefetch_related('scheduletables'))
-                            contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(carnum = carnum).filter(week = 3).prefetch_related('editedscheduletables'))
-
-                    else:
-                        searchTime = int(searchTime)
-
-                        if week == 0:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).filter(carnum = carnum).prefetch_related('scheduletables'))
-
-                        elif week == 1:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(week1=0).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).filter(carnum = carnum).prefetch_related('scheduletables'))
-                            contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(week = 1).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('editedscheduletables'))
-
-                        elif week == 2:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(week2=0).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).filter(carnum = carnum).prefetch_related('scheduletables'))
-                            contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(week = 2).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('editedscheduletables'))
-
-                        elif week == 3:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(week3=0).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).filter(carnum = carnum).prefetch_related('scheduletables'))
-                            contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(week = 3).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('editedscheduletables'))
+                   
+                    contacts = getContacts(bid, day, carnum, week, searchTime)
 
                     academy = Academy.objects.filter(bid=bid)
-                    contacts = sorted(contacts, key=lambda x: x.stime,reverse=False)
 
                     return render_to_response('supdateSchedule.html',{"area":area,"branch":branch,"searchTime":searchTime,"academy":academy,"day":day,"carlist": carlist,"carnum":carnum,"bid":bid,"areaid": areaid,"week": week,"contacts":contacts,'user':request.user})
 
@@ -619,188 +600,28 @@ def updateSchedule(request):
                         else:
                             eiid = e3iid
 
-                        # lflag load -> 1 unload ->0 start -> 2 end -> 3
-                        for i in range(len(time)):
-                            if i == 0:
-                                estable = EditedScheduleTable(ieid_id = eiid, time = time[i], addr = addr[i], req = req[i], alist='{}', slist='{}', sname=list(name2[i]), tflag='{}', lflag=2)
-                                estable.save()
-
-                            elif i == len(time) - 1:
-                                estable = EditedScheduleTable(ieid_id = eiid, time = time[i], addr = addr[i], req = req[i], alist='{}', slist='{}', sname=list(name2[i]), tflag='{}', lflag=3)
-                                estable.save()
-
-                            elif 0 < i < len(time) - 1:
-				try:
-                                    academy = StudentInfo.objects.filter(id__in = [int(s) for s in sid[i].split(',')])
-                                    temp_aca = [a.aid_id for a in academy]
-                                    temp_name = [n.strip() for n in name2[i].split(',')]
-                                    sidlist = [s.strip() for s in sid[i].split(',')]
-
-                                except:
-                                    temp_aca = []
-                                    temp_name = []
-                                    sidlist = []
-                                    temp_aca = filter(None, temp_aca)
-                                    temp_name = filter(None, temp_name)
-                                    sidlist = filter(None, sidlist)
-
-                                temp_lflag = [0 for z in range(len(temp_name))]
-
-                                anamelist = []
-
-                                for aid in temp_aca:
-                                    aname = Academy.objects.get(id = aid)
-                                    anamelist.append(aname.name)
-
-                                estable = EditedScheduleTable(ieid_id = eiid, time = time[i], addr = addr[i], req = req[i], alist=temp_aca, anamelist = anamelist, slist=sidlist, sname=temp_name, tflag=temp_lflag, lflag=load[i])
-                                estable.save()
-
+                        uInven.create_edited_stable(eiid)
+                                                 
                     contacts = []
 
-                    if searchTime == '':
-                        if week == 0:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(carnum = carnum).prefetch_related('scheduletables'))
-
-                        elif week == 1:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(carnum = carnum).filter(week1 = 0).prefetch_related('scheduletables'))
-                            contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(carnum = carnum).filter(week = 1).prefetch_related('editedscheduletables'))
-
-                        elif week == 2:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(carnum = carnum).filter(week2 = 0).prefetch_related('scheduletables'))
-                            contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(carnum = carnum).filter(week = 2).prefetch_related('editedscheduletables'))
-
-                        elif week == 3:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(carnum = carnum).filter(week3 = 0).prefetch_related('scheduletables'))
-                            contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(carnum = carnum).filter(week = 3).prefetch_related('editedscheduletables'))
-
-                    else:
-                        searchTime = int(searchTime)
-
-                        if week == 0:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).filter(carnum = carnum).prefetch_related('scheduletables'))
-
-                        elif week == 1:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(week1=0).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).filter(carnum = carnum).prefetch_related('scheduletables'))
-                            contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(week = 1).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('editedscheduletables'))
-
-                        elif week == 2:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(week2=0).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).filter(carnum = carnum).prefetch_related('scheduletables'))
-                            contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(week = 2).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('editedscheduletables'))
-
-                        elif week == 3:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(week3=0).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).filter(carnum = carnum).prefetch_related('scheduletables'))
-                            contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(week = 3).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('editedscheduletables'))
-
                     academy = Academy.objects.filter(bid=bid)
-                    contacts = sorted(contacts, key=lambda x: x.stime,reverse=False)
+                    
+                    contacts = getContacts(bid, day, carnum, week, searchTime)                    
 
                     return render_to_response('supdateSchedule.html',{"area":area,"branch":branch,"searchTime":searchTime,"academy":academy,"day":day,"carlist": carlist,"carnum":carnum,"bid":bid,"areaid": areaid,"week": week,"contacts":contacts,'user':request.user})
 
             elif week == 2:
-                try:
-                    eInven = EditedInven.objects.get(id = iid, week = week)
-                    eInven_index = 0;
-
-                except:
-                    eInven_index = 1;
+                eInven_index = checkEditedInven(iid, week)
 
                 #update inventory editedinven
                 if eInven_index == 0:
-                    editedInven = EditedInven.objects.get(id = iid)
-                    invenId = editedInven.iid_id
-
-                    editedInvenList = EditedInven.objects.filter(iid_id = invenId).exclude(week=1)
-
-                    for ei in editedInvenList:
-                        ei.carnum = carnum
-                        ei.bid = bid
-                        ei.snum = snum
-                        ei.day = day
-                        ei.alist = alist
-                        ei.anamelist = anamelist_inven
-                        ei.slist_temp3 = slist_temp3
-                        ei.stime = stime
-                        ei.etime = etime
-                        ei.save()
-
-                        delete_estable = EditedScheduleTable.objects.filter(ieid_id=ei.id)
-                        delete_estable.delete()
-
-                        # lflag load -> 1 unload ->0 start -> 2 end -> 3
-                        for i in range(len(time)):
-                            if i == 0:
-                                estable = EditedScheduleTable(ieid_id = ei.id, time = time[i], addr = addr[i], req = req[i], alist='{}', slist='{}', sname=list(name2[i]), tflag='{}', lflag=2)
-                                estable.save()
-
-                            elif i == len(time) - 1:
-                                estable = EditedScheduleTable(ieid_id = ei.id, time = time[i], addr = addr[i], req = req[i], alist='{}', slist='{}', sname=list(name2[i]), tflag='{}', lflag=3)
-                                estable.save()
-
-                            elif 0 < i < len(time) - 1:
-				try:
-                                    academy = StudentInfo.objects.filter(id__in = [int(s) for s in sid[i].split(',')])
-                                    temp_aca = [a.aid_id for a in academy]
-                                    temp_name = [n.strip() for n in name2[i].split(',')]
-                                    sidlist = [s.strip() for s in sid[i].split(',')]
-
-                                except:
-                                    temp_aca = []
-                                    temp_name = []
-                                    sidlist = []
-                                    temp_aca = filter(None, temp_aca)
-                                    temp_name = filter(None, temp_name)
-                                    sidlist = filter(None, sidlist)
-
-                                temp_lflag = [0 for z in range(len(temp_name))]
-
-                                anamelist = []
-
-                                for aid in temp_aca:
-                                    aname = Academy.objects.get(id = aid)
-                                    anamelist.append(aname.name)
-
-                                estable = EditedScheduleTable(ieid_id = ei.id, time = time[i], addr = addr[i], req = req[i], alist=temp_aca, anamelist = anamelist, slist=sidlist, sname=temp_name, tflag=temp_lflag, lflag=load[i])
-                                estable.save()
+                    uInven.update_edited_inven(iid,1)
 
                     contacts = []
 
-                    if searchTime == '':
-
-                        if week == 0:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(carnum = carnum).prefetch_related('scheduletables'))
-
-                        elif week == 1:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(carnum = carnum).filter(week1=0).prefetch_related('scheduletables'))
-                            contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(carnum = carnum).filter(week = 1).prefetch_related('editedscheduletables'))
-
-                        elif week == 2:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(carnum = carnum).filter(week2 = 0).prefetch_related('scheduletables'))
-                            contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(carnum = carnum).filter(week = 2).prefetch_related('editedscheduletables'))
-
-                        elif week == 3:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(carnum = carnum).filter(week3 = 0).prefetch_related('scheduletables'))
-                            contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(carnum = carnum).filter(week = 3).prefetch_related('editedscheduletables'))
-
-                    else:
-                        searchTime = int(searchTime)
-
-                        if week == 0:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).filter(carnum = carnum).prefetch_related('scheduletables'))
-
-                        elif week == 1:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(week1=0).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).filter(carnum = carnum).prefetch_related('scheduletables'))
-                            contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(week = 1).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('editedscheduletables'))
-
-                        elif week == 2:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(week2=0).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).filter(carnum = carnum).prefetch_related('scheduletables'))
-                            contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(week = 2).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('editedscheduletables'))
-
-                        elif week == 3:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(week3=0).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).filter(carnum = carnum).prefetch_related('scheduletables'))
-                            contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(week = 3).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('editedscheduletables'))
-
                     academy = Academy.objects.filter(bid=bid)
-                    contacts = sorted(contacts, key=lambda x: x.stime,reverse=False)
+
+                    contacts = getContacts(bid, day, carnum, week, searchTime)
 
                     return render_to_response('supdateSchedule.html',{"area":area,"branch":branch,"searchTime":searchTime,"academy":academy,"day":day,"carlist": carlist,"carnum":carnum,"bid":bid,"areaid": areaid,"week": week,"contacts":contacts,'user':request.user})
 
@@ -828,173 +649,29 @@ def updateSchedule(request):
                         elif j == 1:
                             eiid = e3iid
 
-                        # lflag load -> 1 unload ->0 start -> 2 end -> 3
-                        for i in range(len(time)):
-                            if i == 0:
-                                estable = EditedScheduleTable(ieid_id = eiid, time = time[i], addr = addr[i], req = req[i], alist='{}', slist='{}', sname=list(name2[i]), tflag='{}', lflag=2)
-                                estable.save()
-
-                            elif i == len(time) - 1:
-                                estable = EditedScheduleTable(ieid_id = eiid, time = time[i], addr = addr[i], req = req[i], alist='{}', slist='{}', sname=list(name2[i]), tflag='{}', lflag=3)
-                                estable.save()
-
-                            elif 0 < i < len(time) - 1:
-                                try:
-                                    academy = StudentInfo.objects.filter(id__in = [int(s) for s in sid[i].split(',')])
-                                    temp_aca = [a.aid_id for a in academy]
-                                    temp_name = [n.strip() for n in name2[i].split(',')]
-                                    sidlist = [s.strip() for s in sid[i].split(',')]
-
-                                except:
-                                    temp_aca = []
-                                    temp_name = []
-                                    sidlist = []
-                                    temp_aca = filter(None, temp_aca)
-                                    temp_name = filter(None, temp_name)
-                                    sidlist = filter(None, sidlist)
-
-                                temp_lflag = [0 for z in range(len(temp_name))]
-
-                                anamelist = []
-
-                                for aid in temp_aca:
-                                    aname = Academy.objects.get(id = aid)
-                                    anamelist.append(aname.name)
-
-                                estable = EditedScheduleTable(ieid_id = eiid, time = time[i], addr = addr[i], req = req[i], alist=temp_aca, anamelist = anamelist, slist=sidlist, sname=temp_name, tflag=temp_lflag, lflag=load[i])
-                                estable.save()
-
+                        uInven.create_edited_stable(eiid)
+ 
                     contacts = []
 
-                    if searchTime == '':
-                        if week == 0:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(carnum = carnum).prefetch_related('scheduletables'))
-
-                        elif week == 1:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(carnum = carnum).filter(week1 = 0).prefetch_related('scheduletables'))
-                            contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(carnum = carnum).filter(week = 1).prefetch_related('editedscheduletables'))
-
-                        elif week == 2:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(carnum = carnum).filter(week2 = 0).prefetch_related('scheduletables'))
-                            contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(carnum = carnum).filter(week = 2).prefetch_related('editedscheduletables'))
-
-                        elif week == 3:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(carnum = carnum).filter(week3 = 0).prefetch_related('scheduletables'))
-                            contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(carnum = carnum).filter(week = 3).prefetch_related('editedscheduletables'))
-
-                    else:
-                        searchTime = int(searchTime)
-
-                        if week == 0:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).filter(carnum = carnum).prefetch_related('scheduletables'))
-
-                        elif week == 1:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(week1=0).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).filter(carnum = carnum).prefetch_related('scheduletables'))
-                            contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(week = 1).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('editedscheduletables'))
-
-                        elif week == 2:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(week2=0).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).filter(carnum = carnum).prefetch_related('scheduletables'))
-                            contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(week = 2).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('editedscheduletables'))
-
-                        elif week == 3:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(week3=0).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).filter(carnum = carnum).prefetch_related('scheduletables'))
-                            contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(week = 3).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('editedscheduletables'))
-
                     academy = Academy.objects.filter(bid=bid)
-                    contacts = sorted(contacts, key=lambda x: x.stime,reverse=False)
-
+                    
+                    contacts = getContacts(bid, day, carnum, week, searchTime)
+                    
                     return render_to_response('supdateSchedule.html',{"area":area,"branch":branch,"searchTime":searchTime,"academy":academy,"day":day,"carlist": carlist,"carnum":carnum,"bid":bid,"areaid": areaid,"week": week,"contacts":contacts,'user':request.user})
 
             elif week == 3:
-                try:
-                    eInven = EditedInven.objects.get(id = iid, week = week)
-                    eInven_index = 0;
 
-                except:
-                    eInven_index = 1;
+                eInven_index = checkEditedInven(iid, week)
 
                 #update inventory editedinven
                 if eInven_index == 0:
-                    EditedInven.objects.filter(id = iid).update(carnum = carnum, bid = bid, snum = snum,day = day, alist = alist, anamelist= anamelist_inven, slist=slist_temp3, stime = stime, etime = etime, week = week)
-
-                    delete_estable = EditedScheduleTable.objects.filter(ieid_id=iid)
-                    delete_estable.delete()
-
-                    # lflag load -> 1 unload ->0 start -> 2 end -> 3
-                    for i in range(len(time)):
-                        if i == 0:
-                            estable = EditedScheduleTable(ieid_id = iid, time = time[i], addr = addr[i], req = req[i], alist='{}', slist='{}', sname=list(name2[i]), tflag='{}', lflag=2)
-                            estable.save()
-
-                        elif i == len(time) - 1:
-                            estable = EditedScheduleTable(ieid_id = iid, time = time[i], addr = addr[i], req = req[i], alist='{}', slist='{}', sname=list(name2[i]), tflag='{}', lflag=3)
-                            estable.save()
-
-                        elif 0 < i < len(time) - 1:
-			    try:
-                                academy = StudentInfo.objects.filter(id__in = [int(s) for s in sid[i].split(',')])
-                                temp_aca = [a.aid_id for a in academy]
-                                temp_name = [n.strip() for n in name2[i].split(',')]
-                                sidlist = [s.strip() for s in sid[i].split(',')]
-
-                            except:
-                                temp_aca = []
-                                temp_name = []
-                                sidlist = []
-                                temp_aca = filter(None, temp_aca)
-                                temp_name = filter(None, temp_name)
-                                sidlist = filter(None, sidlist)
-
-                            temp_lflag = [0 for z in range(len(temp_name))]
-
-                            anamelist = []
-
-                            for aid in temp_aca:
-                                aname = Academy.objects.get(id = aid)
-                                anamelist.append(aname.name)
-
-                            estable = EditedScheduleTable(ieid_id = iid, time = time[i], addr = addr[i], req = req[i], alist=temp_aca, anamelist = anamelist, slist=sidlist, sname=temp_name, tflag=temp_lflag, lflag=load[i])
-                            estable.save()
+                    uInven.update_edited_inven(iid,1)
 
                     contacts = []
 
-                    if searchTime == '':
-
-                        if week == 0:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(carnum = carnum).prefetch_related('scheduletables'))
-
-                        elif week == 1:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(carnum = carnum).filter(week1=0).prefetch_related('scheduletables'))
-                            contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(carnum = carnum).filter(week = 1).prefetch_related('editedscheduletables'))
-
-                        elif week == 2:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(carnum = carnum).filter(week2 = 0).prefetch_related('scheduletables'))
-                            contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(carnum = carnum).filter(week = 2).prefetch_related('editedscheduletables'))
-
-                        elif week == 3:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(carnum = carnum).filter(week3 = 0).prefetch_related('scheduletables'))
-                            contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(carnum = carnum).filter(week = 3).prefetch_related('editedscheduletables'))
-
-                    else:
-                        searchTime = int(searchTime)
-
-                        if week == 0:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).filter(carnum = carnum).prefetch_related('scheduletables'))
-
-                        elif week == 1:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(week1=0).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).filter(carnum = carnum).prefetch_related('scheduletables'))
-                            contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(week = 1).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('editedscheduletables'))
-
-                        elif week == 2:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(week2=0).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).filter(carnum = carnum).prefetch_related('scheduletables'))
-                            contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(week = 2).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('editedscheduletables'))
-
-                        elif week == 3:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(week3=0).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).filter(carnum = carnum).prefetch_related('scheduletables'))
-                            contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(week = 3).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('editedscheduletables'))
-
                     academy = Academy.objects.filter(bid=bid)
-                    contacts = sorted(contacts, key=lambda x: x.stime,reverse=False)
+ 
+                    contacts = getContacts(bid, day, carnum, week, searchTime)
 
                     return render_to_response('supdateSchedule.html',{"area":area,"branch":branch,"searchTime":searchTime,"academy":academy,"day":day,"carlist": carlist,"carnum":carnum,"bid":bid,"areaid": areaid,"week": week,"contacts":contacts,'user':request.user})
 
@@ -1009,129 +686,68 @@ def updateSchedule(request):
                     inven.week3 = 1
                     inven.save()
 
-                    # lflag load -> 1 unload ->0 start -> 2 end -> 3
-                    for i in range(len(time)):
-                        if i == 0:
-                            estable = EditedScheduleTable(ieid_id = eiid, time = time[i], addr = addr[i], alist='{}', slist='{}', sname=list(name2[i]), tflag='{}', lflag=2)
-                            estable.save()
-
-                        elif i == len(time) - 1:
-                            estable = EditedScheduleTable(ieid_id = eiid, time = time[i], addr = addr[i], alist='{}', slist='{}', sname=list(name2[i]), tflag='{}', lflag=3)
-                            estable.save()
-
-                        elif 0 < i < len(time) - 1:
-			    try:
-                                academy = StudentInfo.objects.filter(id__in = [int(s) for s in sid[i].split(',')])
-                                temp_aca = [a.aid_id for a in academy]
-                                temp_name = [n.strip() for n in name2[i].split(',')]
-                                sidlist = [s.strip() for s in sid[i].split(',')]
-
-                            except:
-                                temp_aca = []
-                                temp_name = []
-                                sidlist = []
-                                temp_aca = filter(None, temp_aca)
-                                temp_name = filter(None, temp_name)
-                                sidlist = filter(None, sidlist)
-
-                            temp_lflag = [0 for z in range(len(temp_name))]
-
-                            anamelist = []
-
-                            for aid in temp_aca:
-                                aname = Academy.objects.get(id = aid)
-                                anamelist.append(aname.name)
-
-                            estable = EditedScheduleTable(ieid_id = eiid, time = time[i], addr = addr[i], req = req[i], alist=temp_aca, anamelist = anamelist, slist=sidlist, sname=temp_name, tflag=temp_lflag, lflag=load[i])
-                            estable.save()
-
+		    uInven.create_edited_stable(eiid)
                     contacts = []
 
-                    if searchTime == '':
-                        if week == 0:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(carnum = carnum).prefetch_related('scheduletables'))
-
-                        elif week == 1:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(carnum = carnum).filter(week1 = 0).prefetch_related('scheduletables'))
-                            contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(carnum = carnum).filter(week = 1).prefetch_related('editedscheduletables'))
-
-                        elif week == 2:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(carnum = carnum).filter(week2 = 0).prefetch_related('scheduletables'))
-                            contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(carnum = carnum).filter(week = 2).prefetch_related('editedscheduletables'))
-
-                        elif week == 3:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(carnum = carnum).filter(week3 = 0).prefetch_related('scheduletables'))
-                            contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(carnum = carnum).filter(week = 3).prefetch_related('editedscheduletables'))
-
-                    else:
-                        searchTime = int(searchTime)
-
-                        if week == 0:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).filter(carnum = carnum).prefetch_related('scheduletables'))
-
-                        elif week == 1:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(week1=0).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).filter(carnum = carnum).prefetch_related('scheduletables'))
-                            contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(week = 1).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('editedscheduletables'))
-
-                        elif week == 2:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(week2=0).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).filter(carnum = carnum).prefetch_related('scheduletables'))
-                            contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(week = 2).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('editedscheduletables'))
-
-                        elif week == 3:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(week3=0).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).filter(carnum = carnum).prefetch_related('scheduletables'))
-                            contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(week = 3).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('editedscheduletables'))
-
                     academy = Academy.objects.filter(bid=bid)
-                    contacts = sorted(contacts, key=lambda x: x.stime,reverse=False)
+                    contacts = getContacts(bid, day, carnum, week, searchTime)
 
                     return render_to_response('supdateSchedule.html',{"area":area,"branch":branch,"searchTime":searchTime,"academy":academy,"day":day,"carlist": carlist,"carnum":carnum,"bid":bid,"areaid": areaid,"week": week,"contacts":contacts,'user':request.user})
 
             #week0 update
             else:
-                Inventory.objects.filter(id=iid).update(snum = snum, alist=alist, anamelist = anamelist_inven, slist=slist_temp3, stime = stime, etime = etime, carnum = carnum)
-                
-		unloadSidList = getUnloadSid(iid) 
-                
-                #delete stable before updateing stable
-                delete_stable = ScheduleTable.objects.filter(iid_id=iid)
-                delete_stable.delete()
+                inven = Inventory.objects.get(id=iid)
+                inven.snum = snum 
+                inven.alist=alist 
+                inven.anamelist = anamelist_inven 
+                inven.slist=slist_temp3 
+                inven.stime = stime 
+                inven.etime = etime 
+                inven.carnum = carnum
+                inven.save()
 
-                # lflag load -> 1 unload ->0 start -> 2 end -> 3
-                for i in range(len(time)):
-                    if i == 0:
-                        stable = ScheduleTable(iid_id = iid, time = time[i], addr = addr[i], req = req[i], alist='{}', slist='{}', sname=list(name2[i]), tflag='{}', lflag=2)
-                        stable.save()
+                if option == '1':
+ 
+                    unloadSidList = getUnloadSid(iid)
+                    
+                    #delete stable before updateing stable
+                    delete_stable = ScheduleTable.objects.filter(iid_id=iid)
+                    delete_stable.delete()
 
-                    elif i == len(time) - 1:
-                        stable = ScheduleTable(iid_id = iid, time = time[i], addr = addr[i], req = req[i], alist='{}', slist='{}', sname=list(name2[i]), tflag='{}', lflag=3)
-                        stable.save()
+                    uInven.update_inven(iid, unloadSidList)  
 
-                    elif 0 < i < len(time) - 1:
-                        try:
-			    academy = StudentInfo.objects.filter(id__in = [int(s) for s in sid[i].split(',')])
-                            temp_aca = [a.aid_id for a in academy]
-                            temp_name = [n.strip() for n in name2[i].split(',')]
-                            sidlist = [s.strip() for s in sid[i].split(',')]
+                    if inven.week1 == 1 or inven.week2 == 1 or inven.week3 == 1:
+                         
+                        uInven.update_edited_inven(iid, 0)
 
-			except:
-                            temp_aca = []
-                            temp_name = []
-  			    sidlist = []
-                            temp_aca = filter(None, temp_aca)
-                            temp_name = filter(None, temp_name)
-                            sidlist = filter(None, sidlist)
+                    else:
+		        if not alist:
+		            alist = 0
+			    cInven = CreateInven(bid, carnum, day,req, time, addr, name, name2, load, sid, week, alist)
+		        if alist != None:
+			    cInven = CreateInven(bid, carnum, day, req, time, addr, name, name2, load, sid, week, alist)
+		        
+                        if cInven.setAlist == 1:
+		            return HttpResponse('error setAlist')
+		        if cInven.setSlist() == 1:
+			    return HttpResponse('error setSlist')
+		        if cInven.setANameList() == 1:
+			    return HttpResponse('error setANameList')
+		        if cInven.setSEtime() == 1:
+			    return HttpResponse('error setSEtime')
+		        
+                        cInven.setWeek1(unloadSidList, iid)     
+                elif option == '0':
+                    Inventory.objects.filter(id=iid).update(snum = snum, alist=alist, anamelist = anamelist_inven, slist=slist_temp3, stime = stime, etime = etime, carnum = carnum)
 
-                        temp_tflag = getTflag(sidlist,unloadSidList)
+		    unloadSidList = getUnloadSid(iid)
 
-                        anamelist = []
-
-                        for aid in temp_aca:
-                            aname = Academy.objects.get(id = aid)
-                            anamelist.append(aname.name)
-
-                        stable = ScheduleTable(iid_id = iid, time = time[i], addr = addr[i], req = req[i], alist=temp_aca, anamelist = anamelist, slist=sidlist, sname=temp_name, tflag=temp_tflag, lflag=load[i])
-                        stable.save()
-
+                    #delete stable before updateing stable
+                    delete_stable = ScheduleTable.objects.filter(iid_id=iid)
+                    delete_stable.delete()
+                   
+                    uInven.update_inven(iid, unloadSidList) 
+                            
                 if searchTime == '':
                     invens = Inventory.objects.filter(bid = bid).filter(day = day).filter(carnum = carnum)
 
@@ -1192,45 +808,13 @@ def updateSchedule(request):
 		except:
 			pass
 
+            contacts = []
+           
+            contacts = getContacts(bid, day, carnum, week, searchTime)
+
             #redirect
             academy = Academy.objects.filter(bid=bid)
-            contacts = []
 
-            if searchTime == '':
-                if week == 0:
-                    contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(carnum = carnum).prefetch_related('scheduletables'))
-
-                elif week == 1:
-                    contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(carnum = carnum).filter(week1 = 0).prefetch_related('scheduletables'))
-                    contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(carnum = carnum).filter(week = 1).prefetch_related('editedscheduletables'))
-
-                elif week == 2:
-                    contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(carnum = carnum).filter(week2=0).prefetch_related('scheduletables'))
-                    contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(carnum = carnum).filter(week = 2).prefetch_related('editedscheduletables'))
-
-                elif week == 3:
-                    contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(carnum = carnum).filter(week3 = 0).prefetch_related('scheduletables'))
-                    contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(carnum = carnum).filter(week = 3).prefetch_related('editedscheduletables'))
-
-            else:
-                searchTime = int(searchTime)
-
-                if week == 0:
-                    contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).filter(carnum = carnum).prefetch_related('scheduletables'))
-
-                elif week == 1:
-                    contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(week1=0).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).filter(carnum = carnum).prefetch_related('scheduletables'))
-                    contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(week = 1).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('editedscheduletables'))
-
-                elif week == 2:
-                    contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(week2=0).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).filter(carnum = carnum).prefetch_related('scheduletables'))
-                    contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(week = 2).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('editedscheduletables'))
-
-                elif week == 3:
-                    contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(week3=0).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).filter(carnum = carnum).prefetch_related('scheduletables'))
-                    contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(week = 3).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('editedscheduletables'))
-
-            contacts = sorted(contacts, key=lambda x: x.stime,reverse=False)
             return render_to_response('supdateSchedule.html',{"area":area,"branch":branch,"searchTime":searchTime,"academy":academy,"day":day,"carlist": carlist,"carnum": int(carnum),"bid":bid,"areaid": areaid,"week": week,"contacts":contacts,'user':request.user})
 
 
@@ -1247,6 +831,7 @@ def acaUpdateSchedule(request):
             bid = int(request.GET.get('bid'))
             aid = int(request.GET.get('aca'))
             week = request.GET.get('week')
+            
 
             academy = Academy.objects.filter(bid=bid)
             branch = Branch.objects.filter(areaid = areaid)
@@ -1257,44 +842,10 @@ def acaUpdateSchedule(request):
             week = int(week)
 
             contacts = []
-
-            if searchTime == '':
-
-                if week == 0:
-                    contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).prefetch_related('scheduletables'))
-
-                elif week == 1:
-                    contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week1 = 0).prefetch_related('scheduletables'))
-                    contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week = 1).prefetch_related('editedscheduletables'))
-
-                elif week == 2:
-                    contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week2 = 0).prefetch_related('scheduletables'))
-                    contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week = 2).prefetch_related('editedscheduletables'))
-
-                elif week == 3:
-                    contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week3 = 0).prefetch_related('scheduletables'))
-                    contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week = 3).prefetch_related('editedscheduletables'))
-
-            else:
-                searchTime = int(searchTime)
-
-                if week == 0:
-                    contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('scheduletables'))
-
-                elif week == 1:
-                    contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week1=0).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('scheduletables'))
-                    contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week = 1).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('editedscheduletables'))
-
-                elif week == 2:
-                    contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week2=0).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('scheduletables'))
-                    contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week = 2).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('editedscheduletables'))
-
-
-                elif week == 3:
-                    contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week3=0).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('scheduletables'))
-                    contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week = 3).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('editedscheduletables'))
-
-            contacts = sorted(contacts, key=lambda x: x.stime,reverse=False)
+            
+            #fake
+            carnum = -1
+            contacts = getContacts(bid, day, carnum , week, searchTime, aid)
 
             carlist = Car.objects.filter(branchid=bid)
 
@@ -1344,15 +895,13 @@ def acaUpdateSchedule(request):
             carnum = request.POST.get('carnum')
             carlist = Car.objects.filter(branchid=bid)
             alist = request.POST.getlist('alist[]')
+            option = request.POST.get('option')
+
             #searchTime,day,area,branch for inventory searching and redirection
             searchTime = request.POST.get('searchTime')
             day = request.POST.get('day')
             area = Area.objects.all()
             branch = Branch.objects.filter(id = bid)
-
-            #searchTime,day,area,branch for inventory searching and redirection
-            area = Area.objects.all()
-            branch = Branch.objects.filter(areaid = areaid)
 
             slist_temp = list(set([i for i in sid if i is not None and i != '']))
             slist_temp2 = ','.join(slist_temp)
@@ -1365,7 +914,7 @@ def acaUpdateSchedule(request):
             slist_temp3 = slist
             academy = StudentInfo.objects.filter(id__in = slist_temp3)
             alist = [a.aid_id for a in academy]
-            
+
             stime = int(time[0].split(':')[0] + time[0].split(':')[1])
             etime = int(time[-1].split(':')[0] + time[-1].split(':')[1])
 
@@ -1377,112 +926,19 @@ def acaUpdateSchedule(request):
 
             snum = len(slist_temp3)
 
-            if week == 1:
-                try:
-                    eInven = EditedInven.objects.get(id = iid, week = week)
-                    eInven_index = 0;
+            uInven = UpdateInven(bid, carnum, day, req, time,stime, etime, addr, name, name2, load, sid, week, alist, snum, anamelist_inven, slist_temp3)
 
-                except:
-                    eInven_index = 1;
+            if week == 1:
+                eInven_index = checkEditedInven(iid, week)
 
                 #update inventory editedinven
                 if eInven_index == 0:
-                    editedInven = EditedInven.objects.get(id = iid)
-                    invenId = editedInven.iid_id
-
-                    editedInvenList = EditedInven.objects.filter(iid_id = invenId)
-
-                    for ei in editedInvenList:
-                        ei.carnum = carnum
-                        ei.bid = bid
-                        ei.snum = snum
-                        ei.day = day
-                        ei.alist = alist
-                        ei.anamelist = anamelist_inven
-                        ei.slist_temp3 = slist_temp3
-                        ei.stime = stime
-                        ei.etime = etime
-                        ei.save()
-
-                        delete_estable = EditedScheduleTable.objects.filter(ieid_id=ei.id)
-                        delete_estable.delete()
-
-                        # lflag load -> 1 unload ->0 start -> 2 end -> 3
-                        for i in range(len(time)):
-                            if i == 0:
-                                estable = EditedScheduleTable(ieid_id = ei.id, time = time[i], addr = addr[i],req = req[i], alist='{}', slist='{}', sname=list(name2[i]), tflag='{}', lflag=2)
-                                estable.save()
-
-                            elif i == len(time) - 1:
-                                estable = EditedScheduleTable(ieid_id = ei.id, time = time[i], addr = addr[i],req = req[i], alist='{}', slist='{}', sname=list(name2[i]), tflag='{}', lflag=3)
-                                estable.save()
-
-                            elif 0 < i < len(time) - 1:
-				try:
-                                    academy = StudentInfo.objects.filter(id__in = [int(s) for s in sid[i].split(',')])
-                                    temp_aca = [a.aid_id for a in academy]
-                                    temp_name = [n.strip() for n in name2[i].split(',')]
-                                    sidlist = [s.strip() for s in sid[i].split(',')]
-
-                                except:
-                                    temp_aca = []
-                            	    temp_name = []
-                                    sidlist = []
-                                    temp_aca = filter(None, temp_aca)
-                                    temp_name = filter(None, temp_name)
-                                    sidlist = filter(None, sidlist)
-
-                                temp_lflag = [0 for z in range(len(temp_name))]
-
-                                anamelist = []
-
-                                for aid in temp_aca:
-                                    aname = Academy.objects.get(id = aid)
-                                    anamelist.append(aname.name)
-
-                                estable = EditedScheduleTable(ieid_id = ei.id, time = time[i], addr = addr[i],req = req[i], alist=temp_aca, anamelist = anamelist, slist=sidlist, sname=temp_name, tflag=temp_lflag, lflag=load[i])
-                                estable.save()
+                    uInven.update_edited_inven(iid, 1)
 
                     contacts = []
 
-                    if searchTime == '':
-
-                        if week == 0:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).prefetch_related('scheduletables'))
-
-                        elif week == 1:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week1 = 0).prefetch_related('scheduletables'))
-                            contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week = 1).prefetch_related('editedscheduletables'))
-
-                        elif week == 2:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week2 = 0).prefetch_related('scheduletables'))
-                            contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week = 2).prefetch_related('editedscheduletables'))
-
-                        elif week == 3:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week3 = 0).prefetch_related('scheduletables'))
-                            contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week = 3).prefetch_related('editedscheduletables'))
-
-                    else:
-                        searchTime = int(searchTime)
-
-                        if week == 0:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('scheduletables'))
-
-                        elif week == 1:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week1=0).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('scheduletables'))
-                            contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week = 1).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('editedscheduletables'))
-
-                        elif week == 2:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week2=0).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('scheduletables'))
-                            contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week = 2).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('editedscheduletables'))
-
-
-                        elif week == 3:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week3=0).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('scheduletables'))
-                            contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week = 3).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('editedscheduletables'))
-
                     academy = Academy.objects.filter(bid=bid)
-                    contacts = sorted(contacts, key=lambda x: x.stime,reverse=False)
+                    contacts = getContacts(bid, day, carnum, week, searchTime,aid)
 
                     return render_to_response('acaUpdateSchedule.html',{"area":area,"branch":branch,"searchTime":searchTime,"carlist":carlist, "academy":academy,"day":day,"carnum":carnum,"aid":raid,"bid":bid,"areaid": areaid,"week": week,"contacts":contacts,'user':request.user})
 
@@ -1518,192 +974,27 @@ def acaUpdateSchedule(request):
                         else:
                             eiid = e3iid
 
-                        # lflag load -> 1 unload ->0 start -> 2 end -> 3
-                        for i in range(len(time)):
-                            if i == 0:
-                                estable = EditedScheduleTable(ieid_id = eiid, time = time[i], addr = addr[i],req = req[i], alist='{}', slist='{}', sname=list(name2[i]), tflag='{}', lflag=2)
-                                estable.save()
-
-                            elif i == len(time) - 1:
-                                estable = EditedScheduleTable(ieid_id = eiid, time = time[i], addr = addr[i],req = req[i], alist='{}', slist='{}', sname=list(name2[i]), tflag='{}', lflag=3)
-                                estable.save()
-
-                            elif 0 < i < len(time) - 1:
-                                try:
-                                    academy = StudentInfo.objects.filter(id__in = [int(s) for s in sid[i].split(',')])
-                                    temp_aca = [a.aid_id for a in academy]
-                                    temp_name = [n.strip() for n in name2[i].split(',')]
-                                    sidlist = [s.strip() for s in sid[i].split(',')]
-
-                                except:
-                                    temp_aca = []
-                                    temp_name = []
-                                    sidlist = []
-                                    temp_aca = filter(None, temp_aca)
-                                    temp_name = filter(None, temp_name)
-                                    sidlist = filter(None, sidlist)
-
-                                sidlist = [s.strip() for s in sid[i].split(',')]
-                                temp_lflag = [0 for z in range(len(temp_name))]
-
-                                anamelist = []
-
-                                for aid in temp_aca:
-                                    aname = Academy.objects.get(id = aid)
-                                    anamelist.append(aname.name)
-
-                                estable = EditedScheduleTable(ieid_id = eiid, time = time[i], addr = addr[i], req = req[i], alist=temp_aca, anamelist = anamelist, slist=sidlist, sname=temp_name, tflag=temp_lflag, lflag=load[i])
-                                estable.save()
+                        uInven.create_edited_stable(eiid)
 
                     contacts = []
 
-                    if searchTime == '':
-
-                        if week == 0:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).prefetch_related('scheduletables'))
-
-                        elif week == 1:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week1 = 0).prefetch_related('scheduletables'))
-                            contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week = 1).prefetch_related('editedscheduletables'))
-
-                        elif week == 2:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week2 = 0).prefetch_related('scheduletables'))
-                            contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week = 2).prefetch_related('editedscheduletables'))
-
-                        elif week == 3:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week3 = 0).prefetch_related('scheduletables'))
-                            contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week = 3).prefetch_related('editedscheduletables'))
-
-                    else:
-                        searchTime = int(searchTime)
-
-                        if week == 0:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('scheduletables'))
-
-                        elif week == 1:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week1=0).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('scheduletables'))
-                            contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week = 1).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('editedscheduletables'))
-
-                        elif week == 2:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week2=0).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('scheduletables'))
-                            contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week = 2).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('editedscheduletables'))
-
-
-                        elif week == 3:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week3=0).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('scheduletables'))
-                            contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week = 3).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('editedscheduletables'))
-
                     academy = Academy.objects.filter(bid=bid)
-                    contacts = sorted(contacts, key=lambda x: x.stime,reverse=False)
+                    contacts = getContacts(bid, day, carnum, week, searchTime, aid) 
 
                     return render_to_response('acaUpdateSchedule.html',{"area":area,"branch":branch,"searchTime":searchTime,"carlist":carlist,"academy":academy,"day":day,"carnum":carnum,"aid":raid,"bid":bid,"areaid": areaid,"week": week,"contacts":contacts,'user':request.user})
 
             elif week == 2:
-                try:
-                    eInven = EditedInven.objects.get(id = iid, week = week)
-                    eInven_index = 0;
-
-                except:
-                    eInven_index = 1;
+                eInven_index = checkEditedInven(iid, week)
 
                 #update inventory editedinven
                 if eInven_index == 0:
-                    editedInven = EditedInven.objects.get(id = iid)
-                    invenId = editedInven.iid_id
-
-                    editedInvenList = EditedInven.objects.filter(iid_id = invenId).exclude(week=1)
-
-                    for ei in editedInvenList:
-                        ei.carnum = carnum
-                        ei.bid = bid
-                        ei.snum = snum
-                        ei.day = day
-                        ei.alist = alist
-                        ei.anamelist = anamelist_inven
-                        ei.slist_temp3 = slist_temp3
-                        ei.stime = stime
-                        ei.etime = etime
-                        ei.save()
-
-                        delete_estable = EditedScheduleTable.objects.filter(ieid_id=ei.id)
-                        delete_estable.delete()
-
-                        # lflag load -> 1 unload ->0 start -> 2 end -> 3
-                        for i in range(len(time)):
-                            if i == 0:
-                                estable = EditedScheduleTable(ieid_id = ei.id, time = time[i], addr = addr[i],req = req[i], alist='{}', slist='{}', sname=list(name2[i]), tflag='{}', lflag=2)
-                                estable.save()
-
-                            elif i == len(time) - 1:
-                                estable = EditedScheduleTable(ieid_id = ei.id, time = time[i], addr = addr[i],req = req[i], alist='{}', slist='{}', sname=list(name2[i]), tflag='{}', lflag=3)
-                                estable.save()
-
-                            elif 0 < i < len(time) - 1:
-                                try:
-                                    academy = StudentInfo.objects.filter(id__in = [int(s) for s in sid[i].split(',')])
-                                    temp_aca = [a.aid_id for a in academy]
-                                    temp_name = [n.strip() for n in name2[i].split(',')]
-                                    sidlist = [s.strip() for s in sid[i].split(',')]
-
-                                except:
-                                    temp_aca = []
-                                    temp_name = []
-                                    sidlist = []
-                                    temp_aca = filter(None, temp_aca)
-                                    temp_name = filter(None, temp_name)
-                                    sidlist = filter(None, sidlist)
-
-                                temp_lflag = [0 for z in range(len(temp_name))]
-
-                                anamelist = []
-
-                                for aid in temp_aca:
-                                    aname = Academy.objects.get(id = aid)
-                                    anamelist.append(aname.name)
-
-                                estable = EditedScheduleTable(ieid_id = ei.id, time = time[i], addr = addr[i],req = req[i], alist=temp_aca, anamelist = anamelist, slist=sidlist, sname=temp_name, tflag=temp_lflag, lflag=load[i])
-                                estable.save()
+                    uInven.update_edited_inven(iid,1)
 
                     contacts = []
 
-                    if searchTime == '':
-
-                        if week == 0:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).prefetch_related('scheduletables'))
-
-                        elif week == 1:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week1 = 0).prefetch_related('scheduletables'))
-                            contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week = 1).prefetch_related('editedscheduletables'))
-
-                        elif week == 2:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week2 = 0).prefetch_related('scheduletables'))
-                            contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week = 2).prefetch_related('editedscheduletables'))
-
-                        elif week == 3:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week3 = 0).prefetch_related('scheduletables'))
-                            contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week = 3).prefetch_related('editedscheduletables'))
-
-                    else:
-                        searchTime = int(searchTime)
-
-                        if week == 0:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('scheduletables'))
-
-                        elif week == 1:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week1=0).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('scheduletables'))
-                            contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week = 1).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('editedscheduletables'))
-
-                        elif week == 2:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week2=0).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('scheduletables'))
-                            contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week = 2).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('editedscheduletables'))
-
-
-                        elif week == 3:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week3=0).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('scheduletables'))
-                            contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week = 3).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('editedscheduletables'))
+                    contacts = getContacts(bid, day, carnum, week, searchTime, aid)
 
                     academy = Academy.objects.filter(bid=bid)
-                    contacts = sorted(contacts, key=lambda x: x.stime,reverse=False)
 
                     return render_to_response('acaUpdateSchedule.html',{"area":area,"branch":branch,"searchTime":searchTime,"carlist":carlist,"academy":academy,"day":day,"carnum":carnum,"aid":raid,"bid":bid,"areaid": areaid,"week": week,"contacts":contacts,'user':request.user})
 
@@ -1732,79 +1023,11 @@ def acaUpdateSchedule(request):
                         else:
                             eiid = e3iid
 
-                        # lflag load -> 1 unload ->0 start -> 2 end -> 3
-                        for i in range(len(time)):
-                            if i == 0:
-                                estable = EditedScheduleTable(ieid_id = eiid, time = time[i], addr = addr[i],req = req[i], alist='{}', slist='{}', sname=list(name2[i]), tflag='{}', lflag=2)
-                                estable.save()
-
-                            elif i == len(time) - 1:
-                                estable = EditedScheduleTable(ieid_id = eiid, time = time[i], addr = addr[i],req = req[i], alist='{}', slist='{}', sname=list(name2[i]), tflag='{}', lflag=3)
-                                estable.save()
-
-                            elif 0 < i < len(time) - 1:
-                                try:
-                                    academy = StudentInfo.objects.filter(id__in = [int(s) for s in sid[i].split(',')])
-                            	    temp_aca = [a.aid_id for a in academy]
-                                    temp_name = [n.strip() for n in name2[i].split(',')]
-                                    sidlist = [s.strip() for s in sid[i].split(',')]
-
-                                except:
-                                    temp_aca = []
-                                    temp_name = []
-                                    sidlist = []
-                                    temp_aca = filter(None, temp_aca)
-                                    temp_name = filter(None, temp_name)
-                                    sidlist = filter(None, sidlist)
-
-				temp_lflag = [0 for z in range(len(temp_name))]
-
-                                anamelist = []
-
-                                for aid in temp_aca:
-                                    aname = Academy.objects.get(id = aid)
-                                    anamelist.append(aname.name)
-
-                                estable = EditedScheduleTable(ieid_id = eiid, time = time[i], addr = addr[i],req = req[i], alist=temp_aca, anamelist = anamelist, slist=sidlist, sname=temp_name, tflag=temp_lflag, lflag=load[i])
-                                estable.save()
+                        uInven.create_edited_stable(eiid)
 
                     contacts = []
 
-                    if searchTime == '':
-
-                        if week == 0:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).prefetch_related('scheduletables'))
-
-                        elif week == 1:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week1 = 0).prefetch_related('scheduletables'))
-                            contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week = 1).prefetch_related('editedscheduletables'))
-
-                        elif week == 2:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week2 = 0).prefetch_related('scheduletables'))
-                            contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week = 2).prefetch_related('editedscheduletables'))
-
-                        elif week == 3:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week3 = 0).prefetch_related('scheduletables'))
-                            contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week = 3).prefetch_related('editedscheduletables'))
-
-                    else:
-                        searchTime = int(searchTime)
-
-                        if week == 0:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('scheduletables'))
-
-                        elif week == 1:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week1=0).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('scheduletables'))
-                            contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week = 1).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('editedscheduletables'))
-
-                        elif week == 2:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week2=0).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('scheduletables'))
-                            contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week = 2).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('editedscheduletables'))
-
-
-                        elif week == 3:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week3=0).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('scheduletables'))
-                            contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week = 3).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('editedscheduletables'))
+                    contacts = getContacts(bid, day, carnum, week, searchTime, aid)
 
                     academy = Academy.objects.filter(bid=bid)
                     contacts = sorted(contacts, key=lambda x: x.stime,reverse=False)
@@ -1813,275 +1036,103 @@ def acaUpdateSchedule(request):
 
 
             elif week == 3:
-                try:
-                    eInven = EditedInven.objects.get(id = iid, week = week)
-                    eInven_index = 0;
-
-                except:
-                    eInven_index = 1;
+                eInven_index = checkEditedInven(iid, week)
 
                 #update inventory editedinven
                 if eInven_index == 0:
-                    EditedInven.objects.filter(id = iid).update(carnum = carnum, bid = bid, snum = snum,day = day, alist = alist, anamelist= anamelist_inven, slist=slist_temp3, stime = stime, etime = etime, week = week)
-
-                    delete_estable = EditedScheduleTable.objects.filter(ieid_id=iid)
-                    delete_estable.delete()
-
-                    # lflag load -> 1 unload ->0 start -> 2 end -> 3
-                    for i in range(len(time)):
-                        if i == 0:
-                            estable = EditedScheduleTable(ieid_id = iid, time = time[i], addr = addr[i], req = req[i], alist='{}', slist='{}', sname=list(name2[i]), tflag='{}', lflag=2)
-                            estable.save()
-
-                        elif i == len(time) - 1:
-                            estable = EditedScheduleTable(ieid_id = iid, time = time[i], addr = addr[i], req = req[i], alist='{}', slist='{}', sname=list(name2[i]), tflag='{}', lflag=3)
-                            estable.save()
-
-                        elif 0 < i < len(time) - 1:
-			    try:
-                                academy = StudentInfo.objects.filter(id__in = [int(s) for s in sid[i].split(',')])
-                                temp_aca = [a.aid_id for a in academy]
-                                temp_name = [n.strip() for n in name2[i].split(',')]
-                                sidlist = [s.strip() for s in sid[i].split(',')]
-
-                            except:
-                                temp_aca = []
-                                temp_name = []
-                                sidlist = []
-                                temp_aca = filter(None, temp_aca)
-                                temp_name = filter(None, temp_name)
-                                sidlist = filter(None, sidlist)
-
-                            temp_lflag = [0 for z in range(len(temp_name))]
-
-                            anamelist = []
-
-                            for aid in temp_aca:
-                                aname = Academy.objects.get(id = aid)
-                                anamelist.append(aname.name)
-
-                            estable = EditedScheduleTable(ieid_id = iid, time = time[i], addr = addr[i], req = req[i], alist=temp_aca, anamelist = anamelist, slist=sidlist, sname=temp_name, tflag=temp_lflag, lflag=load[i])
-                            estable.save()
+                    uInven.update_edited_inven(iid,1)
 
                     contacts = []
 
-                    if searchTime == '':
-
-                        if week == 0:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).prefetch_related('scheduletables'))
-
-                        elif week == 1:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week1 = 0).prefetch_related('scheduletables'))
-                            contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week = 1).prefetch_related('editedscheduletables'))
-
-                        elif week == 2:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week2 = 0).prefetch_related('scheduletables'))
-                            contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week = 2).prefetch_related('editedscheduletables'))
-
-                        elif week == 3:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week3 = 0).prefetch_related('scheduletables'))
-                            contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week = 3).prefetch_related('editedscheduletables'))
-
-                    else:
-                        searchTime = int(searchTime)
-
-                        if week == 0:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('scheduletables'))
-
-                        elif week == 1:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week1=0).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('scheduletables'))
-                            contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week = 1).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('editedscheduletables'))
-
-                        elif week == 2:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week2=0).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('scheduletables'))
-                            contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week = 2).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('editedscheduletables'))
-
-
-                        elif week == 3:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week3=0).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('scheduletables'))
-                            contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week = 3).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('editedscheduletables'))
+                    contacts = getContacts(bid, day, carnum, week, searchTime, aid)
 
                     academy = Academy.objects.filter(bid=bid)
-                    contacts = sorted(contacts, key=lambda x: x.stime,reverse=False)
 
                     return render_to_response('acaUpdateSchedule.html',{"area":area,"branch":branch,"searchTime":searchTime,"carlist":carlist,"academy":academy,"day":day,"carnum":carnum,"aid":raid,"bid":bid,"areaid": areaid,"week": week,"contacts":contacts,'user':request.user})
 
 
-				#first update editedinven
+	        #first update editedinven
                 elif eInven_index == 1:
                     inven = Inventory.objects.get(id = iid)
 
                     ei3 = EditedInven(iid = inven , carnum = carnum, bid = bid, snum = snum, day = day, alist = alist, anamelist= anamelist_inven, slist=slist_temp3, stime = stime, etime = etime, week = 3)
                     ei3.save()
                     e3iid = ei3.id
+                    
                     inven.week3 = 1
-
                     inven.save()
-
-                    # lflag load -> 1 unload ->0 start -> 2 end -> 3
-                    for i in range(len(time)):
-                        if i == 0:
-                            estable = EditedScheduleTable(ieid_id = e3iid, time = time[i], addr = addr[i],req = req[i], alist='{}', slist='{}', sname=list(name2[i]), tflag='{}', lflag=2)
-                            estable.save()
-
-                        elif i == len(time) - 1:
-                            estable = EditedScheduleTable(ieid_id = e3iid, time = time[i], addr = addr[i],req = req[i], alist='{}', slist='{}', sname=list(name2[i]), tflag='{}', lflag=3)
-                            estable.save()
-
-                        elif 0 < i < len(time) - 1:
-                            try:
-                                academy = StudentInfo.objects.filter(id__in = [int(s) for s in sid[i].split(',')])
-                                temp_aca = [a.aid_id for a in academy]
-                                temp_name = [n.strip() for n in name2[i].split(',')]
-                                sidlist = [s.strip() for s in sid[i].split(',')]
-
-                            except:
-                                temp_aca = []
-                                temp_name = []
-                                sidlist = []
-                                temp_aca = filter(None, temp_aca)
-                                temp_name = filter(None, temp_name)
-                                sidlist = filter(None, sidlist)
-
-                            temp_lflag = [0 for z in range(len(temp_name))]
-
-                            anamelist = []
-
-                            for aid in temp_aca:
-                                aname = Academy.objects.get(id = aid)
-                                anamelist.append(aname.name)
-
-                            estable = EditedScheduleTable(ieid_id = e3iid, time = time[i], addr = addr[i],req = req[i], alist=temp_aca, anamelist = anamelist, slist=sidlist, sname=temp_name, tflag=temp_lflag, lflag=load[i])
-                            estable.save()
+                   
+                    uInven.create_edited_stable(e3iid) 
 
                     contacts = []
-
-                    if searchTime == '':
-
-                        if week == 0:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).prefetch_related('scheduletables'))
-
-                        elif week == 1:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week1 = 0).prefetch_related('scheduletables'))
-                            contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week = 1).prefetch_related('editedscheduletables'))
-
-                        elif week == 2:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week2 = 0).prefetch_related('scheduletables'))
-                            contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week = 2).prefetch_related('editedscheduletables'))
-
-                        elif week == 3:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week3 = 0).prefetch_related('scheduletables'))
-                            contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week = 3).prefetch_related('editedscheduletables'))
-
-                    else:
-                        searchTime = int(searchTime)
-
-                        if week == 0:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('scheduletables'))
-
-                        elif week == 1:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week1=0).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('scheduletables'))
-                            contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week = 1).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('editedscheduletables'))
-
-                        elif week == 2:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week2=0).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('scheduletables'))
-                            contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week = 2).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('editedscheduletables'))
-
-
-                        elif week == 3:
-                            contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week3=0).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('scheduletables'))
-                            contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week = 3).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('editedscheduletables'))
+                    
+                    contacts = getContacts(bid, day, carnum, week, searchTime, aid)
 
                     academy = Academy.objects.filter(bid=bid)
-                    contacts = sorted(contacts, key=lambda x: x.stime,reverse=False)
 
                     return render_to_response('acaUpdateSchedule.html',{"area":area,"branch":branch,"searchTime":searchTime,"carlist":carlist,"academy":academy,"day":day,"carnum":carnum,"aid":raid,"bid":bid,"areaid": areaid,"week": week,"contacts":contacts,'user':request.user})
+            
             else:
-                Inventory.objects.filter(id=iid).update(snum = snum, alist=alist, anamelist = anamelist_inven, slist=slist_temp3, stime = stime, etime = etime)
+                inven = Inventory.objects.get(id=iid)
+                inven.snum = snum 
+                inven.alist=alist 
+                inven.anamelist = anamelist_inven 
+                inven.slist=slist_temp3 
+                inven.stime = stime 
+                inven.etime = etime 
+                inven.carnum = carnum
+                inven.save()
 
-                unloadSidList = getUnloadSid(iid)
+                if option == '1':
 
-                #delete stable before updateing stable
-                delete_stable = ScheduleTable.objects.filter(iid_id=iid)
-                delete_stable.delete()
+                    unloadSidList = getUnloadSid(iid)
 
-                # lflag load -> 1 unload ->0 start -> 2 end -> 3
-                for i in range(len(time)):
-                    if i == 0:
-                        stable = ScheduleTable(iid_id = iid, time = time[i], addr = addr[i],req = req[i], alist='{}', slist='{}', sname=list(name2[i]), tflag='{}', lflag=2)
-                        stable.save()
+                    #delete stable before updateing stable
+                    delete_stable = ScheduleTable.objects.filter(iid_id=iid)
+                    delete_stable.delete()
 
-                    elif i == len(time) - 1:
-                        stable = ScheduleTable(iid_id = iid, time = time[i], addr = addr[i],req = req[i],alist='{}', slist='{}', sname=list(name2[i]), tflag='{}', lflag=3)
-                        stable.save()
+                    uInven.update_inven(iid, unloadSidList)
 
-                    elif 0 < i < len(time) - 1:
-			try:
-                            academy = StudentInfo.objects.filter(id__in = [int(s) for s in sid[i].split(',')])
-                            temp_aca = [a.aid_id for a in academy]
-                            temp_name = [n.strip() for n in name2[i].split(',')]
-                            sidlist = [s.strip() for s in sid[i].split(',')]
+                    if inven.week1 == 1 or inven.week2 == 1 or inven.week3 == 1:
 
-                        except:
-                            temp_aca = []
-                            temp_name = []
-                            sidlist = []
-                            temp_aca = filter(None, temp_aca)
-                            temp_name = filter(None, temp_name)
-                            sidlist = filter(None, sidlist)
+                        uInven.update_edited_inven(iid, 0)
+                    
+                    else:
+                        if not alist:
+                            alist = 0
+			    cInven = CreateInven(bid, carnum, day,req, time, addr, name, name2, load, sid, week, alist)
+		        if alist != None:
+			    cInven = CreateInven(bid, carnum, day, req, time, addr, name, name2, load, sid, week, alist)
+		        
+                        if cInven.setAlist == 1:
+		            return HttpResponse('error setAlist')
+		        if cInven.setSlist() == 1:
+			    return HttpResponse('error setSlist')
+		        if cInven.setANameList() == 1:
+			    return HttpResponse('error setANameList')
+		        if cInven.setSEtime() == 1:
+			    return HttpResponse('error setSEtime')
+		        
+                        cInven.setWeek1(unloadSidList, iid) 
+                
+                elif option == '0':
+                    Inventory.objects.filter(id=iid).update(snum = snum, alist=alist, anamelist = anamelist_inven, slist=slist_temp3, stime = stime, etime = etime, carnum = carnum)
 
-                        temp_tflag = getTflag(sidlist, unloadSidList)
+		    unloadSidList = getUnloadSid(iid)
 
-                        anamelist = []
-
-                        for aid in temp_aca:
-                            aname = Academy.objects.get(id = aid)
-                            anamelist.append(aname.name)
-
-                        stable = ScheduleTable(iid_id = iid, time = time[i], addr = addr[i],req = req[i], alist=temp_aca, anamelist = anamelist, slist=sidlist, sname=temp_name, tflag=temp_tflag, lflag=load[i])
-                        stable.save()
-
+                    #delete stable before updateing stable
+                    delete_stable = ScheduleTable.objects.filter(iid_id=iid)
+                    delete_stable.delete()
+                   
+                    uInven.update_inven(iid, unloadSidList)
+                
                 #redirect
                 area = Area.objects.all()
                 academy = Academy.objects.filter(bid=bid)
 
                 contacts = []
 
-                if searchTime == '':
-
-                    if week == 0:
-                        contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).prefetch_related('scheduletables'))
-
-                    elif week == 1:
-                        contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week1 = 0).prefetch_related('scheduletables'))
-                        contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week = 1).prefetch_related('editedscheduletables'))
-
-                    elif week == 2:
-                        contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week2 = 0).prefetch_related('scheduletables'))
-                        contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week = 2).prefetch_related('editedscheduletables'))
-
-                    elif week == 3:
-                        contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week3 = 0).prefetch_related('scheduletables'))
-                        contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week = 3).prefetch_related('editedscheduletables'))
-
-                else:
-                    searchTime = int(searchTime)
-
-                    if week == 0:
-                        contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('scheduletables'))
-
-                    elif week == 1:
-                        contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week1=0).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('scheduletables'))
-                        contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week = 1).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('editedscheduletables'))
-
-                    elif week == 2:
-                        contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week2=0).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('scheduletables'))
-                        contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week = 2).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('editedscheduletables'))
-
-
-                    elif week == 3:
-                        contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week3=0).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('scheduletables'))
-                        contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week = 3).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('editedscheduletables'))
+                contacts = getContacts(bid, day, carnum, week, searchTime, aid)
 
                 return render_to_response('acaUpdateSchedule.html',{"area":area,"searchTime":searchTime,"week":week,"day":day,"carlist":carlist,"branch":branch,"academy":academy,"areaid": areaid,"aid":raid,"bid":bid, "contacts":contacts,'user':request.user})
 
@@ -2132,49 +1183,14 @@ def acaUpdateSchedule(request):
                 except:
                     return HttpResponse("inven delete error:inventory")
 
-            #redirect
-            academy = Academy.objects.filter(bid=bid)
             contacts = []
 
-            if searchTime == '':
+            contacts = getContacts(bid, day, carnum, week, searchTime, aid) 
 
-                if week == 0:
-                    contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).prefetch_related('scheduletables'))
-
-                elif week == 1:
-                    contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week1 = 0).prefetch_related('scheduletables'))
-                    contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week = 1).prefetch_related('editedscheduletables'))
-
-                elif week == 2:
-                    contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week2 = 0).prefetch_related('scheduletables'))
-                    contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week = 2).prefetch_related('editedscheduletables'))
-
-                elif week == 3:
-                    contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week3 = 0).prefetch_related('scheduletables'))
-                    contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week = 3).prefetch_related('editedscheduletables'))
-
-            else:
-                searchTime = int(searchTime)
-
-                if week == 0:
-                    contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('scheduletables'))
-
-                elif week == 1:
-                    contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week1=0).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('scheduletables'))
-                    contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week = 1).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('editedscheduletables'))
-
-                elif week == 2:
-                    contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week2=0).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('scheduletables'))
-                    contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week = 2).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('editedscheduletables'))
-
-
-                elif week == 3:
-                    contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week3=0).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('scheduletables'))
-                    contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week = 3).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('editedscheduletables'))
-
-            contacts = sorted(contacts, key=lambda x: x.stime,reverse=False)
+            academy = Academy.objects.filter(bid=bid)
 
             return render_to_response('acaUpdateSchedule.html',{"area":area,"searchTime":searchTime,"carlist":carlist,"week":week,"day":day,"branch":branch,"academy":academy,"areaid": areaid,"aid":raid,"bid":bid, "contacts":contacts,'user':request.user})
+
 @csrf_exempt
 def studentLoad(request):
     if request.method == "POST":

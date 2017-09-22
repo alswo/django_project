@@ -27,7 +27,7 @@ def save_user_profile(sender, instance, **kwargs):
     instance.profile.save()
 
 def set_current_date_time():
-    return str(timezone.now())[:19]
+    return str(datetime.datetime.now())[:19]
 
 class Group(models.Model):
     gname = models.CharField(max_length = 80, null = True, blank = True)
@@ -45,7 +45,7 @@ class Academy(models.Model):
     lon = models.FloatField(null=True, blank=True)
     lat = models.FloatField(null=True, blank=True)
     bid = models.IntegerField()
-    #history = HistoricalRecords()
+    maxvehicle = models.IntegerField(default=1)
 
 class Commute(models.Model):
     name = models.CharField(max_length = 10)
@@ -63,19 +63,19 @@ class Commute(models.Model):
     etc = models.TextField(null = True, blank = True)
     #history = HistoricalRecords()
 
-class PhoneList(models.Model):
-    aca = Academy.objects.all()
-    ACA = ()
-    ACA_2 = ()
-    for a in aca:
-        ACA = ACA + ((a.id, a.name),)
-        ACA_2 = ACA_2 + ((a.name, a.name),)
-    print(ACA)
-    name = models.CharField(max_length = 10)
-    aid = models.IntegerField(choices = ACA)
-    aname = models.CharField(choices = ACA_2, max_length=30)
-    phone1 = models.CharField(max_length = 30, null = True, blank = True)
-    phone2 = models.CharField(max_length = 30, null = True, blank = True)
+#class PhoneList(models.Model):
+    #aca = Academy.objects.all()
+    #ACA = ()
+    #ACA_2 = ()
+    #for a in aca:
+        #ACA = ACA + ((a.id, a.name),)
+        #ACA_2 = ACA_2 + ((a.name, a.name),)
+    ##print(ACA)
+    #name = models.CharField(max_length = 10)
+    #aid = models.IntegerField(choices = ACA)
+    #aname = models.CharField(choices = ACA_2, max_length=30)
+    #phone1 = models.CharField(max_length = 30, null = True, blank = True)
+    #phone2 = models.CharField(max_length = 30, null = True, blank = True)
 
 class Schedule(models.Model):
     name = models.CharField(max_length = 50)
@@ -146,25 +146,26 @@ class Daily(models.Model):
     good_stu = models.CharField(max_length = 10)
 
 class ShuttleSchedule(models.Model):
-    aca = Academy.objects.all()
+    #aca = Academy.objects.all()
     grp = Group.objects.all()
 
     GID = ()
-    ACA = ()
-    ACA_2 = ()
+    #ACA = ()
+    #ACA_2 = ()
 
     for g in grp:
         GID = GID + ((g.gid, g.gname),)
 
-    for a in aca:
-        ACA = ACA + ((a.id, a.name),)
+    #for a in aca:
+        #ACA = ACA + ((a.id, a.name),)
 
     a_name = models.CharField(max_length = 30)
     day = models.CharField(max_length = 10)
     time = models.IntegerField()
     schedule = models.TextField()
     gid = models.IntegerField(choices = GID)
-    aid = models.IntegerField(choices = ACA)
+    #aid = models.IntegerField(choices = ACA)
+    aid = models.IntegerField()
     slist = ArrayField(models.IntegerField(null = True, blank = True, default=0))
     p_schedule = models.TextField(null = True, blank = True)
     alist = ArrayField(models.IntegerField(null = True, blank = True, default=0))

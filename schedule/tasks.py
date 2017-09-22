@@ -1,4 +1,6 @@
 #_*_ coding:utf-8 _*_
+from __future__ import absolute_import
+from tayo.celery import app
 from schedule.models import Inventory,ScheduleTable,HistoryScheduleTable, EditedInven, EditedScheduleTable
 from passenger.models import StudentInfo, Academy, ShuttleSchedule, ScheduleDate
 from passenger.dateSchedule import timeToDate
@@ -9,6 +11,7 @@ import simplejson
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
+
 def get_offmember_list(tflag, slist):
 	ret = []
 	for idx, t in enumerate(tflag):
@@ -17,6 +20,7 @@ def get_offmember_list(tflag, slist):
 
 	return ret
 
+@app.task
 def store_historyschedule():
 	t = timeToDate()
 	dmy = t.timeToDmy()
@@ -46,7 +50,12 @@ def store_historyschedule():
 			except Exception as e:
 				print(e)
 
+@app.task
+def say_hello():
+	print("Hello, celery!")
 
+
+@app.task
 def store_historyschedule_old():
 	t = timeToDate()
 	dmy = t.timeToDmy()
@@ -136,6 +145,7 @@ def find_update():
 
 	notice_to_student(0, "end")
 
+@app.task
 def weekly_update():
 	#copy week1 -> OG inven
 	invenEditedWeek1 = Inventory.objects.filter(week1 = 1)
@@ -223,6 +233,7 @@ def weekly_update():
 	 	tempInven.week3 = 1
 	 	tempInven.save()
 
+@app.task
 def resetTodayLoad():
     sTable = ScheduleTable.objects.all()
 

@@ -16,6 +16,7 @@
 	<link href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.20.1/vis.min.css" rel="stylesheet" type="text/css" />
 	<link href="/static/css/monitor.css" rel="stylesheet">
 	<link href="{% static 'css/timeline.css' %}" rel="stylesheet">
+	<link href="{% static 'css/bootstrap-multiselect.css' %}" rel="stylesheet">
 	<link rel="stylesheet" type="text/css" href="http://cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.css" />
 
 
@@ -34,6 +35,7 @@
 	<script type="text/javascript" src="{% static 'js/plugins/pdfmake.min.js' %}"></script>
 	<script type="text/javascript" src="{% static 'js/plugins/vfs_fonts.js' %}"></script>
 	<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+	<script type="text/javascript" src="{% static 'js/bootstrap-multiselect.js' %}"></script>
 <style>
 .entry:not(:first-of-type)
 {
@@ -146,13 +148,27 @@
               <li><a href="/institute/getHistory">정산</a></li>
               <!-- li><a href="#">Contact</a></li //-->
        {% if request.user.is_authenticated and request.user.is_staff %}
-              <li class="dropdown">
+              <!-- li class="dropdown">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">학원선택<span class="caret"></span></a>
                 <ul class="dropdown-menu">
                   <li><a href="#" class="selectInstitute" data-instituteid="0">전체</a></li>
 		  {% for academy in academies %}
                   <li {% if request.session.instituteid == academy.id %} class="hiddenactive"{% endif %}><a href="#" class="selectInstitute" data-instituteid="{{academy.id}}">{{academy.name}}</a></li>
-                  <!-- li role="separator" class="divider"></li//-->
+		  {% endfor %}
+                </ul>
+              </li//-->
+
+              <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">학원선택<span class="caret"></span></a>
+                <ul class="dropdown-menu">
+                  <li><a href="#" class="selectInstitute" data-instituteid="0">전체</a></li>
+		  {% for branch, academies in academyPerBranch %}
+                  <li role="separator" class="divider"></li>
+                  <li>{{branch}}</li>
+                  <li role="separator" class="divider"></li>
+			{% for academy in academies %}
+                  	<li {% if request.session.instituteid == academy.id %} class="hiddenactive"{% endif %}><a href="#" class="selectInstitute" data-instituteid="{{academy.id}}"><div>{{academy.name}}</div></a></li>
+			{% endfor %}
 		  {% endfor %}
                 </ul>
               </li>
