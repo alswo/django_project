@@ -16,9 +16,9 @@ app.conf.enable_utc = True
 app.conf.broker_url = 'amqp://guest@localhost//'
 app.conf.accept_content = ['application/json']
 app.conf.beat_schedule = {
-    'today-schedule-notification': {
-        'task': 'fcmdev.tasks.today_schedule_notification',
-        'schedule': crontab(hour=8, minute=10),
+        'today-schedule-notification': {
+                'task': 'fcmdev.tasks.today_schedule_notification',
+                'schedule': crontab(hour=8, minute=10),
     	},
 	#'say-hello': {
 		#'task': 'schedule.tasks.say_hello',
