@@ -68,7 +68,7 @@ def checkAuth(request):
 	if institute:
 		try:
 			academy = Academy.objects.get(name = institute)
-		except AcademyDeosNotExist:
+		except Academy.DoesNotExist:
 			return render(request, 'message.html', {'msg': "학원 검색에 실패했습니다.", 'redirect_url': redirect_url})
 	else:
 		return render(request, 'message.html', {'msg': "학원 권한이 필요합니다.", 'redirect_url': redirect_url})
@@ -84,7 +84,11 @@ def listStudents(request):
 		institute = request.user.first_name
 
 	if institute:
-		academy = Academy.objects.get(name = institute)
+		try:
+			academy = Academy.objects.get(name = institute)
+		except Academy.DoesNotExist:
+			return render(request, 'message.html', {'msg': "학원 검색에 실패했습니다.", 'redirect_url': "http://www.edticket.com/institute/listStudents"})
+
 		students = StudentInfo.objects.filter(aid_id = academy.id).filter(deleted_date__isnull=True).order_by('sname')
 	else:
 		students = StudentInfo.objects.all().filter(deleted_date__isnull=True).order_by('sname')
