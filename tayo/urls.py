@@ -1,12 +1,9 @@
 from django.conf.urls import url, include
 from django.contrib import admin
-<<<<<<< HEAD
 from fcm_django.api.rest_framework import FCMDeviceViewSet, FCMDeviceAuthorizedViewSet
 from rest_framework.routers import DefaultRouter
 from rest_framework.documentation import include_docs_urls
-=======
 from django.contrib.auth import views as auth_views
->>>>>>> c70c00d3fe12bb407c572f4f2b2738759ab6d307
 
 router = DefaultRouter()
 router.register(r'devices', FCMDeviceViewSet)

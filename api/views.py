@@ -37,12 +37,9 @@ def getRealtimeLocationDebug(request):
 		if (debug_id == None):
 			debug_id = '0'
 		msg = ""
-<<<<<<< HEAD
 
-=======
 		waittime = -1
-	
->>>>>>> c70c00d3fe12bb407c572f4f2b2738759ab6d307
+
 		if (debug_id == '401'):
 			msg = "해당 사용자가 존재하지 않습니다."
 		elif (debug_id == '400'):

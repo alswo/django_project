@@ -31,12 +31,9 @@ INSTALLED_APPS = [
     'corsheaders',
     'fcm',
     'util',
-<<<<<<< HEAD
     'fcmdev',
     'fcm_django',
-=======
     #'traccar',
->>>>>>> c70c00d3fe12bb407c572f4f2b2738759ab6d307
 ]
 
 #LOGGING = {
