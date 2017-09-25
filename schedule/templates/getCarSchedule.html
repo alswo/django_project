@@ -233,12 +233,13 @@
 
 
         $(function() {
-          refresh = setInterval(function(){
-            location.reload();
-          }, 55000);
-
+          refresh = setInterval(refreshfunc, 55000);
           alarm = setInterval(alarmfunc, 2500);
         });
+
+        function refreshfunc() {
+          location.reload();
+        } 
 
         //for blinkBtn frequent
         var blinkBtn = -1;

@@ -2,7 +2,15 @@ from __future__ import unicode_literals
 
 from django.db import models
 from django.contrib.postgres.fields import ArrayField, JSONField
+from django.contrib.auth.models import User
+
 #from simple_history.models import HistoricalRecords
+
+class InvenAuditing(models.Model):
+    create_time = models.CharField(max_length = 20)
+    create_user = models.ForeignKey(User, related_name='user')
+    comment = models.TextField()
+    done  = models.CharField(max_length = 10)
 
 class Inventory(models.Model):
     carnum = models.IntegerField()

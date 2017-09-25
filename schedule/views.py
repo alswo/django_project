@@ -2,7 +2,7 @@
 import logging
 from django.shortcuts import render_to_response, redirect
 from django.template import RequestContext
-from schedule.models import HistoryScheduleTable, Inventory, ScheduleTable, Building, Branch, InventoryRequest, Area, Car, RealtimeLocation, EditedInven, EditedScheduleTable, TodayLoadTimeLog
+from schedule.models import HistoryScheduleTable, Inventory, ScheduleTable, Building, Branch, InventoryRequest, Area, Car, RealtimeLocation, EditedInven, EditedScheduleTable, TodayLoadTimeLog, InvenAuditing
 from passenger.models import Academy, Group, StudentInfo, Profile
 from django.db.models import Q
 from django.db.models import Prefetch
@@ -36,6 +36,9 @@ class DailyHistory:
 	def __init__(self):
 		self.date = ""
 		self.timehistory = list()
+
+def set_audit(comment, done, user):
+    InvenAuditing.objects.create(create_time = str(datetime.datetime.now())[:16], create_user = user, comment = comment, done = done)
 
 def invenToJson(invens):
     contacts = []
@@ -552,6 +555,9 @@ def updateSchedule(request):
 
             snum = len(slist_temp3)
 
+            comment = 'carnum: ' + str(carnum) + ', day: ' + str(day) + ', stime: ' + str(stime) + ', week: ' + str(week) + ' update'
+            set_audit(comment, 'update', request.user)
+
             uInven = UpdateInven(bid, carnum, day, req, time,stime, etime, addr, name, name2, load, sid, week, alist, snum, anamelist_inven, slist_temp3)
 
             if week == 1:
@@ -745,7 +751,7 @@ def updateSchedule(request):
                     #delete stable before updateing stable
                     delete_stable = ScheduleTable.objects.filter(iid_id=iid)
                     delete_stable.delete()
-                   
+       
                     uInven.update_inven(iid, unloadSidList) 
                             
                 if searchTime == '':
@@ -779,6 +785,15 @@ def updateSchedule(request):
             carlist = Car.objects.filter(branchid=bid)
             #for redirection
             carnum = request.POST.get('carnum')
+           
+            if week == 0:
+                a_inven = Inventory.objects.get(id = iid)
+                comment = 'carnum: ' + str(carnum) + ', day: ' + str(day) + ', stime: ' + str(a_inven.stime) + ', week: ' + str(week) + ' delete'
+                set_audit(comment, 'delete' , request.user)
+            else:
+                a_inven = EditedInven.objects.get(id = iid)
+                comment = 'carnum: ' + str(carnum) + ', day: ' + str(day) + ', stime: ' + str(a_inven.stime) + ', week: ' + str(week) + ' delete'
+                set_audit(comment, 'delete' , request.user)
 
             if week > 0:
                 try:
@@ -925,6 +940,9 @@ def acaUpdateSchedule(request):
                 anamelist_inven.append(a.name)
 
             snum = len(slist_temp3)
+
+            comment = 'carnum: ' + str(carnum) + ', day: ' + str(day) +', stime: '+ str(time[0])+ ', week: ' + str(week) + ' update'
+            set_audit(comment, 'update', request.user)
 
             uInven = UpdateInven(bid, carnum, day, req, time,stime, etime, addr, name, name2, load, sid, week, alist, snum, anamelist_inven, slist_temp3)
 
@@ -1155,6 +1173,14 @@ def acaUpdateSchedule(request):
             #for redirection
             carnum = request.POST.get('carnum')
 
+            if week == 0: 
+                a_inven = Inventory.objects.get(id = iid)
+                comment = 'carnum: ' + str(carnum) + ', day: ' + str(day) + ', stime: ' + str(a_inven.stime) + ', week: ' + str(week) + ' delete'
+                set_audit(comment, 'delete' , request.user)
+            else:
+                a_inven = EditedInven.objects.get(id = iid)
+                comment = 'carnum: ' + str(carnum) + ', day: ' + str(day) + ', stime: ' + str(a_inven.stime) + ', week: ' + str(week) + ' delete'
+                set_audit(comment, 'delete' , request.user)
 
             if week > 0:
                 try:
