@@ -31,6 +31,8 @@ INSTALLED_APPS = [
     'corsheaders',
     'fcm',
     'util',
+    'fcmdev',
+    'fcm_django',
     #'traccar',
 ]
 
