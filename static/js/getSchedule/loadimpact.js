@@ -7,7 +7,7 @@ var loadModule = (function () {
   }
 
   function setPresentTime(date){
-    presentTime = date.getHours().toString()+":"+ (date.getMinutes()<10 ? '0' : '') + date.getMinutes().toString();
+    presentTime = (date.getHours()<10 ? '0' : '') + date.getHours().toString()+":"+ (date.getMinutes()<10 ? '0' : '') + date.getMinutes().toString();
   }
 
   function compareLoadTime(){
