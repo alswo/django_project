@@ -9,7 +9,7 @@ urlpatterns = [
     url(r'^listNotice$', views.listNotice),
     url(r'^getNotice$', views.getNotice),
     url(r'^getClauses$', views.getClauses),
-    url(r'^getStudentInfo$', views.getStudentInfo),
+    url(r'^getStudentInfo$', views.getStudentInfo2),
     url(r'^getStudentInfo2$', views.getStudentInfo2),
     url(r'^todayLoad$', views.todayLoad),
     url(r'^checkLoadState$', views.checkLoadState),

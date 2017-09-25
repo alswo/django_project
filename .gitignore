@@ -6,3 +6,5 @@ logs/
 logs/*
 traccar/
 traccar/*
+celerybeat-schedule
+celerybeat.pid

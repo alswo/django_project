@@ -408,12 +408,6 @@ def experienceGetRouteMap(request):
 def getSchedulesForStudent(request):
     if request.method == "GET":
 	max_diff = 10
-	msg['schedules'][daydictionary[d]]['list'].append(data)
-	return JsonResponse(msg)
-
-def getSchedulesForStudent(request):
-    if request.method == "GET":
-	max_diff = 10
         t = timeToDate()
         d = t.timeToD()
         today = t.timeToYmd()
