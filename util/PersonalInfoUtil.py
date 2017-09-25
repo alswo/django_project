@@ -51,13 +51,19 @@ def compareLists(name1, item1, list1, name2, item2, list2):
 def findSamePerson(student1, student2):
 	if (student1.bid == student2.bid and getHangul(student1.sname) == getHangul(student2.sname)):
 		list1 = []
-		list1.append(student1.parents_phonenumber)
-		list1.append(student1.grandparents_phonenumber)
-		list1.append(student1.self_phonenumber)
+		if (student1.parents_phonenumber != None and len(student1.parents_phonenumber) > 0):
+			list1.append(student1.parents_phonenumber)
+		if (student1.grandparents_phonenumber != None and len(student1.grandparents_phonenumber) > 0):
+			list1.append(student1.grandparents_phonenumber)
+		if (student1.self_phonenumber != None and len(student1.self_phonenumber) > 0):
+			list1.append(student1.self_phonenumber)
 		list2 = []
-		list2.append(student1.parents_phonenumber)
-		list2.append(student1.grandparents_phonenumber)
-		list2.append(student1.self_phonenumber)
+		if (student2.parents_phonenumber != None and len(student2.parents_phonenumber) > 0):
+			list2.append(student2.parents_phonenumber)
+		if (student2.grandparents_phonenumber != None and len(student2.grandparents_phonenumber) > 0):
+			list2.append(student2.grandparents_phonenumber)
+		if (student2.self_phonenumber != None and len(student2.self_phonenumber) > 0):
+			list2.append(student2.self_phonenumber)
 
 		if not set(list1).isdisjoint(list2):
 			return True
@@ -67,13 +73,19 @@ def findSamePerson(student1, student2):
 def findSibling(student1, student2):
 	if (student1.bid == student2.bid):
 		list1 = []
-		list1.append(student1.parents_phonenumber)
-		list1.append(student1.grandparents_phonenumber)
-		list1.append(student1.self_phonenumber)
+		if (student1.parents_phonenumber != None and len(student1.parents_phonenumber) > 0):
+			list1.append(student1.parents_phonenumber)
+		if (student1.grandparents_phonenumber != None and len(student1.grandparents_phonenumber) > 0):
+			list1.append(student1.grandparents_phonenumber)
+		if (student1.self_phonenumber != None and len(student1.self_phonenumber) > 0):
+			list1.append(student1.self_phonenumber)
 		list2 = []
-		list2.append(student1.parents_phonenumber)
-		list2.append(student1.grandparents_phonenumber)
-		list2.append(student1.self_phonenumber)
+		if (student2.parents_phonenumber != None and len(student2.parents_phonenumber) > 0):
+			list2.append(student2.parents_phonenumber)
+		if (student2.grandparents_phonenumber != None and len(student2.grandparents_phonenumber) > 0):
+			list2.append(student2.grandparents_phonenumber)
+		if (student2.self_phonenumber != None and len(student2.self_phonenumber) > 0):
+			list2.append(student2.self_phonenumber)
 
 		if not set(list1).isdisjoint(list2):
 			return True
