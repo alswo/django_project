@@ -571,16 +571,6 @@ def studentInfo(request):
             return HttpResponse(data, content_type="application/json" )
 
 
-@csrf_exempt
-@login_required
-def getBilling(request):
-    if request.method == "GET":
-        contacts = Community.objects.order_by('-id')
-
-        return render_to_response('passenger/billing.html',{"contacts":contacts,'user':request.user})
-
-
-
 
 def robots(request):
 	return render_to_response('passenger/robots.txt', content_type="text/plain")
