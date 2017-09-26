@@ -237,6 +237,31 @@ def getSchedule(request):
         return HttpResponse('로그인 후 사용해주세요.')
 
 @csrf_exempt
+def putScheduleForm(request):
+	if request.method == 'GET':
+		bid = request.GET.get('bid')
+		carnum = request.GET.get('carnum')
+		day = request.GET.get('day')
+		week = request.GET.get('week')
+
+		if carnum:
+			carnum = int(carnum)
+		elif carnum == None:
+			carnum = 0
+		
+		if bid:
+			academy = Academy.objects.filter(bid = bid)
+			group = Car.objects.filter(branchid = bid)
+
+		return render(request, 'putSchedule.html', {'academy': academy, 'bid': bid, 'carnum': carnum, 'day': day, 'week': week, 'group': group, 'user': request.user})
+
+	if request.method == 'POST':
+		times = request.POST.getlist('time[]')
+		addrs = request.POST.getlist('addr[]')
+
+		return render(request, 'putScheduleForm.html', {'times': times, 'addrs': addrs})
+
+@csrf_exempt
 def putSchedule(request):
     if request.method == "GET":
         bid = request.GET.get('bid')

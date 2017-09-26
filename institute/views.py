@@ -520,7 +520,7 @@ def addAcademyForm(request):
 	if not request.user.is_staff :
 		return render(request, 'message.html', {'msg': "staff 권한이 필요합니다.", 'redirect_url': redirect_url})
 
-	return render(request, 'addAcademyForm.html', )
+	return render(request, 'addUpdateAcademyForm.html', )
 
 @login_required
 def updateAcademyForm(request):
@@ -532,7 +532,7 @@ def updateAcademyForm(request):
 	aid = request.GET.get('aid')
 	academy = Academy.objects.get(id = aid)
 
-	return render(request, 'addAcademyForm.html', {'academy' : academy})
+	return render(request, 'addUpdateAcademyForm.html', {'academy' : academy})
 
 @csrf_exempt
 @login_required
@@ -564,6 +564,7 @@ def addAcademy(request):
 		placement = Placement.objects.get(poi = poi, alias = aname)
 	except Placement.DoesNotExist:
 		placement = Placement.objects.create(poi = poi, alias = aname, branch = branch)
+	#placement = None
 
 	try:
 		Academy.objects.create(name = aname, address = address, phone_1 = phone_1, phone_2 = phone_2, bid = bid, maxvehicle = maxvehicle, placement = placement)
@@ -595,6 +596,7 @@ def updateAcademy(request):
 	lat = request.POST.get('lat')
 	lng = request.POST.get('lng')
 	address = request.POST.get('address')
+	address2 = request.POST.get('address2')
 
 	branch = Branch.objects.get(id=bid)
 	msg = None
@@ -613,6 +615,7 @@ def updateAcademy(request):
 		academy = Academy.objects.get(id = aid)
 		academy.name = aname
 		academy.address = address
+		academy.address2 = address2
 		academy.phone_1 = phone_1
 		academy.phone_2 = phone_2
 		academy.bid = bid
@@ -629,28 +632,16 @@ def updateAcademy(request):
 	return render(request, 'message.html', {'msg': msg, 'redirect_url': request.META.get('HTTP_REFERER')})
 
 @login_required
-def listStudents(request):
-	if request.user.is_staff :
-		institute = request.session.get('institute', None)
-	else :
-		institute = request.user.first_name
+def listAcademies(request):
+	if not request.user.is_staff :
+		msg = "staff 권한이 필요합니다."
+		return render(request, 'message.html', {'msg': msg, 'redirect_url': request.META.get('HTTP_REFERER')})
 
-	if institute:
-		academy = Academy.objects.get(name = institute)
-		students = StudentInfo.objects.filter(aid_id = academy.id).filter(deleted_date__isnull=True).order_by('sname')
-	else:
-		students = StudentInfo.objects.all().filter(deleted_date__isnull=True).order_by('sname')
+	academies = Academy.objects.all().order_by('bid')
+	branches = Branch.objects.all()
+	branch_dict = {}
+	for branch in branches:
+		branch_dict[branch.id] = branch.bname
 
-	beautifyStudents = []
-	for student in students:
-		beautifyStudent = BeautifyStudent()
-		beautifyStudent.info = student
-		beautifyStudent.phonenumber  = FormatPhoneNumber(student.parents_phonenumber)
-		beautifyStudent.other_phone = student.grandparents_phonenumber or student.parents_phonenumber or student.self_phonenumber
-
-		if (student.birth_year):
-			beautifyStudent.age = timezone.now().year - int(student.birth_year) + 1
-		beautifyStudents.append(beautifyStudent)
-
-	return render(request, 'listStudents.html', {'students': beautifyStudents});
+	return render(request, 'listAcademies.html', {'academies': academies, 'branch_dict': branch_dict});
 

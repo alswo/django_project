@@ -15,4 +15,5 @@ urlpatterns = [
     url(r'^updateAcademyForm$', views.updateAcademyForm),
     url(r'^addAcademy$', views.addAcademy),
     url(r'^updateAcademy$', views.updateAcademy),
+    url(r'^listAcademies$', views.listAcademies),
 ]
