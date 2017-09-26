@@ -4,13 +4,14 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from passenger.models import Academy, StudentInfo, PersonalInfo
-from schedule.models import Branch, HistoryScheduleTable
+from schedule.models import Branch, HistoryScheduleTable, Poi, Placement
 from util.PhoneNumber import CleanPhoneNumber, FormatPhoneNumber
 from util.PersonalInfoUtil import compareLists, saveNewPersonInfo2
 from django.utils import timezone
 import datetime
 import re
 from django.db.models import Min
+from django.db import IntegrityError, transaction
 import math
 
 # Create your views here.
@@ -60,10 +61,6 @@ def checkAuth(request):
 		institute = request.user.first_name
 
 	redirect_url = request.META.get('HTTP_REFERER', 'http://' + request.META.get('SERVER_NAME') + '/institute/listStudents')
-	#if (request.META['HTTP_REFERER'] == None):
-		#redirect_url = 'http://' + request.META['SERVER_NAME'] + '/institute/listStudents'
-	#else:
-		#redirect_url = request.META['HTTP_REFERER']
 
 	if institute:
 		try:
@@ -522,20 +519,133 @@ def getHistory(request):
 
 @login_required
 def addAcademyForm(request):
-	rv = checkAuth(request)
-	if (rv != None):
-		return rv
+	redirect_url = request.META.get('HTTP_REFERER', 'http://' + request.META.get('SERVER_NAME') + '/institute/listStudents')
 
-	return render(request, 'addAcademyForm.html', )
+	if not request.user.is_staff :
+		return render(request, 'message.html', {'msg': "staff 권한이 필요합니다.", 'redirect_url': redirect_url})
+
+	return render(request, 'addUpdateAcademyForm.html', )
 
 @login_required
-def updateAcademy(request):
-	rv = checkAuth(request)
-	if (rv != None):
-		return rv
+def updateAcademyForm(request):
+	redirect_url = request.META.get('HTTP_REFERER', 'http://' + request.META.get('SERVER_NAME') + '/institute/listStudents')
 
-	aid = request.POST.get('aid')
+	if not request.user.is_staff :
+		return render(request, 'message.html', {'msg': "staff 권한이 필요합니다.", 'redirect_url': redirect_url})
+
+	aid = request.GET.get('aid')
 	academy = Academy.objects.get(id = aid)
 
-	return render(request, 'addAcademyForm.html', {'academy' : academy})
+	return render(request, 'addUpdateAcademyForm.html', {'academy' : academy})
+
+@csrf_exempt
+@login_required
+def addAcademy(request):
+	redirect_url = request.META.get('HTTP_REFERER', 'http://' + request.META.get('SERVER_NAME') + '/institute/listStudents')
+
+	if not request.user.is_staff :
+		return render(request, 'message.html', {'msg': "staff 권한이 필요합니다.", 'redirect_url': redirect_url})
+
+
+	bid = request.POST.get('bid')
+	aname = request.POST.get('aname')
+	phone_1 = request.POST.get('phone_1')
+	phone_2 = request.POST.get('phone_2')
+	maxvehicle = request.POST.get('maxvehicle')
+	lat = request.POST.get('lat')
+	lng = request.POST.get('lng')
+	address = request.POST.get('address')
+
+	branch = Branch.objects.get(id=bid)
+	msg = None
+
+	try:
+		poi = Poi.objects.get(lat = lat, lng = lng)
+	except Poi.DoesNotExist:
+		poi = Poi.objects.create(lat = lat, lng = lng, address = address)
+
+	try:
+		placement = Placement.objects.get(poi = poi, alias = aname)
+	except Placement.DoesNotExist:
+		placement = Placement.objects.create(poi = poi, alias = aname, branch = branch)
+	#placement = None
+
+	try:
+		Academy.objects.create(name = aname, address = address, phone_1 = phone_1, phone_2 = phone_2, bid = bid, maxvehicle = maxvehicle, placement = placement)
+	except IntegrityError as e:
+		#if 'unique constraint' in e.message:
+		msg = "중복되는 학원명입니다."
+	except:
+		msg = "에러가 발생했습니다."
+	else:
+		msg = "학원 추가 성공했습니다."
+
+	return render(request, 'message.html', {'msg': msg, 'redirect_url': request.META.get('HTTP_REFERER')})
+
+@csrf_exempt
+@login_required
+def updateAcademy(request):
+	redirect_url = request.META.get('HTTP_REFERER', 'http://' + request.META.get('SERVER_NAME') + '/institute/listStudents')
+
+	if not request.user.is_staff :
+		return render(request, 'message.html', {'msg': "staff 권한이 필요합니다.", 'redirect_url': redirect_url})
+
+
+	aid = request.POST.get('aid')
+	bid = request.POST.get('bid')
+	aname = request.POST.get('aname')
+	phone_1 = request.POST.get('phone_1')
+	phone_2 = request.POST.get('phone_2')
+	maxvehicle = request.POST.get('maxvehicle')
+	lat = request.POST.get('lat')
+	lng = request.POST.get('lng')
+	address = request.POST.get('address')
+	address2 = request.POST.get('address2')
+
+	branch = Branch.objects.get(id=bid)
+	msg = None
+
+	try:
+		poi = Poi.objects.get(lat = lat, lng = lng)
+	except Poi.DoesNotExist:
+		poi = Poi.objects.create(lat = lat, lng = lng, address = address)
+
+	try:
+		placement = Placement.objects.get(poi = poi, alias = aname)
+	except Placement.DoesNotExist:
+		placement = Placement.objects.create(poi = poi, alias = aname, branch = branch)
+
+	try:
+		academy = Academy.objects.get(id = aid)
+		academy.name = aname
+		academy.address = address
+		academy.address2 = address2
+		academy.phone_1 = phone_1
+		academy.phone_2 = phone_2
+		academy.bid = bid
+		academy.maxvehicle = maxvehicle
+		academy.placement = placement
+		academy.save()
+	except IntegrityError as e:
+		msg = "중복되는 학원명입니다."
+	except:
+		msg = "에러가 발생했습니다."
+	else:
+		msg = "학원 추가 성공했습니다."
+
+	return render(request, 'message.html', {'msg': msg, 'redirect_url': request.META.get('HTTP_REFERER')})
+
+@login_required
+def listAcademies(request):
+	if not request.user.is_staff :
+		msg = "staff 권한이 필요합니다."
+		return render(request, 'message.html', {'msg': msg, 'redirect_url': request.META.get('HTTP_REFERER')})
+
+	academies = Academy.objects.all().order_by('bid')
+	branches = Branch.objects.all()
+	branch_dict = {}
+	for branch in branches:
+		branch_dict[branch.id] = branch.bname
+
+	return render(request, 'listAcademies.html', {'academies': academies, 'branch_dict': branch_dict});
 

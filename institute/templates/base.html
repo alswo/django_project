@@ -24,6 +24,7 @@
     	<script src="/static/js/jquery-ui.js"></script>
 	<script src="/static/js/bootstrap.min.js"></script>
   	<!-- script type="text/javascript" src="http://apis.daum.net/maps/maps3.js?apikey=df6af02ef0921fda82ecbfd508cfcfdf&libraries=services"></script //-->
+	<script type="text/javascript" src="http://dapi.kakao.com/v2/maps/sdk.js?appkey=12ec34cf3d8e8933e1f57a5dd9767f1a&libraries=services"></script>
 	<!-- script type="text/javascript" src="/static/js/jquery.timepicker.min.js"></script //-->
 	<script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
 	<!-- script src="/static/js/plugins/proj4.js"></script //-->
@@ -174,6 +175,15 @@
               </li>
 
               <li class="dorpdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">학원<span class="caret"></span></a>
+                <ul class="dropdown-menu">
+                  <li><a href="/institute/listAcademies">보기</a></li>
+                  <li><a href="/institute/addAcademyForm">추가</a></li>
+                </ul>
+              </li>
+
+
+              <li class="dorpdown">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">모니터<span class="caret"></span></a>
                 <ul class="dropdown-menu">
                   <li><a href="/monitor/inventories">인벤토리</a></li>
@@ -189,7 +199,7 @@
                   <li><a href="/opti2" target="_blank">V2</a></li>
                 </ul>
               </li>
-{% endif %}
+	{% endif %}
             </ul>
             <ul class="nav navbar-nav navbar-right">
               <li class="hiddenactive"><a href="./">{{displayname}}<span class="sr-only">(current)</span></a></li>

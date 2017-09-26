@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.contrib.postgres.fields import ArrayField
-from schedule.models import Branch
+from schedule.models import Branch, Placement
 from django.db import models
 from django.utils import timezone
 import datetime
@@ -38,6 +38,7 @@ class Group(models.Model):
 class Academy(models.Model):
     name = models.CharField(max_length = 50)
     address = models.CharField(max_length = 50)
+    address2 = models.CharField(max_length = 30, null=True)
     phone_1 = models.CharField(max_length = 30)
     phone_2 = models.CharField(max_length = 30, null = True, blank = True)
     gid = models.IntegerField(null=True, blank=True)
@@ -45,7 +46,12 @@ class Academy(models.Model):
     lon = models.FloatField(null=True, blank=True)
     lat = models.FloatField(null=True, blank=True)
     bid = models.IntegerField()
+    branch = models.ForeignKey(Branch, null=True)
     maxvehicle = models.IntegerField(default=1)
+    placement = models.ForeignKey(Placement, null=True)
+
+    class Meta:
+        unique_together = ('bid', 'name')
 
 class Commute(models.Model):
     name = models.CharField(max_length = 10)
