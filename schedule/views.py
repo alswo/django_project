@@ -333,28 +333,23 @@ def getSchedule(request):
 
 @csrf_exempt
 def putScheduleForm(request):
-	if request.method == 'GET':
-		bid = request.GET.get('bid')
-		carnum = request.GET.get('carnum')
-		day = request.GET.get('day')
-		week = request.GET.get('week')
+    weekdaylist = ['월', '화', '수', '목', '금', '토']
+    if request.method == "GET":
+        bid = request.GET.get('bid')
+        carnum = int(request.GET.get('carnum', '0'))
+        day = request.GET.get('day')
+        week = int(request.GET.get('week', '0'))
 
-		if carnum:
-			carnum = int(carnum)
-		elif carnum == None:
-			carnum = 0
-		
-		if bid:
-			academy = Academy.objects.filter(bid = bid)
-			group = Car.objects.filter(branchid = bid)
+    elif request.method == 'POST':
+        times = request.POST.getlist('time[]')
+        addrs = request.POST.getlist('addr[]')
 
-		return render(request, 'putSchedule.html', {'academy': academy, 'bid': bid, 'carnum': carnum, 'day': day, 'week': week, 'group': group, 'user': request.user})
+    if bid:
+        academy = Academy.objects.filter(bid = bid)
+        group = Car.objects.filter(branchid = bid)
 
-	if request.method == 'POST':
-		times = request.POST.getlist('time[]')
-		addrs = request.POST.getlist('addr[]')
+    return render_to_response('putSchedule.html', {"academy" : academy, "bid" : bid,"carnum":carnum,"day":day,"week":week, "group" : group,'user':request.user, 'weekdaylist': weekdaylist, 'weeknum_range': range(0, 4), 'times': times, 'addrs': addrs})
 
-		return render(request, 'putScheduleForm.html', {'times': times, 'addrs': addrs})
 
 @csrf_exempt
 def putSchedule(request):
@@ -408,11 +403,9 @@ def putSchedule(request):
         else:
             putInven.setWeek3()
 
-
     if bid:
         academy = Academy.objects.filter(bid = bid)
         group = Car.objects.filter(branchid = bid)
-
 
     return render_to_response('putSchedule.html', {"academy" : academy, "bid" : bid,"carnum":carnum,"day":day,"week":week, "group" : group,'user':request.user, 'weekdaylist': weekdaylist, 'weeknum_range': range(0, 4)})
 
