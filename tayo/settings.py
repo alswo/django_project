@@ -33,6 +33,7 @@ INSTALLED_APPS = [
     'util',
     'fcmdev',
     'fcm_django',
+    'billing',
     #'traccar',
 ]
 
