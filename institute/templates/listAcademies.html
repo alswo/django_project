@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% load bitwise_tags %}
+{% block content %}
+<DIV class="row">
+	<DIV class="col-md-12">
+		<DIV class="table-reponsive">
+			<table id="academyListTable" class="display" width="100%"></table>
+		</DIV>
+	</DIV>
+</DIV>
+
+<SCRIPT>
+	var dataSet = [
+		{% for academy in academies %}
+		[
+			"{{branch_dict|get_item:academy.bid}}",
+                        "{{academy.name}}",
+			"{% if academy.address %}{{academy.address}}{% endif %} {% if academy.address2 %}{{academy.address2}}{% endif %}",
+			"{% if academy.phone_1 %}{{academy.phone_1}}{% endif %}",
+			"{% if academy.phone_2 %}{{academy.phone_2}}{% endif %}",
+			"{% if academy.maxvehicle %}{{academy.maxvehicle}}{% endif %}",
+			'<p data-placement="top" data-toggle="tooltip" title="Edit" class="p_bottom_0"><button class="btn btn-primary btn-sm updateStudent" data-title="Edit" data-aid="{{academy.id}}" data-target="#edit" ><span class="glyphicon glyphicon-pencil"></span></button></p>',
+			'<p data-placement="top" data-toggle="tooltip" title="Delete"><button class="btn btn-danger btn-sm deleteStudent" data-title="Delete" data-aid="{{academy.id}}" data-target="#delete" ><span class="glyphicon glyphicon-trash"></span></button></p>',
+		],
+		{% endfor %}
+	];
+	$(document).ready(function() {
+		var table = $('#academyListTable').DataTable({
+			data : dataSet,
+			columns : [
+                                { title : "지역" },
+                                { title : "이름" },
+				{ title : "주소" },
+				{ title : "전화번호1" },
+				{ title : "전화번호2" },
+				{ title : "차량대수" },
+				{ title : "수정" },
+				{ title : "삭제" },
+			],
+			"lengthMenu": [10, 25, 50, 100],
+		});
+
+		$('.updateStudent').on('click', function(e) {
+			location.href = "updateAcademyForm?aid=" + $(this).data('aid')
+		});
+		$('.deleteStudent').on('click', function(e) {
+			location.href = "deleteAcademy?aid=" + $(this).data('aid')
+		});
+
+		// every event is deleted when paging
+		$('#academyListTable').on( 'draw.dt', function () {
+			$('.updateStudent').on('click', function(e) {
+				location.href = "updateAcademyForm?aid=" + $(this).data('aid')
+			});
+			$('.deleteStudent').on('click', function(e) {
+				if (confirm("학생 삭제를 하시겠습니까?")) {
+					location.href = "deleteAcademy?aid=" + $(this).data('aid')
+				}
+				else {
+					return false;
+				}
+			});
+		});
+
+		$('.preventSorting').on('click', function(e){
+       e.stopPropagation();
+    });
+	});
+</SCRIPT>
+{% endblock content %}
