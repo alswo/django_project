@@ -175,7 +175,7 @@ class PoiGraph(Graph):
                     weight = current_vertex.get_weight(prev_vertex)
                     total_weight += weight
                     prev_vertex = self.get_vertex(route)
-                obj['features'].append({'index': index, 'viaPointName': route, 'requiredTime': weight})
+                obj['features'].append({'index': index, 'viaPointName': route, 'requiredTime': weight, 'lat': self.get_vertex(route).lat, 'lng': self.get_vertex(route).lon})
                 index += 1
             obj['properties']['totalTime'] = total_weight
         return json.dumps(obj)
