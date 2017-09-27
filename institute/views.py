@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from passenger.models import Academy, StudentInfo, PersonalInfo
-from schedule.models import Branch, HistoryScheduleTable, Poi, Placement
+from schedule.models import Branch, HistoryScheduleTable#, Poi, Placement
 from util.PhoneNumber import CleanPhoneNumber, FormatPhoneNumber
 from util.PersonalInfoUtil import compareLists, saveNewPersonInfo2
 from django.utils import timezone
@@ -354,12 +354,14 @@ def getHistory(request):
         startdate = request.GET.get('startdate')
         enddate = request.GET.get('enddate')
         carid = request.GET.get('carid')
+        monthpick = request.GET.get('monthpick')
     elif request.method == 'POST':
     	aid = request.POST.get('aid')
     	daterange = request.POST.get('daterange')
         startdate = request.POST.get('startdate')
         enddate = request.POST.get('enddate')
         carid = request.POST.get('carid')
+        monthpick = request.POST.get('monthpick')
 
     if (carid == None or carid == 'all'):
         carid = 0
@@ -380,9 +382,14 @@ def getHistory(request):
     overtime = 30
 
 
-    if aid is not None and aid != '' and startdate is not None and startdate != '' and enddate is not None and enddate != '':
-        start_date = datetime.date(*map(int, startdate.split('-')))
-        end_date = datetime.date(*map(int, enddate.split('-')))
+    if aid is not None and aid != '' and ((startdate is not None and startdate != '' and enddate is not None and enddate != '') or (monthpick is not None)):
+        if monthpick :
+            start_date = datetime.date(*map(int, monthpick.split('-') + ['1']))
+            end_date = datetime.date(*map(int, monthpick.split('-') + ['30']))
+        else :
+            start_date = datetime.date(*map(int, startdate.split('-')))
+            end_date = datetime.date(*map(int, enddate.split('-')))
+
         total_days = (end_date - start_date).days + 1
         academy = Academy.objects.get(id=aid)
 	#aname = Academy.objects.get(pk=aid).name
@@ -514,7 +521,25 @@ def getHistory(request):
             for dailyHistory in history:
                 dailyHistory.timehistory[:] = [x for x in dailyHistory.timehistory if x.carnum == carid]
 
-    return render(request, 'getHistory.html', {"history": history, "academy" : academy, 'total_count': total_count, 'startdate': startdate, 'enddate': enddate, 'user':request.user, 'cars':sorted(cars), 'carid':carid, 'overtime':overtime})
+    cur_year = datetime.datetime.now().year
+    cur_month = datetime.datetime.now().month
+    monthpick_range = [
+        '{}-{:0>2}'.format(year, month)
+            for year in xrange(2016, cur_year+1)
+            for month in xrange(1, 12+1)
+            if not (year == cur_year and month > cur_month)
+    ]
+
+    if (monthpick) :
+        lastmonth = monthpick
+    else :
+        if (cur_month > 1):
+            lastmonth = '{}-{:0>2}'.format(cur_year, cur_month - 1)
+        else:
+            lastmonth = '{}-{:0>2}'.format(cur_year - 1, 12)
+
+
+    return render(request, 'getHistory.html', {"history": history, "academy" : academy, 'total_count': total_count, 'startdate': startdate, 'enddate': enddate, 'user':request.user, 'cars':sorted(cars), 'carid':carid, 'overtime':overtime, 'monthpick_range': monthpick_range, 'lastmonth': lastmonth})
 
 
 @login_required
@@ -559,16 +584,16 @@ def addAcademy(request):
 	branch = Branch.objects.get(id=bid)
 	msg = None
 
-	try:
-		poi = Poi.objects.get(lat = lat, lng = lng)
-	except Poi.DoesNotExist:
-		poi = Poi.objects.create(lat = lat, lng = lng, address = address)
+	#try:
+		#poi = Poi.objects.get(lat = lat, lng = lng)
+	#except Poi.DoesNotExist:
+		#poi = Poi.objects.create(lat = lat, lng = lng, address = address)
 
-	try:
-		placement = Placement.objects.get(poi = poi, alias = aname)
-	except Placement.DoesNotExist:
-		placement = Placement.objects.create(poi = poi, alias = aname, branch = branch)
-	#placement = None
+	#try:
+		#placement = Placement.objects.get(poi = poi, alias = aname)
+	#except Placement.DoesNotExist:
+		#placement = Placement.objects.create(poi = poi, alias = aname, branch = branch)
+	placement = None
 
 	try:
 		Academy.objects.create(name = aname, address = address, phone_1 = phone_1, phone_2 = phone_2, bid = bid, maxvehicle = maxvehicle, placement = placement)
@@ -605,15 +630,15 @@ def updateAcademy(request):
 	branch = Branch.objects.get(id=bid)
 	msg = None
 
-	try:
-		poi = Poi.objects.get(lat = lat, lng = lng)
-	except Poi.DoesNotExist:
-		poi = Poi.objects.create(lat = lat, lng = lng, address = address)
+	#try:
+		#poi = Poi.objects.get(lat = lat, lng = lng)
+	#except Poi.DoesNotExist:
+		#poi = Poi.objects.create(lat = lat, lng = lng, address = address)
 
-	try:
-		placement = Placement.objects.get(poi = poi, alias = aname)
-	except Placement.DoesNotExist:
-		placement = Placement.objects.create(poi = poi, alias = aname, branch = branch)
+	#try:
+		#placement = Placement.objects.get(poi = poi, alias = aname)
+	#except Placement.DoesNotExist:
+		#placement = Placement.objects.create(poi = poi, alias = aname, branch = branch)
 
 	try:
 		academy = Academy.objects.get(id = aid)
@@ -624,7 +649,7 @@ def updateAcademy(request):
 		academy.phone_2 = phone_2
 		academy.bid = bid
 		academy.maxvehicle = maxvehicle
-		academy.placement = placement
+		#academy.placement = placement
 		academy.save()
 	except IntegrityError as e:
 		msg = "중복되는 학원명입니다."

@@ -13,7 +13,7 @@
 			검색 조건
 			</div>
 			<div class="panel-body">
-        			<form action="getHistory" method="POST">
+        			<form action="{{request.path}}" method="POST">
             			<div class="col-md-3">
                 			<label>학원</label> 
                 			<select class="form-control" id="aid" name="aid">
@@ -32,8 +32,17 @@
                 			</select>
             			</div>
             			<div class="col-md-5">
+					{% if request.path == '/institute/getMonthlyHistory' %}
+                			<label>월별</label> 
+                			<select class="form-control" id="monthpick" name="monthpick">
+                        			{% for monthpick in monthpick_range %}
+                        			<option value="{{monthpick}}" {% if monthpick == lastmonth %} selected {% endif %}>{{monthpick}}</option>
+                        			{% endfor %}
+                			</select>
+					{% else %}
                     			<label>기간</label>
                     			<input class="form-control calendar" name="daterange" type="text" id="daterange">
+					{% endif %}
             			</div>
             			<div class="col-md-2" align="right">
                 			<br>
@@ -87,8 +96,10 @@
 				= 이용요금 <br>: <span id="pay_amount"></span> 원<br>
 					</div>
 					<div class="col-md-2" align="right">
+						<!-- button type="button" class="btn-md btn-info" id="add-memo">확정 <span class="glyphicon glyphicon-pencil"></span></button><br><br//-->
 						<button type="button" class="btn-md btn-info" id="add-memo">Memo <span class="glyphicon glyphicon-pencil"></span></button><br><br>
-						<button type="button" id='pdfdown' class="btn-md btn-info">PDF <span class="glyphicon glyphicon-download-alt"></span></button>
+						<button type="button" id='pdfdown' class="btn-md btn-info">PDF <span class="glyphicon glyphicon-download-alt"></span></button><br><br>
+						<button type="button" class="btn-md btn-info" id="fix">확정 <span class="glyphicon glyphicon-check"></span></button>
 					</div>
 				</div>
 			</div>
@@ -414,6 +425,9 @@ $("#add-memo").click(function(event) {
 		<div class="col-md-1">
 		</div>
 		`;
+});
+
+$("fix").click(function(event) {
 });
 
 $(document).ready(function() {

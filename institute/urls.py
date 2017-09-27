@@ -11,6 +11,7 @@ urlpatterns = [
     url(r'^deleteStudent$', views.deleteStudent),
     url(r'^addClassForm$', views.addClassForm),
     url(r'^getHistory$', views.getHistory),
+    url(r'^getMonthlyHistory$', views.getHistory),
     url(r'^addAcademyForm$', views.addAcademyForm),
     url(r'^updateAcademyForm$', views.updateAcademyForm),
     url(r'^addAcademy$', views.addAcademy),
