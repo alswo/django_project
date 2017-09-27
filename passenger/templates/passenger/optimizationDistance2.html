@@ -91,6 +91,15 @@
             </select>
           </div>
         </div>
+        <div class="row form-group">
+          <label class="col-sm-2 control-label text-right">시작시간</label>
+          <div class="col-sm-5">
+                <input type="text" id="starttime" autocomplete=off class="form-control" placeholder="14:30">
+          </div>
+        </div>
+            <form>
+            <table class="table">
+              <thead>
             <form>
             <table class="table">
               <thead>
@@ -299,7 +308,6 @@
   var source = []
 
   $('#schedule_submit').click(function(event) {
-    alert('schedule_submit clicked');
     $('#putScheduleForm').submit();
   });
 
@@ -375,20 +383,32 @@ console.log($('.markerInfo')[i].parentNode);
           var result = JSON.parse(xmlhttp.responseText);
           console.log(xmlhttp.responseText);
           doc = document.getElementById('recommand');
+          starttime = $('#starttime').val();
           appendHtml = "";
-          for (i=0; i < result['features'].length - 1; i++) {
-             appendHtml += '<br>' + result['features'][i]['viaPointName'];
-             appendHtml += '(' + Math.floor(result['features'][i+1]['requiredTime'] / 6) / 10 + ' M)<br>';
+          if (!starttime) {
+             starttime = '00:00';
           }
-          appendHtml += '<br>' + result['features'][i]['viaPointName'];
+          starttimeSec = timeToSec(starttime);
+          for (i=0; i < result['features'].length - 1; i++) {
+             appendHtml += '<br>' + secToTime(starttimeSec) + " : " + result['features'][i]['viaPointName'];
+             appendHtml += '(' + Math.floor(result['features'][i+1]['requiredTime'] / 6) / 10 + ' M)<br>';
+             starttimeSec = timeToSec(secToTime(starttimeSec)) + result['features'][i+1]['requiredTime'];
+          }
+          appendHtml += '<br>' + secToTime(starttimeSec) + " : " + result['features'][i]['viaPointName'] + "<br>";
        
-          submitHtml = "<form method='POST' action='/schedule/putScheduleForm' id='putScheduleForm'>";
+          starttimeSec = timeToSec(starttime);
+          submitHtml = "<form method='POST' action='/inventory/putScheduleForm' id='putScheduleForm'>";
           for (i=0; i<result['features'].length; i++) {
+             submitHtml += "<input type='hidden' name='time[]' value='" + secToTime(starttimeSec) + "'>";
              submitHtml += "<input type='hidden' name='addr[]' value='" + result['features'][i]['viaPointName'] + "'>";
+             if (i < result['features'].length - 1) {
+                 starttimeSec = timeToSec(secToTime(starttimeSec)) + result['features'][i+1]['requiredTime'];
+             }
           }
           submitHtml += "</form>";
 
-          doc.innerHTML = appendHtml + '&nbsp&nbsp' + ' <span class="glyphicon glyphicon-time" aria-hidden="true"></span> : ' + Math.floor(parseInt(result['properties']['totalTime']) / 60) + 'M' + submitHtml;
+          //doc.innerHTML = appendHtml + '&nbsp&nbsp' + ' <span class="glyphicon glyphicon-time" aria-hidden="true"></span> : ' + Math.floor(parseInt(result['properties']['totalTime']) / 60) + 'M' + submitHtml;
+          doc.innerHTML = appendHtml + '<br>' + 'Total <span class="glyphicon glyphicon-time" aria-hidden="true"></span> : ' + secToTime(timeToSec(secToTime(starttimeSec)) - timeToSec(starttime)) + 'M' + submitHtml;
 
 	  jsonObj['reqCoordType'] = 'WGS84GEO';
 	  jsonObj['resCoordType'] = 'WGS84GEO';
@@ -450,6 +470,17 @@ console.log($('.markerInfo')[i].parentNode);
 	}
 
 	return;
+  }
+
+  function timeToSec(timestr) {
+	var timearr = timestr.split(":");
+	return timearr[0] * 60 * 60 + timearr[1] * 60;
+  }
+
+  function secToTime(sec) {
+	var hour = parseInt(sec / (60 * 60));
+	var min = Math.ceil((sec - (hour * 60 * 60)) / 60);
+	return hour + ":" + min;
   }
 
 </script>

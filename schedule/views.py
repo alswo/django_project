@@ -331,11 +331,23 @@ def getSchedule(request):
 
         return HttpResponse('로그인 후 사용해주세요.')
 
+class TimeAddrPair:
+	def __init__(self):
+		self.time = None
+		self.addr = None
+		self.lat = 0
+		self.lng = 0
+
 @csrf_exempt
 def putScheduleForm(request):
     weekdaylist = ['월', '화', '수', '목', '금', '토']
     times = None
     addrs = None
+    bid = None
+    carnum = None
+    week = None
+    day = None
+
     if request.method == "GET":
         bid = request.GET.get('bid')
         carnum = int(request.GET.get('carnum', '0'))
@@ -345,6 +357,17 @@ def putScheduleForm(request):
     elif request.method == 'POST':
         times = request.POST.getlist('time[]')
         addrs = request.POST.getlist('addr[]')
+	lats = request.POST.getlist('lat[]')
+	lngs = request.POST.getlist('lng[]')
+
+	timeaddrpairs = list()
+	for idx, time in enumerate(times):
+		timeaddrpair = TimeAddrPair()
+		timeaddrpair.time = time
+		timeaddrpair.addr = addrs[idx]
+		timeaddrpair.lat = lats[idx]
+		timeaddrpair.lng = lngs[idx]
+		timeaddrpairs.append(timeaddrpair)
 
     if bid:
         academy = Academy.objects.filter(bid = bid)
@@ -359,7 +382,7 @@ def putScheduleForm(request):
     if not week:
         week = 0
 
-    return render_to_response('putSchedule.html', {"academy" : academy, "bid" : bid,"carnum":carnum,"day":day,"week":week, "group" : group,'user':request.user, 'weekdaylist': weekdaylist, 'weeknum_range': range(0, 4), 'times': times, 'addrs': addrs})
+    return render_to_response('putSchedule.html', {"academy" : academy, "bid" : bid,"carnum":carnum,"day":day,"week":week, "group" : group,'user':request.user, 'weekdaylist': weekdaylist, 'weeknum_range': range(0, 4), 'timeaddrpairs': timeaddrpairs})
 
 
 @csrf_exempt
