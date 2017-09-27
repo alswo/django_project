@@ -338,6 +338,10 @@ class TimeAddrPair:
 		self.lat = 0
 		self.lng = 0
 
+def convertTime(timestr):
+    times = timestr.split(':')
+    return "%02d:%02d" % (int(times[0]), int(times[1]))
+
 @csrf_exempt
 def putScheduleForm(request):
     weekdaylist = ['월', '화', '수', '목', '금', '토']
@@ -363,7 +367,7 @@ def putScheduleForm(request):
 	timeaddrpairs = list()
 	for idx, time in enumerate(times):
 		timeaddrpair = TimeAddrPair()
-		timeaddrpair.time = time
+		timeaddrpair.time = convertTime(time)
 		timeaddrpair.addr = addrs[idx]
 		timeaddrpair.lat = lats[idx]
 		timeaddrpair.lng = lngs[idx]
@@ -1552,6 +1556,7 @@ def getRealtimeLocation(request):
             ## inventory 사이에..
             else:
                 return HttpResponse("다음 스케쥴이 아직 시작되지 않았습니다.")
+
 @csrf_exempt
 def moveCarInven(request):
     if request.method == 'POST':

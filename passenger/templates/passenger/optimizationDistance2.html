@@ -401,6 +401,8 @@ console.log($('.markerInfo')[i].parentNode);
           for (i=0; i<result['features'].length; i++) {
              submitHtml += "<input type='hidden' name='time[]' value='" + secToTime(starttimeSec) + "'>";
              submitHtml += "<input type='hidden' name='addr[]' value='" + result['features'][i]['viaPointName'] + "'>";
+             submitHtml += "<input type='hidden' name='lat[]' value='" + result['features'][i]['lat'] + "'>";
+             submitHtml += "<input type='hidden' name='lng[]' value='" + result['features'][i]['lgn'] + "'>";
              if (i < result['features'].length - 1) {
                  starttimeSec = timeToSec(secToTime(starttimeSec)) + result['features'][i+1]['requiredTime'];
              }
