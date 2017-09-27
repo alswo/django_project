@@ -144,11 +144,9 @@
             <h3 id="recommand"></h3>
           </div>
         </div>
-        <hr>
-        <div class="modal-body">
-        </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary" id="schedule_submit">스케쥴 저장</button>
         </div>
       </div>
     </div>
@@ -300,6 +298,11 @@
 
   var source = []
 
+  $('#schedule_submit').click(function(event) {
+    alert('schedule_submit clicked');
+    $('#putScheduleForm').submit();
+  });
+
   $('#getRoute').click(function(event) {
   //function getRoute() {
     var jsonObj = {};
@@ -378,8 +381,14 @@ console.log($('.markerInfo')[i].parentNode);
              appendHtml += '(' + Math.floor(result['features'][i+1]['requiredTime'] / 6) / 10 + ' M)<br>';
           }
           appendHtml += '<br>' + result['features'][i]['viaPointName'];
-          doc.innerHTML = appendHtml + '&nbsp&nbsp' + ' <span class="glyphicon glyphicon-time" aria-hidden="true"></span> : ' + Math.floor(parseInt(result['properties']['totalTime']) / 60) + 'M';
+       
+          submitHtml = "<form method='POST' action='/schedule/putScheduleForm' id='putScheduleForm'>";
+          for (i=0; i<result['features'].length; i++) {
+             submitHtml += "<input type='hidden' name='addr[]' value='" + result['features'][i]['viaPointName'] + "'>";
+          }
+          submitHtml += "</form>";
 
+          doc.innerHTML = appendHtml + '&nbsp&nbsp' + ' <span class="glyphicon glyphicon-time" aria-hidden="true"></span> : ' + Math.floor(parseInt(result['properties']['totalTime']) / 60) + 'M' + submitHtml;
 
 	  jsonObj['reqCoordType'] = 'WGS84GEO';
 	  jsonObj['resCoordType'] = 'WGS84GEO';

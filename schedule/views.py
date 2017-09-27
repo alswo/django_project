@@ -334,10 +334,12 @@ def getSchedule(request):
 @csrf_exempt
 def putScheduleForm(request):
     weekdaylist = ['월', '화', '수', '목', '금', '토']
+    times = None
+    addrs = None
     if request.method == "GET":
         bid = request.GET.get('bid')
         carnum = int(request.GET.get('carnum', '0'))
-        day = request.GET.get('day')
+        day = request.GET.get('day', '월')
         week = int(request.GET.get('week', '0'))
 
     elif request.method == 'POST':
@@ -347,6 +349,15 @@ def putScheduleForm(request):
     if bid:
         academy = Academy.objects.filter(bid = bid)
         group = Car.objects.filter(branchid = bid)
+    else:
+        bid = 0
+        academy = Academy.objects.all()
+        group = Car.objects.all()
+
+    if not carnum:
+        carnum = 0
+    if not week:
+        week = 0
 
     return render_to_response('putSchedule.html', {"academy" : academy, "bid" : bid,"carnum":carnum,"day":day,"week":week, "group" : group,'user':request.user, 'weekdaylist': weekdaylist, 'weeknum_range': range(0, 4), 'times': times, 'addrs': addrs})
 
