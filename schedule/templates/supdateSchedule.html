@@ -31,56 +31,9 @@
   <div class="col-md-2">
     <label>DAY:</label>
     <select name="day" class="form-control" form="searchform">
-      {% if day == '월' %}
-      <option value="월" selected>월</option>
-      <option value="화">화</option>
-      <option value="수">수</option>
-      <option value="목">목</option>
-      <option value="금">금</option>
-      <option value="토">토</option>
-      {% elif day == '화' %}
-      <option value="월">월</option>
-      <option value="화" selected>화</option>
-      <option value="수">수</option>
-      <option value="목">목</option>
-      <option value="금">금</option>
-      <option value="토">토</option>
-      {% elif day == '수' %}
-      <option value="월">월</option>
-      <option value="화">화</option>
-      <option value="수" selected>수</option>
-      <option value="목">목</option>
-      <option value="금">금</option>
-      <option value="토">토</option>
-      {% elif day == '목' %}
-      <option value="월">월</option>
-      <option value="화">화</option>
-      <option value="수">수</option>
-      <option value="목" selected>목</option>
-      <option value="금">금</option>
-      <option value="토">토</option>
-      {% elif day == '금' %}
-      <option value="월">월</option>
-      <option value="화">화</option>
-      <option value="수">수</option>
-      <option value="목">목</option>
-      <option value="금" selected>금</option>
-      <option value="토">토</option>
-      {% elif day == '토' %}
-      <option value="월">월</option>
-      <option value="화">화</option>
-      <option value="수">수</option>
-      <option value="목">목</option>
-      <option value="금">금</option>
-      <option value="토" selected>토</option>
-      {% else %}
-      <option value="월" selected>월</option>
-      <option value="화">화</option>
-      <option value="수">수</option>
-      <option value="목">목</option>
-      <option value="금">금</option>
-      <option value="토">토</option>
-      {% endif %}
+      {% for weekday in weekdaylist %}
+      <option value="{{weekday}}" {% if day == weekday %}selected{%endif%}>{{weekday}}</option>
+      {% endfor %}
     </select>
   </div>
   <!--<div class="col-md-3">
