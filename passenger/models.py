@@ -49,6 +49,14 @@ class Academy(models.Model):
     branch = models.ForeignKey(Branch, null=True)
     maxvehicle = models.IntegerField(default=1)
     placement = models.ForeignKey(Placement, null=True)
+    bank003 = models.CharField(max_length = 16, null = False, default = 0)
+    bank004 = models.CharField(max_length = 16, null = False, default = 0)
+    bank011 = models.CharField(max_length = 16, null = False, default = 0)
+    bank020 = models.CharField(max_length = 16, null = False, default = 0)
+    bank027 = models.CharField(max_length = 16, null = False, default = 0)
+    bank071 = models.CharField(max_length = 16, null = False, default = 0)
+    bank081 = models.CharField(max_length = 16, null = False, default = 0)
+    bank088 = models.CharField(max_length = 16, null = False, default = 0)
 
     class Meta:
         unique_together = ('bid', 'name')
