@@ -15,6 +15,10 @@ def bitwise_or(value, arg):
 def masking(value):
     return value[:1] + '**'
 
+@register.filter
+def get_item(dictionary, key):
+    return dictionary.get(key)
+
 @register.simple_tag
 def get_constants(name):
     return getattr(TimeHistory, name, None)

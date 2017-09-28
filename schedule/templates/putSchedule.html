@@ -63,175 +63,20 @@
             <div class="col-md-4">
               <label>WEEK:</label>
               <select name="week" class="form-control" id="{{contact.id}}gid" form="scheduleform">
-                          {% if week == '0' %}
                           <option value="">주차</option>
-                          <option  value="0" selected>금주</option>
-                          <option  value="1">1주차</option>
-                          <option  value="2">2주차</option>
-                          <option  value="3">3주차</option>
-                          {% elif week == '1' %}
-                          <option value="" >주차</option>
-                          <option  value="0">금주</option>
-                          <option  value="1" selected>1주차</option>
-                          <option  value="2">2주차</option>
-                          <option  value="3">3주차</option>
-                          {% elif week == '2'%}
-                          <option value="" >주차</option>
-                          <option  value="0">금주</option>
-                          <option  value="1">1주차</option>
-                          <option  value="2" selected>2주차</option>
-                          <option  value="3">3주차</option>
-                          {% elif week == '3'%}
-                          <option value="" selected>주차</option>
-                          <option  value="0">금주</option>
-                          <option  value="1">1주차</option>
-                          <option  value="2">2주차</option>
-                          <option  value="3" selected>3주차</option>
-                          {% else %}
-                          <option value="" selected>주차</option>
-                          <option  value="0">금주</option>
-                          <option  value="1">1주차</option>
-                          <option  value="2">2주차</option>
-                          <option  value="3">3주차</option>
-                          {% endif %}
+                          {% for weeknum in weeknum_range %}
+                          <option  value="{{weeknum}}" {% if week == weeknum %}selected{% endif %}>{% if weeknum == 0 %}금주{% else %}{{weeknum}}주차{% endif %}</option>
+                          {% endfor %}
                         </select>
             </div>
             <div class="col-md-4">
               <label>DAY:</label>
-              <br> {% if day == '월' %}
+              <br> 
+              {% for weekday in weekdaylist %}
               <div class="checkbox-inline">
-                <label><input type="checkbox" id="{{contact.id}}gid" form="scheduleform" name="day[]" value="월" checked>월</label>
+                <label><input type="checkbox" id="{{contact.id}}gid" form="scheduleform" name="day[]" value="{{weekday}}" {% if day == weekday %}checked{%endif%}>{{weekday}}</label>
               </div>
-              <div class="checkbox-inline">
-                <label><input type="checkbox" id="{{contact.id}}gid" form="scheduleform" name="day[]" value="화">화</label>
-              </div>
-              <div class="checkbox-inline">
-                <label><input type="checkbox" id="{{contact.id}}gid" form="scheduleform" name="day[]" value="수">수</label>
-              </div>
-              <div class="checkbox-inline">
-                <label><input type="checkbox" id="{{contact.id}}gid" form="scheduleform" name="day[]" value="목">목</label>
-              </div>
-              <div class="checkbox-inline">
-                <label><input type="checkbox" id="{{contact.id}}gid" form="scheduleform" name="day[]" value="금">금</label>
-              </div>
-              <div class="checkbox-inline">
-                <label><input type="checkbox" id="{{contact.id}}gid" form="scheduleform" name="day[]" value="토">토</label>
-              </div>
-              {% elif day == '화' %}
-              <div class="checkbox-inline">
-                <label><input type="checkbox" id="{{contact.id}}gid" form="scheduleform" name="day[]" value="월">월</label>
-              </div>
-              <div class="checkbox-inline">
-                <label><input type="checkbox" id="{{contact.id}}gid" form="scheduleform" name="day[]" value="화" checked>화</label>
-              </div>
-              <div class="checkbox-inline">
-                <label><input type="checkbox" id="{{contact.id}}gid" form="scheduleform" name="day[]" value="수">수</label>
-              </div>
-              <div class="checkbox-inline">
-                <label><input type="checkbox" id="{{contact.id}}gid" form="scheduleform" name="day[]" value="목">목</label>
-              </div>
-              <div class="checkbox-inline">
-                <label><input type="checkbox" id="{{contact.id}}gid" form="scheduleform" name="day[]" value="금">금</label>
-              </div>
-              <div class="checkbox-inline">
-                <label><input type="checkbox" id="{{contact.id}}gid" form="scheduleform" name="day[]" value="토">토</label>
-              </div>
-              {% elif day == '수' %}
-              <div class="checkbox-inline">
-                <label><input type="checkbox" id="{{contact.id}}gid" form="scheduleform" name="day[]" value="월">월</label>
-              </div>
-              <div class="checkbox-inline">
-                <label><input type="checkbox" id="{{contact.id}}gid" form="scheduleform" name="day[]" value="화">화</label>
-              </div>
-              <div class="checkbox-inline">
-                <label><input type="checkbox" id="{{contact.id}}gid" form="scheduleform" name="day[]" value="수" checked>수</label>
-              </div>
-              <div class="checkbox-inline">
-                <label><input type="checkbox" id="{{contact.id}}gid" form="scheduleform" name="day[]" value="목">목</label>
-              </div>
-              <div class="checkbox-inline">
-                <label><input type="checkbox" id="{{contact.id}}gid" form="scheduleform" name="day[]" value="금">금</label>
-              </div>
-              <div class="checkbox-inline">
-                <label><input type="checkbox" id="{{contact.id}}gid" form="scheduleform" name="day[]" value="토">토</label>
-              </div>
-              {% elif day == '목' %}
-              <div class="checkbox-inline">
-                <label><input type="checkbox" id="{{contact.id}}gid" form="scheduleform" name="day[]" value="월">월</label>
-              </div>
-              <div class="checkbox-inline">
-                <label><input type="checkbox" id="{{contact.id}}gid" form="scheduleform" name="day[]" value="화">화</label>
-              </div>
-              <div class="checkbox-inline">
-                <label><input type="checkbox" id="{{contact.id}}gid" form="scheduleform" name="day[]" value="수">수</label>
-              </div>
-              <div class="checkbox-inline">
-                <label><input type="checkbox" id="{{contact.id}}gid" form="scheduleform" name="day[]" value="목" checked>목</label>
-              </div>
-              <div class="checkbox-inline">
-                <label><input type="checkbox" id="{{contact.id}}gid" form="scheduleform" name="day[]" value="금">금</label>
-              </div>
-              <div class="checkbox-inline">
-                <label><input type="checkbox" id="{{contact.id}}gid" form="scheduleform" name="day[]" value="토">토</label>
-              </div>
-              {% elif day == '금' %}
-              <div class="checkbox-inline">
-                <label><input type="checkbox" id="{{contact.id}}gid" form="scheduleform" name="day[]" value="월">월</label>
-              </div>
-              <div class="checkbox-inline">
-                <label><input type="checkbox" id="{{contact.id}}gid" form="scheduleform" name="day[]" value="화">화</label>
-              </div>
-              <div class="checkbox-inline">
-                <label><input type="checkbox" id="{{contact.id}}gid" form="scheduleform" name="day[]" value="수">수</label>
-              </div>
-              <div class="checkbox-inline">
-                <label><input type="checkbox" id="{{contact.id}}gid" form="scheduleform" name="day[]" value="목">목</label>
-              </div>
-              <div class="checkbox-inline">
-                <label><input type="checkbox" id="{{contact.id}}gid" form="scheduleform" name="day[]" value="금" checked>금</label>
-              </div>
-              <div class="checkbox-inline">
-                <label><input type="checkbox" id="{{contact.id}}gid" form="scheduleform" name="day[]" value="토">토</label>
-              </div>
-              {% elif day == '토' %}
-              <div class="checkbox-inline">
-                <label><input type="checkbox" id="{{contact.id}}gid" form="scheduleform" name="day[]" value="월">월</label>
-              </div>
-              <div class="checkbox-inline">
-                <label><input type="checkbox" id="{{contact.id}}gid" form="scheduleform" name="day[]" value="화">화</label>
-              </div>
-              <div class="checkbox-inline">
-                <label><input type="checkbox" id="{{contact.id}}gid" form="scheduleform" name="day[]" value="수">수</label>
-              </div>
-              <div class="checkbox-inline">
-                <label><input type="checkbox" id="{{contact.id}}gid" form="scheduleform" name="day[]" value="목">목</label>
-              </div>
-              <div class="checkbox-inline">
-                <label><input type="checkbox" id="{{contact.id}}gid" form="scheduleform" name="day[]" value="금">금</label>
-              </div>
-              <div class="checkbox-inline">
-                <label><input type="checkbox" id="{{contact.id}}gid" form="scheduleform" name="day[]" value="토" checked>토</label>
-              </div>
-              {% else %}
-              <div class="checkbox-inline">
-                <label><input type="checkbox" id="{{contact.id}}gid" form="scheduleform" name="day[]" value="월">월</label>
-              </div>
-              <div class="checkbox-inline">
-                <label><input type="checkbox" id="{{contact.id}}gid" form="scheduleform" name="day[]" value="화">화</label>
-              </div>
-              <div class="checkbox-inline">
-                <label><input type="checkbox" id="{{contact.id}}gid" form="scheduleform" name="day[]" value="수">수</label>
-              </div>
-              <div class="checkbox-inline">
-                <label><input type="checkbox" id="{{contact.id}}gid" form="scheduleform" name="day[]" value="목">목</label>
-              </div>
-              <div class="checkbox-inline">
-                <label><input type="checkbox" id="{{contact.id}}gid" form="scheduleform" name="day[]" value="금">금</label>
-              </div>
-              <div class="checkbox-inline">
-                <label><input type="checkbox" id="{{contact.id}}gid" form="scheduleform" name="day[]" value="토">토</label>
-              </div>
-              {% endif %}
+              {% endfor %}
             </div>
             <div class="col-md-2">
             </div>
@@ -331,9 +176,9 @@
   $('.table-container').on('click', '.addrow', function() {
     var element = $(this).parent().find('.table-body');
     if (element.children().length <= 1) {
-      element.append(getRowHtml(true));
+      element.append(getRowHtml(true, '', '', 0, 0));
     } else {
-      $(getRowHtml(false)).insertBefore(element.children().last());
+      $(getRowHtml(false, '', '', 0, 0)).insertBefore(element.children().last());
     }
   });
 
@@ -341,7 +186,7 @@
     $(this).parent().parent().remove();
   });
 
-  function getRowHtml(readonly) {
+  function getRowHtml(readonly, timestr, addr, lat, lng) {
     var readonly_property;
 
     if (readonly) {
@@ -352,7 +197,7 @@
       display_none = "";
     }
 
-    return '<tr><td data-name="time" class="thstyle1"><input type="text" name="time[]" placeholder="Time" onblur="normalizeTime(this);" class="form-control" form="scheduleform"/></td><td class="thstyle11"><input type="text" name="addr[]" placeholder="Address" class="form-control" form="scheduleform" ' +
+    return '<tr><td data-name="time" class="thstyle1"><input type="hidden" name="lat[]" value="' + lat + '"><input type="hidden" name="lng[]" value="' + lng + '"><input type="text" name="time[]" placeholder="Time" onblur="normalizeTime(this);" class="form-control" form="scheduleform" value="' + timestr + '"/></td><td class="thstyle11"><input type="text" name="addr[]" placeholder="Address" class="form-control" value="' + addr + '" form="scheduleform" ' +
       readonly_property + ' /></td><td data-name="name" class="inputTd"><input type="text" name="name[]" data-role="tagsinput" class="form-control" form="scheduleform" ' + readonly_property + ' value="{% for name in s.sname %}{{name}}{% include '
     comma.html ' %}{% endfor %}" /></td><td data-name="addstu"><button class="btn btn-primary glyphicon glyphicon-plus addstudent" data-toggle="modal" ' + display_none +
       '></button></td><td data-name="sid" class="inputSid" style="display:none;"><input name="sid[]" type="text" data-role="tagsinput" class="form-control" form="scheduleform" value="{% for sid in s.slist %}{{sid}}{% include '
@@ -409,9 +254,26 @@
   }
 
   $(document).ready(function() {
-    for (i = 0; i < 3; i++) {
-      $('.addrow').click();
-    }
+    {% if timeaddrpairs %}
+      var element = $(document).find('.table-body');
+      var i = 0;
+      var readonly;
+      {% for timeaddr in timeaddrpairs %}
+          if (i == 0 || i == ({{timeaddrpairs|length}} - 1)) {
+              readonly = true;
+          }
+          else {
+              readonly = false;
+          }
+          element.append(getRowHtml(readonly, '{{timeaddr.time}}', '{{timeaddr.addr}}', '{{timeaddr.lat}}', '{{timeaddr.lng}}'));
+          i++;
+
+      {% endfor %}
+    {% else %}
+      for (i = 0; i < 3; i++) {
+        $('.addrow').click();
+      }
+    {% endif %}
   });
 
   var thisObject;

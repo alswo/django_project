@@ -23,6 +23,9 @@ def store_historyschedule():
 	ymd = t.timeToYmd()
 	d = t.timeToD()
 
+	if (ymd == '2017-10-02'):
+            d = '10/2'
+
 	inventories = Inventory.objects.filter(day=d).select_related()
 	#print "# of inventory = " + str(len(inventories))
 	for inventory in inventories:

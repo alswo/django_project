@@ -1,0 +1,379 @@
+{% extends "base.html" %}
+{% block content %}
+<!-- DIV class="row" //-->
+	<div id="left" class="col-md-2"> 
+		<form action="javascript:search();">
+	지역 검색 : <input type="text" id="query" autocomplete=off> <button type="submit">검색</button>
+		</form>
+		<table class="table">
+			<thead></thead>
+			<tbody id="result_tbody"></tbody>
+		</table>
+	</div>
+	<div class="col-md-6">
+      			<div id="map"></div>
+			<div id="gmarker" style="width:20px;height:20px;cursor:move"></div>
+	</DIV>
+	<div class="col-md-4">
+		<FORM role="form" autocomplete="off" action={% if academy %} "updateAcademy" {% else %} "addAcademy" {% endif %} method="POST" id="addAcademyForm">
+
+			{% if academy %}
+			<INPUT type='hidden' name='aid' value='{{academy.id}}'>
+			{% endif %}
+			<FIELDSET class="fsStyle">
+				<DIV class="row collapse in">
+					<DIV class="col-md-2">
+					</DIV>
+					<DIV class="col-md-4">
+						<label>지역선택</label>
+					</DIV>
+					<DIV class="col-md-4 input-div">
+						<select class="form-control" name='bid' id='bid'>
+								<option value="">선택안함</option>
+							{% for branch in branches %}
+								<option value="{{branch.id}}" {% if academy and academy.bid == branch.id %} selected {% endif %}>{{branch.bname}}</option>
+							{% endfor %}
+						</select>
+					</DIV>
+				</DIV>
+				<BR>
+				<DIV class="row collapse in">
+					<DIV class="col-md-2">
+					</DIV>
+					<DIV class="col-md-4">
+						<label>학원명</label>
+					</DIV>
+					<DIV class="col-md-4 input-div">
+						<input type='text' name='aname' id='aname' maxlength='50' class="form-control" {% if academy %} value="{{academy.name}}" {% endif %}/>
+					</DIV>
+				</DIV>
+				<BR>
+				<DIV class="row collapse in">
+					<DIV class="col-md-2">
+					</DIV>
+					<DIV class="col-md-4">
+						<label>연락처1</label>
+					</DIV>
+					<DIV class="col-md-4 input-div">
+						<input placeholder="전화번호" type='text' name='phone_1' id='phone_1' maxlength='15' class='form-control' {% if academy.phone_1 %} value="{{academy.phone_1}}" {% endif %} />
+					</DIV>
+				</DIV>
+				<BR>
+				<DIV class="row collapse in">
+					<DIV class="col-md-2">
+					</DIV>
+					<DIV class="col-md-4">
+						<label>연락처2</label>
+					</DIV>
+					<DIV class="col-md-4 input-div">
+						<input placeholder="전화번호" type='text' name='phone_2' id='phone_2' maxlength='15' class='form-control' {% if academy.phone_2 %} value="{{academy.phone_2}}" {% endif %} />
+					</DIV>
+				</DIV>
+				<BR>
+				<DIV class="row collapse in">
+					<DIV class="col-md-2">
+					</DIV>
+					<DIV class="col-md-4">
+						<label>운행차량 숫자</label>
+					</DIV>
+					<DIV class="col-md-4 input-div">
+						<select class="form-control" name='maxvehicle'>
+							{% for i in maxvehicle_range %}
+								<option value="{{i}}" {% if academy and academy.maxvehicle == i %} selected {% endif %} >{{i}}대</option>
+							{% endfor %}
+						</select>
+					</DIV>
+				</DIV>
+				<BR>
+				<DIV class="row collapse in">
+					<DIV class="col-md-2">
+					</DIV>
+					<DIV class="col-md-4">
+						<label>학원 위치</label>
+					</DIV>
+					<div class="col-md-4 input-div dropzone" style="border:1px solid red;font-size:100%;">{% if academy and academy.placement.poi %}{{academy.placement.poi.address}}{% else %}지도에서 끌어와주세요.{%endif%}</div></td>
+				</DIV>
+				<BR>
+				<DIV class="row collapse in">
+					<DIV class="col-md-2">
+					</DIV>
+					<DIV class="col-md-4">
+						<label>학원 위치 상세주소</label>
+					</DIV>
+					<DIV class="col-md-4 input-div">
+						<input placeholder="학원 위치 상세주소" type='text' name='address2' id='address2' maxlength='30' class='form-control' {% if academy.address2 %} value="{{academy.address2}}" {% endif %} />
+					</DIV>
+				</DIV>
+				<BR>
+				<DIV class="row collapse in">
+					<DIV class="col-md-2">
+					</DIV>
+					<DIV class="col-md-4">
+						<button id="addsubmit" class="form-control">{% if academy %} 수정 {% else %} 추가 {% endif %}</button>
+					</DIV>
+				</DIV>
+				<INPUT TYPE="hidden" name="lat" id="lat" {% if academy %} value="{{academy.placement.poi.lat}}"{% endif %}>
+				<INPUT TYPE="hidden" name="lng" id="lng" {% if academy %} value="{{academy.placement.poi.lng}}"{% endif %}>
+				<INPUT TYPE="hidden" name="address" id="address" {% if academy %} value="{{academy.placement.poi.address}}"{% endif %}>
+			</FIELDSET>
+		</FORM>
+	</DIV>
+
+
+<SCRIPT>
+$(document).ready(function(){
+    var next = 1;
+	$('#addsubmit').click(function(e) {
+		if ($('#bid').val() == '') {
+			alert("입력값이 올바르지 않습니다.1");
+			e.preventDefault();
+		}
+		if (validateName($('#aname').val()) == false) {
+			alert("입력값이 올바르지 않습니다.2");
+			e.preventDefault();
+		}
+		if ($('#lat').val() == '' || $('#lng').val() == '') {
+			alert("입력값이 올바르지 않습니다.3");
+			e.preventDefault();
+		}
+		if (validatePhoneNumber($('#phone_1').val())
+			|| validatePhoneNumber($('#phone_2').val())) {
+		}
+		else {
+			alert("입력값이 올바르지 않습니다.4");
+			e.preventDefault();
+		}
+	});
+});
+
+function validateName(name) {
+	if (!name) {
+		return false;
+	} 
+	name = name.replace(/[\s]/g, '');
+
+	if (name.length < 2) {
+		return false;
+	}
+
+	return true;
+}
+
+function validatePhoneNumber(phonenumber) {
+	phonenumber = phonenumber.replace(/[^0-9]/g, '');
+	if (phonenumber.length < 10) {
+		return false;
+	}
+
+	return true;
+}
+
+</SCRIPT>
+<script>
+	var map;
+    	var bounds;
+
+	var gDrag = {
+		jq: $('#gmarker'),
+		item: {},
+		status: 0,
+		y: 0,
+		x: 0
+	};
+	var markers = [];
+	var last_infowindow;
+	var labels = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+	var labelIndex = 0;
+
+	function initMap() {
+		var uluru = {lat: 37.394798, lng: 127.111135};
+		map = new google.maps.Map(document.getElementById('map'), {
+			zoom: 17,
+			draggable: true,
+			center: uluru,
+			//mapTypeId: "OSM",
+		});
+
+	     daumMapType = new google.maps.ImageMapType({
+                getTileUrl: function(coord, zoom) {
+                    return "http://tlpimg3.tmap.co.kr/tms/1.0.0/hd_tile/" + zoom + "/" + coord.x + "/" + ( Math.pow(2, zoom) - coord.y - 1 ) + ".png?bizAppId=9c78e49d-c72c-36a6-8e25-5c249e9291a3?v=Release1.18.30";
+                },
+                tileSize: new google.maps.Size(256, 256),
+                name: "OpenStreetMap",
+                maxZoom: 19,
+		isPng: true,
+            });
+
+		map.mapTypes.set("OSM", daumMapType);
+		map.setMapTypeId("OSM");
+
+		google.maps.event.addListener(map, 'click', function(e) {
+			var geocoder = new daum.maps.services.Geocoder();
+			geocoder.coord2Address(e.latLng.lng(), e.latLng.lat(), function(result, status) {
+			//geocoder.coord2RegionCode(new daum.maps.LatLng(e.latLng.lat(), e.latLng.lng()), function(status, result) {
+				if (status === daum.maps.services.Status.OK) {
+					placeMarker(e.latLng, map, result[0].address.address_name);
+				}
+			});
+		});
+
+		$(".dropzone").droppable({
+			accept: "#gmarker",
+			activeClass: "drophere",
+			hoverClass: "dropaccept",
+			drop: function(event, ui, item){
+				gDrag.status = 1;
+				$(this).addClass("ui-state-highlight").html(gDrag.item.title);
+				$('input[name="lat"]').val(gDrag.item.getPosition().lat());
+				$('input[name="lng"]').val(gDrag.item.getPosition().lng());
+				$('input[name="address"]').val(gDrag.item.title);
+			}
+		});
+
+		gDrag.jq.draggable({
+			stack: ".dropzone",
+			start: function(event, ui){
+					gDrag.jq.html('<img src="https://mts.googleapis.com/vt/icon/name=icons/spotlight/spotlight-poi.png" />');
+					gDrag.item.setVisible(true);
+				},
+			stop: function(event, ui){
+				gDrag.jq.html('');
+				if(gDrag.status){
+					//gDrag.item.setVisible(false);
+				}else{
+					gDrag.item.setVisible(true);
+				}
+			},
+		});
+
+			
+		$(document).mousemove(function(event){
+			gDrag.x = event.pageX;
+			gDrag.y = event.pageY;
+            	});
+			
+		{% if academy and academy.placement.poi %}
+			var position = new google.maps.LatLng('{{academy.placement.poi.lat}}', '{{academy.placement.poi.lng}}');
+			var index = placeMarker(position, map, '{{academy.placement.poi.address}}');
+		{% endif %}
+
+        }
+	function placeMarker(position, map, txt) {
+		var marker = new google.maps.Marker({
+			position: position,
+			map: map,
+			draggable: false,
+			raiseOnDrag: false,
+			label: {
+				text: labels[labelIndex++ % labels.length],
+			},
+			title: txt,
+		});
+
+		google.maps.event.addListener(marker, 'mouseover', function(e) {
+			if (!gDrag.jq.hasClass('ui-draggable-dragging')) {
+				gDrag.item = this;
+				gDrag.jq.offset({ 
+					top: gDrag.y - 10,
+	     	     			left: gDrag.x - 10
+				});
+			}
+		});
+
+		markers.push(marker);
+
+		if (!bounds) {
+			bounds = new google.maps.LatLngBounds();
+			bounds.extend(position);
+			map.setCenter(position);
+		}
+		else {
+			//bounds.extend(position);
+			//map.fitBounds(bounds);		// auto-zoom
+			//map.panToBounds(bounds);	// auto-center
+		}
+
+		return (markers.length-1);
+	}
+
+	function clearMarkers() {
+		for (var i=0; i<markers.length; i++) {
+			markers[i].setMap(null);
+		}
+	}
+
+	function make_search_result(i, lat, lng, title, address) {
+		var html = "<tr class='search_result_tr'><td><a href='javascript:void(0)' class='search_result' id='search_result" + labelIndex + "'>" 
+		+ labels[labelIndex % labels.length] + " " + title
+		+ "</a></td></tr>";
+		$('#result_tbody').append(html);
+		$('#search_result' + labelIndex).data("lat", lat);
+		$('#search_result' + labelIndex).data("lon", lng);
+		$('#search_result' + labelIndex).data("title", title);
+
+		var position = new google.maps.LatLng(lat, lng);
+		var index = placeMarker(position, map, address);
+		$('#search_result' + index).data("index", index);
+
+		$('#search_result' + index).on('click', function(event) {
+			var infowindow = new google.maps.InfoWindow({
+				content: $(this).data('title'),
+			});	
+			position = new google.maps.LatLng($(this).data('lat'), $(this).data('lon'));
+			map.setCenter(position);
+			if (last_infowindow) {
+				last_infowindow.close();
+			}
+			infowindow.open(map, markers[$(this).data('index')]);
+			last_infowindow = infowindow;
+		});
+	}
+	
+	function displayPlaces(places) {
+		for (var i=0; i<places.length; i++) {
+			make_search_result(labelIndex, places[i].y, places[i].x, places[i].place_name, places[i].address_name);
+		}
+	}
+
+	function placeSearchDB(data, status, pagination) {
+		if (status == daum.maps.services.Status.OK) {
+			displayPlaces(data);
+		}
+		else if (status == daum.maps.services.Status.ZERO_RESULT) {
+			alert("장소 검색 결과가 존재하지 않습니다.");
+			return;
+		}
+		else if (status == daum.maps.services.Status.ERROR) {
+			alert("검색 결과 중 오류가 발생했습니다.");
+			return;
+		}
+	}
+
+	function search() {
+		clearMarkers();
+		$('.search_result_tr').remove();
+		labelIndex = 0;
+		bounds = null;
+
+		var geocoder = new daum.maps.services.Geocoder();
+		var result_i = 0;
+		var keyword = $('#query').val();
+		geocoder.addressSearch($('#query').val(), function(result, status) {
+			if (status == daum.maps.services.Status.OK) {
+				// title == address
+				make_search_result(labelIndex, result[0].y, result[0].x, keyword, keyword);
+				result_i ++;
+			}
+		});
+
+		var ps = new daum.maps.services.Places();
+		ps.keywordSearch(keyword, placeSearchDB);
+	}
+
+
+      </script>
+      <script async defer
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBaGGxx6F0oPYs8wS6tqYbh3ZJKzD8GMbI&callback=initMap">
+      </script>
+
+{% endblock content %}

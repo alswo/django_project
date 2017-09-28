@@ -332,24 +332,38 @@ def getSchedule(request):
         return HttpResponse('로그인 후 사용해주세요.')
 
 @csrf_exempt
+def putScheduleForm(request):
+	if request.method == 'GET':
+		bid = request.GET.get('bid')
+		carnum = request.GET.get('carnum')
+		day = request.GET.get('day')
+		week = request.GET.get('week')
+
+		if carnum:
+			carnum = int(carnum)
+		elif carnum == None:
+			carnum = 0
+		
+		if bid:
+			academy = Academy.objects.filter(bid = bid)
+			group = Car.objects.filter(branchid = bid)
+
+		return render(request, 'putSchedule.html', {'academy': academy, 'bid': bid, 'carnum': carnum, 'day': day, 'week': week, 'group': group, 'user': request.user})
+
+	if request.method == 'POST':
+		times = request.POST.getlist('time[]')
+		addrs = request.POST.getlist('addr[]')
+
+		return render(request, 'putScheduleForm.html', {'times': times, 'addrs': addrs})
+
+@csrf_exempt
 def putSchedule(request):
+    weekdaylist = ['월', '화', '수', '목', '금', '토', '10/2']
     if request.method == "GET":
         bid = request.GET.get('bid')
-        carnum = request.GET.get('carnum')
+        carnum = int(request.GET.get('carnum', '0'))
         day = request.GET.get('day')
-        week = request.GET.get('week')
-
-        if carnum:
-            carnum = int(carnum)
-
-        elif carnum == None:
-            carnum = 0
-
-        if bid:
-            academy = Academy.objects.filter(bid = bid)
-            group = Car.objects.filter(branchid = bid)
-
-        return render_to_response('putSchedule.html', {"academy" : academy, "bid" : bid,"carnum":carnum,"day":day,"week":week, "group" : group,'user':request.user})
+        week = int(request.GET.get('week', '0'))
 
     elif request.method == "POST":
         day = request.POST.getlist('day[]')
@@ -367,10 +381,8 @@ def putSchedule(request):
 
         if not alist:
             alist = 0
-            putInven = CreateInven(bid,carnum,day,req,time,addr,name,name2,load,sid,week,alist)
 
-        if alist != None:
-            putInven = CreateInven(bid,carnum,day,req,time,addr,name,name2,load,sid,week,alist)
+        putInven = CreateInven(bid,carnum,day,req,time,addr,name,name2,load,sid,week,alist)
 
         if putInven.setAlist() == 1:
             return HttpResponse('error setAlist')
@@ -396,14 +408,18 @@ def putSchedule(request):
         else:
             putInven.setWeek3()
 
+
+    if bid:
         academy = Academy.objects.filter(bid = bid)
         group = Car.objects.filter(branchid = bid)
 
-        return render_to_response('putSchedule.html', {"academy" : academy, "bid" : bid, "week": week, "group" : group,'user':request.user})
+
+    return render_to_response('putSchedule.html', {"academy" : academy, "bid" : bid,"carnum":carnum,"day":day,"week":week, "group" : group,'user':request.user, 'weekdaylist': weekdaylist, 'weeknum_range': range(0, 4)})
 
 
 @csrf_exempt
 def updateSchedule(request):
+    weekdaylist = ['월', '화', '수', '목', '금', '토', '10/2']
     if request.method == "GET":
         searchflag = request.GET.get('searchinven')
         if searchflag:
@@ -432,13 +448,13 @@ def updateSchedule(request):
                 
                 contacts = getContacts(bid, day, carnum, week, searchTime)
 
-                return render_to_response('supdateSchedule.html',{"area":area,"searchTime":searchTime,"day":day,"branch":branch,"academy":academy,"carlist": carlist,"carnum": carnum,"bid":bid,"areaid": areaid,"week": week,"contacts":contacts,'user':request.user})
+                return render_to_response('supdateSchedule.html',{"area":area,"searchTime":searchTime,"day":day,"branch":branch,"academy":academy,"carlist": carlist,"carnum": carnum,"bid":bid,"areaid": areaid,"week": week,"contacts":contacts,'user':request.user, 'weekdaylist': weekdaylist})
 
 
         area = Area.objects.all()
         branch = Branch.objects.all()
 
-        return render_to_response('supdateSchedule.html',{'area':area, 'branch': branch, 'user':request.user})
+        return render_to_response('supdateSchedule.html',{'area':area, 'branch': branch, 'user':request.user, 'weekdaylist': weekdaylist})
 
 
     elif request.method == "POST":
