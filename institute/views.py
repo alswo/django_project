@@ -480,6 +480,7 @@ def getHistory(request):
 
             standard_h = None
             warning_set = set()
+            warning_number_set = set()
             studentNum = 0
             for h in dailyHistory.timehistory:
                 fire = False
@@ -489,19 +490,22 @@ def getHistory(request):
                         # warning 처리
                         # 학생 수가 많아서 어쩔 수 없이 차량이 많아진 경우는 maxvehicle 보다 우선시한다.
                         maxvehicle = max(academy.maxvehicle, int(math.ceil(float(studentNum)/10.0)))
-                        if (len(warning_set) > maxvehicle):
+                        if (len(warning_number_set) > maxvehicle):
                             sorted_warning = sorted(warning_set, key=lambda timehistory: timehistory.billing_code, reverse=True)
                             for i_warning in range(maxvehicle, len(sorted_warning)):
                                 sorted_warning[i_warning].warning = True 
                     standard_h = h
                     warning_set = set()
+                    warning_number_set = set()
                     studentNum = h.studentnum
                     if not (h.billing_code & TimeHistory.BILLING_NONCHARGE):
                         warning_set.add(h)
+                        warning_number_set.add(h.carnum)
                 else:
                     studentNum += h.studentnum
                     if not (h.billing_code & TimeHistory.BILLING_NONCHARGE):
                         warning_set.add(h)
+                        warning_number_set.add(h.carnum)
 
 		#if (h.warning == True):
 			#continue
