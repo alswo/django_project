@@ -14,6 +14,9 @@ def isSamePhoneNumber(phone1, phone2):
 	if (not phone1 or not phone2):
 		return False
 
+	if ((len(phone1) == 0) or (len(phone2) == 0)):
+		return False
+
 	return (phone1 == phone2)
 
 def isSamePerson(student1, student2):
