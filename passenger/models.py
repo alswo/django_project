@@ -258,13 +258,3 @@ class Community(models.Model):
     likeuserid = ArrayField(models.IntegerField(null=True,default=0))
     disuser = ArrayField(models.CharField(null=True,max_length=30,default=''))
     likeuser = ArrayField(models.CharField(null=True,max_length=30,default=''))
-
-# class BillingHistory(models.Model):
-#     academy = models.ForeignKey(Academy)
-#     month = forms.models.CharField(max_length = 8, null=True)
-#     billing_amount = models.DecimalField(max_digits=13, decimal_places=0, null=True)
-#     billing_il = = models.CharField(max_length = 8, null=True)
-#     billing_bank = = models.CharField(max_length = 8, null=True)
-#
-#     class Meta:
-#         unique_together = ('academy', 'month')
