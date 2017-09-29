@@ -14,6 +14,9 @@ def isSamePhoneNumber(phone1, phone2):
 	if (not phone1 or not phone2):
 		return False
 
+	if ((len(phone1) == 0) or (len(phone2) == 0)):
+		return False
+
 	return (phone1 == phone2)
 
 def isSamePerson(student1, student2):
@@ -41,7 +44,7 @@ def run():
 	for student in students:
 		try:
 			# 12 o'clock
-			otherStudents = StudentInfo.objects.filter(bid = student.bid, personinfo__created_time__gt = '2017-09-13 02:00').exclude(id=student.id)
+			otherStudents = StudentInfo.objects.filter(bid = student.bid).exclude(id=student.id)
 			#print "otherStudent len = " + str(len(otherStudents))
 			found = False
 			for otherStudent in otherStudents:

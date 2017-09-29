@@ -24,7 +24,7 @@
 						</DIV>
 						<DIV class="col-md-2">
 							<label>연락처</label>
-							<label>( 4개 연락처 중에 최소 하나는 필수로 입력하셔야 합니다. )</label>
+							<!-- label>( 4개 연락처 중에 최소 하나는 필수로 입력하셔야 합니다. )</label //-->
 						</DIV>
 						<DIV class="col-md-4">
 							<DIV class="row input-group" id="phonediv1">
@@ -140,15 +140,15 @@ $(document).ready(function(){
 			alert("입력값이 올바르지 않습니다.");
 			e.preventDefault();
 		}
-		if (validatePhoneNumber($('#parents_phonenumber').val())
-			|| validatePhoneNumber($('#grandparents_phonenumber').val())
-			|| validatePhoneNumber($('#self_phonenumber').val())
-			|| validatePhoneNumber($('#care_phonenumber').val())) {
-		}
-		else {
-			alert("입력값이 올바르지 않습니다.");
-			e.preventDefault();
-		}
+		//if (validatePhoneNumber($('#parents_phonenumber').val())
+			//|| validatePhoneNumber($('#grandparents_phonenumber').val())
+			//|| validatePhoneNumber($('#self_phonenumber').val())
+			//|| validatePhoneNumber($('#care_phonenumber').val())) {
+		//}
+		//else {
+			//alert("입력값이 올바르지 않습니다.");
+			//e.preventDefault();
+		//}
 	});
 
 	$('#datepicker').datepicker( { changeYear: false, format: 'dd/mm',});

@@ -6,7 +6,7 @@ from django.views.decorators.csrf import csrf_exempt
 from passenger.models import Academy, StudentInfo, PersonalInfo
 from schedule.models import Branch, HistoryScheduleTable#, Poi, Placement
 from util.PhoneNumber import CleanPhoneNumber, FormatPhoneNumber
-from util.PersonalInfoUtil import compareLists, saveNewPersonInfo2
+from util.PersonalInfoUtil import compareLists, saveNewPersonInfo2, findSamePerson
 from django.utils import timezone
 import datetime
 import re
@@ -32,9 +32,9 @@ def compareStudents(student1, student2):
 		list1.append(student1.grandparents_phonenumber)
 		list1.append(student1.self_phonenumber)
 		list2 = []
-		list2.append(student1.parents_phonenumber)
-		list2.append(student1.grandparents_phonenumber)
-		list2.append(student1.self_phonenumber)
+		list2.append(student2.parents_phonenumber)
+		list2.append(student2.grandparents_phonenumber)
+		list2.append(student2.self_phonenumber)
 
 		if not set(list1).isdisjoint(list2):
 			return True
@@ -47,7 +47,7 @@ def setSession(request):
 	try:
 		request.session['instituteid'] = int(instituteid)
 		request.session['institute'] = Academy.objects.get(id = instituteid).name
-		
+
 	except Academy.DoesNotExist:
 		del request.session['institute']
 		del request.session['instituteid']
@@ -168,36 +168,37 @@ def addStudent(request):
 	if (birmon and birday):
 		birthday = '%02d%02d' % (int(birmon), int(birday))
 
-	students = StudentInfo.objects.filter(bid=academy.bid, aid=academy, sname=sname)
+	students = StudentInfo.objects.filter(bid=academy.bid, aid=academy)
 	studentinfo = StudentInfo(bid=academy.bid, sname=sname, bname=bname, phone1=0, aid=academy, aname=institute, parents_phonenumber=parents_phonenumber, grandparents_phonenumber=grandparents_phonenumber, self_phonenumber=self_phonenumber, care_phonenumber=care_phonenumber, birth_year=birth_year, billing_date=billing_date, phonelist=None)
 
 	# same person in the same academy
 	for student in students:
-		if compareStudents(student, studentinfo):
+		if findSamePerson(student, studentinfo):
 			return render(request, 'message.html', {'msg': "동일한 학생이 존재합니다.", 'redirect_url': request.META.get('HTTP_REFERER')})
 
 
-	rv = True
-	# for PersonalINfo
-	# same person in another academy
-	try:
-		found = False
-		anotherStudents = StudentInfo.objects.filter(sname = studentinfo.sname, bid = studentinfo.bid)
-		for anotherStudent in anotherStudents:
-			if compareStudents(studentinfo, anotherStudent):
-				studentinfo.personinfo = anotherStudent.personinfo
-				#studentinfo.save(update_fields=['personinfo'])
-				found = True
-				break
-		if (found == False):
+	if (studentinfo.parents_phonenumber or studentinfo.grandparents_phonenumber or studentinfo.self_phonenumber) :
+		rv = True
+		# for PersonalINfo
+		# same person in another academy
+		try:
+			found = False
+			anotherStudents = StudentInfo.objects.filter(bid = studentinfo.bid)
+			for anotherStudent in anotherStudents:
+				if findSamePerson(studentinfo, anotherStudent):
+					studentinfo.personinfo = anotherStudent.personinfo
+					#studentinfo.save(update_fields=['personinfo'])
+					found = True
+					break
+			if (found == False):
+				rv = saveNewPersonInfo2(studentinfo)
+
+		except StudentInfo.DoesNotExist:
+			# add PersnoalInfo if there is no record
 			rv = saveNewPersonInfo2(studentinfo)
 
-	except StudentInfo.DoesNotExist:
-		# add PersnoalInfo if there is no record
-		rv = saveNewPersonInfo2(studentinfo)
-
-	if (rv == False):
-		return render(request, 'message.html', {'msg': '학원생 추가 실해했습니다. error : Too many retry for make random pin_number', 'redirect_url': request.META.get('HTTP_REFERER')})
+		if (rv == False):
+			return render(request, 'message.html', {'msg': '학원생 추가 실해했습니다. error : Too many retry for make random pin_number', 'redirect_url': request.META.get('HTTP_REFERER')})
 
 	studentinfo.save()
 
@@ -215,8 +216,12 @@ def updateStudent(request):
 
 	student = None
 	age = None
+	noPersoninfo = False
 	try:
 		student = StudentInfo.objects.get(id=sid)
+
+		if ((not student.parents_phonenumber) and (not student.grandparents_phonenumber) and (not student.self_phonenumber)):
+			noPersoninfo = True
 
 		student.sname = request.POST.get('sname')
 		student.parents_phonenumber = request.POST.get('parents_phonenumber')
@@ -231,7 +236,10 @@ def updateStudent(request):
 	except:
 		return render(request, 'message.html', {'msg': "학생 수정에 에러가 발생했습니다.", 'redirect_url': request.META.get('HTTP_REFERER')})
 
-	student.save()
+	if (noPersoninfo == True):
+		saveNewPersonInfo2(student)
+	else:
+		student.save()
 	beautifyStudent = BeautifyStudent()
 	beautifyStudent.info = student
 	beautifyStudent.age = age
@@ -307,7 +315,7 @@ def chooseBillingCode(academy, first_time, last_time, isShare, student_num, pass
 	code = 0
 	overtime = 35
 
-	if (academy.bid == 11 or academy.bid == 12):
+	if (academy.bid == 11):
 		overtime = 50
 
 	if (student_num <= 0):
@@ -322,7 +330,7 @@ def chooseBillingCode(academy, first_time, last_time, isShare, student_num, pass
 		code = TimeHistory.BILLING_PASSENGER | code
 
 	if (code == 0):
-		code = TimeHistory.BILLING_NORMAL 
+		code = TimeHistory.BILLING_NORMAL
 
 	return code
 
@@ -394,7 +402,7 @@ def getHistory(request):
         academy = Academy.objects.get(id=aid)
 	#aname = Academy.objects.get(pk=aid).name
 
-        if (academy.bid == 11 or academy.bid == 12):
+        if (academy.bid == 11):
             overtime = 45
 
         for day_number in range(total_days):
@@ -476,7 +484,7 @@ def getHistory(request):
                         if (len(warning_set) > maxvehicle):
                             sorted_warning = sorted(warning_set, key=lambda timehistory: timehistory.billing_code, reverse=True)
                             for i_warning in range(maxvehicle, len(sorted_warning)):
-                                sorted_warning[i_warning].warning = True 
+                                sorted_warning[i_warning].warning = True
                     standard_h = h
                     warning_set = set()
                     studentNum = h.studentnum
@@ -596,7 +604,8 @@ def addAcademy(request):
 	placement = None
 
 	try:
-		Academy.objects.create(name = aname, address = address, phone_1 = phone_1, phone_2 = phone_2, bid = bid, maxvehicle = maxvehicle, placement = placement)
+
+            Academy.objects.create(name = aname, address = address, phone_1 = phone_1, phone_2 = phone_2, bid = bid, maxvehicle = maxvehicle, placement = placement)
 	except IntegrityError as e:
 		#if 'unique constraint' in e.message:
 		msg = "중복되는 학원명입니다."
@@ -604,6 +613,7 @@ def addAcademy(request):
 		msg = "에러가 발생했습니다."
 	else:
 		msg = "학원 추가 성공했습니다."
+
 
 	return render(request, 'message.html', {'msg': msg, 'redirect_url': request.META.get('HTTP_REFERER')})
 
@@ -614,6 +624,7 @@ def updateAcademy(request):
 
 	if not request.user.is_staff :
 		return render(request, 'message.html', {'msg': "staff 권한이 필요합니다.", 'redirect_url': redirect_url})
+        cursor = connection.cursor()
 
 
 	aid = request.POST.get('aid')
@@ -651,6 +662,8 @@ def updateAcademy(request):
 		academy.maxvehicle = maxvehicle
 		#academy.placement = placement
 		academy.save()
+
+
 	except IntegrityError as e:
 		msg = "중복되는 학원명입니다."
 	except:
@@ -673,4 +686,3 @@ def listAcademies(request):
 		branch_dict[branch.id] = branch.bname
 
 	return render(request, 'listAcademies.html', {'academies': academies, 'branch_dict': branch_dict});
-

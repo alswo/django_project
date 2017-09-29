@@ -49,6 +49,14 @@ class Academy(models.Model):
     branch = models.ForeignKey(Branch, null=True)
     maxvehicle = models.IntegerField(default=1)
     placement = models.ForeignKey(Placement, null=True)
+    bank003 = models.CharField(max_length = 16, null = False, default = 0)
+    bank004 = models.CharField(max_length = 16, null = False, default = 0)
+    bank011 = models.CharField(max_length = 16, null = False, default = 0)
+    bank020 = models.CharField(max_length = 16, null = False, default = 0)
+    bank027 = models.CharField(max_length = 16, null = False, default = 0)
+    bank071 = models.CharField(max_length = 16, null = False, default = 0)
+    bank081 = models.CharField(max_length = 16, null = False, default = 0)
+    bank088 = models.CharField(max_length = 16, null = False, default = 0)
 
     class Meta:
         unique_together = ('bid', 'name')
@@ -250,3 +258,13 @@ class Community(models.Model):
     likeuserid = ArrayField(models.IntegerField(null=True,default=0))
     disuser = ArrayField(models.CharField(null=True,max_length=30,default=''))
     likeuser = ArrayField(models.CharField(null=True,max_length=30,default=''))
+
+class BillingHistory(models.Model):
+     academy = models.ForeignKey(Academy)
+     month = models.CharField(max_length = 8, null=True)
+     billing_amount = models.IntegerField(null=True)
+     billing_il = models.CharField(max_length = 8, null=True)
+     billing_bank = models.CharField(max_length = 8, null=True)
+
+     class Meta:
+         unique_together = ('academy', 'month')
