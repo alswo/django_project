@@ -397,7 +397,7 @@ def getHistory(request):
         if monthpick :
             ym = monthpick.split('-')
             tt, end = calendar.monthrange(int(ym[0]), int(ym[1]))
-            begin = '1'
+            begin = '01'
             start_date = datetime.date(*map(int, monthpick.split('-') + [begin]))
             end_date = datetime.date(*map(int, monthpick.split('-') + [end]))
             startdate = monthpick + '-' + str(begin)
