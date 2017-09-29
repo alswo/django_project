@@ -3,7 +3,6 @@ from django.shortcuts import render_to_response, render, redirect
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
-from django.db import connection
 from passenger.models import Academy, StudentInfo, PersonalInfo
 from schedule.models import Branch, HistoryScheduleTable#, Poi, Placement
 from util.PhoneNumber import CleanPhoneNumber, FormatPhoneNumber
@@ -580,37 +579,6 @@ def addAcademy(request):
 	if not request.user.is_staff :
 		return render(request, 'message.html', {'msg': "staff 권한이 필요합니다.", 'redirect_url': redirect_url})
 
-        cursor = connection.cursor()
-
-	try:
-	    cursor.execute("SELECT acct_no  FROM vacs_vact WHERE bank_cd = %s AND acct_st = %s", ['003','0'])
-	    giup = cursor.fetchone()
-
-	    cursor.execute("SELECT acct_no  FROM vacs_vact WHERE bank_cd = %s AND acct_st = %s", ['004','0'])
-	    gukmin = cursor.fetchone()
-
-	    cursor.execute("SELECT acct_no  FROM vacs_vact WHERE bank_cd = %s AND acct_st = %s", ['011','0'])
-	    nonghyup = cursor.fetchone()
-
-	    cursor.execute("SELECT acct_no  FROM vacs_vact WHERE bank_cd = %s AND acct_st = %s", ['020','0'])
-	    woori = cursor.fetchone()
-
-	    cursor.execute("SELECT acct_no  FROM vacs_vact WHERE bank_cd = %s AND acct_st = %s", ['027','0'])
-	    city = cursor.fetchone()
-
-	    cursor.execute("SELECT acct_no  FROM vacs_vact WHERE bank_cd = %s AND acct_st = %s", ['071','0'])
-	    woochegook = cursor.fetchone()
-
-	    cursor.execute("SELECT acct_no  FROM vacs_vact WHERE bank_cd = %s AND acct_st = %s", ['081','0'])
-	    hana = cursor.fetchone()
-
-	    cursor.execute("SELECT acct_no  FROM vacs_vact WHERE bank_cd = %s AND acct_st = %s", ['088','0'])
-	    shinhan = cursor.fetchone()
-
-
-
-	except Exception, e:
-		print ("Can't call Insert", e)
 
 	bid = request.POST.get('bid')
 	aname = request.POST.get('aname')
@@ -636,8 +604,8 @@ def addAcademy(request):
 	placement = None
 
 	try:
-		Academy.objects.create(name = aname, address = address, phone_1 = phone_1, phone_2 = phone_2, bid = bid, maxvehicle = maxvehicle, placement = placement, bank003 = giup[0], bank004 = gukmin[0], bank011 = nonghyup[0], bank020 = woori[0], bank027 = city[0], bank071 = woochegook[0], bank081 = hana[0], bank088 = shinhan[0])
-		# , bank004 = gukmin, bank011 = nonghyup, bank020 = woori, bank027 = city, bank071 = woochegook, bank081 = hana, bank088 = shinhan
+
+            Academy.objects.create(name = aname, address = address, phone_1 = phone_1, phone_2 = phone_2, bid = bid, maxvehicle = maxvehicle, placement = placement)
 	except IntegrityError as e:
 		#if 'unique constraint' in e.message:
 		msg = "중복되는 학원명입니다."
@@ -645,6 +613,7 @@ def addAcademy(request):
 		msg = "에러가 발생했습니다."
 	else:
 		msg = "학원 추가 성공했습니다."
+
 
 	return render(request, 'message.html', {'msg': msg, 'redirect_url': request.META.get('HTTP_REFERER')})
 
@@ -655,6 +624,7 @@ def updateAcademy(request):
 
 	if not request.user.is_staff :
 		return render(request, 'message.html', {'msg': "staff 권한이 필요합니다.", 'redirect_url': redirect_url})
+        cursor = connection.cursor()
 
 
 	aid = request.POST.get('aid')
@@ -692,6 +662,8 @@ def updateAcademy(request):
 		academy.maxvehicle = maxvehicle
 		#academy.placement = placement
 		academy.save()
+
+
 	except IntegrityError as e:
 		msg = "중복되는 학원명입니다."
 	except:
