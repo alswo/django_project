@@ -636,7 +636,7 @@ def addAcademy(request):
 	placement = None
 
 	try:
-		Academy.objects.create(name = aname, address = address, phone_1 = phone_1, phone_2 = phone_2, bid = bid, maxvehicle = maxvehicle, placement = placement, bank003 = giup[0], bank004 = gukmin[0], bank011 = nonghyup[0], bank020 = woori[0], bank027 = city[0], bank071 = woochegook[0], bank081 = hana[0], bank088 = shinhan[0])
+		Academy.objects.create(name = aname, address = address, phone_1 = phone_1, phone_2 = phone_2, bid = bid, maxvehicle = maxvehicle, placement = placement, bank003 = giup[0].strip(), bank004 = gukmin[0].strip(), bank011 = nonghyup[0].strip(), bank020 = woori[0].strip(), bank027 = city[0].strip(), bank071 = woochegook[0].strip(), bank081 = hana[0].strip(), bank088 = shinhan[0].strip())
 		# , bank004 = gukmin, bank011 = nonghyup, bank020 = woori, bank027 = city, bank071 = woochegook, bank081 = hana, bank088 = shinhan
 	except IntegrityError as e:
 		#if 'unique constraint' in e.message:
@@ -645,6 +645,27 @@ def addAcademy(request):
 		msg = "에러가 발생했습니다."
 	else:
 		msg = "학원 추가 성공했습니다."
+		aca_bank = Academy.objects.get(name = aname)
+		bank003 = aca_bank.bank003
+		bank004 = aca_bank.bank004
+		bank011 = aca_bank.bank011
+		bank020 = aca_bank.bank020
+		bank027 = aca_bank.bank027
+		bank071 = aca_bank.bank071
+		bank081= aca_bank.bank081
+		bank088 = aca_bank.bank088
+		cursor.execute("UPDATE vacs_vact SET acct_st = %s WHERE acct_no = %s", ['1',bank003])
+		cursor.execute("UPDATE vacs_vact SET acct_st = %s WHERE acct_no = %s", ['1',bank004])
+		cursor.execute("UPDATE vacs_vact SET acct_st = %s WHERE acct_no = %s", ['1',bank011])
+		cursor.execute("UPDATE vacs_vact SET acct_st = %s WHERE acct_no = %s", ['1',bank020])
+		cursor.execute("UPDATE vacs_vact SET acct_st = %s WHERE acct_no = %s", ['1',bank027])
+		cursor.execute("UPDATE vacs_vact SET acct_st = %s WHERE acct_no = %s", ['1',bank071])
+		cursor.execute("UPDATE vacs_vact SET acct_st = %s WHERE acct_no = %s", ['1',bank081])
+		cursor.execute("UPDATE vacs_vact SET acct_st = %s WHERE acct_no = %s", ['1',bank088])
+                cursor.close()
+	        connection.commit()
+	        connection.close()
+
 
 	return render(request, 'message.html', {'msg': msg, 'redirect_url': request.META.get('HTTP_REFERER')})
 
