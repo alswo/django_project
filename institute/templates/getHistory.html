@@ -317,8 +317,8 @@ function calculate() {
 
 	var discount_rate = $('#discount_rate')[0];
 	var discount_rate_value = numberWithoutCommas(discount_rate.options[discount_rate.selectedIndex].value);
-	var per_amount_value = {% if academy.bid == 11 or academy.bid == 12 %} 9000 {% else %} 7500 {% endif %};
-	var passenger_amount_value = {% if academy.bid == 11 or academy.bid == 12 %} 5000 {% else %} 3500 {% endif %};
+	var per_amount_value = {% if academy.bid == 11 %} 9000 {% else %} 7500 {% endif %};
+	var passenger_amount_value = {% if academy.bid == 11 %} 5000 {% else %} 3500 {% endif %};
 
 
 
