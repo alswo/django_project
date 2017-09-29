@@ -676,7 +676,37 @@ def updateAcademy(request):
 
 	if not request.user.is_staff :
 		return render(request, 'message.html', {'msg': "staff 권한이 필요합니다.", 'redirect_url': redirect_url})
+        cursor = connection.cursor()
 
+	try:
+	    cursor.execute("SELECT acct_no  FROM vacs_vact WHERE bank_cd = %s AND acct_st = %s", ['003','0'])
+	    giup = cursor.fetchone()
+
+	    cursor.execute("SELECT acct_no  FROM vacs_vact WHERE bank_cd = %s AND acct_st = %s", ['004','0'])
+	    gukmin = cursor.fetchone()
+
+	    cursor.execute("SELECT acct_no  FROM vacs_vact WHERE bank_cd = %s AND acct_st = %s", ['011','0'])
+	    nonghyup = cursor.fetchone()
+
+	    cursor.execute("SELECT acct_no  FROM vacs_vact WHERE bank_cd = %s AND acct_st = %s", ['020','0'])
+	    woori = cursor.fetchone()
+
+	    cursor.execute("SELECT acct_no  FROM vacs_vact WHERE bank_cd = %s AND acct_st = %s", ['027','0'])
+	    city = cursor.fetchone()
+
+	    cursor.execute("SELECT acct_no  FROM vacs_vact WHERE bank_cd = %s AND acct_st = %s", ['071','0'])
+	    woochegook = cursor.fetchone()
+
+	    cursor.execute("SELECT acct_no  FROM vacs_vact WHERE bank_cd = %s AND acct_st = %s", ['081','0'])
+	    hana = cursor.fetchone()
+
+	    cursor.execute("SELECT acct_no  FROM vacs_vact WHERE bank_cd = %s AND acct_st = %s", ['088','0'])
+	    shinhan = cursor.fetchone()
+
+
+
+	except Exception, e:
+		print ("Can't call Insert", e)
 
 	aid = request.POST.get('aid')
 	bid = request.POST.get('bid')
@@ -712,7 +742,43 @@ def updateAcademy(request):
 		academy.bid = bid
 		academy.maxvehicle = maxvehicle
 		#academy.placement = placement
+		if academy.bank003 == 0:
+			academy.bank003 = giup
+			cursor.execute("UPDATE vacs_vact SET acct_st = %s WHERE acct_no = %s", ['1',bank003])
+		elif academy.bank004 == 0:
+			academy.bank004 = gukmin
+			cursor.execute("UPDATE vacs_vact SET acct_st = %s WHERE acct_no = %s", ['1',bank004])
+		elif academy.bank011 == 0:
+			academy.bank011 = nonghyup
+			cursor.execute("UPDATE vacs_vact SET acct_st = %s WHERE acct_no = %s", ['1',bank011])
+		elif academy.bank020 == 0:
+			academy.bank020 = woori
+			cursor.execute("UPDATE vacs_vact SET acct_st = %s WHERE acct_no = %s", ['1',bank020])
+		elif academy.bank027 == 0:
+			academy.bank027 = city
+			cursor.execute("UPDATE vacs_vact SET acct_st = %s WHERE acct_no = %s", ['1',bank027])
+		elif academy.bank071 == 0:
+			academy.bank071 = woochegook
+			cursor.execute("UPDATE vacs_vact SET acct_st = %s WHERE acct_no = %s", ['1',bank071])
+		elif academy.bank081 == 0:
+			academy.bank081 = hana
+			cursor.execute("UPDATE vacs_vact SET acct_st = %s WHERE acct_no = %s", ['1',bank081])
+		elif academy.bank088 == 0:
+			academy.bank088 = shinhan
+			cursor.execute("UPDATE vacs_vact SET acct_st = %s WHERE acct_no = %s", ['1',bank088])
+
+		cursor.close()
+		connection.commit()
+		connection.close()
 		academy.save()
+
+
+
+
+
+
+
+
 	except IntegrityError as e:
 		msg = "중복되는 학원명입니다."
 	except:
