@@ -33,8 +33,12 @@ INSTALLED_APPS = [
     'util',
     'fcmdev',
     'fcm_django',
-    #'traccar',
+    'drivermanager',
+    'traccar',
+    'sass_processor',
 ]
+
+SASS_ROOT = os.path.join(BASE_DIR, 'drivermanager', 'static', 'scss')
 
 #LOGGING = {
 #    'version': 1,
