@@ -34,8 +34,7 @@ INSTALLED_APPS = [
     'fcmdev',
     'fcm_django',
     'drivermanager',
-    'traccar',
-    'sass_processor',
+    #'traccar',
 ]
 
 SASS_ROOT = os.path.join(BASE_DIR, 'drivermanager', 'static', 'scss')
