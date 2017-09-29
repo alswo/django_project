@@ -3,8 +3,8 @@ from django.shortcuts import render_to_response, render, redirect
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
-from passenger.models import Academy, StudentInfo, PersonalInfo
-from schedule.models import Branch, HistoryScheduleTable#, Poi, Placement
+from passenger.models import Academy, StudentInfo, PersonalInfo, BillingHistory
+from schedule.models import Branch, HistoryScheduleTable, Poi, Placement
 from util.PhoneNumber import CleanPhoneNumber, FormatPhoneNumber
 from util.PersonalInfoUtil import compareLists, saveNewPersonInfo2, findSamePerson
 from django.utils import timezone
@@ -13,6 +13,9 @@ import re
 from django.db.models import Min
 from django.db import IntegrityError, transaction
 import math
+import psycopg2
+from django.db import connection
+import calendar
 
 # Create your views here.
 
@@ -47,7 +50,7 @@ def setSession(request):
 	try:
 		request.session['instituteid'] = int(instituteid)
 		request.session['institute'] = Academy.objects.get(id = instituteid).name
-
+		
 	except Academy.DoesNotExist:
 		del request.session['institute']
 		del request.session['instituteid']
@@ -199,7 +202,7 @@ def addStudent(request):
 
 		if (rv == False):
 			return render(request, 'message.html', {'msg': '학원생 추가 실해했습니다. error : Too many retry for make random pin_number', 'redirect_url': request.META.get('HTTP_REFERER')})
-
+	
 	studentinfo.save()
 
 	return render(request, 'message.html', {'msg': "학원생 추가 성공했습니다.", 'redirect_url': request.META.get('HTTP_REFERER')})
@@ -315,7 +318,7 @@ def chooseBillingCode(academy, first_time, last_time, isShare, student_num, pass
 	code = 0
 	overtime = 35
 
-	if (academy.bid == 11):
+	if (academy.bid == 11 or academy.bid == 12):
 		overtime = 50
 
 	if (student_num <= 0):
@@ -330,7 +333,7 @@ def chooseBillingCode(academy, first_time, last_time, isShare, student_num, pass
 		code = TimeHistory.BILLING_PASSENGER | code
 
 	if (code == 0):
-		code = TimeHistory.BILLING_NORMAL
+		code = TimeHistory.BILLING_NORMAL 
 
 	return code
 
@@ -392,8 +395,13 @@ def getHistory(request):
 
     if aid is not None and aid != '' and ((startdate is not None and startdate != '' and enddate is not None and enddate != '') or (monthpick is not None)):
         if monthpick :
-            start_date = datetime.date(*map(int, monthpick.split('-') + ['1']))
-            end_date = datetime.date(*map(int, monthpick.split('-') + ['30']))
+            ym = monthpick.split('-')
+            tt, end = calendar.monthrange(int(ym[0]), int(ym[1]))
+            begin = '1'
+            start_date = datetime.date(*map(int, monthpick.split('-') + [begin]))
+            end_date = datetime.date(*map(int, monthpick.split('-') + [end]))
+            startdate = monthpick + '-' + str(begin)
+            enddate = monthpick + '-' + str(end)
         else :
             start_date = datetime.date(*map(int, startdate.split('-')))
             end_date = datetime.date(*map(int, enddate.split('-')))
@@ -402,7 +410,7 @@ def getHistory(request):
         academy = Academy.objects.get(id=aid)
 	#aname = Academy.objects.get(pk=aid).name
 
-        if (academy.bid == 11):
+        if (academy.bid == 11 or academy.bid == 12):
             overtime = 45
 
         for day_number in range(total_days):
@@ -484,7 +492,7 @@ def getHistory(request):
                         if (len(warning_set) > maxvehicle):
                             sorted_warning = sorted(warning_set, key=lambda timehistory: timehistory.billing_code, reverse=True)
                             for i_warning in range(maxvehicle, len(sorted_warning)):
-                                sorted_warning[i_warning].warning = True
+                                sorted_warning[i_warning].warning = True 
                     standard_h = h
                     warning_set = set()
                     studentNum = h.studentnum
@@ -592,20 +600,19 @@ def addAcademy(request):
 	branch = Branch.objects.get(id=bid)
 	msg = None
 
-	#try:
-		#poi = Poi.objects.get(lat = lat, lng = lng)
-	#except Poi.DoesNotExist:
-		#poi = Poi.objects.create(lat = lat, lng = lng, address = address)
+	try:
+		poi = Poi.objects.get(lat = lat, lng = lng)
+	except Poi.DoesNotExist:
+		poi = Poi.objects.create(lat = lat, lng = lng, address = address)
 
-	#try:
-		#placement = Placement.objects.get(poi = poi, alias = aname)
-	#except Placement.DoesNotExist:
-		#placement = Placement.objects.create(poi = poi, alias = aname, branch = branch)
+	try:
+		placement = Placement.objects.get(poi = poi, alias = aname)
+	except Placement.DoesNotExist:
+		placement = Placement.objects.create(poi = poi, alias = aname, branch = branch)
 	placement = None
 
 	try:
-
-            Academy.objects.create(name = aname, address = address, phone_1 = phone_1, phone_2 = phone_2, bid = bid, maxvehicle = maxvehicle, placement = placement)
+		Academy.objects.create(name = aname, address = address, phone_1 = phone_1, phone_2 = phone_2, bid = bid, maxvehicle = maxvehicle, placement = placement)
 	except IntegrityError as e:
 		#if 'unique constraint' in e.message:
 		msg = "중복되는 학원명입니다."
@@ -613,7 +620,6 @@ def addAcademy(request):
 		msg = "에러가 발생했습니다."
 	else:
 		msg = "학원 추가 성공했습니다."
-
 
 	return render(request, 'message.html', {'msg': msg, 'redirect_url': request.META.get('HTTP_REFERER')})
 
@@ -624,7 +630,6 @@ def updateAcademy(request):
 
 	if not request.user.is_staff :
 		return render(request, 'message.html', {'msg': "staff 권한이 필요합니다.", 'redirect_url': redirect_url})
-        cursor = connection.cursor()
 
 
 	aid = request.POST.get('aid')
@@ -641,15 +646,15 @@ def updateAcademy(request):
 	branch = Branch.objects.get(id=bid)
 	msg = None
 
-	#try:
-		#poi = Poi.objects.get(lat = lat, lng = lng)
-	#except Poi.DoesNotExist:
-		#poi = Poi.objects.create(lat = lat, lng = lng, address = address)
+	try:
+		poi = Poi.objects.get(lat = lat, lng = lng)
+	except Poi.DoesNotExist:
+		poi = Poi.objects.create(lat = lat, lng = lng, address = address)
 
-	#try:
-		#placement = Placement.objects.get(poi = poi, alias = aname)
-	#except Placement.DoesNotExist:
-		#placement = Placement.objects.create(poi = poi, alias = aname, branch = branch)
+	try:
+		placement = Placement.objects.get(poi = poi, alias = aname)
+	except Placement.DoesNotExist:
+		placement = Placement.objects.create(poi = poi, alias = aname, branch = branch)
 
 	try:
 		academy = Academy.objects.get(id = aid)
@@ -660,10 +665,8 @@ def updateAcademy(request):
 		academy.phone_2 = phone_2
 		academy.bid = bid
 		academy.maxvehicle = maxvehicle
-		#academy.placement = placement
+		academy.placement = placement
 		academy.save()
-
-
 	except IntegrityError as e:
 		msg = "중복되는 학원명입니다."
 	except:
@@ -686,3 +689,43 @@ def listAcademies(request):
 		branch_dict[branch.id] = branch.bname
 
 	return render(request, 'listAcademies.html', {'academies': academies, 'branch_dict': branch_dict});
+
+def prevmonth(yearmonth):
+	arr = yearmonth.split('-')
+	
+	return arr[0] + arr[1]
+
+def thismonth():
+	return "%04d%02d" % (timezone.now().year, timezone.now().month)
+
+@csrf_exempt
+@login_required
+def saveBill(request):
+	aid = request.POST.get('aid')
+	amount = request.POST.get('amount')
+	yearmonth = request.POST.get('yearmonth')
+
+	current_yearmonth = thismonth()
+	previous_yearmonth = prevmonth(yearmonth)
+
+	start_billday = current_yearmonth + "10"
+	end_billday = current_yearmonth + "31"
+
+	academy = Academy.objects.get(id = aid)
+
+
+	bankcodes = ['003', '004', '011', '020', '027', '071', '081', '088']
+	conn = None
+
+	with connection.cursor() as cursor:
+		try: 
+			for bankcode in bankcodes:
+				field = "bank" + bankcode
+				cursor.execute("""UPDATE vacs_vact SET tr_amt = %s, trbegin_il = %s, trend_il = %s WHERE bank_cd = %s AND acct_no = %s;""", (amount, start_billday, end_billday, bankcode, getattr(academy, field)))
+		except: 
+			return HttpResponse("error occured")
+
+	obj, created = BillingHistory.objects.update_or_create(academy = academy, month = previous_yearmonth, defaults = {'billing_amount': int(amount)},)
+	#billinghistory = BillingHistory.objects.create(academy = academy, month = prevmonth, billing_amount = int(amount))
+
+	return HttpResponse("start : " + start_billday + " <> end : " + end_billday)
