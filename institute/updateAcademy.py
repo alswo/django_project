@@ -15,7 +15,7 @@ from django.db.models import Min
 from django.db import IntegrityError, transaction
 import math
 
-def updateAcademy(request):
+def updateAcademy():
     academy = Academy.objects.all()
     cursor = connection.cursor()
     for a in academy:
