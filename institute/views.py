@@ -588,9 +588,38 @@ def updateAcademyForm(request):
 @login_required
 def addAcademy(request):
 	redirect_url = request.META.get('HTTP_REFERER', 'http://' + request.META.get('SERVER_NAME') + '/institute/listStudents')
-
+        cursor = connection.cursor()
 	if not request.user.is_staff :
 		return render(request, 'message.html', {'msg': "staff 권한이 필요합니다.", 'redirect_url': redirect_url})
+
+	try:
+	    cursor.execute("SELECT acct_no  FROM vacs_vact WHERE bank_cd = %s AND acct_st = %s", ['03','0'])
+	    giup = cursor.fetchone()
+
+	    cursor.execute("SELECT acct_no  FROM vacs_vact WHERE bank_cd = %s AND acct_st = %s", ['04','0'])
+	    gukmin = cursor.fetchone()
+
+	    cursor.execute("SELECT acct_no  FROM vacs_vact WHERE bank_cd = %s AND acct_st = %s", ['11','0'])
+	    nonghyup = cursor.fetchone()
+
+	    cursor.execute("SELECT acct_no  FROM vacs_vact WHERE bank_cd = %s AND acct_st = %s", ['20','0'])
+	    woori = cursor.fetchone()
+
+	    cursor.execute("SELECT acct_no  FROM vacs_vact WHERE bank_cd = %s AND acct_st = %s", ['27','0'])
+	    city = cursor.fetchone()
+
+	    cursor.execute("SELECT acct_no  FROM vacs_vact WHERE bank_cd = %s AND acct_st = %s", ['71','0'])
+	    woochegook = cursor.fetchone()
+
+	    cursor.execute("SELECT acct_no  FROM vacs_vact WHERE bank_cd = %s AND acct_st = %s", ['81','0'])
+	    hana = cursor.fetchone()
+
+	    cursor.execute("SELECT acct_no  FROM vacs_vact WHERE bank_cd = %s AND acct_st = %s", ['88','0'])
+	    shinhan = cursor.fetchone()
+
+	except Exception, e:
+		print ("Can't call Insert", e)
+
 
 
 	bid = request.POST.get('bid')
@@ -617,7 +646,7 @@ def addAcademy(request):
 	placement = None
 
 	try:
-		Academy.objects.create(name = aname, address = address, phone_1 = phone_1, phone_2 = phone_2, bid = bid, maxvehicle = maxvehicle, placement = placement)
+		Academy.objects.create(name = aname, address = address, phone_1 = phone_1, phone_2 = phone_2, bid = bid, maxvehicle = maxvehicle, placement = placement, bank003 = giup[0].strip(), bank004 = gukmin[0].strip(), bank011 = nonghyup[0].strip(), bank020 = woori[0].strip(), bank027 = city[0].strip(), bank071 = woochegook[0].strip(), bank081 = hana[0].strip(), bank088 = shinhan[0].strip())
 	except IntegrityError as e:
 		#if 'unique constraint' in e.message:
 		msg = "중복되는 학원명입니다."
@@ -625,7 +654,26 @@ def addAcademy(request):
 		msg = "에러가 발생했습니다."
 	else:
 		msg = "학원 추가 성공했습니다."
-
+		aca_bank = Academy.objects.get(name = aname)
+		bank003 = aca_bank.bank003
+		bank004 = aca_bank.bank004
+		bank011 = aca_bank.bank011
+		bank020 = aca_bank.bank020
+		bank027 = aca_bank.bank027
+		bank071 = aca_bank.bank071
+		bank081= aca_bank.bank081
+		bank088 = aca_bank.bank088
+		cursor.execute("UPDATE vacs_vact SET acct_st = %s WHERE acct_no = %s", ['1',bank003])
+		cursor.execute("UPDATE vacs_vact SET acct_st = %s WHERE acct_no = %s", ['1',bank004])
+		cursor.execute("UPDATE vacs_vact SET acct_st = %s WHERE acct_no = %s", ['1',bank011])
+		cursor.execute("UPDATE vacs_vact SET acct_st = %s WHERE acct_no = %s", ['1',bank020])
+		cursor.execute("UPDATE vacs_vact SET acct_st = %s WHERE acct_no = %s", ['1',bank027])
+		cursor.execute("UPDATE vacs_vact SET acct_st = %s WHERE acct_no = %s", ['1',bank071])
+		cursor.execute("UPDATE vacs_vact SET acct_st = %s WHERE acct_no = %s", ['1',bank081])
+		cursor.execute("UPDATE vacs_vact SET acct_st = %s WHERE acct_no = %s", ['1',bank088])
+                cursor.close()
+		connection.commit()
+		connection.close()
 	return render(request, 'message.html', {'msg': msg, 'redirect_url': request.META.get('HTTP_REFERER')})
 
 @csrf_exempt
