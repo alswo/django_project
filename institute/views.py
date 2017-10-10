@@ -3,8 +3,14 @@ from django.shortcuts import render_to_response, render, redirect
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
+<<<<<<< HEAD
 from passenger.models import Academy, StudentInfo, PersonalInfo, BillingHistory
 from schedule.models import Branch, HistoryScheduleTable, Poi, Placement
+=======
+from django.db import connection
+from passenger.models import Academy, StudentInfo, PersonalInfo, BillingHistory
+from schedule.models import Branch, HistoryScheduleTable#, Poi, Placement
+>>>>>>> bank
 from util.PhoneNumber import CleanPhoneNumber, FormatPhoneNumber
 from util.PersonalInfoUtil import compareLists, saveNewPersonInfo2, findSamePerson
 from django.utils import timezone
@@ -634,6 +640,10 @@ def updateAcademy(request):
 
 	if not request.user.is_staff :
 		return render(request, 'message.html', {'msg': "staff 권한이 필요합니다.", 'redirect_url': redirect_url})
+<<<<<<< HEAD
+=======
+        
+>>>>>>> bank
 
 
 	aid = request.POST.get('aid')
@@ -669,8 +679,15 @@ def updateAcademy(request):
 		academy.phone_2 = phone_2
 		academy.bid = bid
 		academy.maxvehicle = maxvehicle
+<<<<<<< HEAD
 		academy.placement = placement
 		academy.save()
+=======
+		#academy.placement = placement
+
+
+
+>>>>>>> bank
 	except IntegrityError as e:
 		msg = "중복되는 학원명입니다."
 	except:
@@ -694,6 +711,7 @@ def listAcademies(request):
 
 	return render(request, 'listAcademies.html', {'academies': academies, 'branch_dict': branch_dict});
 
+<<<<<<< HEAD
 def prevmonth(yearmonth):
 	arr = yearmonth.split('-')
 	
@@ -733,3 +751,17 @@ def saveBill(request):
 	#billinghistory = BillingHistory.objects.create(academy = academy, month = prevmonth, billing_amount = int(amount))
 
 	return HttpResponse("start : " + start_billday + " <> end : " + end_billday)
+=======
+
+@login_required
+def listAcademiesBilling(request):
+	if not request.user.is_staff :
+		msg = "staff 권한이 필요합니다."
+		return render(request, 'message.html', {'msg': msg, 'redirect_url': request.META.get('HTTP_REFERER')})
+
+	billinghistorys = BillingHistory.objects.all()
+
+
+
+	return render(request, 'listAcademiesBilling.html', {'billinghistorys': billinghistorys});
+>>>>>>> bank
