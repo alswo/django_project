@@ -73,6 +73,17 @@
 				비과금 횟수: <span id="noncharge_count"></span><br>
 				예상 과금횟수 : <span id="uniq_count"></span><br>
 						</div>
+						<div align="right">
+				입금계좌<br>
+				신한은행 : {{academy.bank088}}<br>
+				국민은행 : {{academy.bank004}}<br>
+				하나은행 : {{academy.bank081}}<br>
+				우리은행 : {{academy.bank020}}<br>
+				기업은행 : {{academy.bank003}}<br>
+				시티은행 : {{academy.bank027}}<br>
+				우체국 : {{academy.bank071}}<br>
+				농협 : {{academy.bank011}}<br>
+						</div>
 					</div>
 					<div class="col-md-3" align="left">
 				<br>
@@ -96,7 +107,6 @@
 				= 이용요금 <br>: <span id="pay_amount"></span> 원<br>
 					</div>
 					<div class="col-md-2" align="right">
-						<!-- button type="button" class="btn-md btn-info" id="add-memo">확정 <span class="glyphicon glyphicon-pencil"></span></button><br><br//-->
 						<button type="button" class="btn-md btn-info" id="add-memo">Memo <span class="glyphicon glyphicon-pencil"></span></button><br><br>
 						<button type="button" id='pdfdown' class="btn-md btn-info">PDF <span class="glyphicon glyphicon-download-alt"></span></button><br><br>
 						<button type="button" class="btn-md btn-info" id="fix">확정 <span class="glyphicon glyphicon-check"></span></button>
@@ -317,8 +327,8 @@ function calculate() {
 
 	var discount_rate = $('#discount_rate')[0];
 	var discount_rate_value = numberWithoutCommas(discount_rate.options[discount_rate.selectedIndex].value);
-	var per_amount_value = {% if academy.bid == 11 %} 9000 {% else %} 7500 {% endif %};
-	var passenger_amount_value = {% if academy.bid == 11 %} 5000 {% else %} 3500 {% endif %};
+	var per_amount_value = {% if academy.bid == 11 or academy.bid == 12 %} 9000 {% else %} 7500 {% endif %};
+	var passenger_amount_value = {% if academy.bid == 11 or academy.bid == 12 %} 5000 {% else %} 3500 {% endif %};
 
 
 
@@ -427,7 +437,30 @@ $("#add-memo").click(function(event) {
 		`;
 });
 
-$("fix").click(function(event) {
+$("#fix").click(function(event) {
+	var aid = "{{academy.id}}";
+	var amount = numberWithoutCommas($("#pay_amount")[0].innerText);
+	var yearmonth = "{{lastmonth}}";
+
+	$.ajax({
+		url:"/institute/saveBill",
+		type:"POST",
+		data:{
+			aid: aid,
+			amount: amount,
+			yearmonth: yearmonth,
+		},
+		success: function(data) {
+			alert(yearmonth + "의 정산 금액이 저장되었습니다.");
+		},
+		error: function(request, status, error) {
+			alert("정산 금액 저장에 실패했습니다.");
+		},
+	});
+});
+
+
+$( function() {
 });
 
 $(document).ready(function() {
@@ -435,6 +468,7 @@ $(document).ready(function() {
 		nonSelectedText: '일반'
 	});
 });
+
 
 $("#pdfdown").click(function() {
 	waitingDialog.show(); 
@@ -522,7 +556,18 @@ $("#pdfdown").click(function() {
 	dd['content'].push({text: '\n결제금액: ' + pay_amount + '원 \n\n', fontSize: 13, bold: true});
 
 
-	dd['content'].push({text: '입금계좌: 우리은행 1005-603-067444 주식회사 에티켓\n\n\n', fontSize: 13, bold: true});
+	//dd['content'].push({text: '입금계좌: 우리은행 1005-603-067444 주식회사 에티켓\n\n\n', fontSize: 13, bold: true});
+
+	dd['content'].push({text: '입금계좌\n', fontSize: 13, bold: true});
+	dd['content'].push({text: '        : 신한은행 {{academy.bank088}} 주식회사 에티켓\n', fontSize: 11, bold: true});
+	dd['content'].push({text: '        : 국민은행 {{academy.bank004}} 주식회사 에티켓\n', fontSize: 11, bold: true});
+	dd['content'].push({text: '        : 하나은행 {{academy.bank081}} 주식회사 에티켓\n', fontSize: 11, bold: true});
+	dd['content'].push({text: '        : 우리은행 {{academy.bank020}} 주식회사 에티켓\n', fontSize: 11, bold: true});
+	dd['content'].push({text: '        : 기업은행 {{academy.bank003}} 주식회사 에티켓\n', fontSize: 11, bold: true});
+	dd['content'].push({text: '        : 시티은행 {{academy.bank027}} 주식회사 에티켓\n', fontSize: 11, bold: true});
+	dd['content'].push({text: '        : 우체국 {{academy.bank071}} 주식회사 에티켓\n', fontSize: 11, bold: true});
+	dd['content'].push({text: '        : 농협 {{academy.bank011}} 주식회사 에티켓\n\n\n', fontSize: 11, bold: true});
+
 	var dailyhistory = document.getElementsByClassName("dailyhistory");
 	for (var i=0; i<dailyhistory.length; i++) {
 		var timehistory = dailyhistory[i].getElementsByClassName("timehistory");
