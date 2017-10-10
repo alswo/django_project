@@ -19,7 +19,7 @@ def is_not_drivermanager(user):
 def day_schedule(bid, day):
 
     invens = Inventory.objects.filter(bid = bid).filter(day = day)
-        
+   
     temp_car = []
 
     for inven in invens:
