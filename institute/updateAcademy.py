@@ -24,6 +24,9 @@ def updateAcademy():
                 cursor.execute("SELECT acct_no  FROM vacs_vact WHERE bank_cd = %s AND acct_st = %s", ['03','0'])
                 giup = cursor.fetchone()
                 cursor.execute("UPDATE vacs_vact SET acct_st = %s WHERE acct_no = %s", ['1',giup[0].strip()])
+                cursor.close()
+                connection.commit()
+                connection.close()
             except Exception, e:
                 print ("Can't call Insert", e)
 
@@ -35,6 +38,9 @@ def updateAcademy():
                 cursor.execute("SELECT acct_no  FROM vacs_vact WHERE bank_cd = %s AND acct_st = %s", ['04','0'])
                 gukmin = cursor.fetchone()
                 cursor.execute("UPDATE vacs_vact SET acct_st = %s WHERE acct_no = %s", ['1',gukmin[0].strip()])
+                cursor.close()
+                connection.commit()
+                connection.close()
             except Exception, e:
                 print ("Can't call Insert", e)
 
@@ -46,6 +52,9 @@ def updateAcademy():
                 cursor.execute("SELECT acct_no  FROM vacs_vact WHERE bank_cd = %s AND acct_st = %s", ['11','0'])
                 nonghyup = cursor.fetchone()
                 cursor.execute("UPDATE vacs_vact SET acct_st = %s WHERE acct_no = %s", ['1',nonghyup[0].strip()])
+                cursor.close()
+                connection.commit()
+                connection.close()
             except Exception, e:
                 print ("Can't call Insert", e)
 
@@ -57,6 +66,9 @@ def updateAcademy():
                 cursor.execute("SELECT acct_no  FROM vacs_vact WHERE bank_cd = %s AND acct_st = %s", ['20','0'])
                 woori = cursor.fetchone()
                 cursor.execute("UPDATE vacs_vact SET acct_st = %s WHERE acct_no = %s", ['1',woori[0].strip()])
+                cursor.close()
+                connection.commit()
+                connection.close()
             except Exception, e:
                 print ("Can't call Insert", e)
 
@@ -68,6 +80,9 @@ def updateAcademy():
                 cursor.execute("SELECT acct_no  FROM vacs_vact WHERE bank_cd = %s AND acct_st = %s", ['27','0'])
                 city = cursor.fetchone()
                 cursor.execute("UPDATE vacs_vact SET acct_st = %s WHERE acct_no = %s", ['1',city[0].strip()])
+                cursor.close()
+                connection.commit()
+                connection.close()
             except Exception, e:
                 print ("Can't call Insert", e)
 
@@ -79,6 +94,9 @@ def updateAcademy():
                 cursor.execute("SELECT acct_no  FROM vacs_vact WHERE bank_cd = %s AND acct_st = %s", ['71','0'])
                 woochegook = cursor.fetchone()
                 cursor.execute("UPDATE vacs_vact SET acct_st = %s WHERE acct_no = %s", ['1',woochegook[0].strip()])
+                cursor.close()
+                connection.commit()
+                connection.close()
             except Exception, e:
                 print ("Can't call Insert", e)
 
@@ -90,6 +108,9 @@ def updateAcademy():
                 cursor.execute("SELECT acct_no  FROM vacs_vact WHERE bank_cd = %s AND acct_st = %s", ['81','0'])
                 hana = cursor.fetchone()
                 cursor.execute("UPDATE vacs_vact SET acct_st = %s WHERE acct_no = %s", ['1',hana[0].strip()])
+                cursor.close()
+                connection.commit()
+                connection.close()
             except Exception, e:
                 print ("Can't call Insert", e)
 
@@ -101,11 +122,14 @@ def updateAcademy():
                 cursor.execute("SELECT acct_no  FROM vacs_vact WHERE bank_cd = %s AND acct_st = %s", ['88','0'])
                 shinhan = cursor.fetchone()
                 cursor.execute("UPDATE vacs_vact SET acct_st = %s WHERE acct_no = %s", ['1',shinhan[0].strip()])
+                cursor.close()
+                connection.commit()
+                connection.close()
             except Exception, e:
                 print ("Can't call Insert", e)
 
             a.bank088 = shinhan[0].strip()
-        cursor.close()
-        connection.commit()
-        connection.close()
+
+
+
         a.save()
