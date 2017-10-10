@@ -260,7 +260,7 @@ class Community(models.Model):
     likeuser = ArrayField(models.CharField(null=True,max_length=30,default=''))
 
 class BillingHistory(models.Model):
-<<<<<<< HEAD
+
      academy = models.ForeignKey(Academy)
      month = models.CharField(max_length = 8, null=True)
      billing_amount = models.IntegerField(null=True)
@@ -269,13 +269,3 @@ class BillingHistory(models.Model):
 
      class Meta:
          unique_together = ('academy', 'month')
-=======
-    academy = models.ForeignKey(Academy)
-    month = models.CharField(max_length = 8, null=True)
-    billing_amount = models.IntegerField(null=True)
-    billing_il = models.CharField(max_length = 8, null=True)
-    billing_bank = models.CharField(max_length = 8, null=True)
-
-    class Meta:
-        unique_together = ('academy', 'month')
->>>>>>> bank

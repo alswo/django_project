@@ -17,9 +17,6 @@ urlpatterns = [
     url(r'^addAcademy$', views.addAcademy),
     url(r'^updateAcademy$', views.updateAcademy),
     url(r'^listAcademies$', views.listAcademies),
-<<<<<<< HEAD
     url(r'^saveBill$', views.saveBill),
-=======
     url(r'^listAcademiesBilling$', views.listAcademiesBilling)
->>>>>>> bank
 ]

@@ -3,14 +3,9 @@ from django.shortcuts import render_to_response, render, redirect
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
-<<<<<<< HEAD
 from passenger.models import Academy, StudentInfo, PersonalInfo, BillingHistory
 from schedule.models import Branch, HistoryScheduleTable, Poi, Placement
-=======
 from django.db import connection
-from passenger.models import Academy, StudentInfo, PersonalInfo, BillingHistory
-from schedule.models import Branch, HistoryScheduleTable#, Poi, Placement
->>>>>>> bank
 from util.PhoneNumber import CleanPhoneNumber, FormatPhoneNumber
 from util.PersonalInfoUtil import compareLists, saveNewPersonInfo2, findSamePerson
 from django.utils import timezone
@@ -56,7 +51,7 @@ def setSession(request):
 	try:
 		request.session['instituteid'] = int(instituteid)
 		request.session['institute'] = Academy.objects.get(id = instituteid).name
-		
+
 	except Academy.DoesNotExist:
 		del request.session['institute']
 		del request.session['instituteid']
@@ -208,7 +203,7 @@ def addStudent(request):
 
 		if (rv == False):
 			return render(request, 'message.html', {'msg': '학원생 추가 실해했습니다. error : Too many retry for make random pin_number', 'redirect_url': request.META.get('HTTP_REFERER')})
-	
+
 	studentinfo.save()
 
 	return render(request, 'message.html', {'msg': "학원생 추가 성공했습니다.", 'redirect_url': request.META.get('HTTP_REFERER')})
@@ -339,7 +334,7 @@ def chooseBillingCode(academy, first_time, last_time, isShare, student_num, pass
 		code = TimeHistory.BILLING_PASSENGER | code
 
 	if (code == 0):
-		code = TimeHistory.BILLING_NORMAL 
+		code = TimeHistory.BILLING_NORMAL
 
 	return code
 
@@ -499,7 +494,7 @@ def getHistory(request):
                         if (len(warning_number_set) > maxvehicle):
                             sorted_warning = sorted(warning_set, key=lambda timehistory: timehistory.billing_code, reverse=True)
                             for i_warning in range(maxvehicle, len(sorted_warning)):
-                                sorted_warning[i_warning].warning = True 
+                                sorted_warning[i_warning].warning = True
                     standard_h = h
                     warning_set = set()
                     warning_number_set = set()
@@ -640,11 +635,6 @@ def updateAcademy(request):
 
 	if not request.user.is_staff :
 		return render(request, 'message.html', {'msg': "staff 권한이 필요합니다.", 'redirect_url': redirect_url})
-<<<<<<< HEAD
-=======
-        
->>>>>>> bank
-
 
 	aid = request.POST.get('aid')
 	bid = request.POST.get('bid')
@@ -679,15 +669,11 @@ def updateAcademy(request):
 		academy.phone_2 = phone_2
 		academy.bid = bid
 		academy.maxvehicle = maxvehicle
-<<<<<<< HEAD
 		academy.placement = placement
 		academy.save()
-=======
+
 		#academy.placement = placement
 
-
-
->>>>>>> bank
 	except IntegrityError as e:
 		msg = "중복되는 학원명입니다."
 	except:
@@ -711,10 +697,9 @@ def listAcademies(request):
 
 	return render(request, 'listAcademies.html', {'academies': academies, 'branch_dict': branch_dict});
 
-<<<<<<< HEAD
 def prevmonth(yearmonth):
 	arr = yearmonth.split('-')
-	
+
 	return arr[0] + arr[1]
 
 def thismonth():
@@ -740,18 +725,18 @@ def saveBill(request):
 	conn = None
 
 	with connection.cursor() as cursor:
-		try: 
+		try:
 			for bankcode in bankcodes:
 				field = "bank" + bankcode
 				cursor.execute("""UPDATE vacs_vact SET tr_amt = %s, trbegin_il = %s, trend_il = %s WHERE bank_cd = %s AND acct_no = %s;""", (amount, start_billday, end_billday, bankcode, getattr(academy, field)))
-		except: 
+		except:
 			return HttpResponse("error occured")
 
 	obj, created = BillingHistory.objects.update_or_create(academy = academy, month = previous_yearmonth, defaults = {'billing_amount': int(amount)},)
 	#billinghistory = BillingHistory.objects.create(academy = academy, month = prevmonth, billing_amount = int(amount))
 
 	return HttpResponse("start : " + start_billday + " <> end : " + end_billday)
-=======
+
 
 @login_required
 def listAcademiesBilling(request):
@@ -764,4 +749,3 @@ def listAcademiesBilling(request):
 
 
 	return render(request, 'listAcademiesBilling.html', {'billinghistorys': billinghistorys});
->>>>>>> bank
