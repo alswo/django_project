@@ -22,7 +22,7 @@ def sendPin(token, kind, list_to, aname, sname, pin):
     
     list_to = str(list_to)
     
-    data = '{"title":"test","from":"07074900210","text":"'+text+'","ttl":"1000","destinations":'+list_to+'}'
+    data = '{"title":"셔틀타요","from":"07074900210","text":"'+text+'","ttl":"1000","destinations":'+list_to+'}'
     headers = {"Authorization" : token, "Accept" : "application/json", "Content-Type" : "application/json"}
 
     response = requests.post(url, headers = headers, data = data)
