@@ -58,10 +58,6 @@ def sendMessage(request):
                 temp_to["to"] = ("82"+ to_grandparents).encode('utf8')
                 list_to.append(temp_to)
 
-            if list_to == []:
-                temp_to["to"] = ("8201045013555").encode('utf8')
-                list_to.append(temp_to)            
-
             list_to = json.dumps(list_to)
          
             pin = pInfo.pin_number
