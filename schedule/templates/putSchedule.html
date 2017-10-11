@@ -1,5 +1,4 @@
-<html>
-
+<html> 
 <head>
   {% load staticfiles %}
   <script src="{% static 'js/jquery-1.10.2.js' %}"></script>
@@ -13,6 +12,8 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/js/bootstrap-select.min.js"></script>
   <script src="http://code.jquery.com/ui/1.11.1/jquery-ui.js"></script>
   <script src="{% static 'js/updateSchedule/updateSchedule.js' %}"></script>
+  <script src="{% static 'js/tayomap.js' %}"></script>
+  <script type="text/javascript" src="http://apis.daum.net/maps/maps3.js?apikey=df6af02ef0921fda82ecbfd508cfcfdf&libraries=services"></script>
   <style>
     .thstyle1 {
       text-align: center;
@@ -149,36 +150,44 @@
         <input type="submit" class="btn btn-success pull-right">
       </form>
     </div>
+    <div class="row">
+	<div class="col-md-7">
+    		<div id='map' style="width:640px;height:500px;"></div>
+	</div>
+	<div class="col-md-5">
+		<div class="row">
+    			<div id="left_bar" class="col-md-5">
+				<table class='table'>
+					<thead></thead>
+					<tbody id='result_tbody'></tbody>
+				</table>
+    			</div>
+    			<div class="col-md-7">
+				<div class="row">
+					<form action="javascript:search()">
+						<div class="col-md-9">
+							<input type="text" id="query" autocomplete=off class="form-control" placeholder="검색">
+						</div>
+						<div class="col-md-3">
+							<button type="submit" class="btn btn-info">주소 검색</button>
+						</div>
+					</form>
+				</div>
+    			</div>
+		</div>
+    </div>
   </div>
-  <!-- <div id="recommand_inven" class="col-md-3">
-                <div class="row affix bg-info">
-                    <h3 align="center">인벤토리추천</h3>
-                    <br>
-                    <label for="exampleInputEmail1">요일</label>
-                    <select class="form-control" id="{{contact.id}}gid">
-                        <option value="" selected>월</option>
-                        <option value="">화</option>
-                        <option value="">수</option>
-                        <option value="">목</option>
-                        <option value="">금</option>
-                        <option value="">토</option>
-                      </select>
-                    <label for="exampleInputEmail1">시작시간</label>
-                    <input type="email" class="form-control" placeholder="시작시간">
-
-                    <br>
-                    <a class="btn btn-default pull-right">검색</a>
-                </div>
-            </div>-->
-  </div>
+     <script async defer
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBaGGxx6F0oPYs8wS6tqYbh3ZJKzD8GMbI&callback=initTayoMap">
+      </script>
 </body>
 <script>
   $('.table-container').on('click', '.addrow', function() {
     var element = $(this).parent().find('.table-body');
     if (element.children().length <= 1) {
-      element.append(getRowHtml(true));
+      element.append(getRowHtml(true, '', '', 0, 0));
     } else {
-      $(getRowHtml(false)).insertBefore(element.children().last());
+      $(getRowHtml(false, '', '', 0, 0)).insertBefore(element.children().last());
     }
   });
 
@@ -186,7 +195,7 @@
     $(this).parent().parent().remove();
   });
 
-  function getRowHtml(readonly) {
+  function getRowHtml(readonly, timestr, addr, lat, lng) {
     var readonly_property;
 
     if (readonly) {
@@ -197,7 +206,7 @@
       display_none = "";
     }
 
-    return '<tr><td data-name="time" class="thstyle1"><input type="text" name="time[]" placeholder="Time" onblur="normalizeTime(this);" class="form-control" form="scheduleform"/></td><td class="thstyle11"><input type="text" name="addr[]" placeholder="Address" class="form-control" form="scheduleform" ' +
+    return '<tr><td data-name="time" class="thstyle1"><input type="hidden" name="lat[]" value="' + lat + '"><input type="hidden" name="lng[]" value="' + lng + '"><input type="text" name="time[]" placeholder="Time" onblur="normalizeTime(this);" class="form-control" form="scheduleform" value="' + timestr + '"/></td><td class="thstyle11"><input type="text" name="addr[]" placeholder="Address" class="form-control" value="' + addr + '" form="scheduleform" ' +
       readonly_property + ' /></td><td data-name="name" class="inputTd"><input type="text" name="name[]" data-role="tagsinput" class="form-control" form="scheduleform" ' + readonly_property + ' value="{% for name in s.sname %}{{name}}{% include '
     comma.html ' %}{% endfor %}" /></td><td data-name="addstu"><button class="btn btn-primary glyphicon glyphicon-plus addstudent" data-toggle="modal" ' + display_none +
       '></button></td><td data-name="sid" class="inputSid" style="display:none;"><input name="sid[]" type="text" data-role="tagsinput" class="form-control" form="scheduleform" value="{% for sid in s.slist %}{{sid}}{% include '
@@ -254,9 +263,26 @@
   }
 
   $(document).ready(function() {
-    for (i = 0; i < 3; i++) {
-      $('.addrow').click();
-    }
+    {% if timeaddrpairs %}
+      var element = $(document).find('.table-body');
+      var i = 0;
+      var readonly;
+      {% for timeaddr in timeaddrpairs %}
+          if (i == 0 || i == ({{timeaddrpairs|length}} - 1)) {
+              readonly = true;
+          }
+          else {
+              readonly = false;
+          }
+          element.append(getRowHtml(readonly, '{{timeaddr.time}}', '{{timeaddr.addr}}', '{{timeaddr.lat}}', '{{timeaddr.lng}}'));
+          i++;
+
+      {% endfor %}
+    {% else %}
+      for (i = 0; i < 3; i++) {
+        $('.addrow').click();
+      }
+    {% endif %}
   });
 
   var thisObject;
