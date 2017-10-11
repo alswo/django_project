@@ -76,7 +76,7 @@ def today_schedule_notification():
 
         count = module_push_content['count']-1
 	lflag = module_push_content['lflag']
-	sname = module_push_content['sname'] = sInfo.sname
+	sname = module_push_content['sname']
 
 	if lflag == 0:
             flag = "하원을 위한"
