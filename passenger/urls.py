@@ -29,5 +29,6 @@ urlpatterns = [
     url(r'^getAcaButton', views.getAcaButton),
     url(r'^getDriButton', views.getDriButton),
     url(r'^studentInfo', views.studentInfo),
+    url(r'^profileInfo', views.profileInfo),
     url(r'^robots.txt$', views.robots),
 ]

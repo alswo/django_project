@@ -73,15 +73,26 @@ def get_drivermanager_page(request):
 @user_passes_test(is_not_drivermanager, login_url='/', redirect_field_name=None)
 @csrf_exempt
 def get_schedule(request):
-  
     weekdaylist = ['월', '화', '수', '목', '금', '토']
-    branch = Branch.objects.all() 
 
     if request.method == 'GET':
-        if request.GET.get('bid'):
-            bid = int(request.GET.get('bid'))
+        if request.user.is_superuser:
+            if request.GET.get('bid'):
+                bid = int(request.GET.get('bid'))
+                
+            else:
+                bid = 1
+
+            branch = Branch.objects.all()
+        
         else: 
-            bid = Profile.objects.get(user_id = request.user).bid         
+            areaid = Profile.objects.get(user_id = request.user).bid
+            branch = Branch.objects.filter(areaid = areaid)  
+
+            if request.GET.get('bid'):
+                bid = int(request.GET.get('bid'))
+            else:
+                bid = branch[0].id    
 
         return render_to_response('daySchedule.html', {"weekdaylist":weekdaylist,"branch": branch,"bid":bid, "user":request.user})
 
