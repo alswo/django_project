@@ -793,7 +793,5 @@ def listAcademiesBilling(request):
 		return render(request, 'message.html', {'msg': msg, 'redirect_url': request.META.get('HTTP_REFERER')})
 
 	billinghistorys = BillingHistory.objects.all()
-
-
-
+	
 	return render(request, 'listAcademiesBilling.html', {'billinghistorys': billinghistorys});
