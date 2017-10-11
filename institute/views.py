@@ -786,19 +786,6 @@ def saveBill(request):
 	return HttpResponse("start : " + start_billday + " <> end : " + end_billday)
 
 
-# @login_required
-# def listAcademiesBilling(request):
-# 	if not request.user.is_staff :
-# 		msg = "staff 권한이 필요합니다."
-# 		return render(request, 'message.html', {'msg': msg, 'redirect_url': request.META.get('HTTP_REFERER')})
-#
-# 	billinghistorys = BillingHistory.objects.all()
-#
-#
-#
-# 	return render(request, 'listAcademiesBilling.html', {'billinghistorys': billinghistorys});
-
-
 @login_required
 def listAcademiesBilling(request):
 	if not request.user.is_staff :
