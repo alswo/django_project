@@ -409,7 +409,7 @@ def putSchedule(request):
         name2 = request.POST.getlist('name[]')
         load = request.POST.getlist('load[]')
         sid = request.POST.getlist('sid[]')
-        week = int(request.POST.get('week'))
+        week = int(request.POST.get('week', '0'))
         alist = request.POST.getlist('alist[]')
 
         if not alist:
