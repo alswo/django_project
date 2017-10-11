@@ -120,7 +120,7 @@ def send_msg(sid, pin, msg):
                     try:
                         result = ast.literal_eval(response.text)
                         status = str(result['success'])
-                        pushurl = 'http://mj.edticket.com/fcmdev/pushConfirmInfo'
+                        pushurl = 'http://api.edticket.com/fcmdev/pushConfirmInfo'
                         data = "pin="+pin+"&confirming="+response.text+"&status="+status+"&token="+token+"&sid="+sid
                         headers = {'content-type': "application/x-www-form-urlencoded"}
                         response = requests.request("POST", pushurl, data=data, headers=headers)
