@@ -2,7 +2,6 @@
 {% block content %}
 <input id="bid" type="hidden" value="{{bid}}"></input>
 <div class="row" align="center">
-  {% if user.is_superuser %}
     {% for b in branch %}
       {% if bid == b.id %}
         <a href="/dm/getSchedule?bid={{b.id}}" type="button" class="btn btn-info">{{b.bname}}</a>
@@ -10,7 +9,6 @@
         <a href="/dm/getSchedule?bid={{b.id}}" type="button" class="btn btn-default">{{b.bname}}</a>
       {% endif %}
     {% endfor %}
-  {% endif %}
 </div>
 <br>
 <div class="row" align="center">
