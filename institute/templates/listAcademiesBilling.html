@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% load bitwise_tags %}
+{% block content %}
+<DIV class="row">
+	<DIV class="col-md-12">
+		<DIV class="table-reponsive">
+			<table id="academybillingListTable" class="display" width="100%"></table>
+		</DIV>
+	</DIV>
+</DIV>
+
+<SCRIPT>
+	var dataSet = [
+		{% for billinghistory in billinghistorys %}
+		[ "{{billinghistory.academy_id.name}}",
+			"{{billinghistory.academy_id}}",
+                        "{{billinghistory.month}}",
+                        "{{billinghistory.billing_amount}}",
+                        "{{billinghistory.billing_il}}",
+                        "{{billinghistory.billing_bank}}",
+
+	],
+		{% endfor %}
+	];
+	$(document).ready(function() {
+		var table = $('#academybillingListTable').DataTable({
+			data : dataSet,
+			columns : [{ title : "학원" },
+                                { title : "학원_id" },
+                                { title : "청구 월" },
+				{ title : "결제 금액" },
+				{ title : "결제 일" },
+				{ title : "결제 은행" },
+
+			],
+			"lengthMenu": [10, 25, 50, 100],
+		});
+	});
+</SCRIPT>
+{% endblock content %}

@@ -18,4 +18,5 @@ urlpatterns = [
     url(r'^updateAcademy$', views.updateAcademy),
     url(r'^listAcademies$', views.listAcademies),
     url(r'^saveBill$', views.saveBill),
+    url(r'^listAcademiesBilling$', views.listAcademiesBilling)
 ]

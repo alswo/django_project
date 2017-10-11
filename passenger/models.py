@@ -260,6 +260,7 @@ class Community(models.Model):
     likeuser = ArrayField(models.CharField(null=True,max_length=30,default=''))
 
 class BillingHistory(models.Model):
+
      academy = models.ForeignKey(Academy)
      month = models.CharField(max_length = 8, null=True)
      billing_amount = models.IntegerField(null=True)

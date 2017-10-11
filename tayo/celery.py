@@ -1,4 +1,5 @@
 from __future__ import absolute_import, unicode_literals
+
 import os
 from celery import Celery
 from celery.schedules import crontab
@@ -18,12 +19,16 @@ app.conf.accept_content = ['application/json']
 app.conf.beat_schedule = {
         'today-schedule-notification': {
                 'task': 'fcmdev.tasks.today_schedule_notification',
-                'schedule': crontab(hour=8, minute=10),
+                'schedule': crontab(hour=11, minute=10),
     	},
 	#'say-hello': {
 		#'task': 'schedule.tasks.say_hello',
 		#'schedule': crontab(hour=16, minute='*'),
 	#},
+       'update-billinghistory': {
+		'task': 'institute.tasks.updateBillingHistory',
+		'schedule': crontab(hour=10, minute=10),
+	},
 	'store-historyschedule': {
 		'task': 'schedule.tasks.store_historyschedule',
 		'schedule': crontab(hour=23, minute=1),
