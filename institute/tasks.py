@@ -68,9 +68,7 @@ def updateBillingHistory():
 					ex(acct, bank_cd, aid)
 
 				else:
-					aid = a.id
-					acaph = a.phone_1
-					noex(aid, acaph)
+					print " nothing"
 
 def ex(acct, bank_cd, aid):
 	cursor = connection.cursor()
@@ -78,13 +76,6 @@ def ex(acct, bank_cd, aid):
 	tr_il = cursor.fetchone()
 	tr_il = u"%s" % tr_il
 	cursor.execute("UPDATE passenger_billinghistory SET billing_il = %s, billing_bank = %s WHERE academy_id = %s", [tr_il, bank_cd, aid])
-	cursor.close()
-	connection.commit()
-	connection.close()
-
-def noex(aid, acaph):
-	cursor = connection.cursor()
-	cursor.execute("UPDATE passenger_billinghistory SET billing_bank = %s WHERE academy_id = %s", [acaph, aid])
 	cursor.close()
 	connection.commit()
 	connection.close()
