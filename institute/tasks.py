@@ -18,7 +18,6 @@ def updateBillingHistory():
 
 
 	for b in billinghistorys:
-		print b.academy_id.name
 		academys = Academy.objects.filter(id = b.academy_id)
 		for a in academys:
 			cursor = connection.cursor()
