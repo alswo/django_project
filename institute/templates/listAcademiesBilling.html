@@ -12,8 +12,8 @@
 <SCRIPT>
 	var dataSet = [
 		{% for billinghistorys in billinghistory %}
-		[ "{{aca_dict|get_item:billinghistorys.academy_id}}",
-			// "{{billinghistorys.academy_id}}",
+		[ "{{aca_name_dict|get_item:billinghistorys.academy_id}}",
+		"{{aca_phone_dict|get_item:billinghistorys.academy_id}}",
                         "{{billinghistorys.month}}",
                         "{{billinghistorys.billing_amount}}",
                         "{{billinghistorys.billing_il}}",
@@ -26,14 +26,14 @@
 		var table = $('#academybillingListTable').DataTable({
 			data : dataSet,
 			columns : [{ title : "학원" },
-                                // { title : "학원_id" },
+                                 { title : "학원 전화번호" },
                                 { title : "청구 월" },
 				{ title : "결제 금액" },
 				{ title : "결제 일" },
 				{ title : "결제 은행" },
 
 			],
-		
+
 		});
 	});
 </SCRIPT>
