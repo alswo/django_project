@@ -34,6 +34,7 @@ INSTALLED_APPS = [
     'fcmdev',
     'fcm_django',
     'drivermanager',
+    'message',
     #'traccar',
 ]
 
