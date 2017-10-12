@@ -76,7 +76,7 @@ def today_schedule_notification():
 
         count = module_push_content['count']-1
 	lflag = module_push_content['lflag']
-	sname = module_push_content['sname'] = sInfo.sname
+	sname = module_push_content['sname']
 
 	if lflag == 0:
             flag = "하원을 위한"
@@ -120,7 +120,7 @@ def send_msg(sid, pin, msg):
                     try:
                         result = ast.literal_eval(response.text)
                         status = str(result['success'])
-                        pushurl = 'http://mj.edticket.com/fcmdev/pushConfirmInfo'
+                        pushurl = 'http://api.edticket.com/fcmdev/pushConfirmInfo'
                         data = "pin="+pin+"&confirming="+response.text+"&status="+status+"&token="+token+"&sid="+sid
                         headers = {'content-type': "application/x-www-form-urlencoded"}
                         response = requests.request("POST", pushurl, data=data, headers=headers)

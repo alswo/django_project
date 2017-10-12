@@ -1,26 +1,39 @@
 {% extends 'basic.html' %}
 {% block content %}
+<input id="bid" type="hidden" value="{{bid}}"></input>
+<div class="row" align="center">
+    {% for b in branch %}
+      {% if bid == b.id %}
+        <a href="/dm/getSchedule?bid={{b.id}}" type="button" class="btn btn-info">{{b.bname}}</a>
+      {% else %}
+        <a href="/dm/getSchedule?bid={{b.id}}" type="button" class="btn btn-default">{{b.bname}}</a>
+      {% endif %}
+    {% endfor %}
+</div>
+<br>
 <div class="row" align="center">
   {% for w in weekdaylist %}
-  <button id="{{w}}" type="button" class="btn btn-primary" onclick="getSchedule('{{w}}')">{{w}}</button>
+  <button id="{{w}}" type="button" class="btn btn-primary" onclick="getSchedule('{{w}}', '{{bid}}')">{{w}}</button>
   {% endfor %}
 </div>
 <br>
 <div id="skeduler-container">
 </div>
 <script type="text/javascript">
-function getSchedule(day){
+function getSchedule(day, bid){
   day = day
+  bid = bid
   $.ajax({
       url: "/dm/getSchedule",
       type: "POST",
       data: {
         day: day,
+        bid: bid,
       },
       success: function(data) {
         var obj = eval(data)
         var day = obj[0]['invens'][0]['day']
-        document.getElementsByClassName('btn-success')[0].className = 'btn btn-primary';
+	document.getElementsByClassName('btn-success')[0].className = 'btn btn-primary';
         document.getElementById(day).className = 'btn btn-success';
         generate(obj)
       }
@@ -34,6 +47,7 @@ function getSchedule(day){
       type: "POST",
       data: {
         day: '월',
+        bid: $('#bid').val(),
       },
       success: function(data) {
         var obj = eval(data)

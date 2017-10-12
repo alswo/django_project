@@ -59,6 +59,7 @@ def sendMessage(request):
                 list_to.append(temp_to)
 
             list_to = json.dumps(list_to)
+         
             pin = pInfo.pin_number
             status = sendPin(token, kind, list_to, aname, sname, pin)
 

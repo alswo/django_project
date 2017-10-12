@@ -274,15 +274,12 @@
   $(document).on('change', '#branchSelected', function() {
     var bname = $("#branchSelected option:selected").text()
     var bid = $("#branchSelected option:selected").val()
-    $('#id_bid').val(bid)
-    $('#id_bname').val(bname)
     $('#id_profile-0-bid').val(bid)
     $.ajax({
       type: 'POST',
-      url: '/studentInfo',
+      url: '/profileInfo',
       data: {
-        branch: bid,
-        flag: 1,
+        bid : bid,
       },
       success: function(data) {
         tempTag = "<option vlaue='default' selected>학원선택</option>"

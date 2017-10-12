@@ -4,7 +4,7 @@ from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core import serializers
 from passenger.models import Profile, StudentInfo
-from schedule.models import Inventory, ScheduleTable
+from schedule.models import Inventory, ScheduleTable, Branch
 import datetime
 from collections import defaultdict
 from django.views.decorators.csrf import csrf_exempt
@@ -12,14 +12,14 @@ import json
 
 def is_not_drivermanager(user):
     if user:
-        return (user.groups.filter(name='drivermanager').exists() == False)
+        return (user.groups.filter(name='drivermanager').exists() == True)
     
-    return True
+    return False
 
 def day_schedule(bid, day):
 
     invens = Inventory.objects.filter(bid = bid).filter(day = day)
-        
+   
     temp_car = []
 
     for inven in invens:
@@ -42,6 +42,7 @@ def day_schedule(bid, day):
                 temp_invens['iid'] = inven.id
                 temp_invens['aname'] = inven.anamelist
                 temp_invens['day'] = inven.day
+                
                 for studentInfo in inven.slist:
                     try:
                         sInfo = StudentInfo.objects.get(id = studentInfo)
@@ -72,17 +73,36 @@ def get_drivermanager_page(request):
 @user_passes_test(is_not_drivermanager, login_url='/', redirect_field_name=None)
 @csrf_exempt
 def get_schedule(request):
-  
     weekdaylist = ['월', '화', '수', '목', '금', '토']
-    bid = Profile.objects.get(user_id=request.user).bid
 
     if request.method == 'GET':
+        if request.user.is_superuser:
+            if request.GET.get('bid'):
+                bid = int(request.GET.get('bid'))
+                
+            else:
+                bid = 1
 
-        return render_to_response('daySchedule.html', {"weekdaylist":weekdaylist,"user":request.user})
+            branch = Branch.objects.all()
+        
+        else: 
+            areaid = Profile.objects.get(user_id = request.user).bid
+            branch = Branch.objects.filter(areaid = areaid)  
+
+            if request.GET.get('bid'):
+                bid = int(request.GET.get('bid'))
+            else:
+                bid = branch[0].id    
+
+        return render_to_response('daySchedule.html', {"weekdaylist":weekdaylist,"branch": branch,"bid":bid, "user":request.user})
 
     else:
         day = request.POST.get('day')
-        
+        if request.POST.get('bid'):
+            bid = request.POST.get('bid')
+        else:
+            bid = Profile.objects.get(user_id = request.user).bid    
+    
         if day:
             contacts = day_schedule(bid, day)
         else:
