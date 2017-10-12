@@ -1,5 +1,6 @@
 #-*- coding:utf-8 -*-
 from django.shortcuts import render
+from django.core.serializers import serialize
 from django.http import HttpResponse
 import requests,logging
 from datetime import datetime
@@ -32,17 +33,20 @@ def sendMessage(request):
 	access_token = getToken()
         token = 'Basic ' + access_token
 
-        if kind == 0 or 3:
+        if kind == 0:
+            sInfo = StudentInfo.objects.filter(id__in = sid)
+        elif kind == 3:
             sInfo = StudentInfo.objects.filter(id__in = sid)
         else:
-            sInfo = StudentInfo.objects.filter(aid_id = aid)
-
+            sInfo = StudentInfo.objects.filter(aid = aid)
+       
         for s in sInfo:
             list_to = []
             temp_to = {}
             pInfo = PersonalInfo.objects.get(id = s.personinfo_id )
             sname = s.sname
             aname = s.aname
+
             if s.parents_phonenumber:
                 to_parents = s.parents_phonenumber[1:]
                 temp_to["to"] = ("82"+ to_parents).encode('utf8')
@@ -57,6 +61,11 @@ def sendMessage(request):
                 to_grandparents = s.grandparents_phonenumber[1:]
                 temp_to["to"] = ("82"+ to_grandparents).encode('utf8')
                 list_to.append(temp_to)
+            
+            if list_to == []:
+                s.sended_time = "전화번호 미입력"
+                s.save()
+                continue
 
             list_to = json.dumps(list_to)
          
