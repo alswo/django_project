@@ -43,7 +43,8 @@ def updateBillingHistory():
 					cursor = connection.cursor()
 					cursor.execute("SELECT tr_il FROM vacs_ahst WHERE iacct_no = %s" , [acct])
 					tr_il = cursor.fetchone()
-					tr_il = u"%s" % tr_il
+					tr_il = u"%s" % tr_i
+					cursor.execute("UPDATE passenger_billinghistory SET billing_il = %s, billing_bank = %s WHERE academy_id = %s", [tr_il, bank_cd, a.id])
 					bank_cd = "국민은행"
 					cursor.close()
 					connection.commit()
@@ -55,6 +56,7 @@ def updateBillingHistory():
 					tr_il = cursor.fetchone()
 					tr_il = u"%s" % tr_il
 					bank_cd = "농협은행"
+					cursor.execute("UPDATE passenger_billinghistory SET billing_il = %s, billing_bank = %s WHERE academy_id = %s", [tr_il, bank_cd, a.id])
 					cursor.close()
 					connection.commit()
 					connection.close()
@@ -65,6 +67,7 @@ def updateBillingHistory():
 					tr_il = cursor.fetchone()
 					tr_il = u"%s" % tr_il
 					bank_cd = "우리은행"
+					cursor.execute("UPDATE passenger_billinghistory SET billing_il = %s, billing_bank = %s WHERE academy_id = %s", [tr_il, bank_cd, a.id])
 					cursor.close()
 					connection.commit()
 					connection.close()
@@ -74,6 +77,7 @@ def updateBillingHistory():
 					tr_il = cursor.fetchone()
 					tr_il = u"%s" % tr_il
 					bank_cd = "시티은행"
+					cursor.execute("UPDATE passenger_billinghistory SET billing_il = %s, billing_bank = %s WHERE academy_id = %s", [tr_il, bank_cd, a.id])
 					cursor.close()
 					connection.commit()
 					connection.close()
@@ -94,6 +98,7 @@ def updateBillingHistory():
 					tr_il = cursor.fetchone()
 					tr_il = u"%s" % tr_il
 					bank_cd = "하나은행"
+					cursor.execute("UPDATE passenger_billinghistory SET billing_il = %s, billing_bank = %s WHERE academy_id = %s", [tr_il, bank_cd, a.id])
 					cursor.close()
 					connection.commit()
 					connection.close()
@@ -104,6 +109,7 @@ def updateBillingHistory():
 					tr_il = cursor.fetchone()
 					tr_il = u"%s" % tr_il
 					bank_cd = "신한은행"
+					cursor.execute("UPDATE passenger_billinghistory SET billing_il = %s, billing_bank = %s WHERE academy_id = %s", [tr_il, bank_cd, a.id])
 					cursor.close()
 					connection.commit()
 					connection.close()
