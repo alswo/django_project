@@ -337,6 +337,13 @@ def chooseBillingCode(academy, first_time, last_time, isShare, student_num, pass
 
 	return code
 
+def setNonCharge(academy, studentNum, warning_number_set, warning_set):
+	maxvehicle = max(academy.maxvehicle, int(math.ceil(float(studentNum)/10.0)))
+	if (len(warning_number_set) > maxvehicle):
+		sorted_warning = sorted(warning_set, key=lambda timehistory: timehistory.billing_code, reverse=True)
+		for i_warning in range(maxvehicle, len(sorted_warning)):
+			sorted_warning[i_warning].warning = True 
+
 @csrf_exempt
 @login_required
 def getHistory(request):
@@ -482,18 +489,18 @@ def getHistory(request):
             warning_set = set()
             warning_number_set = set()
             studentNum = 0
-            for h in dailyHistory.timehistory:
+            for idx, h in enumerate(dailyHistory.timehistory):
                 fire = False
 
                 if ((standard_h == None) or (standard_h.last_time <= h.first_time)):
                     if (len(warning_set) > 0):
                         # warning 처리
                         # 학생 수가 많아서 어쩔 수 없이 차량이 많아진 경우는 maxvehicle 보다 우선시한다.
-                        maxvehicle = max(academy.maxvehicle, int(math.ceil(float(studentNum)/10.0)))
-                        if (len(warning_number_set) > maxvehicle):
-                            sorted_warning = sorted(warning_set, key=lambda timehistory: timehistory.billing_code, reverse=True)
-                            for i_warning in range(maxvehicle, len(sorted_warning)):
-                                sorted_warning[i_warning].warning = True 
+			setNonCharge(academy, studentNum, warning_number_set, warning_set)
+                        #if (len(warning_number_set) > maxvehicle):
+                            #sorted_warning = sorted(warning_set, key=lambda timehistory: timehistory.billing_code, reverse=True)
+                            #for i_warning in range(maxvehicle, len(sorted_warning)):
+                                #sorted_warning[i_warning].warning = True 
                     standard_h = h
                     warning_set = set()
                     warning_number_set = set()
@@ -506,6 +513,16 @@ def getHistory(request):
                     if not (h.billing_code & TimeHistory.BILLING_NONCHARGE):
                         warning_set.add(h)
                         warning_number_set.add(h.carnum)
+
+		if (idx == len(dailyHistory.timehistory)-1 and (len(warning_set) > 0)):
+			setNonCharge(academy, studentNum, warning_number_set, warning_set)
+			# warning 처리
+			# 학생 수가 많아서 어쩔 수 없이 차량이 많아진 경우는 maxvehicle 보다 우선시한다.
+			#maxvehicle = max(academy.maxvehicle, int(math.ceil(float(studentNum)/10.0)))
+			#if (len(warning_number_set) > maxvehicle):
+				#sorted_warning = sorted(warning_set, key=lambda timehistory: timehistory.billing_code, reverse=True)
+				#for i_warning in range(maxvehicle, len(sorted_warning)):
+					#sorted_warning[i_warning].warning = True 
 
 		#if (h.warning == True):
 			#continue
