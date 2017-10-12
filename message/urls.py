@@ -3,4 +3,5 @@ from message import views
 
 urlpatterns = [
     url(r'^sendMessage$', views.sendMessage),
+    url(r'^biztalkreport$', views.getReport),
 ]

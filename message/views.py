@@ -8,6 +8,7 @@ from send import sendPin
 from requests.auth import HTTPBasicAuth
 from base64 import b64encode
 from passenger.models import StudentInfo, PersonalInfo
+from message.models import Report
 from django.views.decorators.csrf import csrf_exempt
 import json
 
@@ -89,3 +90,26 @@ def sendMessage(request):
             s.save()
  
         return HttpResponse(status)
+
+def getReport(request):
+    
+    if request.method == "GET":
+        
+        groupId = request.GET.get('groupId')
+        messageId = request.GET.get('messageId')
+        messageType = request.GET.get('messageType')
+        requestTime = request.GET.get('requestTime')
+        to_num = request.GET.get('to')
+        from_num = request.GET.get('from') 
+        resultCode = request.GET.get('resultCode')
+        errorText = request.GET.get('errorText')
+        reportTime = request.GET.get('reportTime')
+
+        Report.objects.create(mid = messageId, gid = groupId, report={ 'messageType' : messageType, 'requestTime' : requestTime, 'to' : to_num, 'from' : from_num, 'resultCode' : resultCode, 'errorText' : errorText, 'reportTime' : reportTime })
+
+        response = {}
+        response['messageId'] = messageId
+        response['to'] = to_num
+
+        return HttpResponse(json.dumps(response), content_type = 'application/javascript; charset=utf8')
+        
