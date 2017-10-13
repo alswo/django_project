@@ -612,28 +612,28 @@ def addAcademy(request):
 		return render(request, 'message.html', {'msg': "staff 권한이 필요합니다.", 'redirect_url': redirect_url})
 
 	try:
-	    cursor.execute("SELECT acct_no  FROM vacs_vact WHERE bank_cd = %s AND acct_st = %s", ['03','0'])
+	    cursor.execute("SELECT acct_no  FROM vacs_vact WHERE bank_cd = %s AND acct_st = %s", ['003','0'])
 	    giup = cursor.fetchone()
 
-	    cursor.execute("SELECT acct_no  FROM vacs_vact WHERE bank_cd = %s AND acct_st = %s", ['04','0'])
+	    cursor.execute("SELECT acct_no  FROM vacs_vact WHERE bank_cd = %s AND acct_st = %s", ['004','0'])
 	    gukmin = cursor.fetchone()
 
-	    cursor.execute("SELECT acct_no  FROM vacs_vact WHERE bank_cd = %s AND acct_st = %s", ['11','0'])
+	    cursor.execute("SELECT acct_no  FROM vacs_vact WHERE bank_cd = %s AND acct_st = %s", ['011','0'])
 	    nonghyup = cursor.fetchone()
 
-	    cursor.execute("SELECT acct_no  FROM vacs_vact WHERE bank_cd = %s AND acct_st = %s", ['20','0'])
+	    cursor.execute("SELECT acct_no  FROM vacs_vact WHERE bank_cd = %s AND acct_st = %s", ['020','0'])
 	    woori = cursor.fetchone()
 
-	    cursor.execute("SELECT acct_no  FROM vacs_vact WHERE bank_cd = %s AND acct_st = %s", ['27','0'])
+	    cursor.execute("SELECT acct_no  FROM vacs_vact WHERE bank_cd = %s AND acct_st = %s", ['027','0'])
 	    city = cursor.fetchone()
 
-	    cursor.execute("SELECT acct_no  FROM vacs_vact WHERE bank_cd = %s AND acct_st = %s", ['71','0'])
+	    cursor.execute("SELECT acct_no  FROM vacs_vact WHERE bank_cd = %s AND acct_st = %s", ['071','0'])
 	    woochegook = cursor.fetchone()
 
-	    cursor.execute("SELECT acct_no  FROM vacs_vact WHERE bank_cd = %s AND acct_st = %s", ['81','0'])
+	    cursor.execute("SELECT acct_no  FROM vacs_vact WHERE bank_cd = %s AND acct_st = %s", ['081','0'])
 	    hana = cursor.fetchone()
 
-	    cursor.execute("SELECT acct_no  FROM vacs_vact WHERE bank_cd = %s AND acct_st = %s", ['88','0'])
+	    cursor.execute("SELECT acct_no  FROM vacs_vact WHERE bank_cd = %s AND acct_st = %s", ['088','0'])
 	    shinhan = cursor.fetchone()
 
 	except Exception, e:
