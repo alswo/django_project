@@ -495,7 +495,8 @@ def getSchedulesForStudent(request):
 			#else:
 				#msg['schedules'][daydictionary[scheduletable.iid.day]]['today'] = False
 
-		msg['schedules'][daydictionary[scheduletable.iid.day]]['list'].append(data)
+		if (scheduletable.iid.day in daydictionary.keys()):
+			msg['schedules'][daydictionary[scheduletable.iid.day]]['list'].append(data)
 
 	return JsonResponse(msg)
 	#return JsonResponse(json.dumps(msg, ensure_ascii=False), safe=False)
