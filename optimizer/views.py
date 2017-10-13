@@ -122,16 +122,19 @@ def getRouteSequential_in(pointlist, payload):
 
 @csrf_exempt
 def getRouteSequential(request):
-    unique_id = request.GET.get('unique_id')
     #urlstr = "https://route2-tayotayo.edticket.com:8080/routes/routeSequential30?version=1&format=xml"
     urlstr = "https://apis.skplanetx.com/tmap/routes/routeSequential30?version=1&format=xml"
     appKey = '9c78e49d-c72c-36a6-8e25-5c249e9291a3'
     headers = {'Content-Type': 'application/json', 'appKey': appKey, 'Accept':'application/xml'}
 
-    tmp_dir = settings.TAYO_TMP_DIR
-    with open(tmp_dir + unique_id, 'r') as f:
-    	jsonfile = File(f)
-	payload = json.load(jsonfile)
+    if (request.method == 'GET'):
+    	unique_id = request.GET.get('unique_id')
+    	tmp_dir = settings.TAYO_TMP_DIR
+    	with open(tmp_dir + unique_id, 'r') as f:
+    		jsonfile = File(f)
+		payload = json.load(jsonfile)
+    elif (request.method == 'POST'):
+    	payload = json.loads(request.body)
 
     #payload = json.loads(request.body)
     ## it has almost everything
