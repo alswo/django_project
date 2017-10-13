@@ -182,27 +182,29 @@ def addStudent(request):
 
 
 	if (studentinfo.parents_phonenumber or studentinfo.grandparents_phonenumber or studentinfo.self_phonenumber) :
-		rv = True
+		rv = saveNewPersonInfo2(studentinfo)
+		if (rv == False):
+			return render(request, 'message.html', {'msg': '학원생 추가 실패했습니다. error : Too many retry for make random pin_number', 'redirect_url': request.META.get('HTTP_REFERER')})
+		#rv = True
 		# for PersonalINfo
 		# same person in another academy
-		try:
-			found = False
-			anotherStudents = StudentInfo.objects.filter(bid = studentinfo.bid)
-			for anotherStudent in anotherStudents:
-				if findSamePerson(studentinfo, anotherStudent):
-					studentinfo.personinfo = anotherStudent.personinfo
-					#studentinfo.save(update_fields=['personinfo'])
-					found = True
-					break
-			if (found == False):
-				rv = saveNewPersonInfo2(studentinfo)
+		#try:
+			#found = False
+			#anotherStudents = StudentInfo.objects.filter(bid = studentinfo.bid)
+			#for anotherStudent in anotherStudents:
+				#if findSamePerson(studentinfo, anotherStudent):
+					#studentinfo.personinfo = anotherStudent.personinfo
+					#found = True
+					#break
+			#if (found == False):
+				#rv = saveNewPersonInfo2(studentinfo)
 
-		except StudentInfo.DoesNotExist:
+		#except StudentInfo.DoesNotExist:
 			# add PersnoalInfo if there is no record
-			rv = saveNewPersonInfo2(studentinfo)
+			#rv = saveNewPersonInfo2(studentinfo)
 
-		if (rv == False):
-			return render(request, 'message.html', {'msg': '학원생 추가 실해했습니다. error : Too many retry for make random pin_number', 'redirect_url': request.META.get('HTTP_REFERER')})
+		#if (rv == False):
+			#return render(request, 'message.html', {'msg': '학원생 추가 실패했습니다. error : Too many retry for make random pin_number', 'redirect_url': request.META.get('HTTP_REFERER')})
 
 	studentinfo.save()
 
@@ -610,28 +612,28 @@ def addAcademy(request):
 		return render(request, 'message.html', {'msg': "staff 권한이 필요합니다.", 'redirect_url': redirect_url})
 
 	try:
-	    cursor.execute("SELECT acct_no  FROM vacs_vact WHERE bank_cd = %s AND acct_st = %s", ['03','0'])
+	    cursor.execute("SELECT acct_no  FROM vacs_vact WHERE bank_cd = %s AND acct_st = %s", ['003','0'])
 	    giup = cursor.fetchone()
 
-	    cursor.execute("SELECT acct_no  FROM vacs_vact WHERE bank_cd = %s AND acct_st = %s", ['04','0'])
+	    cursor.execute("SELECT acct_no  FROM vacs_vact WHERE bank_cd = %s AND acct_st = %s", ['004','0'])
 	    gukmin = cursor.fetchone()
 
-	    cursor.execute("SELECT acct_no  FROM vacs_vact WHERE bank_cd = %s AND acct_st = %s", ['11','0'])
+	    cursor.execute("SELECT acct_no  FROM vacs_vact WHERE bank_cd = %s AND acct_st = %s", ['011','0'])
 	    nonghyup = cursor.fetchone()
 
-	    cursor.execute("SELECT acct_no  FROM vacs_vact WHERE bank_cd = %s AND acct_st = %s", ['20','0'])
+	    cursor.execute("SELECT acct_no  FROM vacs_vact WHERE bank_cd = %s AND acct_st = %s", ['020','0'])
 	    woori = cursor.fetchone()
 
-	    cursor.execute("SELECT acct_no  FROM vacs_vact WHERE bank_cd = %s AND acct_st = %s", ['27','0'])
+	    cursor.execute("SELECT acct_no  FROM vacs_vact WHERE bank_cd = %s AND acct_st = %s", ['027','0'])
 	    city = cursor.fetchone()
 
-	    cursor.execute("SELECT acct_no  FROM vacs_vact WHERE bank_cd = %s AND acct_st = %s", ['71','0'])
+	    cursor.execute("SELECT acct_no  FROM vacs_vact WHERE bank_cd = %s AND acct_st = %s", ['071','0'])
 	    woochegook = cursor.fetchone()
 
-	    cursor.execute("SELECT acct_no  FROM vacs_vact WHERE bank_cd = %s AND acct_st = %s", ['81','0'])
+	    cursor.execute("SELECT acct_no  FROM vacs_vact WHERE bank_cd = %s AND acct_st = %s", ['081','0'])
 	    hana = cursor.fetchone()
 
-	    cursor.execute("SELECT acct_no  FROM vacs_vact WHERE bank_cd = %s AND acct_st = %s", ['88','0'])
+	    cursor.execute("SELECT acct_no  FROM vacs_vact WHERE bank_cd = %s AND acct_st = %s", ['088','0'])
 	    shinhan = cursor.fetchone()
 
 	except Exception, e:
@@ -678,7 +680,7 @@ def addAcademy(request):
 		bank020 = aca_bank.bank020
 		bank027 = aca_bank.bank027
 		bank071 = aca_bank.bank071
-		bank081= aca_bank.bank081
+		bank081 = aca_bank.bank081
 		bank088 = aca_bank.bank088
 		cursor.execute("UPDATE vacs_vact SET acct_st = %s WHERE acct_no = %s", ['1',bank003])
 		cursor.execute("UPDATE vacs_vact SET acct_st = %s WHERE acct_no = %s", ['1',bank004])
