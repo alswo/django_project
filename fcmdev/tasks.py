@@ -60,19 +60,25 @@ def today_schedule_notification():
                         sInfo = None
                         break
                     else:
+			try:
 
-                        pin = PersonalInfo.objects.get(id = sInfo.personinfo_id)
-                        module_push_content = {}
-                        module_push_content['sname'] = sInfo.sname
-                        module_push_content['time'] = schTable.time
-                        module_push_content['addr'] = schTable.addr
-			module_push_content['lflag'] = schTable.lflag
-                        module_push_content['aname'] = sInfo.aname
-                        module_push_content['pin'] = pin.pin_number
-                        module_push_content['sid'] = key
-                        module_push_content['count'] = value
-                        push_content.append(module_push_content)
-                        break
+				pin = PersonalInfo.objects.get(id = sInfo.personinfo_id)
+	                        module_push_content = {}
+	                        module_push_content['sname'] = sInfo.sname
+	                        module_push_content['time'] = schTable.time
+	                        module_push_content['addr'] = schTable.addr
+		                module_push_content['lflag'] = schTable.lflag
+	                        module_push_content['aname'] = sInfo.aname
+	                        module_push_content['pin'] = pin.pin_number
+	                        module_push_content['sid'] = key
+	                        module_push_content['count'] = value
+	                        push_content.append(module_push_content)
+	                        break
+			except PersonalInfo.DoesNotExist:
+			        break
+
+
+
 
         count = module_push_content['count']-1
 	lflag = module_push_content['lflag']
@@ -87,10 +93,10 @@ def today_schedule_notification():
 	    flag = "에 대한"
         if count == 0:
             msg = "오늘 " + sname + " 학생의 " + module_push_content['aname'] + " " + flag + " " + module_push_content['time'] + " [" + module_push_content['addr'] + "] 승차 스케줄이 있습니다"
-            send_msg(module_push_content['sid'], module_push_content['pin'], msg)
+             send_msg(module_push_content['sid'], module_push_content['pin'], msg)
         else:
             msg = "오늘 " + sname + " 학생의 " + module_push_content['aname'] + " 등원을 위한 " + module_push_content['time'] + " [" + module_push_content['addr'] + "]승차 외" + str(count) + "건의 스케줄이 있습니다."
-            send_msg(module_push_content['sid'], module_push_content['pin'], msg)
+             send_msg(module_push_content['sid'], module_push_content['pin'], msg)
 
 
 
