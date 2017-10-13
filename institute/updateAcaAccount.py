@@ -21,13 +21,13 @@ def updateAcaAccount():
         academy = Academy.objects.get(id = bh.academy_id)
         q = academy.name
         a = academy.bank003
-        b = academy.bank003
-        c = academy.bank003
-        d = academy.bank003
-        e = academy.bank003
-        f = academy.bank003
-        g = academy.bank003
-        h = academy.bank003
+        b = academy.bank004
+        c = academy.bank011
+        d = academy.bank020
+        e = academy.bank027
+        f = academy.bank071
+        g = academy.bank081
+        h = academy.bank088
         amount = bh.billing_amount
         print q
         print amount
