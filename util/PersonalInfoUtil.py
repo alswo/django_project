@@ -139,7 +139,7 @@ def saveNewPersonInfo2(student):
 		if findSamePerson(student, other):
 			student.personinfo = other.personinfo
 			student.save()
-			return
+			return True
 
 	siblings = StudentInfo.objects.filter(bid = student.bid)
 	for sibling in siblings:

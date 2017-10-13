@@ -181,30 +181,32 @@ def addStudent(request):
 			return render(request, 'message.html', {'msg': "동일한 학생이 존재합니다.", 'redirect_url': request.META.get('HTTP_REFERER')})
 
 
-	if (studentinfo.parents_phonenumber or studentinfo.grandparents_phonenumber or studentinfo.self_phonenumber) :
-		rv = True
+	rv = saveNewPersonInfo2(studentinfo)
+	if (rv == False):
+		return render(request, 'message.html', {'msg': '학원생 추가 실패했습니다. error : Too many retry for make random pin_number', 'redirect_url': request.META.get('HTTP_REFERER')})
+	#if (studentinfo.parents_phonenumber or studentinfo.grandparents_phonenumber or studentinfo.self_phonenumber) :
+		#rv = True
 		# for PersonalINfo
 		# same person in another academy
-		try:
-			found = False
-			anotherStudents = StudentInfo.objects.filter(bid = studentinfo.bid)
-			for anotherStudent in anotherStudents:
-				if findSamePerson(studentinfo, anotherStudent):
-					studentinfo.personinfo = anotherStudent.personinfo
-					#studentinfo.save(update_fields=['personinfo'])
-					found = True
-					break
-			if (found == False):
-				rv = saveNewPersonInfo2(studentinfo)
+		#try:
+			#found = False
+			#anotherStudents = StudentInfo.objects.filter(bid = studentinfo.bid)
+			#for anotherStudent in anotherStudents:
+				#if findSamePerson(studentinfo, anotherStudent):
+					#studentinfo.personinfo = anotherStudent.personinfo
+					#found = True
+					#break
+			#if (found == False):
+				#rv = saveNewPersonInfo2(studentinfo)
 
-		except StudentInfo.DoesNotExist:
+		#except StudentInfo.DoesNotExist:
 			# add PersnoalInfo if there is no record
-			rv = saveNewPersonInfo2(studentinfo)
+			#rv = saveNewPersonInfo2(studentinfo)
 
-		if (rv == False):
-			return render(request, 'message.html', {'msg': '학원생 추가 실해했습니다. error : Too many retry for make random pin_number', 'redirect_url': request.META.get('HTTP_REFERER')})
+		#if (rv == False):
+			#return render(request, 'message.html', {'msg': '학원생 추가 실패했습니다. error : Too many retry for make random pin_number', 'redirect_url': request.META.get('HTTP_REFERER')})
 
-	studentinfo.save()
+	#studentinfo.save()
 
 	return render(request, 'message.html', {'msg': "학원생 추가 성공했습니다.", 'redirect_url': request.META.get('HTTP_REFERER')})
 	#return redirect(addStudentsForm)
