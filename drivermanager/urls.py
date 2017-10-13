@@ -4,7 +4,7 @@ from drivermanager import views
 urlpatterns = [
     url(r'^main', views.get_drivermanager_page),
     url(r'^getSchedule', views.get_schedule),
-    url(r'^getCarSchedule', views.car_schedule),
+    url(r'^getCarSchedule', views.get_car_schedule),
 ]
 
 
