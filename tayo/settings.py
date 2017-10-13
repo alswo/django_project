@@ -137,8 +137,8 @@ CRONJOBS = [
     #('01 23 * * *', 'schedule.cron.store_historyschedule'),
     #('00 21 * * *', 'schedule.cron.store_historyschedule_old'),
     #('00 22 * * sun', 'schedule.cron.reset_lflag_on_every_schedule'),
-    ('30 23 * * sun', 'schedule.cron.weekly_update'),
-    ('30 23 * * sat', 'schedule.cron.resetTodayLoad'),
+    #('30 23 * * sun', 'schedule.cron.weekly_update'),
+    #('30 23 * * sat', 'schedule.cron.resetTodayLoad'),
     #('00 23 31 12 *', 'schedule.test.move_schedule'),
     #('00 23 31 12 *', 'schedule.test.regist_student')
 ]
