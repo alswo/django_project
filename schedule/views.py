@@ -25,6 +25,7 @@ import re
 from schedule.updateInventory import UpdateInven 
 from schedule.createInventory import CreateInven
 from schedule.maintainTodayLoad import getUnloadSid, getTflag
+from django.utils import timezone
 
 class TimeHistory:
 	def __init__(self):
@@ -99,7 +100,7 @@ def invenToJson(invens):
                     if (studentInfo.birth_year):
                         sInfo['age'] = timezone.now().year - int(studentInfo.birth_year) + 1
                     else:
-                        sInfo['age'] = 20
+                        sInfo['age'] = 30
                     sInfo['phone1'] = studentInfo.phone1
                     sInfo['phonelist'] = studentInfo.phonelist
                     sInfo['parents_phonenumber'] = studentInfo.parents_phonenumber
