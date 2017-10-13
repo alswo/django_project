@@ -680,7 +680,7 @@ def addAcademy(request):
 		bank020 = aca_bank.bank020
 		bank027 = aca_bank.bank027
 		bank071 = aca_bank.bank071
-		bank081= aca_bank.bank081
+		bank081 = aca_bank.bank081
 		bank088 = aca_bank.bank088
 		cursor.execute("UPDATE vacs_vact SET acct_st = %s WHERE acct_no = %s", ['1',bank003])
 		cursor.execute("UPDATE vacs_vact SET acct_st = %s WHERE acct_no = %s", ['1',bank004])
