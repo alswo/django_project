@@ -143,12 +143,36 @@
             </div>
           </div>
         </div>
-        <a class="btn btn-default pull-right addrow">Add Row</a>
-      </div>
-      <input class="hidden" name="bid" value="{{bid}}" form="scheduleform" />
+	<button class="btn btn-success start">출발</button>
+	<button class="btn btn-danger end">도착</button>
+	<button class="btn btn-default addrow">추가</button>
+	<button class="btn btn-info draw">Draw Map</button>
+	<button class="btn btn-warning route">Find Route</button>
+        <button type="submit" class="btn btn-success" form="scheduleform">Submit</button>
       <form action="putSchedule" method="post" enctype='application/json' id="scheduleform" onsubmit="return validateTableForm('scheduleform')">
-        <input type="submit" class="btn btn-success pull-right">
       </form>
+      <input class="hidden" name="bid" value="{{bid}}" form="scheduleform" />
+
+      </div>
+	<div class="row form-group">
+          <label class="col-sm-2 control-label text-right">알고리즘</label>
+          <div class="col-sm-2">
+            <select id="algorithm" class="form-control input-sm">
+                <option>선택</option>
+                <option value="prim"> 길찾기 (Prim) </option>
+                <option value="onlytime"> 순서대로 소요시간만 </option>
+                <option value="salesman"> 길찾기 (Travelling-Salesman) </option>
+                <option value="mintime"> 길찾기 (학생들 소요시간 합 최소) </option>
+                <option value="deviation"> 길찾기 (학생들 소요시간 증가분의 최소 분산) </option>
+            </select>
+          </div>
+	</div>
+	<div class="row form-group">
+          <label class="col-sm-2 control-label text-right">시작시간</label>
+          <div class="col-sm-2">
+                <input type="text" id="starttime" autocomplete=off class="form-control" placeholder="14:30">
+          </div>
+	</div>
     </div>
     <div class="row">
 	<div class="col-md-7">
@@ -161,15 +185,16 @@
 					<thead></thead>
 					<tbody id='result_tbody'></tbody>
 				</table>
+				<div id="click_poi"></div>
     			</div>
     			<div class="col-md-7">
 				<div class="row">
 					<form action="javascript:search()">
 						<div class="col-md-9">
-							<input type="text" id="query" autocomplete=off class="form-control" placeholder="검색">
+							<input type="text" id="query" autocomplete=off class="form-control" placeholder="주소">
 						</div>
 						<div class="col-md-3">
-							<button type="submit" class="btn btn-info">주소 검색</button>
+							<button type="submit" class="btn btn-info">검색</button>
 						</div>
 					</form>
 				</div>
@@ -184,11 +209,25 @@
 <script>
   $('.table-container').on('click', '.addrow', function() {
     var element = $(this).parent().find('.table-body');
-    if (element.children().length <= 1) {
-      element.append(getRowHtml(true, '', '', 0, 0));
-    } else {
-      $(getRowHtml(false, '', '', 0, 0)).insertBefore(element.children().last());
+    var addr, lat, lng;
+    if (gClicked) {
+	addr = gClicked.data('title');
+	lat = gClicked.data('lat');
+	lng = gClicked.data('lon');
     }
+    if (element.children().length <= 1) {
+      element.append(getRowHtml(true, '', addr, lat, lng));
+    } else {
+      $(getRowHtml(false, '', addr, lat, lng)).insertBefore(element.children().last());
+    }
+  });
+
+  $('.table-container').on('click', '.draw', function() {
+    drawRoute();
+  });
+
+  $('.table-container').on('click', '.route', function() {
+    findRoute();
   });
 
   $(".table-schedule").on('click', '.row-remove', function(event) {
@@ -206,11 +245,11 @@
       display_none = "";
     }
 
-    return '<tr><td data-name="time" class="thstyle1"><input type="hidden" name="lat[]" value="' + lat + '"><input type="hidden" name="lng[]" value="' + lng + '"><input type="text" name="time[]" placeholder="Time" onblur="normalizeTime(this);" class="form-control" form="scheduleform" value="' + timestr + '"/></td><td class="thstyle11"><input type="text" name="addr[]" placeholder="Address" class="form-control" value="' + addr + '" form="scheduleform" ' +
-      readonly_property + ' /></td><td data-name="name" class="inputTd"><input type="text" name="name[]" data-role="tagsinput" class="form-control" form="scheduleform" ' + readonly_property + ' value="{% for name in s.sname %}{{name}}{% include '
+    return '<tr><td data-name="time" class="thstyle1"><input type="hidden" name="lat[]" value="' + lat + '" class="lat"><input type="hidden" name="lng[]" value="' + lng + '" class="lng"><input type="text" name="time[]" placeholder="Time" onblur="normalizeTime(this);" class="form-control time" form="scheduleform" value="' + timestr + '"/></td><td class="thstyle11"><input type="text" name="addr[]" placeholder="Address" class="form-control addr" value="' + addr + '" form="scheduleform" ' +
+      readonly_property + '/></td><td data-name="name" class="inputTd"><input type="text" name="name[]" data-role="tagsinput" class="form-control name" form="scheduleform" ' + readonly_property + ' value="{% for name in s.sname %}{{name}}{% include '
     comma.html ' %}{% endfor %}" /></td><td data-name="addstu"><button class="btn btn-primary glyphicon glyphicon-plus addstudent" data-toggle="modal" ' + display_none +
-      '></button></td><td data-name="sid" class="inputSid" style="display:none;"><input name="sid[]" type="text" data-role="tagsinput" class="form-control" form="scheduleform" value="{% for sid in s.slist %}{{sid}}{% include '
-    comma.html ' %}{% endfor %}"/></td><td data-name="load"><select name="load[]" form="scheduleform" ' + display_none +
+      '></button></td><td data-name="sid" class="inputSid" style="display:none;"><input name="sid[]" type="text" data-role="tagsinput" class="form-control sid" form="scheduleform" value="{% for sid in s.slist %}{{sid}}{% include '
+    comma.html ' %}{% endfor %}"/></td><td data-name="load"><select name="load[]" form="scheduleform" class="load" ' + display_none +
       '><option value="">등하원</option><option value="1">등원</option><option value="0">하원</option></select></td><td data-name="del"><button name="del" class="btn btn-danger glyphicon glyphicon-remove row-remove" ' + display_none +
       '></button></td></tr>';
   }
@@ -262,6 +301,135 @@
     }
   }
 
+  function timeToSec(timestr) {
+        var timearr = timestr.split(":");
+        return timearr[0] * 60 * 60 + timearr[1] * 60;
+  }
+
+  function secToTime(sec) {
+        var hour = parseInt(sec / (60 * 60));
+        var min = Math.ceil((sec - (hour * 60 * 60)) / 60);
+	min = ("0" + min).slice(-2);
+        return hour + ":" + min;
+  }
+
+	function makeJson() {
+		var jsonObj = {};
+		jsonObj['reqCoordType'] = 'WGS84GEO';
+		jsonObj['resCoordType'] = 'WGS84GEO';
+		for (i=0; i< $('.addr').length; i++) {
+			if (i == 0) {
+				jsonObj['startName'] = $('.addr')[i].value;
+				jsonObj['startX'] = $('.lng')[i].value;
+				jsonObj['startY'] = $('.lat')[i].value;
+				jsonObj['viaPoints'] = [];
+			}
+			else if (i == ($('.addr').length - 1)) {
+				jsonObj['endName'] = $('.addr')[i].value;
+				jsonObj['endX'] = $('.lng')[i].value;
+				jsonObj['endY'] = $('.lat')[i].value;
+			}
+			else {
+	      			jsonObj['viaPoints'][i-1] = {};
+              			jsonObj['viaPoints'][i-1]['viaPointName'] = $('.addr')[i].value;
+              			jsonObj['viaPoints'][i-1]['viaPointId'] = $('.addr')[i].value;
+              			jsonObj['viaPoints'][i-1]['index'] = i-1;
+              			jsonObj['viaPoints'][i-1]['viaX'] = $('.lng')[i].value;
+              			jsonObj['viaPoints'][i-1]['viaY'] = $('.lat')[i].value;
+              			jsonObj['viaPoints'][i-1]['viaPointNumPassenger'] = '1';
+			}
+		}
+
+		return jsonObj;
+	}
+
+	function resetTayoMap() {
+                $('.search_result_tr').remove();
+                initTayoMarkers();
+                labelIndex = 0;
+                gClicked = null;
+	}
+
+	function drawRoute() {
+		resetTayoMap();
+		jsonObj = makeJson();
+		console.log(jsonObj);
+
+		var xmlhttp = new XMLHttpRequest();
+		xmlhttp.onreadystatechange = function() {
+			if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+				var result = JSON.parse(xmlhttp.responseText);
+				unique_id = result['unique_id'];
+				urlStr = 'http://route2-tayotayo.edticket.com/optimizer/getRouteSequential?unique_id=' + unique_id;
+	
+				if (routeLayer) {
+					routeLayer.setMap(null);
+				}
+				routeLayer = new google.maps.KmlLayer({
+					url: urlStr,
+					map: map
+				});
+			}
+      		};
+
+      		xmlhttp.open("POST", "http://route2-tayotayo.edticket.com/optimizer/getRoute?reqCoordType=WGS84GEO&algorithm=onlytime");
+      		xmlhttp.setRequestHeader("Content-Type", "application/json");
+      		xmlhttp.send(JSON.stringify(jsonObj));
+	}
+
+	function findRoute() {
+		resetTayoMap();
+		jsonObj = makeJson();
+		console.log(jsonObj);
+
+		var e = $('#algorithm');
+		var algorithm;
+		if (e.length >= 1) {
+			var algorithm = e[0].options[e[0].selectedIndex].value;
+		}
+		
+		if (!algorithm) {
+			algorithm = "";
+		}
+
+		var xmlhttp = new XMLHttpRequest();
+		xmlhttp.onreadystatechange = function() {
+			if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+				console.log(xmlhttp.responseText);
+				var result = JSON.parse(xmlhttp.responseText);
+				unique_id = result['unique_id'];
+				urlStr = 'http://route2-tayotayo.edticket.com/optimizer/getRouteSequential?unique_id=' + unique_id;
+				starttime = $('#starttime').val();
+				if (!starttime) {
+					starttime = "14:30";
+				}
+
+				var startTimeSec = timeToSec(starttime);
+
+				for (i=0; i<result['features'].length; i++) {
+					$('.addr')[i].value = result['features'][i]['viaPointName'];
+					$('.lat')[i].value = result['features'][i]['lat'];
+					$('.lng')[i].value = result['features'][i]['lng'];
+					startTimeSec += result['features'][i]['requiredTime'];
+					$('.time')[i].value = secToTime(startTimeSec);
+					console.log(secToTime(startTimeSec));
+				}
+	
+				if (routeLayer) {
+					routeLayer.setMap(null);
+				}
+				routeLayer = new google.maps.KmlLayer({
+					url: urlStr,
+					map: map
+				});
+			}
+		};
+
+      		xmlhttp.open("POST", "http://route2-tayotayo.edticket.com/optimizer/getRoute?reqCoordType=WGS84GEO&algorithm=" + algorithm);
+      		xmlhttp.setRequestHeader("Content-Type", "application/json");
+      		xmlhttp.send(JSON.stringify(jsonObj));
+	}
+
   $(document).ready(function() {
     {% if timeaddrpairs %}
       var element = $(document).find('.table-body');
@@ -278,11 +446,13 @@
           i++;
 
       {% endfor %}
+
     {% else %}
       for (i = 0; i < 3; i++) {
         $('.addrow').click();
       }
     {% endif %}
+    $('.draw').click();
   });
 
   var thisObject;
