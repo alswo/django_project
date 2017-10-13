@@ -1,5 +1,6 @@
 #-*- coding:utf-8 -*-
 from django.shortcuts import render
+from django.core.serializers import serialize
 from django.http import HttpResponse
 import requests,logging
 from datetime import datetime
@@ -7,6 +8,7 @@ from send import sendPin
 from requests.auth import HTTPBasicAuth
 from base64 import b64encode
 from passenger.models import StudentInfo, PersonalInfo
+from message.models import Report
 from django.views.decorators.csrf import csrf_exempt
 import json
 
@@ -32,17 +34,20 @@ def sendMessage(request):
 	access_token = getToken()
         token = 'Basic ' + access_token
 
-        if kind == 0 or 3:
+        if kind == 0:
+            sInfo = StudentInfo.objects.filter(id__in = sid)
+        elif kind == 3:
             sInfo = StudentInfo.objects.filter(id__in = sid)
         else:
-            sInfo = StudentInfo.objects.filter(aid_id = aid)
-
+            sInfo = StudentInfo.objects.filter(aid = aid)
+       
         for s in sInfo:
             list_to = []
             temp_to = {}
             pInfo = PersonalInfo.objects.get(id = s.personinfo_id )
             sname = s.sname
             aname = s.aname
+
             if s.parents_phonenumber:
                 to_parents = s.parents_phonenumber[1:]
                 temp_to["to"] = ("82"+ to_parents).encode('utf8')
@@ -57,6 +62,11 @@ def sendMessage(request):
                 to_grandparents = s.grandparents_phonenumber[1:]
                 temp_to["to"] = ("82"+ to_grandparents).encode('utf8')
                 list_to.append(temp_to)
+            
+            if list_to == []:
+                s.sended_time = "전화번호 미입력"
+                s.save()
+                continue
 
             list_to = json.dumps(list_to)
          
@@ -80,3 +90,26 @@ def sendMessage(request):
             s.save()
  
         return HttpResponse(status)
+
+def getReport(request):
+    
+    if request.method == "GET":
+        
+        groupId = request.GET.get('groupId')
+        messageId = request.GET.get('messageId')
+        messageType = request.GET.get('messageType')
+        requestTime = request.GET.get('requestTime')
+        to_num = request.GET.get('to')
+        from_num = request.GET.get('from') 
+        resultCode = request.GET.get('resultCode')
+        errorText = request.GET.get('errorText')
+        reportTime = request.GET.get('reportTime')
+
+        Report.objects.create(mid = messageId, gid = groupId, report={ 'messageType' : messageType, 'requestTime' : requestTime, 'to' : to_num, 'from' : from_num, 'resultCode' : resultCode, 'errorText' : errorText, 'reportTime' : reportTime })
+
+        response = {}
+        response['messageId'] = messageId
+        response['to'] = to_num
+
+        return HttpResponse(json.dumps(response), content_type = 'application/javascript; charset=utf8')
+        

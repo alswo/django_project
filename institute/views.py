@@ -345,7 +345,7 @@ def setNonCharge(academy, studentNum, warning_number_set, warning_set):
 	if (len(warning_number_set) > maxvehicle):
 		sorted_warning = sorted(warning_set, key=lambda timehistory: timehistory.billing_code, reverse=True)
 		for i_warning in range(maxvehicle, len(sorted_warning)):
-			sorted_warning[i_warning].warning = True 
+			sorted_warning[i_warning].warning = True
 
 @csrf_exempt
 @login_required
@@ -503,7 +503,7 @@ def getHistory(request):
                         #if (len(warning_number_set) > maxvehicle):
                             #sorted_warning = sorted(warning_set, key=lambda timehistory: timehistory.billing_code, reverse=True)
                             #for i_warning in range(maxvehicle, len(sorted_warning)):
-                                #sorted_warning[i_warning].warning = True 
+                                #sorted_warning[i_warning].warning = True
                     standard_h = h
                     warning_set = set()
                     warning_number_set = set()
@@ -525,7 +525,7 @@ def getHistory(request):
 			#if (len(warning_number_set) > maxvehicle):
 				#sorted_warning = sorted(warning_set, key=lambda timehistory: timehistory.billing_code, reverse=True)
 				#for i_warning in range(maxvehicle, len(sorted_warning)):
-					#sorted_warning[i_warning].warning = True 
+					#sorted_warning[i_warning].warning = True
 
 		#if (h.warning == True):
 			#continue
@@ -814,8 +814,13 @@ def listAcademiesBilling(request):
 
 	billinghistorys = BillingHistory.objects.all()
 	academy = Academy.objects.all()
-	aca_dict = {}
-	for aca in academy:
-		aca_dict[aca.id] = aca.name
+	aca_name_dict = {}
+	aca_phone_dict = {}
 
-	return render(request, 'listAcademiesBilling.html', {'billinghistory': billinghistorys, 'aca_dict': aca_dict});
+	for aname in academy:
+		aca_name_dict[aname.id] = aname.name
+
+	for aphone in academy:
+		aca_phone_dict[aphone.id] = aphone.phone_1
+
+	return render(request, 'listAcademiesBilling.html', {'billinghistory': billinghistorys, 'aca_name_dict': aca_name_dict, 'aca_phone_dict': aca_phone_dict});
