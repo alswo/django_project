@@ -93,10 +93,10 @@ def today_schedule_notification():
 	    flag = "에 대한"
         if count == 0:
             msg = "오늘 " + sname + " 학생의 " + module_push_content['aname'] + " " + flag + " " + module_push_content['time'] + " [" + module_push_content['addr'] + "] 승차 스케줄이 있습니다"
-             send_msg(module_push_content['sid'], module_push_content['pin'], msg)
+            send_msg(module_push_content['sid'], module_push_content['pin'], msg)
         else:
             msg = "오늘 " + sname + " 학생의 " + module_push_content['aname'] + " 등원을 위한 " + module_push_content['time'] + " [" + module_push_content['addr'] + "]승차 외" + str(count) + "건의 스케줄이 있습니다."
-             send_msg(module_push_content['sid'], module_push_content['pin'], msg)
+            send_msg(module_push_content['sid'], module_push_content['pin'], msg)
 
 
 
