@@ -241,5 +241,3 @@ def resetTodayLoad():
         lenTflag = len(s.tflag)
         s.tflag = [0]*lenTflag
         s.save()
-
-
