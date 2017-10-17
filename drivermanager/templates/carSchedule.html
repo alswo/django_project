@@ -1,71 +1,65 @@
 {% extends 'basic.html' %}
 {% block content %}
+<input id="aid" type="hidden" value="{{aid}}"></input> 
 <input id="bid" type="hidden" value="{{bid}}"></input>
+{% if user.is_superuser %} 
 <div class="row" align="center">
-    {% for b in branch %}
-      {% if bid == b.id %}
-        <a href="/dm/getSchedule?bid={{b.id}}" type="button" class="btn btn-info">{{b.bname}}</a>
-      {% else %}
-        <a href="/dm/getSchedule?bid={{b.id}}" type="button" class="btn btn-default">{{b.bname}}</a>
-      {% endif %}
-    {% endfor %}
+  {% for a in area %}
+    {% if aid == a.id %}
+      <a href="/dm/getCarSchedule?aid={{a.id}}" type="button" class="btn btn-primary">{{a.name}}</a>
+    {% else %}
+      <a href="/dm/getCarSchedule?aid={{a.id}}" type="button" class="btn btn-default">{{a.name}}</a>
+    {% endif %}  
+  {% endfor %}
+</div>
+{% endif %}
+<br>
+<div class="row" align="center">
+  {% for b in branch %}
+    {% if bid == b.id %}
+      <a href="/dm/getCarSchedule?aid={{aid}}&bid={{b.id}}" type="button" class="btn btn-info">{{b.bname}}</a>
+    {% else %}
+      <a href="/dm/getCarSchedule?aid={{aid}}&bid={{b.id}}" type="button" class="btn btn-default">{{b.bname}}</a>
+    {% endif %}  
+  {% endfor %}
 </div>
 <br>
 <div class="row" align="center">
-  {% for w in weekdaylist %}
-  <button id="{{w}}" type="button" class="btn btn-primary" onclick="getSchedule('{{w}}', '{{bid}}')">{{w}}</button>
-  {% endfor %}
+    {% for c in car %}
+        <button id='{{c.carname}}' class="btn btn-default car-btn" onclick="carSchedule('{{c.carname}}')">{{c.carname}}</button>
+    {% endfor %}
 </div>
 <br>
 <div id="skeduler-container">
 </div>
 <script type="text/javascript">
-function getSchedule(day, bid){
-  day = day
-  bid = bid
+function carSchedule(car){
+  car = car
   $.ajax({
-      url: "/dm/getSchedule",
+      url: "/dm/getCarSchedule",
       type: "POST",
       data: {
-        day: day,
-        bid: bid,
+        car: car,
       },
       success: function(data) {
         var obj = eval(data)
-        var day = obj[0]['invens'][0]['day']
-	document.getElementsByClassName('btn-success')[0].className = 'btn btn-primary';
-        document.getElementById(day).className = 'btn btn-success';
+        var car = obj[0]['invens'][0]['carnum']
+        try{
+          document.getElementsByClassName('btn-success')[0].className = 'btn btn-default car-btn';
+        }
+        catch(e){
+            console.log(e)
+        }
+        document.getElementById(car).className = 'btn btn-success car-btn';
         generate(obj)
       }
   });
 
 };
 
-(function (){
-  $.ajax({
-      url: "/dm/getSchedule",
-      type: "POST",
-      data: {
-        day: '월',
-        bid: $('#bid').val(),
-      },
-      success: function(data) {
-        var obj = eval(data)
-        console.log(obj)
-        var day = obj[0]['invens'][0]['day']
-        document.getElementById(day).className = 'btn btn-success';
-        generate(obj)
-      }
-  });
-
-})();
-
 function generate(obj) {
   var tasks = [];
-  var headers = [];
-  for( i in obj){
-    headers.push(obj[i]['carnum']+"호차")
-  }
+  var headers = ['MON','TUE','WED','THU','FRI'];
 
   for (var i = 0; i < obj.length ; i++) {
       for ( var j = 0 ; j < obj[i]['invens'].length; j++) {
@@ -111,14 +105,13 @@ function generate(obj) {
 
       tasks.push(task);
       }
-      console.log(tasks)
   }
 
   $("#skeduler-container").skeduler({
     headers: headers,
     tasks: tasks,
     cardTemplate: '<div>${aname}&nbsp&nbsp${passenger}</div><div>${title}</div>',
-    onClick: function (e, t) { console.log(e, t); }
+    onClick: function (e, t) { console.log(e, t); },
   });
 }
 </script>

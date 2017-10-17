@@ -129,6 +129,7 @@
                     <div class="dropdown">
                       <button type="button" id="{{c.id}}{{s.id}}{{forloop.counter}}" class="load btn btn-small btn-space {% if f == 0 %} btn-primary {% elif f == 2 %} btn-warning blink {% else %} btn-default {% endif %} dropdown-toggle" data-toggle="dropdown">
                                     {{si.name}}
+{% if si.age <= 9 %}<span class="glyphicon glyphicon-eye-open"></span>{% elif si.age <= 13 %}<span class="glyphicon glyphicon-user"></span>{% endif %} 
                                   </button>
                       <ul class="dropdown-menu pull-right">
                         <li><a href="tel:{{si.aphone}}">{{si.aname}}</a></li>
