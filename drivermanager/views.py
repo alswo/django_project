@@ -99,7 +99,34 @@ def car_schedule(car):
         contacts.append(temp_dict)
 
     return contacts  
+   
+def get_ratio(bid):
+    invens = Inventory.objects.filter(bid = bid)
     
+    temp_car = []
+
+    for inven in invens:
+        temp_car.append(inven.carnum)
+    
+    temp_car = set(temp_car)
+
+    contacts = []
+    for tc in temp_car:
+        temp_inven = {}
+        temp_inven['carnum'] = tc
+
+        inventory = Inventory.objects.filter(carnum = tc)
+        anum = 0
+        for i in inventory:
+            anum += len(set(i.alist))
+        
+        temp_inven['ratio'] =  anum/len(inventory)
+
+        contacts.append(temp_inven)        
+
+    return contacts
+ 
+ 
 @login_required
 @user_passes_test(is_not_drivermanager, login_url='/', redirect_field_name=None)
 def get_drivermanager_page(request):
@@ -212,4 +239,34 @@ def get_car_schedule(request):
 
         return HttpResponse(json.dumps(contacts)) 
 
+def share_ratio(request):
+    if request.method == 'GET':
+        if request.user.is_superuser:
+            if request.GET.get('aid'):
+                aid = int(request.GET.get('aid'))
+            else:
+                aid = -1
 
+            if request.GET.get('bid'):
+                bid = int(request.GET.get('bid'))
+            else:
+                bid = -1
+
+            area = Area.objects.all()
+            if aid > 0:
+                if bid > 0:
+                    branch = Branch.objects.filter(areaid=aid)
+                    contacts = get_ratio(bid)
+
+                    return render_to_response('shareRatio.html', {'area':area, 'branch':branch, 'aid':aid, 'bid':bid, 'user':request.user})
+
+                else:
+                    branch = Branch.objects.filter(areaid=aid)
+
+                    return render_to_response('shareRatio.html', {'area':area, 'branch':branch, 'aid':aid, 'user':request.user})
+
+            else:
+                return render_to_response('shareRatio.html', {'area':area, 'user':request.user})
+        else:
+ 
+            return render_to_response('shareRatio.html', {'user':request.user})

@@ -43,26 +43,28 @@ def sendMessage(request):
        
         for s in sInfo:
             list_to = []
-            temp_to = {}
+            temp_p = {}
+            temp_s = {}
+            temp_g = {}
             pInfo = PersonalInfo.objects.get(id = s.personinfo_id )
             sname = s.sname
             aname = s.aname
 
-            if s.parents_phonenumber:
+            if s.parents_phonenumber != '':
                 to_parents = s.parents_phonenumber[1:]
-                temp_to["to"] = ("82"+ to_parents).encode('utf8')
-                list_to.append(temp_to)
+                temp_p["to"] = ("82"+ to_parents).encode('utf8')
+                list_to.append(temp_p)
             
-            if s.self_phonenumber:
+            if s.self_phonenumber != '':
                 to_self = s.self_phonenumber[1:]
-                temp_to["to"] = ("82"+to_self).encode('utf8')
-                list_to.append(temp_to)
+                temp_s["to"] = ("82"+to_self).encode('utf8')
+                list_to.append(temp_s)
 
-            if s.grandparents_phonenumber:
+            if s.grandparents_phonenumber != '':
                 to_grandparents = s.grandparents_phonenumber[1:]
-                temp_to["to"] = ("82"+ to_grandparents).encode('utf8')
-                list_to.append(temp_to)
-            
+                temp_g["to"] = ("82"+ to_grandparents).encode('utf8')
+                list_to.append(temp_g)
+           
             if list_to == []:
                 s.sended_time = "전화번호 미입력"
                 s.save()
