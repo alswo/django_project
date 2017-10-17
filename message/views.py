@@ -60,7 +60,7 @@ def sendMessage(request):
                 temp_s["to"] = ("82"+to_self).encode('utf8')
                 list_to.append(temp_s)
 
-            if s.grandparent_phonenumber != None and s.grandparents_phonenumber != '':
+            if s.grandparents_phonenumber != None and s.grandparents_phonenumber != '':
                 to_grandparents = s.grandparents_phonenumber[1:]
                 temp_g["to"] = ("82"+ to_grandparents).encode('utf8')
                 list_to.append(temp_g)
