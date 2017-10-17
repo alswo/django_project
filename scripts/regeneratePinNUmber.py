@@ -5,10 +5,9 @@ from django.conf import settings
 from passenger.models import StudentInfo, PersonalInfo
 from django.utils.crypto import get_random_string
 from django.db.models import Q
-from util.PersonalInfoUtil import compareLists, saveNewPersonInfo, getHangul
+from util.PersonalInfoUtil import compareLists, saveNewPersonInfo, getHangul, TAYO_PINNUMBER_ALLOWED_CHARS
 from util.PhoneNumber import FormatPhoneNumber
 from django.db import transaction
-
 
 def isSamePhoneNumber(phone1, phone2):
 	if (not phone1 or not phone2):
@@ -69,7 +68,7 @@ def run():
 			if (found == False):
 				for i in range(0, 5):
 					try:
-						pin_number = get_random_string(length=7)
+						pin_number = get_random_string(length=7, allowed_chars=TAYO_PINNUMBER_ALLOWED_CHARS)
 						personinfos = PersonalInfo.objects.filter(pin_number = pin_number)
 						if (len(personinfos) == 0):
 							sys.stderr.write(str(i) + "th pin_number [" + pin_number + "] newly created\n")
