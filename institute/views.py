@@ -20,6 +20,7 @@ import calendar
 import json
 from institute.models import BillingHistorySetting
 from django.contrib.auth.models import User
+from django.http import JsonResponse
 
 # Create your views here.
 
@@ -394,10 +395,8 @@ def getHistory(request):
         academy = Academy.objects.get(id = aid)
         billingHistorySettings = BillingHistorySetting.objects.filter(academy = academy, carid = carid, monthpick = monthpick)
 
-    if (carid == None or carid == 'all'):
-        carid = 0
-    else:
-        carid = int(carid)
+    if (carid == None):
+        carid = "all"
 
     if daterange is not None and daterange != '':
     	(startdate, enddate) = daterange.split(' - ')
@@ -568,9 +567,9 @@ def getHistory(request):
 
 
         rem = 0
-        if (carid != 0):
+        if (carid != "all"):
             for dailyHistory in history:
-                dailyHistory.timehistory[:] = [x for x in dailyHistory.timehistory if x.carnum == carid]
+                dailyHistory.timehistory[:] = [x for x in dailyHistory.timehistory if x.carnum == int(carid)]
 
     cur_year = datetime.datetime.now().year
     cur_month = datetime.datetime.now().month
@@ -837,6 +836,12 @@ def listAcademiesBilling(request):
 
 	return render(request, 'listAcademiesBilling.html', {'billinghistory': billinghistorys, 'aca_name_dict': aca_name_dict, 'aca_phone_dict': aca_phone_dict});
 
+def makeBillingHistorySettingName(billingHistorySetting):
+	return billingHistorySetting.created_time + " By " + billingHistorySetting.created_user.username + "(" + billingHistorySetting.created_user.first_name + " " + billingHistorySetting.created_user.last_name + ")"
+
+def makeBillingHistorySettingValue(billingHistorySetting):
+	return billingHistorySetting.created_time + "_" + str(billingHistorySetting.created_user_id)
+
 @csrf_exempt
 @login_required
 def saveBillingHistorySetting(request):
@@ -847,18 +852,51 @@ def saveBillingHistorySetting(request):
 	received_json_data = json.loads(request.body)
 
 	if (aid == None or carid == None or monthpick == None):
-		return HttpResponse("Error")
+		return JsonResponse({'msg' : 'Error'})
 
 	academy = Academy.objects.get(id = aid)
 	billingHistorySetting = BillingHistorySetting.objects.create(academy = academy, carid = carid, monthpick = monthpick, created_user = request.user, setting = received_json_data)
+	name = makeBillingHistorySettingName(billingHistorySetting)
+	value = makeBillingHistorySettingValue(billingHistorySetting)
 
-	return HttpResponse("Success")
+	return JsonResponse({'msg' : 'Success', 'name' : name, 'value' : value})
 
 @login_required
 def getBillingHistorySetting(request):
 	created_time = request.GET.get('created_time')
 	created_user_id = request.GET.get('created_user_id')
 
-	created_user = User.objects.get(id = created_user_id)
+	try :
+		created_user = User.objects.get(id = created_user_id)
+		billingHistorySetting = BillingHistorySetting.objects.filter(created_time = created_time, created_user = created_user)
+	except User.DoesNotExist:
+		return HttpResponse("해당 히스토리의 사용자가 존재하지 않습니다.")
+	except BillingHistorySetting.DoesNotExist:
+		return HttpResponse("해당 히스토리가 존재하지 않습니다.")
 
-	return HttpResponse("Success")
+	return JsonResponse(billingHistorySetting[0].setting)
+
+@login_required
+def getBillingHistorySettingList(request):
+    	aid = request.GET.get('aid')
+        carid = request.GET.get('carid')
+        monthpick = request.GET.get('monthpick')
+
+	try :
+        	academy = Academy.objects.get(id = aid)
+		if (carid == 'all') :
+        		billingHistorySettings = BillingHistorySetting.objects.filter(academy = academy, monthpick = monthpick).order_by('created_time')
+		else :
+        		billingHistorySettings = BillingHistorySetting.objects.filter(academy = academy, carid = carid, monthpick = monthpick).order_by('created_time')
+	except BillingHistorySetting.DoesNotExist:
+		return HttpResponse("해당 히스토리가 존재하지 않습니다.")
+
+	jsonObj = {}
+	jsonObj['list'] = []
+
+	for billingHistorySetting in billingHistorySettings:
+		name = makeBillingHistorySettingName(billingHistorySetting)
+		value = makeBillingHistorySettingValue(billingHistorySetting)
+		jsonObj['list'].append({'name' : name, 'value' : value})
+
+	return JsonResponse(jsonObj)

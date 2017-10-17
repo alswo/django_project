@@ -20,4 +20,6 @@ urlpatterns = [
     url(r'^saveBill$', views.saveBill),
     url(r'^listAcademiesBilling$', views.listAcademiesBilling),
     url(r'^saveBillingHistorySetting$', views.saveBillingHistorySetting),
+    url(r'^getBillingHistorySetting$', views.getBillingHistorySetting),
+    url(r'^getBillingHistorySettingList$', views.getBillingHistorySettingList),
 ]

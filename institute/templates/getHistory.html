@@ -46,7 +46,7 @@
             			</div>
             			<div class="col-md-2" align="right">
                 			<br>
-                			<button class="btn btn-info" onclick="submit()" type="button" value="dateAcademy">적용</button>              
+                			<button class="btn btn-info search" onclick="submit()" type="button" value="dateAcademy">적용</button>              
             			</div>
         			</form>
 			</div>
@@ -55,6 +55,33 @@
             <div class="col-md-1">
             </div>
         </div>
+	<div class="row" align="center">
+		<div class="col-md-1">
+		</div>
+		<div class="col-md-10">
+			<div class="panel panel-info">
+				<div class="panel-heading">
+					저장 History
+				</div>
+				<div class="panel-body">
+					<div class="col-md-2">
+					</div>
+					<div class="col-md-8">
+					<select class="form-control" id="billingHistorySetting">
+						<option value="">선택</option>
+{% for billingHistorySetting in billingHistorySettings %}
+						<option value="{{billingHistorySetting.created_time}}_{{billingHistorySetting.created_user.id}}">{{ billingHistorySetting.created_time }} By {{billingHistorySetting.created_user.username}} ({{billingHistorySetting.created_user.first_name}} {{billingHistorySetting.created_user.last_name}})</option>
+{% endfor %}
+					</select>
+					</div>
+					<div class="col-md-2">
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-1">
+		</div>
+	</div>
 	<div class="row" align="center">
 		<div class="col-md-1">
 		</div>
@@ -113,11 +140,6 @@
 						<button type="button" class="btn-md btn-info" id="fix">확정 <span class="glyphicon glyphicon-check"></span></button>
 					</div>
 
-	<select id="billingHistorySetting">
-{% for billingHistorySetting in billingHistorySettings %}
-	<option value="{{billingHistorySetting.created_time}}_{{billingHistorySetting.created_user.id}}">{{ billingHistorySetting.created_time }} {{billingHistorySetting.created_user.username}} ({{billingHistorySetting.created_user.first_name}} {{billingHistorySetting.created_user.last_name}})</option>
-{% endfor %}
-	</select>
 				</div>
 			</div>
 		</div>
@@ -158,7 +180,6 @@
 							<option value="{% get_constants 'BILLING_OVERTIME' %}" {% if timehistory.billing_code|isOverTime %} selected="selected" {% endif %}>{{overtime}}분 초과(X2)</option>
 							<option value="{% get_constants 'BILLING_NONCHARGE' %}" {% if timehistory.warning == True %} selected="selected" {% endif %}>비과금</option>
 						</select>
-						<!-- button class="btn-xs btn-danger glyphicon glyphicon-remove table-remove"></button //-->
 					</div>
 				</div>
                             </div>
@@ -392,6 +413,32 @@ function todayLoad(offset,invenid, stableid){
     });
 }
 
+function makeHistorySettingList(default_value) {
+	var xmlhttp = new XMLHttpRequest();
+	xmlhttp.onreadystatechange = function() {
+		if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+			if(xmlhttp.getResponseHeader('content-type') == 'application/json') {
+				var jsonResponse = JSON.parse(xmlhttp.responseText);
+				$('#billingHistorySetting').find('option').remove();
+				for (var i=0; i<jsonResponse['list'].length; i++) {
+					console.log(jsonResponse['list'][i]['name']);
+					console.log(jsonResponse['list'][i]['value']);
+					$('#billingHistorySetting').append("<option value='" + jsonResponse['list'][i]['value'] + "'>" + jsonResponse['list'][i]['name'] + "</option>");
+				}
+
+				if (default_value != null) {
+					$('#billingHistorySetting').val(default_value);
+				}
+			}
+			else {
+				alert(xmlhttp.responseText);
+			}
+		}
+	}
+	xmlhttp.open("GET", "/institute/getBillingHistorySettingList?aid=" + "{{academy.id}}" + "&carid=" + "{{carid}}" + "&monthpick=" + "{{lastmonth}}");
+	xmlhttp.send(null);
+}
+
 
 $( function() {
             $('input[name="daterange"]').daterangepicker(
@@ -486,7 +533,7 @@ $("#temp-save").click(function(event) {
 	
 	$('.dailyhistory').each(function(i, obj) {
 		jsonObj['data'][$(obj).attr('id')] = {};
-		$('.timehistoryoption').each(function(j, obj2) {
+		$('#' + $(obj).attr('id')).find('.timehistoryoption').each(function(j, obj2) {
 			jsonObj['data'][$(obj).attr('id')][$(obj2).attr('inventory_id')] = $(obj2).val();
 		});
 	});
@@ -496,10 +543,16 @@ $("#temp-save").click(function(event) {
 	var xmlhttp = new XMLHttpRequest();
 	xmlhttp.onreadystatechange = function() {
 		if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-			if (xmlhttp.responseText == 'Success') {
-				alert("저장되었습니다.");
+			if(xmlhttp.getResponseHeader('content-type') == 'application/json') {
+				var jsonResponse = JSON.parse(xmlhttp.responseText);
+				if (jsonResponse['msg'] == 'Success') {
+					alert(jsonResponse['name'] + " 으로 저장되었습니다.");
+					makeHistorySettingList(jsonResponse['value']);
+				}
+				else {
+					console.log(jsonResponse['msg']);
+				}
 			}
-			console.log(xmlhttp.responseText);
 		}
 	};
 	xmlhttp.open("POST", "/institute/saveBillingHistorySetting?aid=" + aid + "&carid=" + carid + "&monthpick=" + monthpick);
@@ -510,14 +563,45 @@ $("#temp-save").click(function(event) {
 $("#billingHistorySetting").on('change', function() {
 	var billingHistorySetting = $('#billingHistorySetting')[0];
 	var billingHistorySetting_value = billingHistorySetting.options[billingHistorySetting.selectedIndex].value;
+	var billingHistorySetting_text = billingHistorySetting.options[billingHistorySetting.selectedIndex].text;
 	var values = billingHistorySetting_value.split("_");
+
+	if (billingHistorySetting_value == "") {
+		console.log("search");
+		$('.search').click();
+		alert("새로 loading 됩니다.");
+		return;
+	}
 
 	var xmlhttp = new XMLHttpRequest();
 	xmlhttp.onreadystatechange = function() {
 		if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+			if(xmlhttp.getResponseHeader('content-type') == 'application/json') {
+				var jsonResponse = JSON.parse(xmlhttp.responseText);
+				if (jsonResponse['memo'] != null) {
+					$("#add-memo").click();
+					$('#memo')[0].value = jsonResponse['memo'];
+				}
+		
+				for (var date in jsonResponse['data']) {
+					for (var inventory_id in jsonResponse['data'][date]) {
+						$('#' + date).find('[inventory_id="' + inventory_id + '"]').multiselect('deselectAll', false);
+						$('#' + date).find('[inventory_id="' + inventory_id + '"]').multiselect('select', jsonResponse['data'][date][inventory_id]);
+					}
+				}
+
+				$('#discount_rate').val(jsonResponse['discount_rate']);
+				calculate();
+				alert(billingHistorySetting_text + " 가 적용되었습니다.");
+			}
+			else {
+				alert(xmlhttp.responseText);
+			}
 		}
 	}
 	xmlhttp.open("GET", "/institute/getBillingHistorySetting?created_time=" + encodeURIComponent(values[0]) + "&created_user_id=" + encodeURIComponent(values[1]));
+	xmlhttp.send(null);
+
 });
 
 

@@ -14,6 +14,6 @@ class BillingHistorySetting(models.Model):
 	academy = models.ForeignKey(Academy)
 	carid = models.CharField(max_length=5)
 	monthpick = models.CharField(max_length=30)
-	created_time = models.CharField(max_length=19, default = set_current_date_time())
+	created_time = models.CharField(max_length=19, default = set_current_date_time)
 	created_user = models.ForeignKey(User)
 	setting = JSONField()
