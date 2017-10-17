@@ -109,8 +109,15 @@
 					<div class="col-md-2" align="right">
 						<button type="button" class="btn-md btn-info" id="add-memo">Memo <span class="glyphicon glyphicon-pencil"></span></button><br><br>
 						<button type="button" id='pdfdown' class="btn-md btn-info">PDF <span class="glyphicon glyphicon-download-alt"></span></button><br><br>
+						<button type="button" class="btn-md btn-info" id="temp-save">임시저장 <span class="glyphicon glyphicon-check"></span></button>
 						<button type="button" class="btn-md btn-info" id="fix">확정 <span class="glyphicon glyphicon-check"></span></button>
 					</div>
+
+	<select id="billingHistorySetting">
+{% for billingHistorySetting in billingHistorySettings %}
+	<option value="{{billingHistorySetting.created_time}}_{{billingHistorySetting.created_user.id}}">{{ billingHistorySetting.created_time }} {{billingHistorySetting.created_user.username}} ({{billingHistorySetting.created_user.first_name}} {{billingHistorySetting.created_user.last_name}})</option>
+{% endfor %}
+	</select>
 				</div>
 			</div>
 		</div>
@@ -122,7 +129,7 @@
 	</div>
 
         {% for dailyhistory in history %}
-        <div class="row dailyhistory">
+        <div class="row dailyhistory" id="{{dailyhistory.date}}">
                 <div class="col-md-1"></div>
                 <div class="col-md-10">
                     <div class="panel panel-primary">
@@ -145,7 +152,7 @@
 			            		{% endfor %}
 					</div>
 					<div class="col-xs-6" align="right">
-						<select class="price_item priceoption timehistoryoption" multiple="multiple">
+						<select class="price_item priceoption timehistoryoption" inventory_id="{{timehistory.inventory_id}}" multiple="multiple">
 							<option value="{% get_constants 'BILLING_PASSENGER' %}" {% if timehistory.billing_code|isPassenger %} selected="selected" {% endif %}>동승자 포함</option>
 							<option value="{% get_constants 'BILLING_OVERPEOPLE' %}" {% if timehistory.billing_code|isOverPeople %} selected="selected" {% endif %}>5인 초과 (+1,500원)</option>
 							<option value="{% get_constants 'BILLING_OVERTIME' %}" {% if timehistory.billing_code|isOverTime %} selected="selected" {% endif %}>{{overtime}}분 초과(X2)</option>
@@ -457,6 +464,60 @@ $("#fix").click(function(event) {
 			alert("정산 금액 저장에 실패했습니다.");
 		},
 	});
+});
+
+$("#temp-save").click(function(event) {
+	var jsonObj = {};
+
+	var aid = $('#aid').val();
+	var carid = $('#carid').val();
+	var monthpick = $('#monthpick').val();
+
+	var memo;
+
+	if ($('#memo') && $('#memo')[0]) {
+		memo = $('#memo')[0].value;
+	}
+
+	jsonObj['discount_rate'] = $('#discount_rate option:selected').text();
+	jsonObj['memo'] = memo;
+	jsonObj['data'] = {};
+	
+	
+	$('.dailyhistory').each(function(i, obj) {
+		jsonObj['data'][$(obj).attr('id')] = {};
+		$('.timehistoryoption').each(function(j, obj2) {
+			jsonObj['data'][$(obj).attr('id')][$(obj2).attr('inventory_id')] = $(obj2).val();
+		});
+	});
+
+	console.log(jsonObj);
+	
+	var xmlhttp = new XMLHttpRequest();
+	xmlhttp.onreadystatechange = function() {
+		if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+			if (xmlhttp.responseText == 'Success') {
+				alert("저장되었습니다.");
+			}
+			console.log(xmlhttp.responseText);
+		}
+	};
+	xmlhttp.open("POST", "/institute/saveBillingHistorySetting?aid=" + aid + "&carid=" + carid + "&monthpick=" + monthpick);
+	xmlhttp.setRequestHeader("Content-Type", "application/json");
+	xmlhttp.send(JSON.stringify(jsonObj));
+});
+
+$("#billingHistorySetting").on('change', function() {
+	var billingHistorySetting = $('#billingHistorySetting')[0];
+	var billingHistorySetting_value = billingHistorySetting.options[billingHistorySetting.selectedIndex].value;
+	var values = billingHistorySetting_value.split("_");
+
+	var xmlhttp = new XMLHttpRequest();
+	xmlhttp.onreadystatechange = function() {
+		if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+		}
+	}
+	xmlhttp.open("GET", "/institute/getBillingHistorySetting?created_time=" + encodeURIComponent(values[0]) + "&created_user_id=" + encodeURIComponent(values[1]));
 });
 
 

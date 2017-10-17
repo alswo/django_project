@@ -17,6 +17,9 @@ import math
 import psycopg2
 from django.db import connection
 import calendar
+import json
+from institute.models import BillingHistorySetting
+from django.contrib.auth.models import User
 
 # Create your views here.
 
@@ -288,6 +291,7 @@ class TimeHistory:
 	BILLING_NONCHARGE = 0b1000
 	def __init__(self):
 		self.carnum = -1
+		self.inventory_id = -1
 		self.academies = set()
 		self.scheduletable = list()
 		self.warning = False
@@ -384,6 +388,12 @@ def getHistory(request):
         carid = request.POST.get('carid')
         monthpick = request.POST.get('monthpick')
 
+    billingHistorySettings = None
+
+    if (aid != None and carid != None and monthpick != None):
+        academy = Academy.objects.get(id = aid)
+        billingHistorySettings = BillingHistorySetting.objects.filter(academy = academy, carid = carid, monthpick = monthpick)
+
     if (carid == None or carid == 'all'):
         carid = 0
     else:
@@ -441,6 +451,7 @@ def getHistory(request):
                     timeHistory = TimeHistory()
                     timeHistory.scheduletable = scheduletable
                     timeHistory.carnum = scheduletable[0].carnum
+                    timeHistory.inventory_id = i
                     cars.add(timeHistory.carnum)
                     index = 0
                     studentNum = 0
@@ -579,7 +590,8 @@ def getHistory(request):
             lastmonth = '{}-{:0>2}'.format(cur_year - 1, 12)
 
 
-    return render(request, 'getHistory.html', {"history": history, "academy" : academy, 'total_count': total_count, 'startdate': startdate, 'enddate': enddate, 'user':request.user, 'cars':sorted(cars), 'carid':carid, 'overtime':overtime, 'monthpick_range': monthpick_range, 'lastmonth': lastmonth})
+
+    return render(request, 'getHistory.html', {"history": history, "academy" : academy, 'total_count': total_count, 'startdate': startdate, 'enddate': enddate, 'user':request.user, 'cars':sorted(cars), 'carid':carid, 'overtime':overtime, 'monthpick_range': monthpick_range, 'lastmonth': lastmonth, "billingHistorySettings": billingHistorySettings})
 
 
 @login_required
@@ -824,3 +836,29 @@ def listAcademiesBilling(request):
 		aca_phone_dict[aphone.id] = aphone.phone_1
 
 	return render(request, 'listAcademiesBilling.html', {'billinghistory': billinghistorys, 'aca_name_dict': aca_name_dict, 'aca_phone_dict': aca_phone_dict});
+
+@csrf_exempt
+@login_required
+def saveBillingHistorySetting(request):
+	aid = request.GET.get('aid')
+	carid = request.GET.get('carid')
+	monthpick = request.GET.get('monthpick')
+
+	received_json_data = json.loads(request.body)
+
+	if (aid == None or carid == None or monthpick == None):
+		return HttpResponse("Error")
+
+	academy = Academy.objects.get(id = aid)
+	billingHistorySetting = BillingHistorySetting.objects.create(academy = academy, carid = carid, monthpick = monthpick, created_user = request.user, setting = received_json_data)
+
+	return HttpResponse("Success")
+
+@login_required
+def getBillingHistorySetting(request):
+	created_time = request.GET.get('created_time')
+	created_user_id = request.GET.get('created_user_id')
+
+	created_user = User.objects.get(id = created_user_id)
+
+	return HttpResponse("Success")
