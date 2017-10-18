@@ -60,16 +60,11 @@ def today_schedule_notification():
                         sInfo = None
                         break
                     else:
+
 			try:
 
 				pin = PersonalInfo.objects.get(id = sInfo.personinfo_id)
 	                        module_push_content = {}
-				# 안타요를 누른 학생에대해서 메시지 필터링.
-				temp_tflag = schTable.tflag
-				offset_list = schTable.slist
-				temp_index = offset_list.index(sInfo.id)
-				module_push_content['tflag'] = temp_tflag[temp_index]
-                                module_push_content['id'] =schTable.id
 				module_push_content['sname'] = sInfo.sname
 	                        module_push_content['time'] = schTable.time
 	                        module_push_content['addr'] = schTable.addr
@@ -86,11 +81,11 @@ def today_schedule_notification():
 
 
 
-        sctid = module_push_content['id']
+
         count = module_push_content['count']-1
 	lflag = module_push_content['lflag']
 	sname = module_push_content['sname']
-        tflag = module_push_content['tflag']
+
         if lflag == 0:
             flag = "하원을 위한"
 
@@ -99,20 +94,12 @@ def today_schedule_notification():
 	else:
 	    flag = "에 대한"
         if count == 0:
-	    i += 1
             msg = "오늘 " + sname + " 학생의 " + module_push_content['aname'] + " " + flag + " " + module_push_content['time'] + " [" + module_push_content['addr'] + "] 승차 스케줄이 있습니다"
             #send_msg(module_push_content['sid'], module_push_content['pin'], msg)
-	    if tflag == 1:
-                print sctid
-	    	print sname+"안타요"
-	    elif tflag == 0:
-	        print sctid
-                print sname+"타요"
         else:
-	    i += 1
             msg = "오늘 " + sname + " 학생의 " + module_push_content['aname'] + " 등원을 위한 " + module_push_content['time'] + " [" + module_push_content['addr'] + "]승차 외" + str(count) + "건의 스케줄이 있습니다."
            # send_msg(module_push_content['sid'], module_push_content['pin'], msg)
-    print i
+
 
 def send_msg(sid, pin, msg):
     url = 'https://fcm.googleapis.com/fcm/send'
