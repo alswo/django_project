@@ -152,11 +152,12 @@ def get_schedule(request):
             branch = Branch.objects.all()
         
         else: 
-            areaid = Profile.objects.get(user_id = request.user).bid
+            areaid = Profile.objects.get(user_id = request.user).areaid
             branch = Branch.objects.filter(areaid = areaid)  
 
             if request.GET.get('bid'):
                 bid = int(request.GET.get('bid'))
+            
             else:
                 bid = branch[0].id    
 
@@ -167,8 +168,10 @@ def get_schedule(request):
         if request.POST.get('bid'):
             bid = request.POST.get('bid')
         else:
-            bid = Profile.objects.get(user_id = request.user).bid    
-    
+            areaid = Profile.objects.get(user_id = request.user).areaid    
+            branch = Branch.objects.filter(areaid_id = areaid)
+            bid = branch[0].id
+
         if day:
             contacts = day_schedule(bid, day)
         else:
@@ -215,7 +218,7 @@ def get_car_schedule(request):
                 return render_to_response('carSchedule.html', {'area':area, 'user':request.user})            
  
         else:
-            areaid = Profile.objects.get(user_id = request.user).bid 
+            areaid = Profile.objects.get(user_id = request.user).areaid 
             branch = Branch.objects.filter(areaid = areaid)
 
             if request.GET.get('bid'):

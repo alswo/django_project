@@ -20,8 +20,8 @@ class ProfileInfoWidget(forms.Widget):
     template_name = "profile_widget.html"
 
     def render(self, name, value , attrs=None):
-        area = Area.objects.all()
-        context = {'area':area}
+        bid = Branch.objects.all()
+        context = {'bid':bid}
         return mark_safe(render_to_string(self.template_name, context))
 
 class ProfileInfoForm(forms.ModelForm):

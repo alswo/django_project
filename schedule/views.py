@@ -1442,8 +1442,20 @@ def reqInventory(request):
         req = request.POST.get('req')
         memo = request.POST.get('memo')
         flag = request.POST.get('flag')
+        wflag = request.POST.get('weeklyFlag')
 
         if flag == '0':
+            if wflag == '1':
+                try:
+                    eInven = EditedInven.objects.filter(iid_id= iid)
+                
+                    for ei in eInven:
+                        ei.req = req
+                        ei.memo = memo
+                        ei.save()
+                except:
+                    pass
+
             inven = Inventory.objects.get(id=iid)
             inven.req = req
             inven.memo = memo
