@@ -8,7 +8,7 @@ from passenger.forms import StudentInfoForm, ProfileInfoForm, AcademyForm
 class ProfileInline(admin.StackedInline):
     model = Profile
     can_delete = False
-    fields = ('academySelection','bid','aid','cid')
+    fields = ('areaid','academySelection','bid','aid','cid')
     verbose_name_plural = 'Profile'
     fk_name = 'user'
     form = ProfileInfoForm
