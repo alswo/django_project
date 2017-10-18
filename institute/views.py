@@ -485,21 +485,27 @@ def getHistory(request):
                         for aca in schedule.academies.all():
 		            timeHistory.academies.add(aca.name)
 
-                        if (index == 0):
-                            timeHistory.first_time = convertMins(schedule.time)
-			    #timeHistory.msg += "first time : " + str(schedule.time) + " "
-			# 등원인 경우 최초 탑승학생 스케쥴 이전 row 가 시작시간
-			if (schedule.lflag == 1 and studentNum == 0):
-			    timeHistory.first_time = convertMins(schedule.time)
-			    #timeHistory.msg += "first time : " + str(schedule.time) + " "
-			# 하원인 경우 마지막 하차학생 스케쥴 row 가 끝나는 시간
-			if (schedule.lflag == 0 and currentStudentNum > 0):
+			if (single_date >= '2017-10-01'):
+                            if (index == 0):
+                                timeHistory.first_time = convertMins(schedule.time)
+			    # 등원인 경우 최초 탑승학생 스케쥴 이전 row 가 시작시간
+			    if (schedule.lflag == 1 and studentNum == 0):
+			        timeHistory.first_time = convertMins(schedule.time)
+			    # 하원인 경우 마지막 하차학생 스케쥴 row 가 끝나는 시간
+			    if (schedule.lflag == 0 and currentStudentNum > 0):
+			        timeHistory.last_time = convertMins(schedule.time)
+			    elif (schedule.lflag == 3 and lflag_on_count > lflag_off_count):
+                       	        timeHistory.lflag = True
+                                timeHistory.last_time = convertMins(schedule.time)
+			# 2017-10-01 이전 기준을 위한 legacy 
+			else:
+			    if (index == 0):
+			        timeHistory.first_time = convertMins(schedule.time)
 			    timeHistory.last_time = convertMins(schedule.time)
-			    #timeHistory.msg += "last time : " + str(schedule.time) + " "
-			elif (schedule.lflag == 3 and lflag_on_count > lflag_off_count):
-                       	    timeHistory.lflag = True
-                            timeHistory.last_time = convertMins(schedule.time)
-		    	    #timeHistory.msg += "last time : " + str(schedule.time) + " "
+
+			# 2017-10-01 이전 기준을 위한 legacy 
+			if (lflag_on_count > lflag_off_count):
+			    timeHistory.lflag = True
 
                         index += 1
 
