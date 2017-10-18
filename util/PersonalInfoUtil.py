@@ -6,6 +6,8 @@ import re
 
 import sys
 
+TAYO_PINNUMBER_ALLOWED_CHARS = 'abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ123456789'
+
 def getHangul(str):
 	#hangul = re.compile('[\u3131-\u3163\uac00-\ud7a3]+')
 	#hangul = re.compile('([\xE0-\xFF][\x80-\xFF][\x80-\xFF])+')
@@ -114,7 +116,7 @@ def saveNewPersonInfo(student):
 	if (pin_number == None):
 		for i in range (0, 5):
 			try:
-				pin_number = get_random_string(length=7)
+				pin_number = get_random_string(length=7, allowed_chars=TAYO_PINNUMBER_ALLOWED_CHARS)
 				personinfos = PersonalInfo.objects.filter(pin_number = pin_number)
 				if (len(personinfos) == 0):
 					raise PersonalInfo.DoesNotExist
@@ -151,7 +153,7 @@ def saveNewPersonInfo2(student):
 	if (pin_number == None):
 		for i in range (0, 5):
 			try:
-				pin_number = get_random_string(length=7)
+				pin_number = get_random_string(length=7, allowed_chars=TAYO_PINNUMBER_ALLOWED_CHARS)
 				personinfo = PersonalInfo.objects.filter(pin_number = pin_number)
 				if (len(personinfo) == 0):
 					raise PersonalInfo.DoesNotExist

@@ -162,14 +162,14 @@ class Daily(models.Model):
 
 class ShuttleSchedule(models.Model):
     #aca = Academy.objects.all()
-    grp = Group.objects.all()
+    #grp = Group.objects.all()
 
     GID = ()
     #ACA = ()
     #ACA_2 = ()
 
-    for g in grp:
-        GID = GID + ((g.gid, g.gname),)
+    #for g in grp:
+        #GID = GID + ((g.gid, g.gname),)
 
     #for a in aca:
         #ACA = ACA + ((a.id, a.name),)

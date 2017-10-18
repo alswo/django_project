@@ -50,17 +50,17 @@ def sendMessage(request):
             sname = s.sname
             aname = s.aname
 
-            if s.parents_phonenumber != '':
+            if s.parents_phonenumber != None and s.parents_phonenumber != '':
                 to_parents = s.parents_phonenumber[1:]
                 temp_p["to"] = ("82"+ to_parents).encode('utf8')
                 list_to.append(temp_p)
             
-            if s.self_phonenumber != '':
+            if s.self_phonenumber != None and s.self_phonenumber != '':
                 to_self = s.self_phonenumber[1:]
                 temp_s["to"] = ("82"+to_self).encode('utf8')
                 list_to.append(temp_s)
 
-            if s.grandparents_phonenumber != '':
+            if s.grandparents_phonenumber != None and s.grandparents_phonenumber != '':
                 to_grandparents = s.grandparents_phonenumber[1:]
                 temp_g["to"] = ("82"+ to_grandparents).encode('utf8')
                 list_to.append(temp_g)
