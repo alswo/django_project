@@ -300,6 +300,7 @@ class TimeHistory:
 		self.last_time = 0
                 self.lflag = False
 		self.studentnum = 0
+		self.msg = ''
 
 class DailyHistory:
 	def __init__(self):
@@ -460,18 +461,21 @@ def getHistory(request):
                     lflag_off_count = 0
                     for schedule in scheduletable:
                         #timeHistory.studentnum += schedule.members.count()
+			currentStudentNum = 0
                         for student in schedule.members.all():
                             if student.aid != academy:
                                 sharingFlag = True
                             else:
-                                studentNum += 1
+				currentStudentNum += 1
                                 timeHistory.studentnum += 1
 				for offmember in schedule.offmembers.all():
 					if (offmember == student):
                                                 #return HttpResponse("offmember = " + str(offmember.id))
-						studentNum -= 1
+						currentStudentNum -= 1
                                 if ((student.birth_year == None) or ((datetime.datetime.now().year - int(student.birth_year) + 1) <= 13)):
                                     isPassenger = True
+
+			studentNum += currentStudentNum
 
                         if (schedule.lflag == 1):
                                 lflag_on_count += 1
@@ -483,7 +487,20 @@ def getHistory(request):
 
                         if (index == 0):
                             timeHistory.first_time = convertMins(schedule.time)
-                        timeHistory.last_time = convertMins(schedule.time)
+			    #timeHistory.msg += "first time : " + str(schedule.time) + " "
+			# 등원인 경우 최초 탑승학생 스케쥴 이전 row 가 시작시간
+			if (schedule.lflag == 1 and studentNum == 0):
+			    timeHistory.first_time = convertMins(schedule.time)
+			    #timeHistory.msg += "first time : " + str(schedule.time) + " "
+			# 하원인 경우 마지막 하차학생 스케쥴 row 가 끝나는 시간
+			if (schedule.lflag == 0 and currentStudentNum > 0):
+			    timeHistory.last_time = convertMins(schedule.time)
+			    #timeHistory.msg += "last time : " + str(schedule.time) + " "
+			elif (schedule.lflag == 3 and lflag_on_count > lflag_off_count):
+                       	    timeHistory.lflag = True
+                            timeHistory.last_time = convertMins(schedule.time)
+		    	    #timeHistory.msg += "last time : " + str(schedule.time) + " "
+
                         index += 1
 
                     if (lflag_on_count > lflag_off_count):

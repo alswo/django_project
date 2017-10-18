@@ -421,8 +421,6 @@ function makeHistorySettingList(default_value) {
 				var jsonResponse = JSON.parse(xmlhttp.responseText);
 				$('#billingHistorySetting').find('option').remove();
 				for (var i=0; i<jsonResponse['list'].length; i++) {
-					console.log(jsonResponse['list'][i]['name']);
-					console.log(jsonResponse['list'][i]['value']);
 					$('#billingHistorySetting').append("<option value='" + jsonResponse['list'][i]['value'] + "'>" + jsonResponse['list'][i]['name'] + "</option>");
 				}
 
