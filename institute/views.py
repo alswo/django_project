@@ -32,6 +32,13 @@ class BeautifyStudent :
 		self.age = None
 		self.billing_date = None
 
+class Uncollected :
+	def __init__(self):
+		self.month = ''
+		self.billing_amount = ''
+		self.additional_charge = ''
+		self.total_charge = ''
+
 
 def compareStudents(student1, student2):
 	if (student1.bid == student2.bid and student1.sname == student2.sname):
@@ -353,6 +360,14 @@ def setNonCharge(academy, studentNum, warning_number_set, warning_set):
 		for i_warning in range(maxvehicle, len(sorted_warning)):
 			sorted_warning[i_warning].warning = True
 
+# 개월차 계산
+# ex. 2017-09, 2017-03 이면 6 return
+def diffMonth(a, b):
+	(a_year, a_month) = a.split('-')
+	(b_year, b_month) = b.split('-')
+
+	return (int(a_year) * 12 + int(a_month)) - (int(b_year) * 12 + int(b_month))
+
 @csrf_exempt
 @login_required
 def getHistory(request):
@@ -391,10 +406,25 @@ def getHistory(request):
         monthpick = request.POST.get('monthpick')
 
     billingHistorySettings = None
+    total_uncollected = 0
 
     if (aid != None and carid != None and monthpick != None):
         academy = Academy.objects.get(id = aid)
         billingHistorySettings = BillingHistorySetting.objects.filter(academy = academy, carid = carid, monthpick = monthpick)
+	if (carid == 'all'):
+		uncollectedHistories = BillingHistory.objects.filter(academy = academy, billing_il__isnull = True, billing_bank__isnull = True, month__lt = monthpick.replace('-', '')).order_by('month')
+		#uncollectedHistories = BillingHistory.objects.filter(academy = academy, billing_il__isnull = True, billing_bank__isnull = True).order_by('month')
+		uncollectedes = []
+		for u in uncollectedHistories:
+			uncollected = Uncollected()
+			uncollected.month = u.month[:4] + '-' + u.month[4:] 
+			uncollected.billing_amount = "{:,}".format(u.billing_amount)
+			# 2% 연체이자, 10원단위 절사
+			additional_charge = int(u.billing_amount * 0.02 * diffMonth(monthpick, uncollected.month) / 100) * 100
+			uncollected.additional_charge = "{:,}".format(additional_charge)
+			uncollected.total_charge = "{:,}".format(u.billing_amount + additional_charge)
+			total_uncollected += u.billing_amount + additional_charge
+			uncollectedes.append(uncollected)
 
     if (carid == None):
         carid = "all"
@@ -613,7 +643,7 @@ def getHistory(request):
 
 
 
-    return render(request, 'getHistory.html', {"history": history, "academy" : academy, 'total_count': total_count, 'startdate': startdate, 'enddate': enddate, 'user':request.user, 'cars':sorted(cars), 'carid':carid, 'overtime':overtime, 'monthpick_range': monthpick_range, 'lastmonth': lastmonth, "billingHistorySettings": billingHistorySettings})
+    return render(request, 'getHistory.html', {"history": history, "academy" : academy, 'total_count': total_count, 'startdate': startdate, 'enddate': enddate, 'user':request.user, 'cars':sorted(cars), 'carid':carid, 'overtime':overtime, 'monthpick_range': monthpick_range, 'lastmonth': lastmonth, "billingHistorySettings": billingHistorySettings, 'uncollectedes': uncollectedes, 'total_uncollected': "{:,}".format(total_uncollected)})
 
 
 @login_required

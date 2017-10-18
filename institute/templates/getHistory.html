@@ -82,6 +82,49 @@
 		<div class="col-md-1">
 		</div>
 	</div>
+	{% if uncollectedes %}
+	<div class="row" align="center">
+		<div class="col-md-1">
+		</div>
+		<div class="col-md-10">
+			<div class="panel panel-info">
+				<div class="panel-heading">
+					연체 내역
+				</div>
+				<div class="panel-body">
+					<div class="col-md-2">
+					</div>
+					<div class="col-md-8">
+                                		<table class="table table-bordered table-reponsive uncollected">
+                                    			<thead>
+                                        			<tr>
+                                            				<th>월</th>
+                                            				<th>금액</th>
+									<th>가산금</th>
+									<th>총액</th>
+                                        			</tr>
+                                    			</thead>
+                                    			<tbody>
+								{% for uncollected in uncollectedes %}
+								<tr class="uncollected_monthly">
+									<td class='uncollected.month'>{{uncollected.month}}</td>
+									<td class='uncollected.billing_amount'>{{uncollected.billing_amount}}</td>
+									<td class='uncollected.additional_charge'>{{uncollected.additional_charge}}</td>
+									<td class='uncollected.total_charge'>{{uncollected.total_charge}}</td>
+								</tr>
+								{% endfor %}
+							</tbody>
+						</table>
+					</div>
+					<div class="col-md-2">
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-1">
+		</div>
+	</div>
+	{% endif %}
 	<div class="row" align="center">
 		<div class="col-md-1">
 		</div>
@@ -132,6 +175,9 @@
 					<span id="calculate_amount" style="display: none"></span>
 					<div class="col-md-2" align="right">
 				= 이용요금 <br>: <span id="pay_amount"></span> 원<br>
+				+ 미수금 <br>: <span id="total_uncollected">{{total_uncollected}}</span> 원<br>
+				<br>
+				= 청구요금 <br>: <span id="total_charge"></span> 원<br>
 					</div>
 					<div class="col-md-2" align="right">
 						<button type="button" class="btn-md btn-info" id="add-memo">Memo <span class="glyphicon glyphicon-pencil"></span></button><br><br>
@@ -388,6 +434,8 @@ function calculate() {
 	console.log("calculate_amount = " +  $('#calculate_amount')[0].innerText);
 	$('#pay_amount')[0].innerText = numberWithCommas(calculate_amount * (100 - discount_rate_value)/ 100);
 
+	$('#total_charge')[0].innerText = numberWithCommas(numberWithoutCommas($('#pay_amount')[0].innerText) + numberWithoutCommas($('#total_uncollected')[0].innerText))
+
 	return null;
 }
 
@@ -637,6 +685,8 @@ $("#pdfdown").click(function() {
 	var noncharge_count = $('#noncharge_count')[0].innerText;
 	var uniq_count = $('#uniq_count')[0].innerText;
 	var total_count = $('#total_count')[0].innerText;
+	var total_uncollected = $('#total_uncollected')[0].innerText;
+	var total_charge = $('#total_charge')[0].innerText;
 
 	var str = "";
 	var dd = {};
@@ -645,6 +695,7 @@ $("#pdfdown").click(function() {
 
 	dd['content'].push({text: "<{{academy.aname}} {{startdate}} ~ {{enddate}} 이용내역>", fontSize: 15, bold: true, alignment: 'center'});
 	dd['content'].push({text: "\n\n총 " + total_count + "회 운행", fontSize: 12, bold: true});
+
 
         if ($('#memo') && $('#memo')[0]) {
 		var memo = $('#memo')[0].value;
@@ -696,7 +747,34 @@ $("#pdfdown").click(function() {
 	if (discount_rate_value != '0%') {
 		dd['content'].push({text: '{{academy.aname}} 특별할인 ' + discount_rate_value + '\n', fontSize: 12});
 	}
-	dd['content'].push({text: '\n결제금액: ' + pay_amount + '원 \n\n', fontSize: 13, bold: true});
+	if (total_uncollected > 0) {
+	// 미납
+		var uncollectedtable = {};
+		uncollectedtable['body'] = [];
+		uncollectedtable['headerRows'] = 1;
+		uncollectedtable['widths'] = [50, 100, 100, 100];
+		uncollectedtable['body'].push(['월', '금액', '가산금', '총액']);
+
+		var uncollected_monthly = document.getElementsByClassName('uncollected_monthly');
+		dd['content'].push({text: '\n미납내역', fontSize: 12, bold: true});
+		for (var i=0; i<uncollected_monthly.length; i++) {
+			var rows = []
+			rows[0] = {'text': $.trim(uncollected_monthly[i].getElementsByClassName("uncollected.month")[0].innerHTML), 'fillColor': '#eeeeee', 'alignment': 'right'};
+			rows[1] = {'text': $.trim(uncollected_monthly[i].getElementsByClassName("uncollected.billing_amount")[0].innerHTML), 'fillColor': '#eeeeee', 'alignment': 'right'};
+			rows[2] = {'text': $.trim(uncollected_monthly[i].getElementsByClassName("uncollected.additional_charge")[0].innerHTML), 'fillColor': '#eeeeee', 'alignment': 'right'};
+			rows[3] = {'text': $.trim(uncollected_monthly[i].getElementsByClassName("uncollected.total_charge")[0].innerHTML), 'fillColor': '#eeeeee', 'alignment': 'right'};
+			uncollectedtable['body'].push(rows);
+		}
+		dd['content'].push({table: uncollectedtable});
+
+		dd['content'].push({text: '\n이용 금액: ' + pay_amount + '원', fontSize: total_uncollected ? 12 : 13, bold: true});
+		dd['content'].push({text: '+ 연체 금액: ' + total_uncollected + '원', fontSize: 12, bold: true});
+		dd['content'].push({text: '= 결제 금액: ' + total_charge + '원', fontSize: 13, bold: true});
+	}
+	else {
+		dd['content'].push({text: '\n이용 금액: ' + pay_amount + '원', fontSize: total_uncollected ? 12 : 13, bold: true});
+	}
+	dd['content'].push({text: '\n\n', fontSize: 13});
 
 
 	//dd['content'].push({text: '입금계좌: 우리은행 1005-603-067444 주식회사 에티켓\n\n\n', fontSize: 13, bold: true});
