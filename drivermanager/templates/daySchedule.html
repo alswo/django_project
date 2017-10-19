@@ -88,8 +88,12 @@ function generate(obj) {
               startTime_t = parseInt(stime.slice(2,4)) >= 20 ? 0.5 : 0;
           }
 
-          if (0 <= parseInt(etime.slice(2,4)) && parseInt(etime.slice(2,4)) <= 5) d = 60 - parseInt(stime.slice(2,4));
+          if (0 <= parseInt(etime.slice(2,4)) && parseInt(etime.slice(2,4)) <= 5) d = 30 - parseInt(stime.slice(2,4));
           else d = forDEtime - forDStime;
+
+          console.log(obj[i]['invens'][j]['aname'])
+          console.log(startTime_h, startTime_t)
+          console.log(d)
 
           var startTime = startTime_h + startTime_t 
           
