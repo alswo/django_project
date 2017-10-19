@@ -45,35 +45,47 @@ def today_schedule_notification():
             count_slist.extend(schTable.slist)
 
     dict_slist = dict(Counter(count_slist))
+    count_tflag =[]
+    for schTable in scheduleTables:
+	    student = StudentInfo.objects.all()
+	    for stu in student:
+                if schTable.slist == [stu.id] and schTable.tflag == [1]:
+		            count_tflag.extend(schTable.slist)
+
+    dict_tflag = dict(Counter(count_tflag))
 
     push_content = []
 
-    msg_count = 0
-    error_count = 0
     for key, value in dict_slist.iteritems():
         for schTable in scheduleTables:
             if len(schTable.slist) >= 1:
                 while(key in schTable.slist):
                     try:
                         sInfo = StudentInfo.objects.get(id=key)
+			filter_slist = schTable.slist
+			stu_index = filter_slist.index(sInfo.id)
+		        stu_tflag = schTable.tflag
+
                     except StudentInfo.DoesNotExist:
                         sInfo = None
                         break
                     else:
 			try:
-
 				pin = PersonalInfo.objects.get(id = sInfo.personinfo_id)
-	                        module_push_content = {}
-	                        module_push_content['sname'] = sInfo.sname
-	                        module_push_content['time'] = schTable.time
-	                        module_push_content['addr'] = schTable.addr
-		                module_push_content['lflag'] = schTable.lflag
-	                        module_push_content['aname'] = sInfo.aname
-	                        module_push_content['pin'] = pin.pin_number
-	                        module_push_content['sid'] = key
-	                        module_push_content['count'] = value
-	                        push_content.append(module_push_content)
-	                        break
+				module_push_content = {}
+				module_push_content['sname'] = sInfo.sname
+	            		module_push_content['time'] = schTable.time
+	            		module_push_content['addr'] = schTable.addr
+		    		module_push_content['lflag'] = schTable.lflag
+	            		module_push_content['aname'] = sInfo.aname
+	            		module_push_content['pin'] = pin.pin_number
+	            		module_push_content['sid'] = key
+	            		module_push_content['count'] = value
+				module_push_content['sid'] = sInfo.id
+	            		push_content.append(module_push_content)
+	            		break
+
+
 			except PersonalInfo.DoesNotExist:
 			        break
 
@@ -83,6 +95,11 @@ def today_schedule_notification():
         count = module_push_content['count']-1
 	lflag = module_push_content['lflag']
 	sname = module_push_content['sname']
+	sid = module_push_content['sid']
+	if dict_tflag.has_key(sid):
+		tflag_count = dict_tflag[sid]
+	else:
+		tflag_count = 0
 
 	if lflag == 0:
             flag = "하원을 위한"
@@ -93,16 +110,25 @@ def today_schedule_notification():
 	    flag = "에 대한"
         if count == 0:
             msg = "오늘 " + sname + " 학생의 " + module_push_content['aname'] + " " + flag + " " + module_push_content['time'] + " [" + module_push_content['addr'] + "] 승차 스케줄이 있습니다"
-            send_msg(module_push_content['sid'], module_push_content['pin'], msg)
-	    test()
+	    if tflag_count > 0:
+		msg +=  "\n (안타요!)"+"오늘의 스케줄을 취소 하셨습니다."
+		#send_msg(module_push_content['sid'], module_push_content['pin'], msg)
+		print msg
+	    else:
+		#send_msg(module_push_content['sid'], module_push_content['pin'], msg)
+		print msg
         else:
             msg = "오늘 " + sname + " 학생의 " + module_push_content['aname'] + " 등원을 위한 " + module_push_content['time'] + " [" + module_push_content['addr'] + "]승차 외" + str(count) + "건의 스케줄이 있습니다."
-            send_msg(module_push_content['sid'], module_push_content['pin'], msg)
-	    test()
+            #send_msg(module_push_content['sid'], module_push_content['pin'], msg)
+	    if tflag_count > 0:
+		count += 1
+		msg += "\n(안타요!) 총"+str(count) + "건의 스케줄 중 " + str(tflag_count) + "건의 스케줄을 취소 하셨습니다."
+		#send_msg(module_push_content['sid'], module_push_content['pin'], msg)
+		print msg
+	    else:
+		#send_msg(module_push_content['sid'], module_push_content['pin'], msg)
+		print msg
 
-
-def test():
-	print "test"
 
 def send_msg(sid, pin, msg):
     url = 'https://fcm.googleapis.com/fcm/send'
