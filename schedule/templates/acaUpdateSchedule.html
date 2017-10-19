@@ -316,10 +316,11 @@
                   </td>
                   <td data-name="del" class="text-center tdstyle3"><button name="del" class="btn btn-sm btn-danger glyphicon glyphicon-remove row-remove"></button></td>
                 </tr>
-                {% endfor %} {% elif c.editedscheduletables %}
+                {% endfor %} 
+                {% elif c.editedscheduletables %}
                 <select class="moveCarList">
                   {% for car in carlist %}
-                    {% if car.carname == carnum %}
+                    {% if car.carname == c.carnum %}
                       <option value="{{c.id}}/{{car.carname}}" selected>{{car.carname}}호차</option>
                     {% else %}
                       <option value="{{c.id}}/{{car.carname}}">{{car.carname}}호차</option>
