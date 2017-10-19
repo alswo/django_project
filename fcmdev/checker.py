@@ -23,13 +23,13 @@ def getResponse(debug, code, msg):
 
 
 @app.task
-def tt():
+def today_schedule_notification():
     time = timeToDate()
     date = time.timeToD()
     si = []
     scheduleTables = []
     schedules = []
-	slist_list = []
+    slist_list = []
     tflag_list = []
     dict_s ={}
     inventorys = Inventory.objects.filter(day = date).prefetch_related('scheduletables').reverse()
@@ -37,20 +37,21 @@ def tt():
         scheduletables = ScheduleTable.objects.filter(iid = inventory.id)
         for scheduletable in scheduletables:
             schedules.extend(scheduletable.slist)
-			slist_list.extend(scheduletable.slist)
-		    tflag_list.extend(scheduletable.tflag)
+	    slist_list.extend(scheduletable.slist)
+            tflag_list.extend(scheduletable.tflag)
 
-	for s in slist_list:
+    for s in slist_list:
         try:
-            si =  slist_list.index(s)
+            t =  slist_list.index(s)
         except:
-            si = None
+            t = None
         else:
             if dict_s.has_key(s):
-                dict_s[s] += int(tflag_list[si])
+                dict_s[s] += int(tflag_list[t])
+                slist_list[t] = []
             else:
-                 dict_s[s] = int(tflag_list[si])
-    print dict_s
+                dict_s[s] = int(tflag_list[t])
+		slist_list[t] = []
 
     for inventory in inventorys:
         scheduleTables.extend(inventory.scheduletables.all())
@@ -87,6 +88,7 @@ def tt():
 	                        module_push_content['pin'] = pin.pin_number
 	                        module_push_content['sid'] = key
 	                        module_push_content['count'] = value
+				module_push_content['sid'] = sInfo.id
 	                        push_content.append(module_push_content)
 	                        break
 			except PersonalInfo.DoesNotExist:
@@ -98,6 +100,11 @@ def tt():
         count = module_push_content['count']-1
 	lflag = module_push_content['lflag']
 	sname = module_push_content['sname']
+	sid = module_push_content['sid']
+	if dict_s.has_key(sid):
+		tflag_count = dict_s[sid]
+	else:
+		tflag_count = 0
 
 	if lflag == 0:
             flag = "하원을 위한"
@@ -108,15 +115,24 @@ def tt():
 	    flag = "에 대한"
         if count == 0:
             msg = "오늘 " + sname + " 학생의 " + module_push_content['aname'] + " " + flag + " " + module_push_content['time'] + " [" + module_push_content['addr'] + "] 승차 스케줄이 있습니다"
-            send_msg(module_push_content['sid'], module_push_content['pin'], msg)
-
+	    if tflag_count > 0:
+		msg +=  "\n (안타요!)"+"오늘의 스케줄을 취소 하셨습니다."
+		#send_msg(module_push_content['sid'], module_push_content['pin'], msg)
+		print msg
+	    else:
+		#send_msg(module_push_content['sid'], module_push_content['pin'], msg)
+		print msg
         else:
             msg = "오늘 " + sname + " 학생의 " + module_push_content['aname'] + " 등원을 위한 " + module_push_content['time'] + " [" + module_push_content['addr'] + "]승차 외" + str(count) + "건의 스케줄이 있습니다."
-            send_msg(module_push_content['sid'], module_push_content['pin'], msg)
+	    if tflag_count > 0:
+		count += 1
+		msg += "\n(안타요!) 총"+str(count) + "건의 스케줄 중 " + str(tflag_count) + "건의 스케줄을 취소 하셨습니다."
+		#send_msg(module_push_content['sid'], module_push_content['pin'], msg)
+		print msg
+	    else:
+		#send_msg(module_push_content['sid'], module_push_content['pin'], msg)
+		print msg
 
-
-def test():
-	print "test"
 
 def send_msg(sid, pin, msg):
     url = 'https://fcm.googleapis.com/fcm/send'
