@@ -73,7 +73,7 @@
       for (var i = 0; i < tasks.length - 1; i++) {
         var k = 0;
         var j = i + 1;
-        while (j < tasks.length && tasks[i].startTime < tasks[j].startTime
+        while (j < tasks.length && tasks[i].startTime <= tasks[j].startTime
           && tasks[i].startTime + tasks[i].duration > tasks[j].startTime) {
           k++;
           j++;

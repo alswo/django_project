@@ -1,10 +1,10 @@
 {# auth_button_widget.html #}
 <div class="col-md-2">
-<label>AREA:</label>
+<label>BRANCH:</label>
 <select class="form-control" form="searchform" id="branchSelected">
         <option vlaue="default" selected>지점선택</option>
-    {% for a in area %}
-        <option value="{{a.id}}">{{a.name}}</option>
+    {% for b in bid %}
+        <option value="{{b.id}}">{{b.bname}}</option>
     {% endfor %}
 </select>
 </div>
