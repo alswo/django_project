@@ -77,7 +77,6 @@ def today_schedule_notification():
                         break
                     else:
 			try:
-
 				pin = PersonalInfo.objects.get(id = sInfo.personinfo_id)
 	                        module_push_content = {}
 	                        module_push_content['sname'] = sInfo.sname
@@ -93,9 +92,6 @@ def today_schedule_notification():
 	                        break
 			except PersonalInfo.DoesNotExist:
 			        break
-
-
-
 
         count = module_push_content['count']-1
 	lflag = module_push_content['lflag']
@@ -116,21 +112,16 @@ def today_schedule_notification():
         if count == 0:
             msg = "오늘 " + sname + " 학생의 " + module_push_content['aname'] + " " + flag + " " + module_push_content['time'] + " [" + module_push_content['addr'] + "] 승차 스케줄이 있습니다"
 	    if tflag_count > 0:
-		msg +=  "\n (안타요!)"+"오늘의 스케줄을 취소 하셨습니다."
-		#send_msg(module_push_content['sid'], module_push_content['pin'], msg)
-		print msg
+		cancel_msg=  "[승차취소]오늘 " + sname + " 학생의 " + module_push_content['aname'] + " " + flag + " " + module_push_content['time'] + " [" + module_push_content['addr'] + "] 승차 스케줄을 취소하셨습니다."
+		print cancel msg
 	    else:
-		#send_msg(module_push_content['sid'], module_push_content['pin'], msg)
 		print msg
         else:
-            msg = "오늘 " + sname + " 학생의 " + module_push_content['aname'] + " 등원을 위한 " + module_push_content['time'] + " [" + module_push_content['addr'] + "]승차 외" + str(count) + "건의 스케줄이 있습니다."
+            msg = "오늘 " + sname + " 학생의 " + module_push_content['aname'] + " " + flag + " " + module_push_content['time'] + " [" + module_push_content['addr'] + "]승차 외" + str(count) + "건의 스케줄이 있습니다."
 	    if tflag_count > 0:
-		count += 1
-		msg += "\n(안타요!) 총"+str(count) + "건의 스케줄 중 " + str(tflag_count) + "건의 스케줄을 취소 하셨습니다."
-		#send_msg(module_push_content['sid'], module_push_content['pin'], msg)
-		print msg
+		cancel_msg = "오늘 " + sname + " 학생의 " + module_push_content['aname'] + " " + flag + " " + module_push_content['time'] + " [" + module_push_content['addr'] + "]승차 외" + str(tflag_count) + "건의 취소된 스케줄이 있습니다."
+		print cancel_msg
 	    else:
-		#send_msg(module_push_content['sid'], module_push_content['pin'], msg)
 		print msg
 
 
