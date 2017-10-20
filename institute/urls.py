@@ -18,5 +18,8 @@ urlpatterns = [
     url(r'^updateAcademy$', views.updateAcademy),
     url(r'^listAcademies$', views.listAcademies),
     url(r'^saveBill$', views.saveBill),
-    url(r'^listAcademiesBilling$', views.listAcademiesBilling)
+    url(r'^listAcademiesBilling$', views.listAcademiesBilling),
+    url(r'^saveBillingHistorySetting$', views.saveBillingHistorySetting),
+    url(r'^getBillingHistorySetting$', views.getBillingHistorySetting),
+    url(r'^getBillingHistorySettingList$', views.getBillingHistorySettingList),
 ]
