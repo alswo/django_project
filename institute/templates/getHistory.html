@@ -135,6 +135,7 @@
 				</div>
 				
                         	<div class="panel-body">
+					<div class="row">
 					<div class="col-md-5" align="center">
 				총운행횟수 : <span id="total_count"></span><br>
 						<div class="etc">
@@ -173,19 +174,39 @@
 					<span id="per_amount_value" style="display: none"></span>
 					<span id="passenger_amount_value" style="display: none"></span>
 					<span id="calculate_amount" style="display: none"></span>
-					<div class="col-md-2" align="right">
-				= 이용요금 <br>: <span id="pay_amount"></span> 원<br>
-				+ 미수금 <br>: <span id="total_uncollected">{{total_uncollected}}</span> 원<br>
+					<div class="col-md-4" align="right">
 				<br>
+				= 이용요금 <br>: <span id="pay_amount"></span> 원<br>
+				+ 미납요금 <br>: <span id="total_uncollected">{{total_uncollected}}</span> 원<br>
+				<br>
+				<div class="controls">
+				<form class="input-append" role="form" autocomplete="off">
+					<div class="entry row">
+						<div class="col-xs-8">
+						<input class="form-control extra-fields" name="extra-fields" type="text" size='10' placeholder="항목" />
+						</div>
+						<div class="input-group col-xs-4">
+						<input class="form-control extra-charge" name="extra-charge" type="text" size='3' placeholder="금액" />
+						<span class="input-group-btn">
+							<button class="btn btn-success btn-add" type="button" style="height: 34px;">
+								<span class="glyphicon glyphicon-plus"></span>
+							</button>
+						</span>
+						</div>
+					</div>
+				</form>
+				</div>
 				= 청구요금 <br>: <span id="total_charge"></span> 원<br>
 					</div>
-					<div class="col-md-2" align="right">
-						<button type="button" class="btn-md btn-info" id="add-memo">Memo <span class="glyphicon glyphicon-pencil"></span></button><br><br>
-						<button type="button" id='pdfdown' class="btn-md btn-info">PDF <span class="glyphicon glyphicon-download-alt"></span></button><br><br>
-						<button type="button" class="btn-md btn-info" id="temp-save">임시저장 <span class="glyphicon glyphicon-check"></span></button>
-						<button type="button" class="btn-md btn-info" id="fix">확정 <span class="glyphicon glyphicon-check"></span></button>
 					</div>
-
+					<div class="row">
+						<div class="col-md-12">
+							<button type="button" class="btn-md btn-info" id="add-memo">Memo <span class="glyphicon glyphicon-pencil"></span></button>
+							<button type="button" id='pdfdown' class="btn-md btn-info">PDF <span class="glyphicon glyphicon-download-alt"></span></button>
+							<button type="button" class="btn-md btn-info" id="temp-save">임시저장 <span class="glyphicon glyphicon-check"></span></button>
+							<button type="button" class="btn-md btn-info" id="fix">확정 <span class="glyphicon glyphicon-check"></span></button>
+						</div>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -434,7 +455,20 @@ function calculate() {
 	console.log("calculate_amount = " +  $('#calculate_amount')[0].innerText);
 	$('#pay_amount')[0].innerText = numberWithCommas(calculate_amount * (100 - discount_rate_value)/ 100);
 
-	$('#total_charge')[0].innerText = numberWithCommas(numberWithoutCommas($('#pay_amount')[0].innerText) + numberWithoutCommas($('#total_uncollected')[0].innerText))
+
+	var extra_charge = 0;
+	console.log("length = " + $('.extra_charge').length);
+	for (var i=0; i<$('.extra-charge').length; i++) {
+		if ($('.extra-charge')[i].value == '' || isNaN($('.extra-charge')[i].value)) {
+			console.log(i + " is not integer");
+		}
+		else {
+			extra_charge += parseInt($('.extra-charge')[i].value);
+			console.log(i + " is integer : " + $('.extra-charge')[i].value);
+		}
+	}
+	console.log("extra_charge = " + extra_charge);
+	$('#total_charge')[0].innerText = numberWithCommas(numberWithoutCommas($('#pay_amount')[0].innerText) + numberWithoutCommas($('#total_uncollected')[0].innerText) + extra_charge);
 
 	return null;
 }
@@ -652,11 +686,38 @@ $("#billingHistorySetting").on('change', function() {
 
 
 $( function() {
+	$(document).on('click', '.btn-add', function(e) {
+		e.preventDefault();
+		
+		var controlForm = $('.controls form:first'),
+		    currentEntry = $(this).parents('.entry:first'),
+		    newEntry = $(currentEntry.clone()).appendTo(controlForm);
+
+		newEntry.change(function() {
+			calculate();
+		});
+
+		newEntry.find('input').val('');
+		controlForm.find('.entry:not(:last) .btn-add')
+			.removeClass('btn-add').addClass('btn-remove')
+			.removeClass('btn-success').addClass('btn-danger')
+			.html('<span class="glyphicon glyphicon-minus"></span>');
+	}).on('click', '.btn-remove', function(e) {
+		$(this).parents('.entry:first').remove();
+
+		e.preventDefault();
+		calculate();
+		return false;
+	});
 });
 
 $(document).ready(function() {
 	$('.timehistoryoption').multiselect({
 		nonSelectedText: '일반'
+	});
+
+	$('.extra-charge').change(function() {
+		calculate();
 	});
 });
 

@@ -407,6 +407,7 @@ def getHistory(request):
 
     billingHistorySettings = None
     total_uncollected = 0
+    uncollectedes = []
 
     if (aid != None and carid != None and monthpick != None):
         academy = Academy.objects.get(id = aid)
@@ -414,7 +415,6 @@ def getHistory(request):
 	if (carid == 'all'):
 		uncollectedHistories = BillingHistory.objects.filter(academy = academy, billing_il__isnull = True, billing_bank__isnull = True, month__lt = monthpick.replace('-', '')).order_by('month')
 		#uncollectedHistories = BillingHistory.objects.filter(academy = academy, billing_il__isnull = True, billing_bank__isnull = True).order_by('month')
-		uncollectedes = []
 		for u in uncollectedHistories:
 			uncollected = Uncollected()
 			uncollected.month = u.month[:4] + '-' + u.month[4:] 
