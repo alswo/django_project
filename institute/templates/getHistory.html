@@ -68,10 +68,6 @@
 					</div>
 					<div class="col-md-8">
 					<select class="form-control" id="billingHistorySetting">
-						<option value="">선택</option>
-{% for billingHistorySetting in billingHistorySettings %}
-						<option value="{{billingHistorySetting.created_time}}_{{billingHistorySetting.created_user.id}}">{{ billingHistorySetting.created_time }} By {{billingHistorySetting.created_user.username}} ({{billingHistorySetting.created_user.first_name}} {{billingHistorySetting.created_user.last_name}})</option>
-{% endfor %}
 					</select>
 					</div>
 					<div class="col-md-2">
@@ -457,17 +453,13 @@ function calculate() {
 
 
 	var extra_charge = 0;
-	console.log("length = " + $('.extra_charge').length);
 	for (var i=0; i<$('.extra-charge').length; i++) {
 		if ($('.extra-charge')[i].value == '' || isNaN($('.extra-charge')[i].value)) {
-			console.log(i + " is not integer");
 		}
 		else {
 			extra_charge += parseInt($('.extra-charge')[i].value);
-			console.log(i + " is integer : " + $('.extra-charge')[i].value);
 		}
 	}
-	console.log("extra_charge = " + extra_charge);
 	$('#total_charge')[0].innerText = numberWithCommas(numberWithoutCommas($('#pay_amount')[0].innerText) + numberWithoutCommas($('#total_uncollected')[0].innerText) + extra_charge);
 
 	return null;
@@ -502,6 +494,7 @@ function makeHistorySettingList(default_value) {
 			if(xmlhttp.getResponseHeader('content-type') == 'application/json') {
 				var jsonResponse = JSON.parse(xmlhttp.responseText);
 				$('#billingHistorySetting').find('option').remove();
+				$('#billingHistorySetting').append("<option value=''>선택</option>");
 				for (var i=0; i<jsonResponse['list'].length; i++) {
 					$('#billingHistorySetting').append("<option value='" + jsonResponse['list'][i]['value'] + "'>" + jsonResponse['list'][i]['name'] + "</option>");
 				}
@@ -519,7 +512,6 @@ function makeHistorySettingList(default_value) {
 	xmlhttp.send(null);
 }
 
-
 $( function() {
             $('input[name="daterange"]').daterangepicker(
             {
@@ -529,6 +521,8 @@ $( function() {
                 {% if startdate != None %}startDate: '{{startdate}}',{% endif %}
                 {% if enddate != None %}endDate: '{{enddate}}'{% endif %}
             });
+
+            makeHistorySettingList();
 } );
 
 function findUpClass(el, classname) {
@@ -585,15 +579,21 @@ $("#fix").click(function(event) {
 			yearmonth: yearmonth,
 		},
 		success: function(data) {
-			alert(yearmonth + "의 정산 금액이 저장되었습니다.");
+			//alert(yearmonth + "의 정산 금액이 저장되었습니다.");
 		},
 		error: function(request, status, error) {
 			alert("정산 금액 저장에 실패했습니다.");
 		},
 	});
+
+	saveSetting('fix');
 });
 
 $("#temp-save").click(function(event) {
+	saveSetting('temp-save');
+});
+
+function saveSetting(fix) {
 	var jsonObj = {};
 
 	var aid = $('#aid').val();
@@ -608,9 +608,15 @@ $("#temp-save").click(function(event) {
 
 	jsonObj['discount_rate'] = $('#discount_rate option:selected').text();
 	jsonObj['memo'] = memo;
+	
+	jsonObj['extra'] = {};
+	$('.extra-fields').each(function(i, obj) {
+		jsonObj['extra'][i] = {};
+		jsonObj['extra'][i][$('.extra-fields')[i].value] = $('.extra-charge')[i].value;
+		console.log(i + " : " + $('.extra-fields')[i].value + " : " + $('.extra-charge')[i].value);
+	});
+	
 	jsonObj['data'] = {};
-	
-	
 	$('.dailyhistory').each(function(i, obj) {
 		jsonObj['data'][$(obj).attr('id')] = {};
 		$('#' + $(obj).attr('id')).find('.timehistoryoption').each(function(j, obj2) {
@@ -626,7 +632,14 @@ $("#temp-save").click(function(event) {
 			if(xmlhttp.getResponseHeader('content-type') == 'application/json') {
 				var jsonResponse = JSON.parse(xmlhttp.responseText);
 				if (jsonResponse['msg'] == 'Success') {
-					alert(jsonResponse['name'] + " 으로 저장되었습니다.");
+					console.log(jsonResponse['name']);
+					if (fix == 'fix') {
+						msg = "'" + jsonResponse['name'] + "' 으로 확정되었고 가상 계좌에 저장되었습니다.";
+					}
+					else {
+						msg = "'" + jsonResponse['name'] + "' 으로 임시저장되었습니다.";
+					}
+					alert(msg);
 					makeHistorySettingList(jsonResponse['value']);
 				}
 				else {
@@ -635,10 +648,10 @@ $("#temp-save").click(function(event) {
 			}
 		}
 	};
-	xmlhttp.open("POST", "/institute/saveBillingHistorySetting?aid=" + aid + "&carid=" + carid + "&monthpick=" + monthpick);
+	xmlhttp.open("POST", "/institute/saveBillingHistorySetting?aid=" + aid + "&carid=" + carid + "&monthpick=" + monthpick + "&fix=" + fix);
 	xmlhttp.setRequestHeader("Content-Type", "application/json");
 	xmlhttp.send(JSON.stringify(jsonObj));
-});
+}
 
 $("#billingHistorySetting").on('change', function() {
 	var billingHistorySetting = $('#billingHistorySetting')[0];
@@ -661,6 +674,16 @@ $("#billingHistorySetting").on('change', function() {
 				if (jsonResponse['memo'] != null) {
 					$("#add-memo").click();
 					$('#memo')[0].value = jsonResponse['memo'];
+				}
+	
+				for (var index in jsonResponse['extra']) {
+					for (var fields in jsonResponse['extra'][index]) {
+						$('.extra-fields:last')[0].value = fields;
+						$('.extra-charge:last')[0].value = jsonResponse['extra'][index][fields];
+					}
+					if (index < Object.keys(jsonResponse['extra']).length - 1) {
+						$('.btn-add:last').click();
+					}
 				}
 		
 				for (var date in jsonResponse['data']) {
@@ -804,11 +827,12 @@ $("#pdfdown").click(function() {
 		}
 		str += '(' +  numberWithCommas((parseInt(numberWithoutCommas(per_amount_value)) + parseInt(numberWithoutCommas(passenger_amount_value))) * 2) + ' x ' + passenger_overtime_count + ') ';
 	}
-	dd['content'].push({text: '\n\n이용료: ' + str + ' = ' + calculate_amount + '원\n', fontSize: 12});
+	dd['content'].push({text: '\n\n이용료: ' + str + '\n= ' + calculate_amount + '원\n', fontSize: 12});
 	if (discount_rate_value != '0%') {
 		dd['content'].push({text: '{{academy.aname}} 특별할인 ' + discount_rate_value + '\n', fontSize: 12});
 	}
-	if (total_uncollected > 0) {
+
+	if (total_uncollected != '0') {
 	// 미납
 		var uncollectedtable = {};
 		uncollectedtable['body'] = [];
@@ -827,14 +851,24 @@ $("#pdfdown").click(function() {
 			uncollectedtable['body'].push(rows);
 		}
 		dd['content'].push({table: uncollectedtable});
+	}
+	console.log('total_uncollected = ' + total_uncollected);
 
-		dd['content'].push({text: '\n이용 금액: ' + pay_amount + '원', fontSize: total_uncollected ? 12 : 13, bold: true});
+	dd['content'].push({text: '\n이용 금액: ' + pay_amount + '원', fontSize: total_uncollected ? 12 : 13, bold: true});
+	
+	if (total_uncollected != '0') {
 		dd['content'].push({text: '+ 연체 금액: ' + total_uncollected + '원', fontSize: 12, bold: true});
-		dd['content'].push({text: '= 결제 금액: ' + total_charge + '원', fontSize: 13, bold: true});
 	}
-	else {
-		dd['content'].push({text: '\n이용 금액: ' + pay_amount + '원', fontSize: total_uncollected ? 12 : 13, bold: true});
+
+	for (var i=0; i<$('.extra-charge').length; i++) {
+		if ($('.extra-charge')[i].value == '' || isNaN($('.extra-charge')[i].value)) {
+		}
+		else {
+			dd['content'].push({text: '+ ' + $('.extra-fields')[i].value + ': ' + numberWithCommas($('.extra-charge')[i].value) + '원', fontSize: 12, bold: true});
+		}
 	}
+
+	dd['content'].push({text: '= 결제 금액: ' + total_charge + '원', fontSize: 13, bold: true});
 	dd['content'].push({text: '\n\n', fontSize: 13});
 
 

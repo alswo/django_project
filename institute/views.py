@@ -890,7 +890,7 @@ def listAcademiesBilling(request):
 	return render(request, 'listAcademiesBilling.html', {'billinghistory': billinghistorys, 'aca_name_dict': aca_name_dict, 'aca_phone_dict': aca_phone_dict});
 
 def makeBillingHistorySettingName(billingHistorySetting):
-	return billingHistorySetting.created_time + " By " + billingHistorySetting.created_user.username + "(" + billingHistorySetting.created_user.first_name + " " + billingHistorySetting.created_user.last_name + ")"
+	return billingHistorySetting.created_time + " By " + billingHistorySetting.created_user.username + "(" + billingHistorySetting.created_user.first_name + " " + billingHistorySetting.created_user.last_name + ") " + billingHistorySetting.fix
 
 def makeBillingHistorySettingValue(billingHistorySetting):
 	return billingHistorySetting.created_time + "_" + str(billingHistorySetting.created_user_id)
@@ -901,14 +901,20 @@ def saveBillingHistorySetting(request):
 	aid = request.GET.get('aid')
 	carid = request.GET.get('carid')
 	monthpick = request.GET.get('monthpick')
+	fix = request.GET.get('fix')
 
 	received_json_data = json.loads(request.body)
 
-	if (aid == None or carid == None or monthpick == None):
+	if (aid == None or carid == None or monthpick == None or fix == None):
 		return JsonResponse({'msg' : 'Error'})
 
+	if (fix == 'fix'):
+		fix_msg = '확정'
+	else:
+		fix_msg = '임시저장'
+
 	academy = Academy.objects.get(id = aid)
-	billingHistorySetting = BillingHistorySetting.objects.create(academy = academy, carid = carid, monthpick = monthpick, created_user = request.user, setting = received_json_data)
+	billingHistorySetting = BillingHistorySetting.objects.create(academy = academy, carid = carid, monthpick = monthpick, fix = fix_msg, created_user = request.user, setting = received_json_data)
 	name = makeBillingHistorySettingName(billingHistorySetting)
 	value = makeBillingHistorySettingValue(billingHistorySetting)
 
