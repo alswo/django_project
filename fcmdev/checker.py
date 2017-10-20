@@ -113,7 +113,7 @@ def today_schedule_notification():
             msg = "오늘 " + sname + " 학생의 " + module_push_content['aname'] + " " + flag + " " + module_push_content['time'] + " [" + module_push_content['addr'] + "] 승차 스케줄이 있습니다"
 	    if tflag_count > 0:
 		cancel_msg=  "[승차취소]오늘 " + sname + " 학생의 " + module_push_content['aname'] + " " + flag + " " + module_push_content['time'] + " [" + module_push_content['addr'] + "] 승차 스케줄을 취소하셨습니다."
-		print cancel msg
+		print cancel_msg
 	    else:
 		print msg
         else:
