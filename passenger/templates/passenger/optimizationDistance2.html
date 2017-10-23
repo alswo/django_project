@@ -481,6 +481,10 @@ console.log($('.markerInfo')[i].parentNode);
   function secToTime(sec) {
 	var hour = parseInt(sec / (60 * 60));
 	var min = Math.ceil((sec - (hour * 60 * 60)) / 60);
+
+	if (min < 10) {
+		min = '0' + min;
+	}
 	return hour + ":" + min;
   }
 
