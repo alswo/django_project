@@ -17,6 +17,10 @@ import math
 import psycopg2
 from django.db import connection
 import calendar
+import json
+from institute.models import BillingHistorySetting
+from django.contrib.auth.models import User
+from django.http import JsonResponse
 
 # Create your views here.
 
@@ -27,6 +31,13 @@ class BeautifyStudent :
 		self.other_phone = False
 		self.age = None
 		self.billing_date = None
+
+class Uncollected :
+	def __init__(self):
+		self.month = ''
+		self.billing_amount = ''
+		self.additional_charge = ''
+		self.total_charge = ''
 
 
 def compareStudents(student1, student2):
@@ -288,6 +299,7 @@ class TimeHistory:
 	BILLING_NONCHARGE = 0b1000
 	def __init__(self):
 		self.carnum = -1
+		self.inventory_id = -1
 		self.academies = set()
 		self.scheduletable = list()
 		self.warning = False
@@ -295,6 +307,7 @@ class TimeHistory:
 		self.last_time = 0
                 self.lflag = False
 		self.studentnum = 0
+		self.msg = ''
 
 class DailyHistory:
 	def __init__(self):
@@ -347,6 +360,14 @@ def setNonCharge(academy, studentNum, warning_number_set, warning_set):
 		for i_warning in range(maxvehicle, len(sorted_warning)):
 			sorted_warning[i_warning].warning = True
 
+# 개월차 계산
+# ex. 2017-09, 2017-03 이면 6 return
+def diffMonth(a, b):
+	(a_year, a_month) = a.split('-')
+	(b_year, b_month) = b.split('-')
+
+	return (int(a_year) * 12 + int(a_month)) - (int(b_year) * 12 + int(b_month))
+
 @csrf_exempt
 @login_required
 def getHistory(request):
@@ -384,10 +405,29 @@ def getHistory(request):
         carid = request.POST.get('carid')
         monthpick = request.POST.get('monthpick')
 
-    if (carid == None or carid == 'all'):
-        carid = 0
-    else:
-        carid = int(carid)
+    billingHistorySettings = None
+    total_uncollected = 0
+    uncollectedes = []
+
+    if (aid != None and carid != None and monthpick != None):
+        academy = Academy.objects.get(id = aid)
+        billingHistorySettings = BillingHistorySetting.objects.filter(academy = academy, carid = carid, monthpick = monthpick)
+	if (carid == 'all'):
+		uncollectedHistories = BillingHistory.objects.filter(academy = academy, billing_il__isnull = True, billing_bank__isnull = True, month__lt = monthpick.replace('-', '')).order_by('month')
+		#uncollectedHistories = BillingHistory.objects.filter(academy = academy, billing_il__isnull = True, billing_bank__isnull = True).order_by('month')
+		for u in uncollectedHistories:
+			uncollected = Uncollected()
+			uncollected.month = u.month[:4] + '-' + u.month[4:] 
+			uncollected.billing_amount = "{:,}".format(u.billing_amount)
+			# 2% 연체이자, 10원단위 절사
+			additional_charge = int(u.billing_amount * 0.02 * diffMonth(monthpick, uncollected.month) / 100) * 100
+			uncollected.additional_charge = "{:,}".format(additional_charge)
+			uncollected.total_charge = "{:,}".format(u.billing_amount + additional_charge)
+			total_uncollected += u.billing_amount + additional_charge
+			uncollectedes.append(uncollected)
+
+    if (carid == None):
+        carid = "all"
 
     if daterange is not None and daterange != '':
     	(startdate, enddate) = daterange.split(' - ')
@@ -441,6 +481,7 @@ def getHistory(request):
                     timeHistory = TimeHistory()
                     timeHistory.scheduletable = scheduletable
                     timeHistory.carnum = scheduletable[0].carnum
+                    timeHistory.inventory_id = i
                     cars.add(timeHistory.carnum)
                     index = 0
                     studentNum = 0
@@ -450,18 +491,21 @@ def getHistory(request):
                     lflag_off_count = 0
                     for schedule in scheduletable:
                         #timeHistory.studentnum += schedule.members.count()
+			currentStudentNum = 0
                         for student in schedule.members.all():
                             if student.aid != academy:
                                 sharingFlag = True
                             else:
-                                studentNum += 1
+				currentStudentNum += 1
                                 timeHistory.studentnum += 1
 				for offmember in schedule.offmembers.all():
 					if (offmember == student):
                                                 #return HttpResponse("offmember = " + str(offmember.id))
-						studentNum -= 1
+						currentStudentNum -= 1
                                 if ((student.birth_year == None) or ((datetime.datetime.now().year - int(student.birth_year) + 1) <= 13)):
                                     isPassenger = True
+
+			studentNum += currentStudentNum
 
                         if (schedule.lflag == 1):
                                 lflag_on_count += 1
@@ -471,9 +515,28 @@ def getHistory(request):
                         for aca in schedule.academies.all():
 		            timeHistory.academies.add(aca.name)
 
-                        if (index == 0):
-                            timeHistory.first_time = convertMins(schedule.time)
-                        timeHistory.last_time = convertMins(schedule.time)
+			if (single_date >= '2017-10-01'):
+                            if (index == 0):
+                                timeHistory.first_time = convertMins(schedule.time)
+			    # 등원인 경우 최초 탑승학생 스케쥴 이전 row 가 시작시간
+			    if (schedule.lflag == 1 and studentNum == 0):
+			        timeHistory.first_time = convertMins(schedule.time)
+			    # 하원인 경우 마지막 하차학생 스케쥴 row 가 끝나는 시간
+			    if (schedule.lflag == 0 and currentStudentNum > 0):
+			        timeHistory.last_time = convertMins(schedule.time)
+			    elif (schedule.lflag == 3 and lflag_on_count > lflag_off_count):
+                       	        timeHistory.lflag = True
+                                timeHistory.last_time = convertMins(schedule.time)
+			# 2017-10-01 이전 기준을 위한 legacy 
+			else:
+			    if (index == 0):
+			        timeHistory.first_time = convertMins(schedule.time)
+			    timeHistory.last_time = convertMins(schedule.time)
+
+			# 2017-10-01 이전 기준을 위한 legacy 
+			if (lflag_on_count > lflag_off_count):
+			    timeHistory.lflag = True
+
                         index += 1
 
                     if (lflag_on_count > lflag_off_count):
@@ -557,9 +620,9 @@ def getHistory(request):
 
 
         rem = 0
-        if (carid != 0):
+        if (carid != "all"):
             for dailyHistory in history:
-                dailyHistory.timehistory[:] = [x for x in dailyHistory.timehistory if x.carnum == carid]
+                dailyHistory.timehistory[:] = [x for x in dailyHistory.timehistory if x.carnum == int(carid)]
 
     cur_year = datetime.datetime.now().year
     cur_month = datetime.datetime.now().month
@@ -579,7 +642,8 @@ def getHistory(request):
             lastmonth = '{}-{:0>2}'.format(cur_year - 1, 12)
 
 
-    return render(request, 'getHistory.html', {"history": history, "academy" : academy, 'total_count': total_count, 'startdate': startdate, 'enddate': enddate, 'user':request.user, 'cars':sorted(cars), 'carid':carid, 'overtime':overtime, 'monthpick_range': monthpick_range, 'lastmonth': lastmonth})
+
+    return render(request, 'getHistory.html', {"history": history, "academy" : academy, 'total_count': total_count, 'startdate': startdate, 'enddate': enddate, 'user':request.user, 'cars':sorted(cars), 'carid':carid, 'overtime':overtime, 'monthpick_range': monthpick_range, 'lastmonth': lastmonth, "billingHistorySettings": billingHistorySettings, 'uncollectedes': uncollectedes, 'total_uncollected': "{:,}".format(total_uncollected)})
 
 
 @login_required
@@ -824,3 +888,74 @@ def listAcademiesBilling(request):
 		aca_phone_dict[aphone.id] = aphone.phone_1
 
 	return render(request, 'listAcademiesBilling.html', {'billinghistory': billinghistorys, 'aca_name_dict': aca_name_dict, 'aca_phone_dict': aca_phone_dict});
+
+def makeBillingHistorySettingName(billingHistorySetting):
+	return billingHistorySetting.created_time + " By " + billingHistorySetting.created_user.username + "(" + billingHistorySetting.created_user.first_name + " " + billingHistorySetting.created_user.last_name + ") " + billingHistorySetting.fix
+
+def makeBillingHistorySettingValue(billingHistorySetting):
+	return billingHistorySetting.created_time + "_" + str(billingHistorySetting.created_user_id)
+
+@csrf_exempt
+@login_required
+def saveBillingHistorySetting(request):
+	aid = request.GET.get('aid')
+	carid = request.GET.get('carid')
+	monthpick = request.GET.get('monthpick')
+	fix = request.GET.get('fix')
+
+	received_json_data = json.loads(request.body)
+
+	if (aid == None or carid == None or monthpick == None or fix == None):
+		return JsonResponse({'msg' : 'Error'})
+
+	if (fix == 'fix'):
+		fix_msg = '확정'
+	else:
+		fix_msg = '임시저장'
+
+	academy = Academy.objects.get(id = aid)
+	billingHistorySetting = BillingHistorySetting.objects.create(academy = academy, carid = carid, monthpick = monthpick, fix = fix_msg, created_user = request.user, setting = received_json_data)
+	name = makeBillingHistorySettingName(billingHistorySetting)
+	value = makeBillingHistorySettingValue(billingHistorySetting)
+
+	return JsonResponse({'msg' : 'Success', 'name' : name, 'value' : value})
+
+@login_required
+def getBillingHistorySetting(request):
+	created_time = request.GET.get('created_time')
+	created_user_id = request.GET.get('created_user_id')
+
+	try :
+		created_user = User.objects.get(id = created_user_id)
+		billingHistorySetting = BillingHistorySetting.objects.filter(created_time = created_time, created_user = created_user)
+	except User.DoesNotExist:
+		return HttpResponse("해당 히스토리의 사용자가 존재하지 않습니다.")
+	except BillingHistorySetting.DoesNotExist:
+		return HttpResponse("해당 히스토리가 존재하지 않습니다.")
+
+	return JsonResponse(billingHistorySetting[0].setting)
+
+@login_required
+def getBillingHistorySettingList(request):
+    	aid = request.GET.get('aid')
+        carid = request.GET.get('carid')
+        monthpick = request.GET.get('monthpick')
+
+	try :
+        	academy = Academy.objects.get(id = aid)
+		if (carid == 'all') :
+        		billingHistorySettings = BillingHistorySetting.objects.filter(academy = academy, monthpick = monthpick).order_by('created_time')
+		else :
+        		billingHistorySettings = BillingHistorySetting.objects.filter(academy = academy, carid = carid, monthpick = monthpick).order_by('created_time')
+	except BillingHistorySetting.DoesNotExist:
+		return HttpResponse("해당 히스토리가 존재하지 않습니다.")
+
+	jsonObj = {}
+	jsonObj['list'] = []
+
+	for billingHistorySetting in billingHistorySettings:
+		name = makeBillingHistorySettingName(billingHistorySetting)
+		value = makeBillingHistorySettingValue(billingHistorySetting)
+		jsonObj['list'].append({'name' : name, 'value' : value})
+
+	return JsonResponse(jsonObj)
