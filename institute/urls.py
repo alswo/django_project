@@ -22,4 +22,5 @@ urlpatterns = [
     url(r'^saveBillingHistorySetting$', views.saveBillingHistorySetting),
     url(r'^getBillingHistorySetting$', views.getBillingHistorySetting),
     url(r'^getBillingHistorySettingList$', views.getBillingHistorySettingList),
+    url(r'^exportStudents$', views.exportStudents),
 ]

@@ -961,6 +961,17 @@ def getBillingHistorySettingList(request):
 
 	return JsonResponse(jsonObj)
 
+@login_required
+def exportStudents(request):
+	studentinfo_resource = StudentInfoResource()
+	queryset = StudentInfo.objects.all()
+	dataset = studentinfo_resource.export(queryset)
+	
+	response = HttpResponse(dataset.xls, content_type='application/vnd.ms-excel')
+	response['Content-Disposition'] = 'attachment; filename="student.xls"'
+
+	return response
+
 class StudentInfoResource(resources.ModelResource):
 	class Meta:
 		model = StudentInfo
