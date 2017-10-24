@@ -97,14 +97,14 @@ def findSibling(student1, student2):
 def saveNewPersonInfo2(student):
 	# for sibling
 	pin_number = None
-	others = StudentInfo.objects.filter(bid = student.aid.bid)
+	others = StudentInfo.objects.filter(aid__bid = student.aid.bid)
 	for other in others:
 		if findSamePerson(student, other):
 			student.personinfo = other.personinfo
 			student.save()
 			return True
 
-	siblings = StudentInfo.objects.filter(bid = student.aid.bid)
+	siblings = StudentInfo.objects.filter(aid__bid = student.aid.bid)
 	for sibling in siblings:
 		if findSibling(sibling, student):
 			if (sibling.personinfo):
