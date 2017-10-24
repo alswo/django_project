@@ -22,6 +22,7 @@ def getResponse(debug, code, msg):
 		return JsonResponse({'code': code, 'msg': msg})
 
 
+@app.task
 def today_schedule_notification():
     time = timeToDate()
     date = time.timeToD()
@@ -35,9 +36,10 @@ def today_schedule_notification():
     for inventory in inventorys:
         scheduletables = ScheduleTable.objects.filter(iid = inventory.id)
         for scheduletable in scheduletables:
-            schedules.extend(scheduletable.slist)
-	    slist_list.extend(scheduletable.slist)
-            tflag_list.extend(scheduletable.tflag)
+			if len(scheduletable.slist) == len(scheduletable.tflag):
+           		    schedules.extend(scheduletable.slist)
+	    	 	    slist_list.extend(scheduletable.slist)
+            		    tflag_list.extend(scheduletable.tflag)
 
     for s in slist_list:
         try:
@@ -112,27 +114,13 @@ def today_schedule_notification():
             msg = "오늘 " + sname + " 학생의 " + module_push_content['aname'] + " " + flag + " " + module_push_content['time'] + " [" + module_push_content['addr'] + "] 승차 스케줄이 있습니다"
 	    if tflag_count > 0:
 		cancel_msg=  "[승차취소]오늘 " + sname + " 학생의 " + module_push_content['aname'] + " " + flag + " " + module_push_content['time'] + " [" + module_push_content['addr'] + "] 승차 스케줄을 취소하셨습니다."
-		# print cancel_msg
-		send_msg(module_push_content['sid'], module_push_content['pin'], msg)
+		print cancel_msg
 	    else:
-		# print msg
-		send_msg(module_push_content['sid'], module_push_content['pin'], msg)
+		print msg
         else:
             msg = "오늘 " + sname + " 학생의 " + module_push_content['aname'] + " " + flag + " " + module_push_content['time'] + " [" + module_push_content['addr'] + "]승차 외" + str(count) + "건의 스케줄이 있습니다."
 	    if tflag_count > 0:
 		cancel_msg = "오늘 " + sname + " 학생의 " + module_push_content['aname'] + " " + flag + " " + module_push_content['time'] + " [" + module_push_content['addr'] + "]승차 외" + str(tflag_count) + "건의 취소된 스케줄이 있습니다."
-		send_msg(module_push_content['sid'], module_push_content['pin'], msg)
+		print cancel_msg
 	    else:
-		send_msg(module_push_content['sid'], module_push_content['pin'], msg)
-
-
-def send_msg(sid, pin, msg):
-
-    prop = PropOfDevice.objects.filter(pin_number = pin)
-    for p in prop:
-        pushcheck = p.receivePush
-        fcm = FCMDevice.objects.filter(device_id = p.device_id)
-        for f in fcm:
-            token = f.registration_id
-            types = f.type
-	    print str(f.id) + types
+		print msg
