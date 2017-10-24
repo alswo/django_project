@@ -113,7 +113,7 @@ def today_schedule_notification():
 	    if tflag_count > 0:
 		cancel_msg=  "[승차취소]오늘 " + sname + " 학생의 " + module_push_content['aname'] + " " + flag + " " + module_push_content['time'] + " [" + module_push_content['addr'] + "] 승차 스케줄을 취소하셨습니다."
 		# print cancel_msg
-		send_msg(module_push_content['sid'], module_push_content['pin'], msg)
+		send_msg(module_push_content['sid'], module_push_content['pin'], cancel_msg)
 	    else:
 		# print msg
 		send_msg(module_push_content['sid'], module_push_content['pin'], msg)
@@ -121,7 +121,7 @@ def today_schedule_notification():
             msg = "오늘 " + sname + " 학생의 " + module_push_content['aname'] + " " + flag + " " + module_push_content['time'] + " [" + module_push_content['addr'] + "]승차 외" + str(count) + "건의 스케줄이 있습니다."
 	    if tflag_count > 0:
 		cancel_msg = "오늘 " + sname + " 학생의 " + module_push_content['aname'] + " " + flag + " " + module_push_content['time'] + " [" + module_push_content['addr'] + "]승차 외" + str(tflag_count) + "건의 취소된 스케줄이 있습니다."
-		send_msg(module_push_content['sid'], module_push_content['pin'], msg)
+		send_msg(module_push_content['sid'], module_push_content['pin'], cancel_msg)
 	    else:
 		send_msg(module_push_content['sid'], module_push_content['pin'], msg)
 
