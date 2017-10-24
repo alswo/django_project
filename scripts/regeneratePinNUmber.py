@@ -5,7 +5,7 @@ from django.conf import settings
 from passenger.models import StudentInfo, PersonalInfo
 from django.utils.crypto import get_random_string
 from django.db.models import Q
-from util.PersonalInfoUtil import compareLists, saveNewPersonInfo, getHangul, TAYO_PINNUMBER_ALLOWED_CHARS
+from util.PersonalInfoUtil import compareLists, getHangul, TAYO_PINNUMBER_ALLOWED_CHARS
 from util.PhoneNumber import FormatPhoneNumber
 from django.db import transaction
 

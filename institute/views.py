@@ -21,6 +21,7 @@ import json
 from institute.models import BillingHistorySetting
 from django.contrib.auth.models import User
 from django.http import JsonResponse
+from import_export import resources
 
 # Create your views here.
 
@@ -41,7 +42,7 @@ class Uncollected :
 
 
 def compareStudents(student1, student2):
-	if (student1.bid == student2.bid and student1.sname == student2.sname):
+	if (student1.aid.bid == student2.aid.bid and student1.sname == student2.sname):
 		list1 = []
 		list1.append(student1.parents_phonenumber)
 		list1.append(student1.grandparents_phonenumber)
@@ -183,8 +184,8 @@ def addStudent(request):
 	if (birmon and birday):
 		birthday = '%02d%02d' % (int(birmon), int(birday))
 
-	students = StudentInfo.objects.filter(bid=academy.bid, aid=academy)
-	studentinfo = StudentInfo(bid=academy.bid, sname=sname, bname=bname, phone1=0, aid=academy, aname=institute, parents_phonenumber=parents_phonenumber, grandparents_phonenumber=grandparents_phonenumber, self_phonenumber=self_phonenumber, care_phonenumber=care_phonenumber, birth_year=birth_year, billing_date=billing_date, phonelist=None)
+	students = StudentInfo.objects.filter(aid=academy)
+	studentinfo = StudentInfo(sname=sname, aid=academy, parents_phonenumber=parents_phonenumber, grandparents_phonenumber=grandparents_phonenumber, self_phonenumber=self_phonenumber, care_phonenumber=care_phonenumber, birth_year=birth_year, billing_date=billing_date)
 
 	# same person in the same academy
 	for student in students:
@@ -959,3 +960,8 @@ def getBillingHistorySettingList(request):
 		jsonObj['list'].append({'name' : name, 'value' : value})
 
 	return JsonResponse(jsonObj)
+
+class StudentInfoResource(resources.ModelResource):
+	class Meta:
+		model = StudentInfo
+		exclude = ('personinfo')
