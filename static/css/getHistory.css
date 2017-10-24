@@ -1,0 +1,7 @@
+    .uncollected thead tr th {
+	text-align : center
+    }
+
+    .uncollected tbody tr td {
+	text-align : right
+    }
