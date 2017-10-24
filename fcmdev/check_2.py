@@ -136,5 +136,5 @@ def send_msg(sid, pin, msg):
         for f in fcm:
             token = f.registration_id
             types = f.type
-	    print str(f.id) + types
+	    print str(f.id) + types + " token :" + token
 	print pin
