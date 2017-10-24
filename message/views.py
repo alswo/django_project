@@ -48,7 +48,7 @@ def sendMessage(request):
             temp_g = {}
             pInfo = PersonalInfo.objects.get(id = s.personinfo_id )
             sname = s.sname
-            aname = s.aname
+            aname = s.aid.name
 
             if s.parents_phonenumber != None and s.parents_phonenumber != '':
                 to_parents = s.parents_phonenumber[1:]

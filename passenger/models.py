@@ -197,14 +197,14 @@ class PersonalInfo(models.Model):
 
 class StudentInfo(models.Model):
     aid = models.ForeignKey('Academy', null=True)
-    bid = models.IntegerField()
-    aname = models.CharField(max_length = 20)
-    bname = models.CharField(max_length = 20)
+    #bid = models.IntegerField()
+    #aname = models.CharField(max_length = 20)
+    #bname = models.CharField(max_length = 20)
     sname = models.CharField(max_length = 10)
-    grade = models.IntegerField(null = True, blank = True)
-    phone1 = models.IntegerField()
-    phonelist = ArrayField(models.IntegerField(null = True, blank = True,default=0),default=0)
-    pin_number = models.CharField(max_length = 20, default=uuid.uuid4().hex[:10].upper())
+    #grade = models.IntegerField(null = True, blank = True)
+    #phone1 = models.IntegerField()
+    #phonelist = ArrayField(models.IntegerField(null = True, blank = True,default=0),default=0)
+    #pin_number = models.CharField(max_length = 20, default=uuid.uuid4().hex[:10].upper())
     deleted_date = models.DateField(null=True)
     personinfo = models.ForeignKey(PersonalInfo, null=True)
     parents_phonenumber = models.CharField(max_length=15, null = True)
@@ -220,7 +220,7 @@ class StudentInfo(models.Model):
     sended_time = models.CharField(max_length = 20, null = True)
 
     def __unicode__(self):
-        return u"{0} // {1} // {2} // {3} // {4}".format(self.bname,self.aname,self.sname,self.grade,self.phone1)
+        return u"{0} // {1} // {2}".format(self.aid.bname,self.aid.name,self.sname)
 
 class AcademySchedule(models.Model):
     gid = models.IntegerField()
