@@ -94,7 +94,7 @@ class UpdateInven:
                     temp_name = filter(None, temp_name)
                     sidlist = filter(None, sidlist)
 
-                temp_tflag = [0 for z in range(len(temp_name))]
+                temp_tflag = [0]*len(sidlist)
                 anamelist = []
 
                 for aid in temp_aca:

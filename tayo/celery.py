@@ -35,7 +35,7 @@ app.conf.beat_schedule = {
 	},
 	'weekly-update': {
 		'task': 'schedule.tasks.weekly_update',
-		'schedule': crontab(hour=23, minute=30, day_of_week='sun'),
+		'schedule': crontab(hour=23, minute=15, day_of_week='sat'),
 	},
 	'resetTodayLoad': {
 		'task': 'schedule.tasks.resetTodayLoad',
