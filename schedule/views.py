@@ -101,8 +101,8 @@ def invenToJson(invens):
                         sInfo['age'] = timezone.now().year - int(studentInfo.birth_year) + 1
                     else:
                         sInfo['age'] = 30
-                    sInfo['phone1'] = studentInfo.phone1
-                    sInfo['phonelist'] = studentInfo.phonelist
+                    sInfo['phone1'] = ''
+                    sInfo['phonelist'] = ''
                     sInfo['parents_phonenumber'] = studentInfo.parents_phonenumber
                     sInfo['grandparents_phonenumber'] = studentInfo.grandparents_phonenumber
                     sInfo['self_phonenumber'] = studentInfo.self_phonenumber

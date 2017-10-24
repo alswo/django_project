@@ -82,7 +82,7 @@ def today_schedule_notification():
 	                        module_push_content['time'] = schTable.time
 	                        module_push_content['addr'] = schTable.addr
 		                module_push_content['lflag'] = schTable.lflag
-	                        module_push_content['aname'] = sInfo.aname
+	                        module_push_content['aname'] = sInfo.aid.name
 	                        module_push_content['pin'] = pin.pin_number
 	                        module_push_content['sid'] = key
 	                        module_push_content['count'] = value
