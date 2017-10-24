@@ -31,11 +31,12 @@ def today_schedule_notification():
     slist_list = []
     tflag_list = []
     dict_s ={}
-    inventorys = Inventory.objects.filter(day = '금').prefetch_related('scheduletables').reverse()
+    inventorys = Inventory.objects.filter(day = '목').prefetch_related('scheduletables').reverse()
     for inventory in inventorys:
         scheduletables = ScheduleTable.objects.filter(iid = inventory.id)
         for scheduletable in scheduletables:
-            print str(scheduletable.slist) + "---- "+ str(scheduletable.tflag)
+			if len(scheduletable.slist) != len(scheduletable.tflag):
+				print str(scheduletable.slist) + "---- "+ str(scheduletable.tflag)
             schedules.extend(scheduletable.slist)
 	    slist_list.extend(scheduletable.slist)
             tflag_list.extend(scheduletable.tflag)
