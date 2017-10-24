@@ -6,6 +6,7 @@ from django.shortcuts import render_to_response
 from django.http import HttpResponse, JsonResponse
 from fcmdev.models import PropOfDevice, PushConfirming
 from fcm_django.models import FCMDevice
+from passenger.models import Academy, StudentInfo, PersonalInfo, BillingHistory
 from django.views.decorators.csrf import csrf_exempt
 
 
@@ -118,3 +119,9 @@ def pushConfirmInfo(request):
         except:
             msg = "error"
             return getResponse(debug, 400, msg)
+
+
+@csrf_exempt
+def pushchecker(request):
+
+	return render(request, 'pushchecker.html', );

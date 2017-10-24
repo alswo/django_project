@@ -165,10 +165,7 @@ class CreateInven:
                             temp_name = filter(None, temp_name)
                             sidlist = filter(None, sidlist)
 
-                        if unloadSidList == 0:
-                            temp_tflag = [0 for z in range(len(temp_name))]
-                        else:
-                            temp_tflag = getTflag(sidlist,unloadSidList)
+                        temp_tflag = [0]*len(sidlist)
                         
                         anamelist = []
 
@@ -213,7 +210,7 @@ class CreateInven:
                             temp_name = filter(None, temp_name)
                             sidlist = filter(None, sidlist)
 
-                        temp_tflag = [0 for z in range(len(temp_name))]
+                        temp_tflag = [0]*len(sidlist)
 
                         anamelist = []
 
@@ -257,7 +254,7 @@ class CreateInven:
                         temp_name = filter(None, temp_name)
                         sidlist = filter(None, sidlist)
                     
-                    temp_tflag = [0 for z in range(len(temp_name))]
+                    temp_tflag = [0]*len(sidlist)
 
                     anamelist = []
 
