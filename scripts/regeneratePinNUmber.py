@@ -47,7 +47,8 @@ def run():
 			#print "otherStudent len = " + str(len(otherStudents))
 			found = False
 			for otherStudent in otherStudents:
-				if (isSamePerson(student, otherStudent) == True and otherStudent.personinfo.created_time >= '2017-10-08 23:34:00'):
+				#if (isSamePerson(student, otherStudent) == True and otherStudent.personinfo.created_time >= '2017-10-08 23:34:00'):
+				if (findSamePerson(student, otherStudent) == True and otherStudent.personinfo.created_time >= '2017-10-08 23:34:00'):
 					pin_number = otherStudent.personinfo.pin_number
 					student.personinfo = otherStudent.personinfo
 					student.save(update_fields=['personinfo'])
@@ -56,7 +57,8 @@ def run():
 
 			if (found == False):
 				for otherStudent in otherStudents:
-					if (isSibling(student, otherStudent) == True and otherStudent.personinfo.created_time >= '2017-10-08 23:34:00'):
+					#if (isSibling(student, otherStudent) == True and otherStudent.personinfo.created_time >= '2017-10-08 23:34:00'):
+					if (findSibling(student, otherStudent) == True and otherStudent.personinfo.created_time >= '2017-10-08 23:34:00'):
 						pin_number = otherStudent.personinfo.pin_number
 						personinfo = PersonalInfo(pin_number = otherStudent.personinfo.pin_number)
 						personinfo.save()
