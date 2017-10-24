@@ -22,7 +22,6 @@ def getResponse(debug, code, msg):
 		return JsonResponse({'code': code, 'msg': msg})
 
 
-@app.task
 def today_schedule_notification():
     time = timeToDate()
     date = time.timeToD()
@@ -113,22 +112,21 @@ def today_schedule_notification():
             msg = "오늘 " + sname + " 학생의 " + module_push_content['aname'] + " " + flag + " " + module_push_content['time'] + " [" + module_push_content['addr'] + "] 승차 스케줄이 있습니다"
 	    if tflag_count > 0:
 		cancel_msg=  "[승차취소]오늘 " + sname + " 학생의 " + module_push_content['aname'] + " " + flag + " " + module_push_content['time'] + " [" + module_push_content['addr'] + "] 승차 스케줄을 취소하셨습니다."
-		print cancel_msg
+		# print cancel_msg
+		send_msg(module_push_content['sid'], module_push_content['pin'], msg)
 	    else:
-		print msg
+		# print msg
+		send_msg(module_push_content['sid'], module_push_content['pin'], msg)
         else:
             msg = "오늘 " + sname + " 학생의 " + module_push_content['aname'] + " " + flag + " " + module_push_content['time'] + " [" + module_push_content['addr'] + "]승차 외" + str(count) + "건의 스케줄이 있습니다."
 	    if tflag_count > 0:
 		cancel_msg = "오늘 " + sname + " 학생의 " + module_push_content['aname'] + " " + flag + " " + module_push_content['time'] + " [" + module_push_content['addr'] + "]승차 외" + str(tflag_count) + "건의 취소된 스케줄이 있습니다."
-		print cancel_msg
+		send_msg(module_push_content['sid'], module_push_content['pin'], msg)
 	    else:
-		print msg
+		send_msg(module_push_content['sid'], module_push_content['pin'], msg)
 
 
 def send_msg(sid, pin, msg):
-    url = 'https://fcm.googleapis.com/fcm/send'
-    header = {'authorization': 'key=AAAAWVvmwNU:APA91bH0IjidQtMmX6q9SRVekZqzNmWKRR15mdjOFFAt05v3E7PziYRb7sLMbtCtNXZYyKrz--fKvoZdDY94yjOrH9G6z-axN7qWS7H5VMBRUy8Z6-dysdj9ZaCYrESl2wnIfOoSnh7X','content-type': 'application/json'}
-    result = {}
 
     prop = PropOfDevice.objects.filter(pin_number = pin)
     for p in prop:
@@ -137,25 +135,4 @@ def send_msg(sid, pin, msg):
         for f in fcm:
             token = f.registration_id
             types = f.type
-
-            if pushcheck == False:
-                print ("he/she doesn't want to receive push message.")
-            else:
-                if types == 'android':
-                    payload = '{\n    "to" : "' + str(token) + '","priority" : "high", "content-available" : "true","collapse_key" : "Updates Available" ,"notification": {\t  "body" : "'+str(msg)+'","title" : "셔틀타요", "sound":"default"},\t}'
-                elif types == 'ios':
-                    payload = '{\n    "to" : "' + str(token) + '","priority" : "high", "content-available" : "true","collapse_key" : "Updates Available" ,"notification": {\t  "body" : "'+str(msg)+'", "sound":"default"},\t}'
-                try:
-                    sid = str(sid)
-                    response = requests.request('POST', url, data=payload, headers=header)
-                    try:
-                        result = ast.literal_eval(response.text)
-                        status = str(result['success'])
-                        pushurl = 'http://api.edticket.com/fcmdev/pushConfirmInfo'
-                        data = "pin="+pin+"&confirming="+response.text+"&status="+status+"&token="+token+"&sid="+sid
-                        headers = {'content-type': "application/x-www-form-urlencoded"}
-                        response = requests.request("POST", pushurl, data=data, headers=headers)
-                    except:
-                        print "msg check error"
-                except:
-                    print ("msg send error")
+	    print str(f.id) + types
