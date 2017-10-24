@@ -31,10 +31,11 @@ def today_schedule_notification():
     slist_list = []
     tflag_list = []
     dict_s ={}
-    inventorys = Inventory.objects.filter(day = date).prefetch_related('scheduletables').reverse()
+    inventorys = Inventory.objects.filter(day = '금').prefetch_related('scheduletables').reverse()
     for inventory in inventorys:
         scheduletables = ScheduleTable.objects.filter(iid = inventory.id)
         for scheduletable in scheduletables:
+            print str(scheduletable.slist) + "---- "+ str(scheduletable.tflag)
             schedules.extend(scheduletable.slist)
 	    slist_list.extend(scheduletable.slist)
             tflag_list.extend(scheduletable.tflag)
@@ -82,7 +83,7 @@ def today_schedule_notification():
 	                        module_push_content['time'] = schTable.time
 	                        module_push_content['addr'] = schTable.addr
 		                module_push_content['lflag'] = schTable.lflag
-	                        module_push_content['aname'] = sInfo.aname
+	                        module_push_content['aname'] = sInfo.aid.name
 	                        module_push_content['pin'] = pin.pin_number
 	                        module_push_content['sid'] = key
 	                        module_push_content['count'] = value
@@ -113,7 +114,7 @@ def today_schedule_notification():
 	    if tflag_count > 0:
 		cancel_msg=  "[승차취소]오늘 " + sname + " 학생의 " + module_push_content['aname'] + " " + flag + " " + module_push_content['time'] + " [" + module_push_content['addr'] + "] 승차 스케줄을 취소하셨습니다."
 		# print cancel_msg
-		send_msg(module_push_content['sid'], module_push_content['pin'], msg)
+		send_msg(module_push_content['sid'], module_push_content['pin'], cancel_msg)
 	    else:
 		# print msg
 		send_msg(module_push_content['sid'], module_push_content['pin'], msg)
@@ -121,20 +122,24 @@ def today_schedule_notification():
             msg = "오늘 " + sname + " 학생의 " + module_push_content['aname'] + " " + flag + " " + module_push_content['time'] + " [" + module_push_content['addr'] + "]승차 외" + str(count) + "건의 스케줄이 있습니다."
 	    if tflag_count > 0:
 		cancel_msg = "오늘 " + sname + " 학생의 " + module_push_content['aname'] + " " + flag + " " + module_push_content['time'] + " [" + module_push_content['addr'] + "]승차 외" + str(tflag_count) + "건의 취소된 스케줄이 있습니다."
-		send_msg(module_push_content['sid'], module_push_content['pin'], msg)
+		send_msg(module_push_content['sid'], module_push_content['pin'], cancel_msg)
 	    else:
 		send_msg(module_push_content['sid'], module_push_content['pin'], msg)
 
 
 def send_msg(sid, pin, msg):
+    try:
+        prop = PropOfDevice.objects.filter(pin_number = pin)
 
-    prop = PropOfDevice.objects.filter(pin_number = pin)
-    for p in prop:
-        print p.device_id
-        pushcheck = p.receivePush
-        fcm = FCMDevice.objects.filter(device_id = p.device_id)
-        for f in fcm:
-            token = f.registration_id
-            types = f.type
-	    print str(f.id) + types + " token :" + token
-	print pin
+    except:
+        print "no device info"
+
+    else:
+        for p in prop:
+            print p.device_id
+            pushcheck = p.receivePush
+            fcm = FCMDevice.objects.filter(device_id = p.device_id)
+            for f in fcm:
+                token = f.registration_id
+                types = f.type
+	        print str(f.id) + types + " token :" + token
