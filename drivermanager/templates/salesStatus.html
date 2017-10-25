@@ -1,0 +1,98 @@
+{% extends 'basic.html' %}
+{% block content %}
+<style>
+  body{
+    width:1060px;
+    margin:50px auto;
+  }
+  path {  stroke: #fff; }
+  path:hover {  opacity:0.9; }
+  rect:hover {  fill:blue; }
+  .axis {  font: 10px sans-serif; }
+  .legend tr{    border-bottom:1px solid grey; }
+  .legend tr:first-child{    border-top:1px solid grey; }
+
+  .axis path,
+  .axis line {
+    fill: none;
+    stroke: #000;
+    shape-rendering: crispEdges;
+  }
+
+  .x.axis path {  display: none; }
+  .legend{
+    margin-bottom:76px;
+    display:inline-block;
+    border-collapse: collapse;
+    border-spacing: 0px;
+  }
+  .legend td{
+    padding:4px 5px;
+    vertical-align:bottom;
+  }
+  .legendFreq, .legendPerc{
+    align:right;
+    width:50px;
+  }
+</style>
+<input id="aid" type="hidden" value="{{aid}}"></input> 
+<input id="bid" type="hidden" value="{{bid}}"></input>
+{% if user.is_superuser %} 
+<div class="row" align="center">
+  {% for a in area %}
+    {% if aid == a.id %}
+      <a href="carSalesStatus?aid={{a.id}}" type="button" class="btn btn-primary">{{a.name}}</a>
+    {% else %}
+      <a href="carSalesStatus?aid={{a.id}}" type="button" class="btn btn-default">{{a.name}}</a>
+    {% endif %}  
+  {% endfor %}
+</div>
+{% endif %}
+<br>
+<div class="row" align="center">
+  {% for b in branch %}
+    {% if bid == b.id %}
+      <a href="carSalesStatus?aid={{aid}}&bid={{b.id}}" type="button" class="btn btn-info">{{b.bname}}</a>
+    {% else %}
+      <a href="carSalesStatus?aid={{aid}}&bid={{b.id}}" type="button" class="btn btn-default">{{b.bname}}</a>
+    {% endif %}  
+  {% endfor %}
+</div>
+<div class="row">
+  <div class="col-md-2">
+    <div class="form-group">
+      <label>Car :</label>
+      <select class="form-control select-car">
+        <option selected>선택</option>
+        {% for c in car %}
+        <option value={{c.id}}>{{c.carname}}호차</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+</div>
+<br>
+<br>
+<script>
+  var freqData = [];
+  $(".select-car").change(function(e){
+    var car = this.value
+    $.ajax({
+      url: "carSalesStatus",
+      type: "POST",
+      data: {
+          flag : 'car',
+          car : car
+      },
+      success: function(data){
+           var sales = JSON.parse(data);
+           for(i = 0 ; i < sales.length; i ++){
+               temp_dict = {}
+               temp_dict['State'] =  sales[i]['month']
+               temp_dict['freq'] = { sales : sales[i]['sales'], labor: 11000 , management: 11000}
+           }
+      }
+    })
+  });
+</script>
+{% endblock content %}

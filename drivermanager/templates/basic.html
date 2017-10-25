@@ -21,6 +21,7 @@
   <script src="/static/js/jquery-3.1.0.min.js"></script>
   <script src="/static/js/jquery-ui.js"></script>
   <script src="/static/js/bootstrap.min.js"></script>
+  <script src="http://d3js.org/d3.v3.min.js"></script>
   <!-- script type="text/javascript" src="http://apis.daum.net/maps/maps3.js?apikey=df6af02ef0921fda82ecbfd508cfcfdf&libraries=services"></script //-->
   <!-- script type="text/javascript" src="/static/js/jquery.timepicker.min.js"></script //-->
   <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
@@ -38,6 +39,8 @@
   <script src="http://d3js.org/d3.v3.min.js" language="JavaScript"></script>
   <script type="text/javascript" src="{% static 'js/shareRatio/liquidFillGauge.js' %}"></script>
   <link href="{% static 'css/dmSchedule/jquery.skeduler.css' %}" rel="stylesheet">
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.0/Chart.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.0/Chart.bundle.min.js"></script>
   <style>
     .entry:not(:first-of-type) {
       margin-top: 10px;
@@ -140,7 +143,7 @@
             <li class="dorpdown">
               <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">통계<span class="caret"></span></a>
               <ul class="dropdown-menu">
-                <li><a href="shareRatio">쉐어링비율</a></li>
+                <li><a href="carSalesStatus">차량매출</a></li>
               </ul>
             </li>
             <li class="dorpdown">
