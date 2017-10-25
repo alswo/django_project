@@ -71,7 +71,7 @@
             </div>
         </div>
     </div>
-    {% if user.username == 'cco'%}
+    {% if user.username == 'cto'%}
     <div class="row">
         <div class="col-md-8"></div>
         <div class="col-md-4">
@@ -96,12 +96,14 @@
                       </div>
                   </div>
                     <div class="container community_container">
-                        <h4>제목</h4>
-                        <p><span class="glyphicon glyphicon glyphicon-headphones" aria-hidden="true"></span>&nbsp{{c.complain|linebreaksbr}}</p>
-                    </div>
+                        <!-- <h4>제목</h4> -->
+                        <strong><span aria-hidden="true" ></span>&nbsp{{c.complain|linebreaksbr}}</strong>
+                <p>
+                </p>
+                      </div>
                     <div class="container community_container">
-                        <h4>내용</h4>
-                        <p><span class="glyphicon glyphicon glyphicon-bullhorn" aria-hidden="true"></span>&nbsp{{c.plan|linebreaksbr}}</p>
+                        <!-- <h4>내용</h4> -->
+                        <p><span aria-hidden="true"></span>&nbsp{{c.plan|linebreaksbr}}</p>
                     </div>
                 </div>
             </li>
