@@ -52,11 +52,15 @@
                 </div>
                 <div class="modal-body">
                     <form action="community" method="post">
-                        <label>학원입력(읽기에선 비공개)</label>
-                        <input type="text" class="form-control" name="aname" value="{{contact.day}}">
-                        <label>고객님의 불편사항입니다</label>
-                        <textarea class="form-control" cols="20" name="complain" rows="10"></textarea>
-                        <label>이에 셔틀타요는요</label>
+                        <label>작성자</label>
+                        <select name="aname" class="form-control" value="{{contact.day}}">
+                          <option value="ceo">ceo</option>
+                          <option value="cco">cco</option>
+                          <option value="cto">cto</option>
+                        </select>
+                        <label>제목</label>
+                        <textarea class="form-control" cols="50" name="complain" rows="1"></textarea>
+                        <label>내용</label>
                         <textarea class="form-control" cols="20" name="plan" rows="10"></textarea>
                 </div>
                 <div class="modal-footer">
@@ -67,7 +71,7 @@
             </div>
         </div>
     </div>
-    {% if user.username == 'cto'%}
+    {% if user.username == 'cco'%}
     <div class="row">
         <div class="col-md-8"></div>
         <div class="col-md-4">
@@ -92,11 +96,11 @@
                       </div>
                   </div>
                     <div class="container community_container">
-                        <h4>고객님의 불편사항입니다</h4>
+                        <h4>제목</h4>
                         <p><span class="glyphicon glyphicon glyphicon-headphones" aria-hidden="true"></span>&nbsp{{c.complain|linebreaksbr}}</p>
                     </div>
                     <div class="container community_container">
-                        <h4>이에 셔틀타요는요</h4>
+                        <h4>내용</h4>
                         <p><span class="glyphicon glyphicon glyphicon-bullhorn" aria-hidden="true"></span>&nbsp{{c.plan|linebreaksbr}}</p>
                     </div>
                 </div>
