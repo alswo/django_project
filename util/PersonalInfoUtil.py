@@ -51,7 +51,7 @@ def compareLists(name1, item1, list1, name2, item2, list2):
 	return not set(compList1).isdisjoint(compList2)
 
 def findSamePerson(student1, student2):
-	if (student1.bid == student2.bid and getHangul(student1.sname) == getHangul(student2.sname)):
+	if (student1.aid.bid == student2.aid.bid and getHangul(student1.sname) == getHangul(student2.sname)):
 		list1 = []
 		if (student1.parents_phonenumber != None and len(student1.parents_phonenumber) > 0):
 			list1.append(student1.parents_phonenumber)
@@ -73,7 +73,7 @@ def findSamePerson(student1, student2):
 	return False
 
 def findSibling(student1, student2):
-	if (student1.bid == student2.bid):
+	if (student1.aid.bid == student2.aid.bid):
 		list1 = []
 		if (student1.parents_phonenumber != None and len(student1.parents_phonenumber) > 0):
 			list1.append(student1.parents_phonenumber)
@@ -94,56 +94,17 @@ def findSibling(student1, student2):
 
 	return False
 
-
-def saveNewPersonInfo(student):
-	# for sibling
-	pin_number = None
-	others = StudentInfo.objects.filter(bid = student.bid)
-	for other in others:
-		if compareLists(student.sname, student.phone1, student.phonelist, other.sname, other.phone1, other.phonelist):
-			student.personinfo = other.personinfo
-			student.save()
-			break
-
-	siblings = StudentInfo.objects.filter(bid = student.bid)
-	for sibling in siblings:
-		# different name but same phone number
-		if compareLists(u"가", student.phone1, student.phonelist, u"가", sibling.phone1, sibling.phonelist):
-			if (sibling.personinfo):
-				pin_number = sibling.personinfo.pin_number
-				break
-
-	if (pin_number == None):
-		for i in range (0, 5):
-			try:
-				pin_number = get_random_string(length=7, allowed_chars=TAYO_PINNUMBER_ALLOWED_CHARS)
-				personinfos = PersonalInfo.objects.filter(pin_number = pin_number)
-				if (len(personinfos) == 0):
-					raise PersonalInfo.DoesNotExist
-				pin_number = None
-			except PersonalInfo.DoesNotExist:
-				break
-		if (pin_number == None):
-			return False
-
-	person = PersonalInfo(pin_number = pin_number)
-	person.save()
-	student.personinfo = person
-	student.save(update_fields=['personinfo'])
-
-	return True
-	
 def saveNewPersonInfo2(student):
 	# for sibling
 	pin_number = None
-	others = StudentInfo.objects.filter(bid = student.bid)
+	others = StudentInfo.objects.filter(aid__bid = student.aid.bid)
 	for other in others:
 		if findSamePerson(student, other):
 			student.personinfo = other.personinfo
 			student.save()
 			return True
 
-	siblings = StudentInfo.objects.filter(bid = student.bid)
+	siblings = StudentInfo.objects.filter(aid__bid = student.aid.bid)
 	for sibling in siblings:
 		if findSibling(sibling, student):
 			if (sibling.personinfo):

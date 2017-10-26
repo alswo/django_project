@@ -24,6 +24,7 @@ def getResponse(debug, code, msg):
 
 @app.task
 def today_schedule_notification():
+    i = 0
     time = timeToDate()
     date = time.timeToD()
     si = []
@@ -94,33 +95,10 @@ def today_schedule_notification():
 			except PersonalInfo.DoesNotExist:
 			        break
 
-        count = module_push_content['count']-1
-	lflag = module_push_content['lflag']
-	sname = module_push_content['sname']
-	sid = module_push_content['sid']
-	if dict_s.has_key(sid):
-		tflag_count = dict_s[sid]
-	else:
-		tflag_count = 0
+        pin_prop = PropOfDevice.objects.filter(pin_number = module_push_content['pin'])
+        for p in pin_prop:
+            i += 1
+            if p.receivePush == False:
+                print p.pin_number
 
-	if lflag == 0:
-            flag = "하원을 위한"
-
-	elif lflag == 1:
-	    flag = "등원을 위한"
-	else:
-	    flag = "에 대한"
-        if count == 0:
-            msg = "오늘 " + sname + " 학생의 " + module_push_content['aname'] + " " + flag + " " + module_push_content['time'] + " [" + module_push_content['addr'] + "] 승차 스케줄이 있습니다"
-	    if tflag_count > 0:
-		cancel_msg=  "[승차취소]오늘 " + sname + " 학생의 " + module_push_content['aname'] + " " + flag + " " + module_push_content['time'] + " [" + module_push_content['addr'] + "] 승차 스케줄을 취소하셨습니다."
-		print cancel_msg
-	    else:
-		print msg
-        else:
-            msg = "오늘 " + sname + " 학생의 " + module_push_content['aname'] + " " + flag + " " + module_push_content['time'] + " [" + module_push_content['addr'] + "]승차 외" + str(count) + "건의 스케줄이 있습니다."
-	    if tflag_count > 0:
-		cancel_msg = "오늘 " + sname + " 학생의 " + module_push_content['aname'] + " " + flag + " " + module_push_content['time'] + " [" + module_push_content['addr'] + "]승차 외" + str(tflag_count) + "건의 취소된 스케줄이 있습니다."
-		print cancel_msg
-	    else:
-		print msg
+    print i

@@ -466,7 +466,6 @@ def getSchedulesForStudent(request):
 		data['inventory_id'] = scheduletable.iid_id
 		data['start_time'] = makeTimeStr(scheduletable.iid.stime)
 		data['end_time'] = makeTimeStr(scheduletable.iid.etime)
-		#data['institute_name'] = list(map(lambda x: (Academy.objects.get(id=x)).name, (set(scheduletable.iid.alist) & set(student.aid))))
 		data['institute_name'] = Academy.objects.get(id=student.aid_id).name
 		data['scheduletable_id'] = scheduletable.id
 
@@ -623,32 +622,6 @@ def getNotice(request):
 	msg['notice']['content'] = notice.content
 
 	return JsonResponse(msg)
-
-@csrf_exempt
-def getStudentInfo(request):
-    if request.method == "POST":
-        pin_number = request.POST.get('pin_number')
-
-	debug = 0
-
-        try:
-            sInfo = StudentInfo.objects.get(pin_number = pin_number)
-
-            studentInfo = {}
-
-            studentInfo['sid'] = sInfo.id
-            studentInfo['aid'] = sInfo.aid_id
-            studentInfo['phone'] = sInfo.phone1
-            studentInfo['pin'] = sInfo.pin_number
-	    studentInfo['grade'] = sInfo.grade
-
-            return JsonResponse(studentInfo)
-
-        except:
-
-            msg = 'PIN값을 다시 입력해주세요'
-
-            return getResponse(debug,400,msg)
 
 @csrf_exempt
 def getStudentInfo2(request):

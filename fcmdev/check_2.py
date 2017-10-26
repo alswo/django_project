@@ -158,3 +158,21 @@ def send_msg(sid, pin, msg):
                         print "msg check error"
 		except:
                     print "msg send error"
+
+
+# def send_msg(sid, pin, msg):
+#     try:
+#         prop = PropOfDevice.objects.filter(pin_number = pin)
+#
+#     except:
+#         print "no device info"
+#
+#     else:
+#         for p in prop:
+#             print p.device_id
+#             pushcheck = p.receivePush
+#             fcm = FCMDevice.objects.filter(device_id = p.device_id)
+#             for f in fcm:
+#                 token = f.registration_id
+#                 types = f.type
+# 	        print str(f.id) + types + " token :" + token
