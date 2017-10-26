@@ -975,4 +975,4 @@ def exportStudents(request):
 class StudentInfoResource(resources.ModelResource):
 	class Meta:
 		model = StudentInfo
-		exclude = ('personinfo')
+		exclude = ('personinfo', 'deleted_date', 'created_time', 'sended_time')
