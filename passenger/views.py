@@ -1,6 +1,6 @@
 from django.shortcuts import render, render_to_response, redirect
 from django.template import RequestContext
-from passenger.models import Commute, Academy, Schedule, ShuttleSchedule, Group, ScheduleDate,Community
+from passenger.models import Commute, Academy, Schedule, ShuttleSchedule, Group, ScheduleDate,Community,BillingHistory
 from schedule.models import Branch, Car
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required, user_passes_test
@@ -10,6 +10,8 @@ from django.core.serializers import serialize
 from passenger.dateSchedule import timeToDate
 from django.utils.crypto import get_random_string
 from django.db import connection
+############
+from institute.models import BillingHistorySetting
 import json
 
 def is_not_driver(user):
@@ -580,8 +582,8 @@ def profileInfo(request):
         aca = Academy.objects.filter(bid__in = temp_bid)
         data = serialize('json', aca)
 
-        return HttpResponse(data, content_type="application/json") 
-        
+        return HttpResponse(data, content_type="application/json")
+
 
 
 def robots(request):
