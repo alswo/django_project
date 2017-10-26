@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core import serializers
 from passenger.models import Profile, StudentInfo
 from schedule.models import Inventory, ScheduleTable, Branch, Area, Car
+from institute.models import BillingHistorySetting
 import datetime
 from collections import defaultdict
 from django.views.decorators.csrf import csrf_exempt
@@ -100,29 +101,58 @@ def car_schedule(car):
 
     return contacts  
    
-def get_ratio(bid):
-    invens = Inventory.objects.filter(bid = bid)
+def get_sales_status(car):
+    invens = Inventory.objects.filter(carnum = car)
     
-    temp_car = []
+    thisyear = str(datetime.datetime.now())[:4]
+    month = []
 
-    for inven in invens:
-        temp_car.append(inven.carnum)
-    
-    temp_car = set(temp_car)
-
+    for i in range(1,13):
+        if i < 10:
+            month.append(thisyear + "-0" + str(i))
+        else:
+            month.append(thisyear + "-" + str(i))
     contacts = []
-    for tc in temp_car:
-        temp_inven = {}
-        temp_inven['carnum'] = tc
-
-        inventory = Inventory.objects.filter(carnum = tc)
-        anum = 0
-        for i in inventory:
-            anum += len(set(i.alist))
-        
-        temp_inven['ratio'] =  anum/len(inventory)
-
-        contacts.append(temp_inven)        
+    for m in month:
+        inventory_option = []
+        temp_sales = {}
+        sales_count = 0
+        bhs = BillingHistorySetting.objects.filter(monthpick = m)
+        for b in bhs:
+            inventory_option = b.setting['data'].values()
+            for io in inventory_option:
+                for i in invens:
+                    temp_value = io.values()[0]
+                    if i.id == int(io.keys()[0]):
+                        if 8 in temp_value:
+                            sales_count += 0
+                        elif 1 in temp_value:
+                            if 2 in temp_value:
+                                if 4 in temp_value:
+                                    sales_count = 22000
+                                else:
+                                    sales_count += 12500
+                            else:
+                                if 4 in temp_value:
+                                    sales_count += 22000
+                                else:
+                                    sales_count += 11000           
+                        else:
+                            if 2 in temp_value:
+                                if 4 in temp_value:
+                                    sales_count += 15000
+                                else:
+                                    sales_count += 9000
+                            else:
+                                if 4 in temp_value:
+                                    sales_count += 15000
+                                else:
+                                    sales_count += 7500
+        temp_sales['month'] = m
+        temp_sales['car'] = car                      
+        temp_sales['sales'] = sales_count
+            
+        contacts.append(temp_sales) 
 
     return contacts
  
@@ -241,8 +271,10 @@ def get_car_schedule(request):
         contacts = car_schedule(car)
 
         return HttpResponse(json.dumps(contacts)) 
-
-def share_ratio(request):
+@login_required
+@user_passes_test(is_not_drivermanager, login_url='/', redirect_field_name=None)
+@csrf_exempt
+def car_sales_status(request):
     if request.method == 'GET':
         if request.user.is_superuser:
             if request.GET.get('aid'):
@@ -259,17 +291,29 @@ def share_ratio(request):
             if aid > 0:
                 if bid > 0:
                     branch = Branch.objects.filter(areaid=aid)
-                    contacts = get_ratio(bid)
+                    car = Car.objects.filter(branchid_id = bid)
 
-                    return render_to_response('shareRatio.html', {'area':area, 'branch':branch, 'aid':aid, 'bid':bid, 'user':request.user})
+                    return render_to_response('salesStatus.html', {'area':area, 'branch':branch, 'car' : car, 'aid':aid, 'bid':bid, 'user':request.user})
 
                 else:
                     branch = Branch.objects.filter(areaid=aid)
 
-                    return render_to_response('shareRatio.html', {'area':area, 'branch':branch, 'aid':aid, 'user':request.user})
+                    return render_to_response('salesStatus.html', {'area':area, 'branch':branch, 'aid':aid, 'user':request.user})
 
             else:
-                return render_to_response('shareRatio.html', {'area':area, 'user':request.user})
+                return render_to_response('salesStatus.html', {'area':area, 'user':request.user})
         else:
  
-            return render_to_response('shareRatio.html', {'user':request.user})
+            return render_to_response('salesStatus.html', {'user':request.user})
+
+    else:
+        flag = request.POST.get('flag') 
+
+        if flag == "car":
+            car = request.POST.get('car')
+            contacts = get_sales_status(car)
+
+            return HttpResponse(json.dumps(contacts))
+
+
+ 
