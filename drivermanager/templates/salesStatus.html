@@ -72,9 +72,9 @@
   </div>
 </div>
 <br>
+<canvas id="salesChart" width="400" height="400"></canvas>
 <br>
 <script>
-  var freqData = [];
   $(".select-car").change(function(e){
     var car = this.value
     $.ajax({
@@ -85,14 +85,43 @@
           car : car
       },
       success: function(data){
-           var sales = JSON.parse(data);
-           for(i = 0 ; i < sales.length; i ++){
-               temp_dict = {}
-               temp_dict['State'] =  sales[i]['month']
-               temp_dict['freq'] = { sales : sales[i]['sales'], labor: 11000 , management: 11000}
-           }
+          var sales = JSON.parse(data);
+          setBarChart(sales);
       }
     })
   });
+
+ function setBarChart(salesData){
+     var ctx = document.getElementById("salesChart");
+     var label = [];
+     var sales = [];
+     for(i = 0 ; i < salesData.length; i++){
+         label.push(salesData[i]['month'])
+         sales.push(salesData[i]['sales'])
+     }
+     var salesChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels : label,
+            label: "Sales (won)",
+            datasets: [{ data : sales }] 
+        },
+        options: {
+            legend: { display: false },
+            title: {
+                display: true,
+                text: 'Sales(원)'
+            },
+            scales: {
+                xAxes: [{
+                    gridLines: {
+                        offsetGridLines: true
+                    }
+                }]
+           }
+        }
+    });
+}
+
 </script>
 {% endblock content %}
