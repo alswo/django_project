@@ -98,6 +98,7 @@ def today_schedule_notification():
         pin_prop = PropOfDevice.objects.filter(pin_number = module_push_content['pin'])
         for p in pin_prop:
             i += 1
-            print p.pin_number + str(i)
+            if p.receivePush == False:
+                print p.pin_number
 
     print i
