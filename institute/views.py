@@ -24,6 +24,7 @@ from django.http import JsonResponse
 from import_export import resources
 
 # Create your views here.
+BANKCODES = ['003', '004', '011', '020', '027', '071', '081', '088']
 
 class BeautifyStudent :
 	def __init__(self):
@@ -847,18 +848,17 @@ def saveBill(request):
 	current_yearmonth = thismonth()
 	previous_yearmonth = prevmonth(yearmonth)
 
-	start_billday = current_yearmonth + "10"
-	end_billday = current_yearmonth + "31"
+	start_billday = current_yearmonth + "07"
+	end_billday = current_yearmonth + "15"
 
 	academy = Academy.objects.get(id = aid)
 
 
-	bankcodes = ['003', '004', '011', '020', '027', '071', '081', '088']
 	conn = None
 
 	with connection.cursor() as cursor:
 		try:
-			for bankcode in bankcodes:
+			for bankcode in BANKCODES:
 				field = "bank" + bankcode
 				cursor.execute("""UPDATE vacs_vact SET tr_amt = %s, trbegin_il = %s, trend_il = %s WHERE bank_cd = %s AND acct_no = %s;""", (amount, start_billday, end_billday, bankcode, getattr(academy, field)))
 		except:

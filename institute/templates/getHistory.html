@@ -192,7 +192,8 @@
 					</div>
 				</form>
 				</div>
-				= 청구요금 <br>: <span id="total_charge"></span> 원<br>
+				= 청구요금 <br>납기내 ( <span id="due_date"></span> 까지 ) : <span id="total_charge"></span> 원<br>
+						납기후 ( <span id="after_due_date"></span> 까지 ) : <span id="after_total_charge"></span> 원<br>
 					</div>
 					</div>
 					<div class="row">
@@ -460,7 +461,15 @@ function calculate() {
 			extra_charge += parseInt($('.extra-charge')[i].value);
 		}
 	}
-	$('#total_charge')[0].innerText = numberWithCommas(numberWithoutCommas($('#pay_amount')[0].innerText) + numberWithoutCommas($('#total_uncollected')[0].innerText) + extra_charge);
+	var total_charge = numberWithoutCommas($('#pay_amount')[0].innerText) + numberWithoutCommas($('#total_uncollected')[0].innerText) + extra_charge;
+	$('#total_charge')[0].innerText = numberWithCommas(total_charge);
+	$('#after_total_charge')[0].innerText = numberWithCommas(Math.floor(total_charge * 1.02 / 100) * 100);
+
+	$('#due_date')[0].innerText = getDueDate();
+	$('#after_due_date')[0].innerText = getAfterDueDate();
+
+	console.log("due date = " + getDueDate());
+	console.log("after due date = " + getAfterDueDate());
 
 	return null;
 }
@@ -592,6 +601,19 @@ $("#fix").click(function(event) {
 $("#temp-save").click(function(event) {
 	saveSetting('temp-save');
 });
+
+function getDueDate() {
+	var yearmonth = $('#monthpick').val().split("-");
+	
+	return yearmonth[0] + "." + (parseInt(yearmonth[1]) + 1) + "." + "15";
+}
+
+function getAfterDueDate() {
+	var yearmonth = $('#monthpick').val().split("-");
+	var lastday = new Date(yearmonth[0], parseInt(yearmonth[1] + 1) + 1, 0);
+	
+	return yearmonth[0] + "." + (parseInt(yearmonth[1]) + 1) + "." + lastday.getDate();
+}
 
 function saveSetting(fix) {
 	var jsonObj = {};
@@ -771,6 +793,9 @@ $("#pdfdown").click(function() {
 	var total_count = $('#total_count')[0].innerText;
 	var total_uncollected = $('#total_uncollected')[0].innerText;
 	var total_charge = $('#total_charge')[0].innerText;
+	var after_total_charge = $('#after_total_charge')[0].innerText;
+	var due_date = $('#due_date')[0].innerText;
+	var after_due_date = $('#after_due_date')[0].innerText;
 
 	var str = "";
 	var dd = {};
@@ -869,6 +894,8 @@ $("#pdfdown").click(function() {
 	}
 
 	dd['content'].push({text: '= 결제 금액: ' + total_charge + '원', fontSize: 13, bold: true});
+	dd['content'].push({text: '납기내 ( ' + due_date + ' 까지 ) : ' + total_charge + '원', fontSize: 13, bold: true});
+	dd['content'].push({text: '납기후 ( ' + after_due_date + ' 까지 ) : ' + after_total_charge + '원', fontSize: 13, bold: true, color: 'red'});
 	dd['content'].push({text: '\n\n', fontSize: 13});
 
 

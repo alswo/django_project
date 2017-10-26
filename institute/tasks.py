@@ -3,7 +3,9 @@
 from __future__ import absolute_import
 from tayo.celery import app
 from passenger.models import BillingHistory, Academy
+from institute.views import BANKCODES
 from django.db import connection
+from django.utils import timezone
 import sys
 import requests
 import simplejson
@@ -79,3 +81,33 @@ def ex(acct, bank_cd, aid):
 	cursor.close()
 	connection.commit()
 	connection.close()
+
+
+def plusPenaltyCharge(amt):
+	new_amt = int(amt * 1.02 / 100) * 100
+	return new_amt
+
+def getStartBillDay():
+	return "%04d%02d16" % (timezone.now().year, timezone.now().month)
+
+def getEndBillDay():
+	return "%04d%02d31" % (timezone.now().year, timezone.now().month)
+	
+@app.task
+def updatePenaltyCharge():
+	billingHistories = BillingHistory.objects.filter(month = '201709').filter(billing_il__isnull = True)
+	start_billday = getStartBillDay()
+	end_billday = getEndBillDay()
+	for billingHistory in billingHistories:
+		print billingHistory.academy.name + " : " + str(billingHistory.billing_amount) + " : " + str(plusPenaltyCharge(billingHistory.billing_amount)) 
+		billingHistory.billing_amount = plusPenaltyCharge(billingHistory.billing_amount)
+		billingHistory.save()
+
+		conn = None
+		with connection.cursor() as cursor:
+			try:
+				for bankcode in BANKCODES:
+					field = "bank" + bankcode
+					cursor.execute("""UPDATE vacs_vact SET tr_amt = %s, trbegin_il = %s, trend_il = %s WHERE bank_cd = %s AND acct_no = %s;""", (billingHistory.billing_amount, start_billday, end_billday, bankcode, getattr(billingHistory.academy, field)))
+			except:
+				print "Error Occured"

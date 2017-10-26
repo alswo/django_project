@@ -41,4 +41,8 @@ app.conf.beat_schedule = {
 		'task': 'schedule.tasks.resetTodayLoad',
 		'schedule': crontab(hour=23, minute=30, day_of_week='sat'),
 	},
+       'update-penaltycharge': {
+		'task': 'institute.tasks.updatePenaltyCharge',
+		'schedule': crontab(hour=00, minute=01, day_of_month='16'),
+	},
 }
