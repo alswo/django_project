@@ -1,5 +1,4 @@
 <html>
-
 <head>
   {% load staticfiles %}
   <script src="{% static 'js/jquery-1.10.2.js' %}"></script>
@@ -201,7 +200,7 @@
       readonly_property + ' /></td><td data-name="name" class="inputTd"><input type="text" name="name[]" data-role="tagsinput" class="form-control" form="scheduleform" ' + readonly_property + ' value="{% for name in s.sname %}{{name}}{% include '
     comma.html ' %}{% endfor %}" /></td><td data-name="addstu"><button class="btn btn-primary glyphicon glyphicon-plus addstudent" data-toggle="modal" ' + display_none +
       '></button></td><td data-name="sid" class="inputSid" style="display:none;"><input name="sid[]" type="text" data-role="tagsinput" class="form-control" form="scheduleform" value="{% for sid in s.slist %}{{sid}}{% include '
-    comma.html ' %}{% endfor %}"/></td><td data-name="load"><select name="load[]" form="scheduleform" ' + display_none +
+    comma.html ' %}{% endfor %}"/></td><td data-name="load"><select class="loadSelect" name="load[]" form="scheduleform" ' + display_none +
       '><option value="">등하원</option><option value="1">등원</option><option value="0">하원</option></select></td><td data-name="del"><button name="del" class="btn btn-danger glyphicon glyphicon-remove row-remove" ' + display_none +
       '></button></td></tr>';
   }
@@ -371,6 +370,14 @@
     }
     sibling_sid.value = delete_sid
   });
+  
+  //등하원 첫번째 선택시 일괄 변화
+  $(document).on('change', '.loadSelect:eq(1)', function(e){
+    if($(this).val() == '0'){
+      $('.loadSelect').val('0')    
+    }else if($(this).val() == '1'){
+      $('.loadSelect').val('1')
+    }
+  });
 </script>
-
 </html>
