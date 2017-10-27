@@ -449,6 +449,17 @@
 
       var req = $('#' + iid + 'text').val();
       var memo = $('#' + iid + 'memo').val();
+      var weeklyFlag;
+
+      if( flag == '0'){
+      if(window.confirm('1,2,3주 전체 변경하시겠어요?')){
+          weeklyFlag = 1; 
+      }else{
+          weeklyFlag = 0;
+      }
+    }
+ 
+
       $.ajax({
         type: 'POST',
         url: 'reqInventory',
@@ -457,6 +468,7 @@
           req: req,
           memo: memo,
           flag: flag,
+          weeklyFlag: weeklyFlag
         },
         success: function(data) {
           $('#' + iid + 'text').val(data);
@@ -659,6 +671,7 @@
       }
       sibling_sid.value = delete_sid
     });
+    
     function updateInven(e){
       if(window.confirm('1,2,3주 전체 변경하시겠어요?')){
         $(e).parent().children("[name='option']").val(1)

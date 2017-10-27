@@ -36,9 +36,10 @@ def today_schedule_notification():
     for inventory in inventorys:
         scheduletables = ScheduleTable.objects.filter(iid = inventory.id)
         for scheduletable in scheduletables:
-            schedules.extend(scheduletable.slist)
-	    slist_list.extend(scheduletable.slist)
-            tflag_list.extend(scheduletable.tflag)
+			if len(scheduletable.slist) == len(scheduletable.tflag):
+           		    schedules.extend(scheduletable.slist)
+	    	 	    slist_list.extend(scheduletable.slist)
+            		    tflag_list.extend(scheduletable.tflag)
 
     for s in slist_list:
         try:
@@ -129,33 +130,31 @@ def send_msg(sid, pin, msg):
     url = 'https://fcm.googleapis.com/fcm/send'
     header = {'authorization': 'key=AAAAWVvmwNU:APA91bH0IjidQtMmX6q9SRVekZqzNmWKRR15mdjOFFAt05v3E7PziYRb7sLMbtCtNXZYyKrz--fKvoZdDY94yjOrH9G6z-axN7qWS7H5VMBRUy8Z6-dysdj9ZaCYrESl2wnIfOoSnh7X','content-type': 'application/json'}
     result = {}
-
     prop = PropOfDevice.objects.filter(pin_number = pin)
     for p in prop:
-        pushcheck = p.receivePush
-        fcm = FCMDevice.objects.filter(device_id = p.device_id)
-        for f in fcm:
-            token = f.registration_id
-            types = f.type
-
-            if pushcheck == False:
-                print ("he/she doesn't want to receive push message.")
-            else:
-                if types == 'android':
-                    payload = '{\n    "to" : "' + str(token) + '","priority" : "high", "content-available" : "true","collapse_key" : "Updates Available" ,"notification": {\t  "body" : "'+str(msg)+'","title" : "셔틀타요", "sound":"default"},\t}'
-                elif types == 'ios':
-                    payload = '{\n    "to" : "' + str(token) + '","priority" : "high", "content-available" : "true","collapse_key" : "Updates Available" ,"notification": {\t  "body" : "'+str(msg)+'", "sound":"default"},\t}'
-                try:
-                    sid = str(sid)
-                    response = requests.request('POST', url, data=payload, headers=header)
-                    try:
+	pushcheck = p.receivePush
+	fcm = FCMDevice.objects.filter(device_id = p.device_id)
+	for f in fcm:
+	    token = f.registration_id
+	    types = f.type
+	    if pushcheck == False:
+	        print ("he/she doesn't want to receive push message.")
+	    else:
+	        if types == 'android':
+	            payload = '{\n    "to" : "' + str(token) + '","priority" : "high", "content-available" : "true","collapse_key" : "Updates Available" ,"notification": {\t  "body" : "'+str(msg)+'","title" : "셔틀타요", "sound":"default"},\t}'
+		elif types == 'ios':
+		    payload = '{\n    "to" : "' + str(token) + '","priority" : "high", "content-available" : "true","collapse_key" : "Updates Available" ,"notification": {\t  "body" : "'+str(msg)+'", "sound":"default"},\t}'
+		try:
+	            sid = str(sid)
+		    response = requests.request('POST', url, data=payload, headers=header)
+		    try:
                         result = ast.literal_eval(response.text)
                         status = str(result['success'])
                         pushurl = 'http://api.edticket.com/fcmdev/pushConfirmInfo'
                         data = "pin="+pin+"&confirming="+response.text+"&status="+status+"&token="+token+"&sid="+sid
                         headers = {'content-type': "application/x-www-form-urlencoded"}
                         response = requests.request("POST", pushurl, data=data, headers=headers)
-                    except:
+		    except:
                         print "msg check error"
-                except:
-                    print ("msg send error")
+		except:
+                    print "msg send error"
