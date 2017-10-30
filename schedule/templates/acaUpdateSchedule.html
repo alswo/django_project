@@ -489,13 +489,21 @@
 
     function moveCarInven(contactId) {
       carname = $('#move' + contactId).val()
-      iid = contactId
+      iid = contactId 
+      var flag;
+
+    if(window.confirm('1,2,3주 전체 변경하시겠어요?')){
+      flag = 'all';
+    }else{
+      flag = 'single';
+    }
       $.ajax({
         type: 'POST',
         url: 'moveCarInven',
         data: {
           iid: iid,
-          carname: carname
+          carname: carname,
+          flag: flag
         },
         success: function(data) {
           alert(data + '차량으로 이동 완료')
@@ -507,12 +515,21 @@
     function moveCarEditedInven(contactId) {
       carname = $('#move' + contactId).val()
       iid = contactId
+      var flag;
+
+      if(window.confirm('1,2,3주 전체 변경하시겠어요?')){
+        flag = 'all';
+      }else{
+        flag = 'single';
+      }
+ 
       $.ajax({
         type: 'POST',
         url: 'moveCarEditedInven',
         data: {
           iid: iid,
-          carname: carname
+          carname: carname,
+          flag: flag
         },
         success: function(data) {
           alert(data + '차량으로 이동 완료')
