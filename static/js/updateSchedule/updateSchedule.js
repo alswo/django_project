@@ -45,11 +45,12 @@ window.onload = function(){
       })
 
       $(document).on('change','#academyselect',function() {
+        aid = this.value
         $.ajax({
           type: 'POST',
           url: 'studentLoad',
           data: {
-            aid: this.value,
+            aid: aid,
           },
           success: function(data) {
             console.log(data)
@@ -62,6 +63,26 @@ window.onload = function(){
           }
         });
       })
+
+      $(document).on('click', '.addstudent', function() {
+      $.ajax({
+        type: 'POST',
+        url: 'studentLoad',
+        data: {
+          aid: aid,
+        },
+        success: function(data) {
+          console.log(data)
+          tempTag = ""
+          for (i = 0; i < data.length; i++) {
+            tempTag = tempTag + "<option value=" + data[i]['pk'] + ">" + data[i]['fields']['sname'] + "</option>"
+          }
+          document.getElementById('studentList').innerHTML = tempTag
+          $('#studentList').selectpicker('refresh');
+        }
+      });
+    })
+
 
       $( ".table-body" ).sortable({
          update: function( event, ui ){
