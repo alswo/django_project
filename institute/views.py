@@ -22,6 +22,9 @@ from institute.models import BillingHistorySetting
 from django.contrib.auth.models import User
 from django.http import JsonResponse
 from import_export import resources
+import xlwt
+import xlrd
+from institute.forms import XlsInputForm
 
 # Create your views here.
 BANKCODES = ['003', '004', '011', '020', '027', '071', '081', '088']
@@ -962,17 +965,65 @@ def getBillingHistorySettingList(request):
 	return JsonResponse(jsonObj)
 
 @login_required
-def exportStudents(request):
-	studentinfo_resource = StudentInfoResource()
-	queryset = StudentInfo.objects.all()
-	dataset = studentinfo_resource.export(queryset)
-	
-	response = HttpResponse(dataset.xls, content_type='application/vnd.ms-excel')
+def exportStudentList(request):
+	response = HttpResponse(content_type='application/vnd.ms-excel')
 	response['Content-Disposition'] = 'attachment; filename="student.xls"'
 
+	workbook = xlwt.Workbook(encoding='utf-8')
+	workbook.default_style.font.height = 20 * 11 # 11pt
+
+	worksheet = workbook.add_sheet(u'학생리스트')
+
+	font_style = xlwt.easyxf('font: height 280, bold on')
+	worksheet.row(0).set_style(font_style)
+
+	studentList = StudentInfo.objects.all()
+	row = 0
+	worksheet.write(row, 0, u'학원')
+	worksheet.write(row, 1, u'이름')
+	worksheet.write(row, 2, u'부모님전화번호')
+	worksheet.write(row, 3, u'조부모님전화번호')
+	worksheet.write(row, 4, u'학생전화번호')
+	worksheet.write(row, 5, u'돌봄전화번호')
+	row += 1
+	for student in studentList:
+		worksheet.write(row, 0, student.aid.name)
+		worksheet.write(row, 1, student.sname)
+		worksheet.write(row, 2, student.parents_phonenumber)
+		worksheet.write(row, 3, student.grandparents_phonenumber)
+		worksheet.write(row, 4, student.self_phonenumber)
+		worksheet.write(row, 5, student.care_phonenumber)
+		if (student.birth_year):
+			worksheet.write(row, 6, timezone.now().year - int(student.birth_year) + 1)
+		row += 1
+
+	workbook.save(response)
+	
 	return response
 
-class StudentInfoResource(resources.ModelResource):
-	class Meta:
-		model = StudentInfo
-		exclude = ('personinfo', 'deleted_date', 'created_time', 'sended_time')
+
+@login_required
+@csrf_exempt
+def importStudentList(request):
+	if request.method == 'POST':
+		form = XlsInputForm(request.POST, request.FILES)
+		if form.is_valid():
+			input_excel = request.FILES['input_excel']
+			workbook = xlrd.open_workbook(file_contents = input_excel.read(), encoding_override = 'utf8')
+			worksheet = workbook.sheet_by_index(0)
+			nrows = worksheet.nrows
+
+			for row_num in range(nrows):
+				worksheet.row_values(row_num)
+
+		return HttpResponse("Success")
+			#return render(request, 'importStudentList.html', {'rows': rows});
+	else:
+		form = XlsInputForm()
+
+	return HttpResponse("Error")
+	#return render(request, 'importStudentList.html', {'form': form});
+
+@login_required
+def importStudentListForm(request):
+	return render(request, 'importStudentListForm.html');
