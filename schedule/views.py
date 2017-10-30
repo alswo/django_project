@@ -1546,19 +1546,58 @@ def getRealtimeLocation(request):
 def moveCarInven(request):
     if request.method == 'POST':
         iid = request.POST.get('iid')
-        carname = request.POST.get('carname')
-        Inventory.objects.filter(id = iid).update(carnum = carname)
+        carnum = request.POST.get('carname')
+        flag = request.POST.get('flag')
 
-    return HttpResponse(carname)
+        if flag == 'all':
+            try:
+                Inventory.objects.filter(id = iid).update(carnum = carnum)
+            except Inventory.DoesNotExist:
+                pass
+
+            try:
+                eInven = EditedInven.objects.filter(iid_id = iid)
+                for e in eInven:
+                    e.carnum = carnum
+                    e.save()
+ 
+            except EditedInven.DoesNotExist:
+                pass
+            
+        else:
+            Inventory.objects.filter(id = iid).update(carnum = carnum)
+
+    return HttpResponse(carnum)
 
 @csrf_exempt
 def moveCarEditedInven(request):
     if request.method == "POST":
         iid = request.POST.get('iid')
         carname = request.POST.get('carname')
+        flag = request.POST.get('flag')
 
-        EditedInven.objects.filter(id = iid).update(carnum = carname)
-
+        if flag == 'all':
+            try:
+                eInven = EditedInven.objects.get(id = iid)
+                iid_id = eInven.iid_id
+            except EditedInven.DoesNotExist:
+                pass
+           
+            try:
+                targetEditedInven = EditedInven.objects.filter(iid_id = iid_id)
+                for ei in targetEditedInven:
+                    ei.carnum = carname
+    
+                    ei.save()
+    
+            except EditedInven.DoesNotExist:
+                pass
+        else:
+            try:
+                EditedInven.objects.filter(id = iid).update(carnum = carname)
+            except EditedInven.DoesNotExist:
+                pass
+    
     return HttpResponse(carname)
 
 @csrf_exempt

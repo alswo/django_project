@@ -282,6 +282,7 @@
         bid : bid,
       },
       success: function(data) {
+        console.log(bid)
         tempTag = "<option vlaue='default' selected>학원선택</option>"
         for (i = 0; i < data.length; i++) {
           tempTag = tempTag + "<option value=" + data[i]['pk'] + ">" + data[i]['fields']['name'] + "</option>"

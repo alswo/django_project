@@ -574,10 +574,8 @@ def studentInfo(request):
 @csrf_exempt
 def profileInfo(request):
     if request.method == "POST":
-        areaid = request.POST.get('bid')
-        branch = Branch.objects.filter(areaid__in = areaid)
-        temp_bid = [ b.id for b in branch]
-        aca = Academy.objects.filter(bid__in = temp_bid)
+        bid = int(request.POST.get('bid'))
+        aca = Academy.objects.filter(bid = bid)
         data = serialize('json', aca)
 
         return HttpResponse(data, content_type="application/json") 
