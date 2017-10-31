@@ -51,7 +51,7 @@
  }
  .jb-th-6 {
 
-   margin: 0 auto;
+
    text-align: left;
 
   }
@@ -131,7 +131,7 @@ table.dataTable tbody td.no-padding {
 
              </tfoot>
            </table>
-           {% if user.username == 'cto' and 'ceo' and 'cco' %}
+           {% if user.username == 'cto' %}
            <div class="row">
                <div class="col-md-8"></div>
                <div class="col-md-4">
@@ -159,21 +159,20 @@ function format ( d ) {
 }
 
 var dataSet = [
- {% for coms in com %}
- [
-       "{{coms.id}}",
-       "{{coms.complain}}",
-       "{{coms.aname}}",
-       "{{coms.showdate}}",
-       "{{coms.plan | linebreaks}}" ,
-],
- {% endfor %}
+{% spaceless %}
+ {% for coms in com %}[ "{{coms.id}}","{{coms.complain}}","{{coms.aname}}","{{coms.showdate}}","{{coms.plan | linebreaks}}"],{% endfor %}
+{% endspaceless %}
+
+
 ];
 
 $(document).ready(function() {
 
  var table = $('#communityListTable').DataTable({
+   "scrollY":        "600px",
+          "scrollCollapse": true,
 
+          "lengthMenu": [5],
    data : dataSet,
    columns : [
                { title : "번호" },
@@ -181,7 +180,7 @@ $(document).ready(function() {
                { title : "작성자" },
                { title : "작성일" },
          ],
-        "lengthMenu": [10, 25, 50, 100],
+
 
 });
 

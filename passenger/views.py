@@ -574,8 +574,10 @@ def studentInfo(request):
 @csrf_exempt
 def profileInfo(request):
     if request.method == "POST":
-        bid = int(request.POST.get('bid'))
-        aca = Academy.objects.filter(bid = bid)
+        areaid = request.POST.get('bid')
+        branch = Branch.objects.filter(areaid__in = areaid)
+        temp_bid = [ b.id for b in branch]
+        aca = Academy.objects.filter(bid__in = temp_bid)
         data = serialize('json', aca)
 
         return HttpResponse(data, content_type="application/json")
@@ -701,7 +703,7 @@ def notice(request):
         aname = request.POST.get('aname')
         complain = request.POST.get('complain')
         plan = request.POST.get('plan')
-
+        
         t = timeToDate()
         toDate = t.timeToYmd()
         c = Community(aname=aname, complain=complain, plan=plan,showdate = toDate,clike=0,dlike=0,disuser=[],disuserid=[],likeuserid=[],likeuser=[])
