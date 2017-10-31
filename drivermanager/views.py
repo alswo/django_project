@@ -6,6 +6,7 @@ from django.core import serializers
 from passenger.models import Profile, StudentInfo
 from schedule.models import Inventory, ScheduleTable, Branch, Area, Car
 from institute.models import BillingHistorySetting
+from drivermanager.models import Salary
 import datetime
 from collections import defaultdict
 from django.views.decorators.csrf import csrf_exempt
@@ -315,5 +316,46 @@ def car_sales_status(request):
 
             return HttpResponse(json.dumps(contacts))
 
+
+
+@login_required
+@user_passes_test(is_not_drivermanager, login_url='/', redirect_field_name=None)
+@csrf_exempt
+def salary_management(request):
+    if request.method == 'GET':
+        if request.user.is_superuser:
+            if request.GET.get('aid'):
+                aid = int(request.GET.get('aid'))
+            else:
+                aid = -1
+
+            if request.GET.get('bid'):
+                bid = int(request.GET.get('bid'))
+            else:
+                bid = -1
+
+            area = Area.objects.all()
+            if aid > 0:
+                if bid > 0:
+                    branch = Branch.objects.filter(areaid=aid)
+                    car = Car.objects.filter(branchid_id = bid)
+
+                    return render_to_response('salaryManagement.html', {'area':area, 'branch':branch, 'car' : car, 'aid':aid, 'bid':bid, 'user':request.user})
+
+                else:
+                    branch = Branch.objects.filter(areaid=aid)                
+
+                    return render_to_response('salaryManagement.html', {'area':area, 'branch':branch, 'aid':aid, 'user':request.user})
+    
+            else:
+                return render_to_response('salaryManagement.html', {'area':area, 'user':request.user})
+        else:
+                                                                              
+            return render_to_response('salaryManagement.html', {'user':request.user})
+    elif request.method == 'POST':
+        carnum = int(request.POST.get('car'))
+        salary = Salary.objects.filter(carnum_id = carnum)
+
+        return HttpResponse(json.dumps(salary))
 
  

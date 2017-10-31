@@ -418,6 +418,8 @@
 </div>
 <br> {% endfor %}
 <script>
+  //학생리스트 리셋을 위한 글로벌 aid
+  var aid;
   $(document).on('click', '.addrow', function() {
     id = $(this).attr('id')
     console.log(id)
@@ -441,7 +443,7 @@
 
     if( flag == '0'){
       if(window.confirm('1,2,3주 전체 변경하시겠어요?')){
-          weeklyFlag = 1; 
+          weeklyFlag = 1;
       }else{
           weeklyFlag = 0;
       }
@@ -474,13 +476,22 @@
 
   function moveCarInven(contactId) {
     carname = $('#move' + contactId).val()
+    var flag;
+
+    if(window.confirm('1,2,3주 전체 변경하시겠어요?')){
+      flag = 'all';
+    }else{
+      flag = 'single';
+    }
+
     iid = contactId
     $.ajax({
       type: 'POST',
       url: 'moveCarInven',
       data: {
         iid: iid,
-        carname: carname
+        carname: carname,
+        flag : flag
       },
       success: function(data) {
         alert(data + '차량으로 이동 완료')
@@ -492,14 +503,25 @@
   function moveCarEditedInven(contactId) {
     carname = $('#move' + contactId).val()
     iid = contactId
+
+    var flag;
+
+    if(window.confirm('1,2,3주 전체 변경하시겠어요?')){
+      flag = 'all';
+    }else{
+      flag = 'single';
+    }
+
     $.ajax({
       type: 'POST',
       url: 'moveCarEditedInven',
       data: {
         iid: iid,
+        flag: flag,
         carname: carname
       },
       success: function(data) {
+        console.log(data)
         alert(data + '차량으로 이동 완료')
         window.location.replace(window.location.href);
       }
@@ -508,11 +530,6 @@
 
   function validateSearchForm() {
     var num = /^\d+$/;
-
-    //if (document.forms["searchform"]["area"].selectedIndex < 1) {
-    //alert("지역, 지점을 선택해 주세요.")
-    //return false;
-    //} else
     if (document.forms["searchform"]["time"].value != '') {
       if (num.test(document.forms["searchform"]["time"].value) == false) {
         alert("시간은 숫자만 입력해 주세요.(예:1500)")
@@ -587,71 +604,6 @@
     });
   }
 
-  window.onload = function() {
-    $(".table-schedule").on('click', '.row-remove', function(event) {
-      $(this).parent().parent().remove();
-    });
-
-    $('#areaSelected').on('change', function() {
-      // updateflag = 1 -> select area;
-      $.ajax({
-        type: 'POST',
-        url: 'updateSchedule',
-        data: {
-          area: this.value,
-          updateflag: 1,
-        },
-        success: function(data) {
-          console.log(data)
-          tempTag = "<option vlaue='default' selected>지점선택</option>"
-          for (i = 0; i < data.length; i++) {
-            tempTag = tempTag + "<option value=" + data[i]['pk'] + ">" + data[i]['fields']['bname'] + "</option>"
-          }
-          document.getElementById('branch').innerHTML = tempTag
-        }
-      });
-    })
-
-    $('#branch').on('change', function() {
-      // updateflag = 1 -> select area;
-      $.ajax({
-        type: 'POST',
-        url: 'acaUpdateSchedule',
-        data: {
-          branch: this.value,
-          acaSelected: 1,
-        },
-        success: function(data) {
-          console.log(data)
-          tempTag = ""
-          for (i = 0; i < data.length; i++) {
-            tempTag = tempTag + "<option value=" + data[i]['pk'] + ">" + data[i]['fields']['name'] + "</option>"
-          }
-          document.getElementById('academy_branch').innerHTML = tempTag
-          $('#academy_branch').selectpicker('refresh');
-        }
-      });
-    })
-
-    $(document).on('change', '#academyselect', function() {
-      $.ajax({
-        type: 'POST',
-        url: 'studentLoad',
-        data: {
-          aid: this.value,
-        },
-        success: function(data) {
-          console.log(data)
-          tempTag = ""
-          for (i = 0; i < data.length; i++) {
-            tempTag = tempTag + "<option value=" + data[i]['pk'] + ">" + data[i]['fields']['sname'] + "</option>"
-          }
-          document.getElementById('studentList').innerHTML = tempTag
-          $('#studentList').selectpicker('refresh');
-        }
-      });
-    })
-
     function validateSearchForm() {
       var num = /^\d+$/;
 
@@ -700,16 +652,6 @@
       }
 
     }
-
-    $(".table-body").sortable({
-      update: function(event, ui) {
-        $(this).children().each(function(index) {
-          $(this).find('td')
-        });
-      }
-    });
-
-  }
 
   $('input:checkbox').click(function() {
     var checked = $(this).is(':checked');
@@ -825,5 +767,6 @@
       $(e).parent().children("[name='option']").val(0)
     }
   }
+
 </script>
 {% endblock content %}

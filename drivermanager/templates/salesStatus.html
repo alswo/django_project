@@ -11,14 +11,12 @@
   .axis {  font: 10px sans-serif; }
   .legend tr{    border-bottom:1px solid grey; }
   .legend tr:first-child{    border-top:1px solid grey; }
-
   .axis path,
   .axis line {
     fill: none;
     stroke: #000;
     shape-rendering: crispEdges;
   }
-
   .x.axis path {  display: none; }
   .legend{
     margin-bottom:76px;
@@ -35,16 +33,16 @@
     width:50px;
   }
 </style>
-<input id="aid" type="hidden" value="{{aid}}"></input> 
+<input id="aid" type="hidden" value="{{aid}}"></input>
 <input id="bid" type="hidden" value="{{bid}}"></input>
-{% if user.is_superuser %} 
+{% if user.is_superuser %}
 <div class="row" align="center">
   {% for a in area %}
     {% if aid == a.id %}
       <a href="carSalesStatus?aid={{a.id}}" type="button" class="btn btn-primary">{{a.name}}</a>
     {% else %}
       <a href="carSalesStatus?aid={{a.id}}" type="button" class="btn btn-default">{{a.name}}</a>
-    {% endif %}  
+    {% endif %}
   {% endfor %}
 </div>
 {% endif %}
@@ -55,7 +53,7 @@
       <a href="carSalesStatus?aid={{aid}}&bid={{b.id}}" type="button" class="btn btn-info">{{b.bname}}</a>
     {% else %}
       <a href="carSalesStatus?aid={{aid}}&bid={{b.id}}" type="button" class="btn btn-default">{{b.bname}}</a>
-    {% endif %}  
+    {% endif %}
   {% endfor %}
 </div>
 <div class="row">
@@ -72,8 +70,13 @@
   </div>
 </div>
 <br>
-<canvas id="salesChart" width="400" height="400"></canvas>
-<br>
+<div class="row">
+  <div class="col-md-8">
+    <canvas id="salesChart" width="200" height="100"></canvas>
+  </div>
+  <div class="col-md-4">
+  </div>
+</div>
 <script>
   $(".select-car").change(function(e){
     var car = this.value
@@ -90,7 +93,6 @@
       }
     })
   });
-
  function setBarChart(salesData){
      var ctx = document.getElementById("salesChart");
      var label = [];
@@ -104,7 +106,7 @@
         data: {
             labels : label,
             label: "Sales (won)",
-            datasets: [{ data : sales }] 
+            datasets: [{ data : sales }]
         },
         options: {
             legend: { display: false },
@@ -122,6 +124,5 @@
         }
     });
 }
-
 </script>
 {% endblock content %}

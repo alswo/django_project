@@ -316,7 +316,7 @@
                   </td>
                   <td data-name="del" class="text-center tdstyle3"><button name="del" class="btn btn-sm btn-danger glyphicon glyphicon-remove row-remove"></button></td>
                 </tr>
-                {% endfor %} 
+                {% endfor %}
                 {% elif c.editedscheduletables %}
                 <select class="moveCarList">
                   {% for car in carlist %}
@@ -429,6 +429,8 @@
     </div>
     <br> {% endfor %}
     <script>
+    //학생리스트 리셋을 위한 글로벌 aid
+    var aid;
     $(document).on('click', '.addrow', function() {
       id = $(this).attr('id')
       console.log(id)
@@ -449,6 +451,17 @@
 
       var req = $('#' + iid + 'text').val();
       var memo = $('#' + iid + 'memo').val();
+      var weeklyFlag;
+
+      if( flag == '0'){
+      if(window.confirm('1,2,3주 전체 변경하시겠어요?')){
+          weeklyFlag = 1;
+      }else{
+          weeklyFlag = 0;
+      }
+    }
+
+
       $.ajax({
         type: 'POST',
         url: 'reqInventory',
@@ -457,6 +470,7 @@
           req: req,
           memo: memo,
           flag: flag,
+          weeklyFlag: weeklyFlag
         },
         success: function(data) {
           $('#' + iid + 'text').val(data);
@@ -475,13 +489,21 @@
 
     function moveCarInven(contactId) {
       carname = $('#move' + contactId).val()
-      iid = contactId
+      iid = contactId 
+      var flag;
+
+    if(window.confirm('1,2,3주 전체 변경하시겠어요?')){
+      flag = 'all';
+    }else{
+      flag = 'single';
+    }
       $.ajax({
         type: 'POST',
         url: 'moveCarInven',
         data: {
           iid: iid,
-          carname: carname
+          carname: carname,
+          flag: flag
         },
         success: function(data) {
           alert(data + '차량으로 이동 완료')
@@ -493,12 +515,21 @@
     function moveCarEditedInven(contactId) {
       carname = $('#move' + contactId).val()
       iid = contactId
+      var flag;
+
+      if(window.confirm('1,2,3주 전체 변경하시겠어요?')){
+        flag = 'all';
+      }else{
+        flag = 'single';
+      }
+ 
       $.ajax({
         type: 'POST',
         url: 'moveCarEditedInven',
         data: {
           iid: iid,
-          carname: carname
+          carname: carname,
+          flag: flag
         },
         success: function(data) {
           alert(data + '차량으로 이동 완료')
@@ -659,6 +690,7 @@
       }
       sibling_sid.value = delete_sid
     });
+
     function updateInven(e){
       if(window.confirm('1,2,3주 전체 변경하시겠어요?')){
         $(e).parent().children("[name='option']").val(1)
