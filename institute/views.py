@@ -29,6 +29,10 @@ from institute.forms import XlsInputForm
 # Create your views here.
 BANKCODES = ['003', '004', '011', '020', '027', '071', '081', '088']
 
+TAYO_SUCCESS = 200
+TAYO_ERROR_SAME_PERSON = 400
+TAYO_ERROR_SAVE_FAILURE = 500
+
 class BeautifyStudent :
 	def __init__(self):
 		self.info = ''
@@ -151,6 +155,58 @@ def updateStudentsForm(request):
 		beautifyStudent.billing_date = int(student.billing_date)
 	return render(request, 'addUpdateStudentsForm.html', {'student': beautifyStudent})
 
+def funcAddStudent(academy_name, student_name, p_number, g_number, s_number, c_number, age):
+	if academy_name:
+		academy_name.strip()
+
+	if student_name:
+		student_name.strip()
+
+	if p_number:
+		p_number = str(p_number)
+		p_number.strip()
+	
+	if g_number:
+		g_number = str(g_number)
+		g_number.strip()
+	
+	if s_number:
+		s_nubmer = str(s_number)
+		s_number.strip()
+	
+	if c_number:
+		c_number = str(c_number)
+		c_number.strip()
+
+	if age:
+		age = str(age)
+		age.strip()
+
+	academy = Academy.objects.get(name = academy_name)
+	parents_phonenumber = CleanPhoneNumber(p_number)
+	grandparents_phonenumber = CleanPhoneNumber(g_number)
+	self_phonenumber = CleanPhoneNumber(s_number)
+	care_phonenumber = CleanPhoneNumber(c_number)
+	birth_year = None
+	if (age):
+		birth_year = str(timezone.now().year - int(float(age)) + 1)
+
+	students = StudentInfo.objects.filter(aid = academy)
+	studentinfo = StudentInfo(sname = student_name, aid = academy, parents_phonenumber = parents_phonenumber, grandparents_phonenumber = grandparents_phonenumber, self_phonenumber = self_phonenumber, care_phonenumber = care_phonenumber, birth_year = birth_year)
+
+	for student in students:
+		if findSamePerson(student, studentinfo):
+			return TAYO_ERROR_SAME_PERSON
+
+	if (studentinfo.parents_phonenumber or studentinfo.grandparents_phonenumber or studentinfo.self_phonenumber) :
+		rv = saveNewPersonInfo2(studentinfo)
+		if (rv == False):
+			return TAYO_ERROR_SAVE_FAILURE
+
+	studentinfo.save()
+
+	return TAYO_SUCCESS
+
 @csrf_exempt
 @login_required
 def addStudent(request):
@@ -158,6 +214,8 @@ def addStudent(request):
 		institute = request.session.get('institute', None)
 	else :
 		institute = request.user.first_name
+
+	academy = None
 
 	if institute:
 		try:
@@ -167,66 +225,16 @@ def addStudent(request):
 	else:
 		return render(request, 'message.html', {'msg': "학원 권한이 필요합니다.", 'redirect_url': request.META.get('HTTP_REFERER')})
 
-	bname = Branch.objects.get(id=academy.bid).bname
-	academy = Academy.objects.get(name=institute)
-	sname = request.POST.get('sname')
-	if sname:
-		sname.strip()
-	parents_phonenumber = CleanPhoneNumber(request.POST.get('parents_phonenumber'))
-	grandparents_phonenumber = CleanPhoneNumber(request.POST.get('grandparents_phonenumber'))
-	self_phonenumber = CleanPhoneNumber(request.POST.get('self_phonenumber'))
-	care_phonenumber = CleanPhoneNumber(request.POST.get('care_phonenumber'))
-	age = request.POST.get('age')
-	billing_date = request.POST.get('billing_date')
-	birth_year = None
-	if age:
-		birth_year = str(timezone.now().year - int(age) + 1)
+	
+	rv = funcAddStudent(institute, request.POST.get('sname'), request.POST.get('parents_phonenumber'), request.POST.get('grandparents_phonenumber'), request.POST.get('self_phonenumber'), request.POST.get('care_phonenumber'), request.POST.get('age'))
+	if (rv == TAYO_ERROR_SAME_PERSON):
+		return render(request, 'message.html', {'msg': "동일한 학생이 존재합니다.", 'redirect_url': request.META.get('HTTP_REFERER')})
+	elif (rv == TAYO_ERROR_SAVE_FAILURE):
+		return render(request, 'message.html', {'msg': '학원생 추가 실패했습니다. error : Too many retry for make random pin_number', 'redirect_url': request.META.get('HTTP_REFERER')})
 
-	birmon = request.POST.get('birmon')
-	birday = request.POST.get('birday')
-
-	if (birmon and birday):
-		birthday = '%02d%02d' % (int(birmon), int(birday))
-
-	students = StudentInfo.objects.filter(aid=academy)
-	studentinfo = StudentInfo(sname=sname, aid=academy, parents_phonenumber=parents_phonenumber, grandparents_phonenumber=grandparents_phonenumber, self_phonenumber=self_phonenumber, care_phonenumber=care_phonenumber, birth_year=birth_year, billing_date=billing_date)
-
-	# same person in the same academy
-	for student in students:
-		if findSamePerson(student, studentinfo):
-			return render(request, 'message.html', {'msg': "동일한 학생이 존재합니다.", 'redirect_url': request.META.get('HTTP_REFERER')})
-
-
-	if (studentinfo.parents_phonenumber or studentinfo.grandparents_phonenumber or studentinfo.self_phonenumber) :
-		rv = saveNewPersonInfo2(studentinfo)
-		if (rv == False):
-			return render(request, 'message.html', {'msg': '학원생 추가 실패했습니다. error : Too many retry for make random pin_number', 'redirect_url': request.META.get('HTTP_REFERER')})
-		#rv = True
-		# for PersonalINfo
-		# same person in another academy
-		#try:
-			#found = False
-			#anotherStudents = StudentInfo.objects.filter(bid = studentinfo.bid)
-			#for anotherStudent in anotherStudents:
-				#if findSamePerson(studentinfo, anotherStudent):
-					#studentinfo.personinfo = anotherStudent.personinfo
-					#found = True
-					#break
-			#if (found == False):
-				#rv = saveNewPersonInfo2(studentinfo)
-
-		#except StudentInfo.DoesNotExist:
-			# add PersnoalInfo if there is no record
-			#rv = saveNewPersonInfo2(studentinfo)
-
-		#if (rv == False):
-			#return render(request, 'message.html', {'msg': '학원생 추가 실패했습니다. error : Too many retry for make random pin_number', 'redirect_url': request.META.get('HTTP_REFERER')})
-
-	studentinfo.save()
 
 	return render(request, 'message.html', {'msg': "학원생 추가 성공했습니다.", 'redirect_url': request.META.get('HTTP_REFERER')})
-	#return redirect(addStudentsForm)
-
+		
 @csrf_exempt
 @login_required
 def updateStudent(request):
@@ -246,10 +254,10 @@ def updateStudent(request):
 			noPersoninfo = True
 
 		student.sname = request.POST.get('sname')
-		student.parents_phonenumber = request.POST.get('parents_phonenumber')
-		student.grandparents_phonenumber = request.POST.get('grandparents_phonenumber')
-		student.self_phonenumber = request.POST.get('self_phonenumber')
-		student.care_phonenumber = request.POST.get('care_phonenumber')
+		student.parents_phonenumber = CleanPhoneNumber(request.POST.get('parents_phonenumber'))
+		student.grandparents_phonenumber = CleanPhoneNumber(request.POST.get('grandparents_phonenumber'))
+		student.self_phonenumber = CleanPhoneNumber(request.POST.get('self_phonenumber'))
+		student.care_phonenumber = CleanPhoneNumber(request.POST.get('care_phonenumber'))
 		if (request.POST.get('age')):
 			age = int(request.POST.get('age'))
 			student.birth_year = str(timezone.now().year - age + 1)
@@ -966,6 +974,15 @@ def getBillingHistorySettingList(request):
 
 @login_required
 def exportStudentList(request):
+	rv = checkAuth(request)
+	if rv != None :
+		return rv
+
+	if request.user.is_staff :
+		institute = request.session.get('institute', None)
+	else :
+		institute = request.user.first_name
+
 	response = HttpResponse(content_type='application/vnd.ms-excel')
 	response['Content-Disposition'] = 'attachment; filename="student.xls"'
 
@@ -977,7 +994,7 @@ def exportStudentList(request):
 	font_style = xlwt.easyxf('font: height 280, bold on')
 	worksheet.row(0).set_style(font_style)
 
-	studentList = StudentInfo.objects.all()
+	studentList = StudentInfo.objects.filter(aid__name = institute)
 	row = 0
 	worksheet.write(row, 0, u'학원')
 	worksheet.write(row, 1, u'이름')
@@ -985,6 +1002,7 @@ def exportStudentList(request):
 	worksheet.write(row, 3, u'조부모님전화번호')
 	worksheet.write(row, 4, u'학생전화번호')
 	worksheet.write(row, 5, u'돌봄전화번호')
+	worksheet.write(row, 6, u'나이')
 	row += 1
 	for student in studentList:
 		worksheet.write(row, 0, student.aid.name)
@@ -1005,24 +1023,50 @@ def exportStudentList(request):
 @login_required
 @csrf_exempt
 def importStudentList(request):
+	rv = checkAuth(request)
+
+	if request.user.is_staff :
+		institute = request.session.get('institute', None)
+	else :
+		institute = request.user.first_name
+
 	if request.method == 'POST':
 		form = XlsInputForm(request.POST, request.FILES)
+		msg = ''
+		same_person = 0
+		nrows = 0
 		if form.is_valid():
 			input_excel = request.FILES['input_excel']
 			workbook = xlrd.open_workbook(file_contents = input_excel.read(), encoding_override = 'utf8')
 			worksheet = workbook.sheet_by_index(0)
 			nrows = worksheet.nrows
 
-			for row_num in range(nrows):
-				worksheet.row_values(row_num)
+			for row_num in range(nrows) :
+				if (row_num != 0) :
+					values = worksheet.row_values(row_num)
+					if len(values) != 7 :
+						return render(request, 'message.html', {'msg': 'excel file 의 format 이 정상적이지 않습니다.', 'redirect_url': request.META.get('HTTP_REFERER')})
+					if (values[0] != institute) :
+						return render(request, 'message.html', {'msg': 'excel file 의 format 이 정상적이지 않습니다.', 'redirect_url': request.META.get('HTTP_REFERER')})
 
-		return HttpResponse("Success")
-			#return render(request, 'importStudentList.html', {'rows': rows});
-	else:
-		form = XlsInputForm()
+			for row_num in range(nrows) :
+				if (row_num != 0) :
+					values = worksheet.row_values(row_num)
+					# values[0] = 학원명
+					rv = funcAddStudent(*values)
+					if (rv == TAYO_ERROR_SAME_PERSON):
+						same_person += 1
+						#return render(request, 'message.html', {'msg': str(row_num) + "번째 row : 동일한 학생이 존재합니다.", 'redirect_url': request.META.get('HTTP_REFERER')})
+					elif (rv == TAYO_ERROR_SAVE_FAILURE):
+						return render(request, 'message.html', {'msg': str(row_num) + '번째 row : 학원생 추가 실패했습니다. error : Too many retry for make random pin_number', 'redirect_url': request.META.get('HTTP_REFERER')})
+
+		if (same_person > 0):
+			msg = str(same_person) + '명의 중복 사용자가 존재합니다. '
+
+		msg += str(nrows-1-same_person) + '명의 신규 학원생 추가 성공했습니다.'
+		return render(request, 'message.html', {'msg': msg, 'redirect_url': request.META.get('HTTP_REFERER')})
 
 	return HttpResponse("Error")
-	#return render(request, 'importStudentList.html', {'form': form});
 
 @login_required
 def importStudentListForm(request):
