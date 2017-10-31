@@ -211,25 +211,29 @@ function callNumber(num){
 // }
 
 function todayLoad(sid,stableid){
+    if(window.confirm('정말 적용하세요?')){
+        var btnid = sid+''+stableid
 
-    var btnid = sid+''+stableid
-
-    $.ajax({
-      url:"/inventory/todayLoad",
-      type:"POST",
-      data:{
-        sid: sid,
-        stableid: stableid,
-      },
-      success: function(data){
-          if(data == 0){
-              $("#"+btnid).attr('class','load btn btn-small btn-default dropdown-toggle')
-          }
-          else if(data == 1){
-              $("#"+btnid).attr('class','load btn btn-small btn-primary dropdown-toggle')
-          }
-      }
-    });
+        $.ajax({
+            url:"/inventory/todayLoad",                                             
+            type:"POST",
+            data:{
+                sid: sid,
+                stableid: stableid,                                                   
+            },
+            success: function(data){                                                
+                if(data == 0){                                                      
+                    $("#"+btnid).attr('class','load btn btn-small btn-default dropdown-toggle')
+                }
+                else if(data == 1){                                                 
+                    $("#"+btnid).attr('class','load btn btn-small btn-primary dropdown-toggle')
+                }
+            }
+        });
+        
+    }else{
+        return false
+    }
 }
 
 function getCarPhone(e, cid,fc){

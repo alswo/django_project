@@ -1,0 +1,95 @@
+{% extends 'basic.html' %}
+{% block content %}
+{% if user.is_superuser %}
+<div class="row" align="center">
+  {% for a in area %}
+    {% if aid == a.id %}
+      <a href="salaryManagement?aid={{a.id}}" type="button" class="btn btn-primary">{{a.name}}</a>
+    {% else %}
+      <a href="salaryManagement?aid={{a.id}}" type="button" class="btn btn-default">{{a.name}}</a>
+    {% endif %}
+  {% endfor %}
+</div>
+{% endif %}
+<br>
+<div class="row" align="center">
+  {% for b in branch %}
+    {% if bid == b.id %}
+      <a href="salaryManagement?aid={{aid}}&bid={{b.id}}" type="button" class="btn btn-info">{{b.bname}}</a>
+    {% else %}
+      <a href="salaryManagement?aid={{aid}}&bid={{b.id}}" type="button" class="btn btn-default">{{b.bname}}</a>
+    {% endif %}
+  {% endfor %}
+</div>
+<div class="row">
+  <div class="col-md-2">
+    <div class="form-group">
+      <label>Car :</label>
+      <select class="form-control select-car">
+        <option selected>선택</option>
+        {% for c in car %}
+        <option value={{c.id}}>{{c.carname}}호차</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+</div>
+<br>
+<table id="" class="display" cellspacing="0" width="100%">
+        <thead>
+            <tr>
+                <th>날짜</th>
+                <th>동승자임금</th>
+                <th>기사임금</th>
+                <th>Etc</th>
+                <th>Etc 내용</th>
+                <th>저장</th>
+            </tr>
+        </thead>
+        <tfoot>
+            <tr>
+                <th>날짜</th>
+                <th>동승자임금</th>
+                <th>기사임금</th>
+                <th>Etc</th>
+                <th>Etc 내용</th>
+                <th>저장</th>
+            </tr>
+        </tfoot>
+        <tbody>
+        </tbody>
+</table>
+<script type="text/javascript">
+$(".select-car").change(function(e){
+  var car = this.value
+  $.ajax({
+    url: "salaryManagement",
+    type: "POST",
+    data: {
+      car : car
+    },
+    success: function(data){
+      var data = JSON.parse(data);
+      console.log(data)
+      //setTable(data);
+    }
+  })
+});
+
+function setTable(data) {
+  var dataSet = [
+    [
+      "<input type='text' name='date' value='{{s.payment_date}}'></input>",
+      "<input type='text' name='p_salary' value='{{s.p_salary}}'></input>",
+      "<input type='text' name='d_salary' value='{{s.d_salary}}'></input>",
+      "<input type='text' name='etc' value='{{s.etc}}'></input>",
+      "<input type='text' name='etc_content' value='{{s.etc_content}}'></input>",
+    ],
+  ];
+
+  $('table.display').DataTable({
+    data : dataSet,
+  });
+}
+</script>
+{% endblock content %}

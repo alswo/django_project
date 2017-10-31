@@ -40,6 +40,7 @@
   <script type="text/javascript" src="{% static 'js/shareRatio/liquidFillGauge.js' %}"></script>
   <link href="{% static 'css/dmSchedule/jquery.skeduler.css' %}" rel="stylesheet">
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.0/Chart.min.js"></script>
+
   <style>
     .entry:not(:first-of-type) {
       margin-top: 10px;
@@ -52,7 +53,7 @@
     .input-div {
       padding: 0;
     }
-    
+
   </style>
 
   <style>
@@ -138,7 +139,12 @@
                 <!--<li><a href="/drivermanager/addStudentsForm">추가</a></li>-->
               </ul>
             </li>
-
+            <li class="dorpdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">급여<span class="caret"></span></a>
+              <ul class="dropdown-menu">
+                <li><a href="salaryManagement">관리</a></li>
+              </ul>
+            </li>
             <li class="dorpdown">
               <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">통계<span class="caret"></span></a>
               <ul class="dropdown-menu">
