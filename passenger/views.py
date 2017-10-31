@@ -1,6 +1,6 @@
 from django.shortcuts import render, render_to_response, redirect
 from django.template import RequestContext
-from passenger.models import Commute, Academy, Schedule, ShuttleSchedule, Group, ScheduleDate,Community,BillingHistory
+from passenger.models import Commute, Academy, Schedule, ShuttleSchedule, Group, ScheduleDate,Community
 from schedule.models import Branch, Car
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required, user_passes_test
@@ -10,8 +10,6 @@ from django.core.serializers import serialize
 from passenger.dateSchedule import timeToDate
 from django.utils.crypto import get_random_string
 from django.db import connection
-############
-from institute.models import BillingHistorySetting
 import json
 
 def is_not_driver(user):
@@ -687,3 +685,32 @@ def insertBanksAcademy():
         connection.commit()
         connection.close()
         a.save()
+
+@csrf_exempt
+@login_required
+def notice(request):
+    if request.method == "GET":
+        com = Community.objects.all()
+
+        return render(request, 'passenger/notice.html', {'com': com} );
+
+    elif request.method == "POST":
+        choice = request.POST.get('choice')
+        uid = request.POST.get('uid')
+        cid = request.POST.get('cid')
+        response_data = {}
+
+        aname = request.POST.get('aname')
+        complain = request.POST.get('complain')
+        plan = request.POST.get('plan')
+
+        t = timeToDate()
+        toDate = t.timeToYmd()
+        c = Community(aname=aname, complain=complain, plan=plan,showdate = toDate,clike=0,dlike=0,disuser=[],disuserid=[],likeuserid=[],likeuser=[])
+
+        c.save()
+
+
+        com = Community.objects.all()
+
+        return render(request, 'passenger/notice.html', {'com': com} );
