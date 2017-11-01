@@ -401,46 +401,47 @@ def getHistory(request):
     if (rv != None):
         return rv
 
-    carid = 0
-
     if request.method == 'GET':
     	aid = request.GET.get('aid')
     	daterange = request.GET.get('daterange')
         startdate = request.GET.get('startdate')
         enddate = request.GET.get('enddate')
-        carid = request.GET.get('carid')
+        carids = request.GET.getlist('carid[]')
         monthpick = request.GET.get('monthpick')
     elif request.method == 'POST':
     	aid = request.POST.get('aid')
     	daterange = request.POST.get('daterange')
         startdate = request.POST.get('startdate')
         enddate = request.POST.get('enddate')
-        carid = request.POST.get('carid')
+        carids = request.POST.getlist('carid[]')
         monthpick = request.POST.get('monthpick')
 
     billingHistorySettings = None
     total_uncollected = 0
     uncollectedes = []
 
-    if (aid != None and carid != None and monthpick != None):
-        academy = Academy.objects.get(id = aid)
-        billingHistorySettings = BillingHistorySetting.objects.filter(academy = academy, carid = carid, monthpick = monthpick)
-	if (carid == 'all'):
-		uncollectedHistories = BillingHistory.objects.filter(academy = academy, billing_il__isnull = True, billing_bank__isnull = True, month__lt = monthpick.replace('-', '')).order_by('month')
-		#uncollectedHistories = BillingHistory.objects.filter(academy = academy, billing_il__isnull = True, billing_bank__isnull = True).order_by('month')
-		for u in uncollectedHistories:
-			uncollected = Uncollected()
-			uncollected.month = u.month[:4] + '-' + u.month[4:] 
-			uncollected.billing_amount = "{:,}".format(u.billing_amount)
-			# 2% 연체이자, 10원단위 절사
-			additional_charge = int(u.billing_amount * 0.02 * diffMonth(monthpick, uncollected.month) / 100) * 100
-			uncollected.additional_charge = "{:,}".format(additional_charge)
-			uncollected.total_charge = "{:,}".format(u.billing_amount + additional_charge)
-			total_uncollected += u.billing_amount + additional_charge
-			uncollectedes.append(uncollected)
+	
+    if len(carids) == 0:
+        carid = 'all'
+    else:
+        carid = ':'.join(carids)
 
-    if (carid == None):
-        carid = "all"
+    if (aid != None and monthpick != None):
+        academy = Academy.objects.get(id = aid)
+
+        billingHistorySettings = BillingHistorySetting.objects.filter(academy = academy, carid = carid, monthpick = monthpick)
+	uncollectedHistories = BillingHistory.objects.filter(academy = academy, billing_il__isnull = True, billing_bank__isnull = True, month__lt = monthpick.replace('-', '')).order_by('month')
+	#uncollectedHistories = BillingHistory.objects.filter(academy = academy, billing_il__isnull = True, billing_bank__isnull = True).order_by('month')
+	for u in uncollectedHistories:
+		uncollected = Uncollected()
+		uncollected.month = u.month[:4] + '-' + u.month[4:] 
+		uncollected.billing_amount = "{:,}".format(u.billing_amount)
+		# 2% 연체이자, 10원단위 절사
+		additional_charge = int(u.billing_amount * 0.02 * diffMonth(monthpick, uncollected.month) / 100) * 100
+		uncollected.additional_charge = "{:,}".format(additional_charge)
+		uncollected.total_charge = "{:,}".format(u.billing_amount + additional_charge)
+		total_uncollected += u.billing_amount + additional_charge
+		uncollectedes.append(uncollected)
 
     if daterange is not None and daterange != '':
     	(startdate, enddate) = daterange.split(' - ')
@@ -633,9 +634,9 @@ def getHistory(request):
 
 
         rem = 0
-        if (carid != "all"):
+        if (len(carids) != 0):
             for dailyHistory in history:
-                dailyHistory.timehistory[:] = [x for x in dailyHistory.timehistory if x.carnum == int(carid)]
+                dailyHistory.timehistory[:] = [x for x in dailyHistory.timehistory if str(x.carnum) in carids]
 
     cur_year = datetime.datetime.now().year
     cur_month = datetime.datetime.now().month
@@ -656,7 +657,7 @@ def getHistory(request):
 
 
 
-    return render(request, 'getHistory.html', {"history": history, "academy" : academy, 'total_count': total_count, 'startdate': startdate, 'enddate': enddate, 'user':request.user, 'cars':sorted(cars), 'carid':carid, 'overtime':overtime, 'monthpick_range': monthpick_range, 'lastmonth': lastmonth, "billingHistorySettings": billingHistorySettings, 'uncollectedes': uncollectedes, 'total_uncollected': "{:,}".format(total_uncollected)})
+    return render(request, 'getHistory.html', {"history": history, "academy" : academy, 'total_count': total_count, 'startdate': startdate, 'enddate': enddate, 'user':request.user, 'cars':sorted(cars), 'carids':carids, 'carid':carid, 'overtime':overtime, 'monthpick_range': monthpick_range, 'lastmonth': lastmonth, "billingHistorySettings": billingHistorySettings, 'uncollectedes': uncollectedes, 'total_uncollected': "{:,}".format(total_uncollected)})
 
 
 @login_required
@@ -955,10 +956,7 @@ def getBillingHistorySettingList(request):
 
 	try :
         	academy = Academy.objects.get(id = aid)
-		if (carid == 'all') :
-        		billingHistorySettings = BillingHistorySetting.objects.filter(academy = academy, monthpick = monthpick).order_by('created_time')
-		else :
-        		billingHistorySettings = BillingHistorySetting.objects.filter(academy = academy, carid = carid, monthpick = monthpick).order_by('created_time')
+        	billingHistorySettings = BillingHistorySetting.objects.filter(academy = academy, carid = carid, monthpick = monthpick).order_by('created_time')
 	except BillingHistorySetting.DoesNotExist:
 		return HttpResponse("해당 히스토리가 존재하지 않습니다.")
 
