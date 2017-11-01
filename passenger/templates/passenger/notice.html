@@ -200,7 +200,7 @@ $(document).ready(function() {
        else {
            // Open this row$.ajax({
 
-           row.child( format(row.data()[0]), 'no-padding' ).show();
+           row.child( format(row.data()[5]), 'no-padding' ).show();
            tr.addClass('shown');
 
            $('div.slider', row.child()).slideDown();
@@ -209,7 +209,7 @@ $(document).ready(function() {
 		           type: "POST",
 		           data: {
 		               choice: 1,
-		               cid: row.data()[5]
+		               cid: row.data()[0]
 		           },
 		           success: function(data) {
 
