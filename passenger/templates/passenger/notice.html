@@ -67,7 +67,7 @@
 
 
  td {
-  background: url('/examples/resources/details_close.png') no-repeat center center;
+  /*background: url('/examples/resources/details_close.png') no-repeat center center;*/
   cursor: pointer;
 }
 
@@ -130,7 +130,7 @@ table.dataTable tbody td.no-padding {
 
              </tfoot>
            </table>
-           {% if user.username == 'cto' %}
+           {% if user.username == 'cco' %}
            <div class="row">
                <div class="col-md-8"></div>
                <div class="col-md-4">
@@ -209,10 +209,10 @@ $(document).ready(function() {
 		           type: "POST",
 		           data: {
 		               choice: 1,
-		               cid: row.data()[0]
+		               cid: row.data()[5]
 		           },
 		           success: function(data) {
-		               
+
 		           }
 		       });
        }
