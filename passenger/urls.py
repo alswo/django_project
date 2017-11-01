@@ -31,4 +31,5 @@ urlpatterns = [
     url(r'^studentInfo', views.studentInfo),
     url(r'^profileInfo', views.profileInfo),
     url(r'^robots.txt$', views.robots),
+    url(r'^notice',views.notice),
 ]
