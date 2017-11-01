@@ -26,18 +26,23 @@
     <div class="form-group">
       <label>Car :</label>
       <select class="form-control select-car">
-        <option selected>선택</option>
+        <option>선택</option>
         {% for c in car %}
-        <option value={{c.id}}>{{c.carname}}호차</option>
+        {% if cid = c.id %}
+        <option value={{c.id}} href="salaryManagement?aid={{aid}}&bid={{bid}}&cid={{c.id}}" selected>{{c.carname}}호차</option>
+        {% else %}
+        <option value={{c.id}} href="salaryManagement?aid={{aid}}&bid={{bid}}&cid={{c.id}}">{{c.carname}}호차</option>
+        {% endif %}
         {% endfor %}
       </select>
     </div>
   </div>
 </div>
 <br>
-<table id="" class="display" cellspacing="0" width="100%">
+<table id="" class="salary_table" cellspacing="0" width="100%">
         <thead>
             <tr>
+                <th>번호</th>
                 <th>날짜</th>
                 <th>동승자임금</th>
                 <th>기사임금</th>
@@ -46,50 +51,109 @@
                 <th>저장</th>
             </tr>
         </thead>
-        <tfoot>
-            <tr>
-                <th>날짜</th>
-                <th>동승자임금</th>
-                <th>기사임금</th>
-                <th>Etc</th>
-                <th>Etc 내용</th>
-                <th>저장</th>
-            </tr>
-        </tfoot>
         <tbody>
         </tbody>
 </table>
 <script type="text/javascript">
-$(".select-car").change(function(e){
-  var car = this.value
-  $.ajax({
-    url: "salaryManagement",
-    type: "POST",
-    data: {
-      car : car
-    },
-    success: function(data){
-      var data = JSON.parse(data);
-      console.log(data)
-      //setTable(data);
-    }
-  })
-});
-
-function setTable(data) {
-  var dataSet = [
-    [
-      "<input type='text' name='date' value='{{s.payment_date}}'></input>",
-      "<input type='text' name='p_salary' value='{{s.p_salary}}'></input>",
-      "<input type='text' name='d_salary' value='{{s.d_salary}}'></input>",
-      "<input type='text' name='etc' value='{{s.etc}}'></input>",
-      "<input type='text' name='etc_content' value='{{s.etc_content}}'></input>",
-    ],
-  ];
-
-  $('table.display').DataTable({
+$('.select-car').change(function(){
+  window.location.href = this.children[this.selectedIndex].getAttribute('href');
+})
+var dataSet = [
+  {% for s in salary %}
+  [
+     "<p>{{s.id}}</p>",
+     "<input name='payment_date' value='{{s.payment_date}}' class='date-picker'>",
+     "<input name='p_salary' value='{{s.p_salary}}'>",
+     "<input name='d_salary' value='{{s.d_salary}}'>",
+     "<input name='etc' value='{{s.etc}}'>",
+     "<input name='etc_content' value='{{s.etc_content}}'>",
+     "<button type='button' class='btn btn-success btn-xs' onclick='saveRow(this,\"update\")'>수정</button>&nbsp<button type='button' class='btn btn-danger btn-xs' onclick='saveRow(this,\"delete\")'>삭제</button>",
+  ],
+  {% endfor %}
+];
+console.log(dataSet)
+$(document).ready(function() {
+  var table = $('.salary_table').DataTable({
+    searching : false,
     data : dataSet,
   });
+       table.row.add( [
+         "<p>{{s.id}}</p>",
+         "<input name='payment_date' value='{{s.payment_date}}' class='date-picker'>",
+         "<input name='p_salary' value='{{s.p_salary}}'>",
+         "<input name='d_salary' value='{{s.d_salary}}'>",
+         "<input name='etc' value='{{s.etc}}'>",
+         "<input name='etc_content' value='{{s.etc_content}}'>",
+         "<button type='button' class='btn btn-success' onclick='saveRow(this,\"create\")'>저장</button>",
+       ] ).draw( false );
+});
+
+function saveRow(el,flag){
+    var id = $(el).parent().siblings().eq(0).children().text();
+    var payment_date = $(el).parent().siblings().eq(1).children().val();
+    var p_salary = $(el).parent().siblings().eq(2).children().val();
+    var d_salary = $(el).parent().siblings().eq(3).children().val();
+    var etc = $(el).parent().siblings().eq(4).children().val();
+    var etc_content = $(el).parent().siblings().eq(5).children().val();
+    var flag = flag;
+    $.ajax({
+      url:"salaryManagement",
+      type:"POST",
+      data:{
+        id: id,
+        payment_date : payment_date,
+        p_salary : p_salary,
+        d_salary : d_salary,
+        etc : etc,
+        etc_content : etc_content,
+        cid: {{cid}},
+        flag : flag
+      },
+      success: function(data){
+        if(data == 1){
+          location.reload()
+        }else{
+          alert('error')
+        }
+      }
+    });
 }
+
+$(function() {
+     $('.date-picker').datepicker(
+                    {
+                        dateFormat: "yy-mm",
+                        changeMonth: true,
+                        changeYear: true,
+                        showButtonPanel: true,
+                        onClose: function(dateText, inst) {
+
+
+                            function isDonePressed(){
+                                return ($('#ui-datepicker-div').html().indexOf('ui-datepicker-close ui-state-default ui-priority-primary ui-corner-all ui-state-hover') > -1);
+                            }
+
+                            if (isDonePressed()){
+                                var month = $("#ui-datepicker-div .ui-datepicker-month :selected").val();
+                                var year = $("#ui-datepicker-div .ui-datepicker-year :selected").val();
+                                $(this).datepicker('setDate', new Date(year, month, 1)).trigger('change');
+
+                                 $('.date-picker').focusout()//Added to remove focus from datepicker input box on selecting date
+                            }
+                        },
+                        beforeShow : function(input, inst) {
+
+                            inst.dpDiv.addClass('month_year_datepicker')
+
+                            if ((datestr = $(this).val()).length > 0) {
+                                year = datestr.substring(datestr.length-4, datestr.length);
+                                month = datestr.substring(0, 2);
+                                $(this).datepicker('option', 'defaultDate', new Date(year, month-1, 1));
+                                $(this).datepicker('setDate', new Date(year, month-1, 1));
+                                $(".ui-datepicker-calendar").hide();
+                            }
+                        }
+                    })
+});
 </script>
 {% endblock content %}

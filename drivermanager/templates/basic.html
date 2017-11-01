@@ -42,18 +42,18 @@
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.0/Chart.min.js"></script>
 
   <style>
+  .ui-datepicker-calendar {
+    display: none;
+    }
     .entry:not(:first-of-type) {
       margin-top: 10px;
     }
-
     .glyphicon {
       font-size: 12px;
     }
-
     .input-div {
       padding: 0;
     }
-
   </style>
 
   <style>
@@ -63,12 +63,10 @@
       height: 300px;
       width: 100%;
     }
-
     #top_bar {
       width: 100%;
       float: top;
     }
-
     #left_bar {
       top: 0px;
       left: 0px;
@@ -77,15 +75,12 @@
       float: left;
       overflow: scroll;
     }
-
     #content {
       top: 0px;
       left: 300px;
       overflow: auto;
     }
-
     #search_result {}
-
     button.phonenumber {
       margin: 5px 0;
     }
@@ -97,17 +92,14 @@
       text-align: center;
       width: 22.5%;
     }
-
     .remove-td {
       text-align: center;
       vertical-align: middle !important;
       width: 7%;
     }
-
     .etc {
       background-color: #E1E5E8;
     }
-
     .panel-danger>.panel-heading {
       background-color: #D98880 !important
     }
@@ -190,10 +182,8 @@
       obj.parents('li').parents('li').addClass("active");
       //obj.parent().addClass("active");
       //obj.parent().parent().parent().addClass("active");
-
       $(".nav").find(".hiddenactive").addClass("active");
     });
-
     $(".selectInstitute").on('click', function(e) {
       $.get("setSession", {
           instituteid: $(this).data("instituteid")
