@@ -47,13 +47,12 @@
  }
 .jb-th-4 {
   width: 10%;
-
  }
+ .jb-th-5 {
+   width: 10%;
+  }
  .jb-th-6 {
-
-
    text-align: left;
-
   }
 .slider{
   background-color: #EFEFEF;
@@ -67,9 +66,9 @@
  }*/
 
 
-tr.shown td.details-control {
-    background: url('/examples/resources/details_close.png') no-repeat center center;
-    cursor: pointer;
+ td {
+  /*background: url('/examples/resources/details_close.png') no-repeat center center;*/
+  cursor: pointer;
 }
 
 div.slider {
@@ -88,7 +87,7 @@ table.dataTable tbody td.no-padding {
   {% if user.is_authenticated %}
   <div class="page-header">
       <h1 style="text-align:center;">
-      <a href="/" style="text-decoration:none">셔틀타요가</a>&nbsp<small>&nbsp알려 드리겠습니다.</small></h1>
+      <a href="/" style="text-decoration:none">셔틀타요가</a>&nbsp<small>&nbsp알려 드립니다.</small></h1>
   </div>
   <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
       <div class="modal-dialog" role="document">
@@ -100,7 +99,7 @@ table.dataTable tbody td.no-padding {
               <div class="modal-body">
                   <form action="notice" method="post">
                       <label>작성자</label>
-                      <select name="aname" class="form-control" value="{{contact.day}}">
+                      <select name="aname" class="form-control">
                         <option value="ceo">ceo</option>
                         <option value="cco">cco</option>
                         <option value="cto">cto</option>
@@ -123,15 +122,15 @@ table.dataTable tbody td.no-padding {
         <DIV class="table-reponsive" >
            <table id="communityListTable" class="display">
              <tfoot>
-                <td class = "jb-th-1"></th>
+                <td class = "jb-th-1" onclick=""></th>
                 <td class = "jb-th-2"></th>
                 <td class = "jb-th-3"></th>
                 <td class = "jb-th-4"></th>
-
+                <td class = "jb-th-5"></th>
 
              </tfoot>
            </table>
-           {% if user.username == 'cto' %}
+           {% if user.username == 'cco' %}
            <div class="row">
                <div class="col-md-8"></div>
                <div class="col-md-4">
@@ -160,7 +159,7 @@ function format ( d ) {
 
 var dataSet = [
 {% spaceless %}
- {% for coms in com %}[ "{{coms.id}}","{{coms.complain}}","{{coms.aname}}","{{coms.showdate}}","{{coms.plan | linebreaks}}"],{% endfor %}
+ {% for coms in com %}[ "{{coms.id}}","{{coms.complain}}","{{coms.aname}}","{{coms.showdate}}","{{coms.clike}}","{{coms.plan | linebreaks}}"],{% endfor %}
 {% endspaceless %}
 
 
@@ -179,6 +178,7 @@ $(document).ready(function() {
                { title : "제목" },
                { title : "작성자" },
                { title : "작성일" },
+               { title : "조회수" },
          ],
 
 
@@ -191,22 +191,33 @@ $(document).ready(function() {
 
        if ( row.child.isShown() ) {
            // This row is already open - close it
+
            $('div.slider', row.child()).slideUp( function () {
                row.child.hide();
                tr.removeClass('shown');
            } );
        }
        else {
-           // Open this row
-           row.child( format(row.data()[4]), 'no-padding' ).show();
+           // Open this row$.ajax({
+
+           row.child( format(row.data()[5]), 'no-padding' ).show();
            tr.addClass('shown');
 
            $('div.slider', row.child()).slideDown();
+					 $.ajax({
+		           url: "/notice",
+		           type: "POST",
+		           data: {
+		               choice: 1,
+		               cid: row.data()[0]
+		           },
+		           success: function(data) {
+								 
+		           }
+		       });
        }
    } );
 });
 
-
 </SCRIPT>
-
 </HTML>

@@ -696,21 +696,35 @@ def notice(request):
 
     elif request.method == "POST":
         choice = request.POST.get('choice')
-        uid = request.POST.get('uid')
+
         cid = request.POST.get('cid')
         response_data = {}
 
-        aname = request.POST.get('aname')
-        complain = request.POST.get('complain')
-        plan = request.POST.get('plan')
-        
-        t = timeToDate()
-        toDate = t.timeToYmd()
-        c = Community(aname=aname, complain=complain, plan=plan,showdate = toDate,clike=0,dlike=0,disuser=[],disuserid=[],likeuserid=[],likeuser=[])
+        if choice:
+            try:
+                com = Community.objects.get(id=cid)
 
-        c.save()
+                com.clike = com.clike+1
+                response_data['num'] = com.clike
 
+                com.save()
 
-        com = Community.objects.all()
+                return HttpResponse(json.dumps(response_data), content_type="application/json")
 
-        return render(request, 'passenger/notice.html', {'com': com} );
+            except Exception as e:
+
+                return HttpResponse(e.message)
+
+        else:
+            response_data = {}
+            aname = request.POST.get('aname')
+            complain = request.POST.get('complain')
+            plan = request.POST.get('plan')
+            t = timeToDate()
+            toDate = t.timeToYmd()
+            c = Community(aname=aname, complain=complain, plan=plan,showdate = toDate,clike=0,dlike=0,disuser=[],disuserid=[],likeuserid=[],likeuser=[])
+            c.save()
+
+            com = Community.objects.all()
+
+            return render(request, 'passenger/notice.html', {'com': com} );
