@@ -345,7 +345,7 @@ def salary_management(request):
                     if cid > 0:
                         branch = Branch.objects.filter(areaid=aid)
                         car = Car.objects.filter(branchid_id = bid)
-                        salary = Salary.objects.filter(carnum_id = cid)
+                        salary = list(Salary.objects.filter(carnum_id = cid).order_by('-payment_date'))
 
                         return render_to_response('salaryManagement.html', {'area':area,'branch':branch,'salary':salary,'car':car,'aid':aid,'bid':bid,'cid':cid,'user':request.user})
 
