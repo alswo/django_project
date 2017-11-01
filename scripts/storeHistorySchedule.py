@@ -7,6 +7,7 @@ from datetime import datetime, timedelta, date
 import psycopg2
 import os
 import time
+from schedule.tasks import get_offmember_list
 
 
 def store_historyschedule(sdate):
@@ -17,7 +18,7 @@ def store_historyschedule(sdate):
 	d = tt[day]
 
 	try :
-		conn = psycopg2.connect("dbname='tayo3' user='postgres' host='localhost' password='beclear048@'")
+		conn = psycopg2.connect("dbname='tayo4' user='postgres' host='localhost' password='beclear048@'")
 	except :
 		print "unable to connect to the database"
 
@@ -53,6 +54,11 @@ def store_historyschedule(sdate):
 				hst.academies.add(academy)
 			except Academy.DoesNotExist:
 				print "aid = " + str(aid) + " doesn't exist"
+
+		offmembers = get_offmember_list(row[5], row[8])
+		for offmember in offmembers:
+			student = StudentInfo.objects.get(id = offmember)
+			hst.offmembers.add(student)
 		#time.sleep(1)
 
 def daterange(start_date, end_date):
@@ -60,10 +66,10 @@ def daterange(start_date, end_date):
 		yield start_date + timedelta(n)
 
 def run(*args):
-	start_date = date(2017, 8, 1)
-	end_date = date(2017, 8, 23)
+	start_date = date(2017, 10, 24)
+	end_date = date(2017, 10, 26)
 	for single_date in daterange(start_date, end_date):
 		cur_date = single_date.strftime("%Y-%m-%d")
-		os.system("/home/ubuntu/backup/restore.sh " + cur_date)
+		os.system("/home/ubuntu/backup/restore.sh " + cur_date + " tayo4")
 		print "cur_date = " + cur_date
 		store_historyschedule(single_date)

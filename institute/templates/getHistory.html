@@ -24,10 +24,10 @@
             			</div>
             			<div class="col-md-2">
                 			<label>차량별</label> 
-                			<select class="form-control" id="carid" name="carid">
-                        			<option value="all">모든차량</option>
+                			<select class="form-control caroption" id="carid" name="carid[]" multiple="multiple">
+                        			<!-- option value="all">모든차량</option //-->
                         			{% for carnum in cars %}
-                        			<option value="{{carnum}}" {% if carnum == carid %} selected {% endif %}>{{carnum}}호차</option>
+                        			<option value="{{carnum}}" {% for cid in carids %}{% if carnum|slugify == cid %} selected {% endif %}{% endfor %}>{{carnum}}호차</option>
                         			{% endfor %}
                 			</select>
             			</div>
@@ -670,7 +670,7 @@ function saveSetting(fix) {
 			}
 		}
 	};
-	xmlhttp.open("POST", "/institute/saveBillingHistorySetting?aid=" + aid + "&carid=" + carid + "&monthpick=" + monthpick + "&fix=" + fix);
+	xmlhttp.open("POST", "/institute/saveBillingHistorySetting?aid=" + aid + "&carid=" + "{{carid}}" + "&monthpick=" + monthpick + "&fix=" + fix);
 	xmlhttp.setRequestHeader("Content-Type", "application/json");
 	xmlhttp.send(JSON.stringify(jsonObj));
 }
@@ -759,6 +759,10 @@ $( function() {
 $(document).ready(function() {
 	$('.timehistoryoption').multiselect({
 		nonSelectedText: '일반'
+	});
+
+	$('.caroption').multiselect({
+		nonSelectedText: '모든차량'
 	});
 
 	$('.extra-charge').change(function() {

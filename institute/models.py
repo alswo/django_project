@@ -12,7 +12,7 @@ def set_current_date_time():
 # Create your models here.
 class BillingHistorySetting(models.Model):
 	academy = models.ForeignKey(Academy)
-	carid = models.CharField(max_length=5)
+	carid = models.CharField(max_length=20)
 	fix = models.CharField(max_length=10)
 	monthpick = models.CharField(max_length=30)
 	created_time = models.CharField(max_length=19, default = set_current_date_time)
