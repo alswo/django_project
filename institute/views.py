@@ -421,7 +421,7 @@ def getHistory(request):
     uncollectedes = []
 
 	
-    if carids == None:
+    if len(carids) == 0:
         carid = 'all'
     else:
         carid = ':'.join(carids)
@@ -634,7 +634,7 @@ def getHistory(request):
 
 
         rem = 0
-        if (carids != None):
+        if (len(carids) != 0):
             for dailyHistory in history:
                 dailyHistory.timehistory[:] = [x for x in dailyHistory.timehistory if str(x.carnum) in carids]
 
