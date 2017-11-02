@@ -14,7 +14,11 @@ import json
 
 def is_not_drivermanager(user):
     if user:
-        return (user.groups.filter(name='drivermanager').exists() == True)
+        if (user.is_superuser == True):
+            return True
+
+        elif (user.groups.filter(name='drivermanager').exists() == True):
+            return True
     
     return False
 
