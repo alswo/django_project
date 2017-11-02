@@ -366,7 +366,7 @@ def salary_management(request):
                     if cid > 0:
                         branch = Branch.objects.filter(areaid=aid)
                         car = Car.objects.filter(branchid_id = bid)
-                        salary = list(Salary.objects.filter(carnum_id = cid).order_by('-payment_date'))
+                        salary = Salary.objects.filter(carnum_id = cid).order_by('-payment_date')
 
                         return render_to_response('salaryManagement.html', {'area':area,'branch':branch,'salary':salary,'car':car,'aid':aid,'bid':bid,'cid':cid,'user':request.user})
 
@@ -400,8 +400,9 @@ def salary_management(request):
             if bid > 0:
                 if cid > 0:
                     car = Car.objects.filter(branchid=bid)
+                    salary = Salary.objects.filter(carnum_id = cid).order_by('-payment_date')
 
-                    return render_to_response('salaryManagement.html', {'branch':branch,'car':car, 'bid':bid, 'cid': cid, 'user':request.user})
+                    return render_to_response('salaryManagement.html', {'branch':branch,'salary' : salary, 'car':car, 'bid':bid, 'cid': cid, 'user':request.user})
                 else:
                     car = Car.objects.filter(branchid=bid)
 
@@ -415,7 +416,7 @@ def salary_management(request):
         d_salary = request.POST.get('d_salary')
         etc = request.POST.get('etc')
         etc_content = request.POST.get('etc_content')
-        cid = request.POST.get('cid')
+        cid = int(request.POST.get('cid'))
         flag = request.POST.get('flag')
 
         if flag == 'create':
