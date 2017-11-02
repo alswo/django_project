@@ -305,11 +305,14 @@ def addClassForm(request):
 	return render(request, 'addClassForm.html')
 
 class TimeHistory:
-	BILLING_NORMAL = 0b0000
-	BILLING_OVERPEOPLE = 0b0001
-	BILLING_PASSENGER = 0b0010
-	BILLING_OVERTIME = 0b0100
-	BILLING_NONCHARGE = 0b1000
+	BILLING_NORMAL =         0b00000000
+	BILLING_OVERPEOPLE =     0b00000001
+	BILLING_PASSENGER =      0b00000010
+	BILLING_OVERTIME =       0b00000100
+	BILLING_NONCHARGE =      0b00001000
+	BILLING_OVERPEOPLE_10 =  0b00010000
+	BILLING_OVERPEOPLE_15 =  0b00100000
+	BILLING_OVERPEOPLE_20 =  0b01000000
 	def __init__(self):
 		self.carnum = -1
 		self.inventory_id = -1
@@ -356,6 +359,12 @@ def chooseBillingCode(academy, first_time, last_time, isShare, student_num, pass
 	## overtime 과 overpeople 은 동시에 setting 되지 않음
 	if ((not isShare) and (last_time - first_time > overtime)):
 		code = TimeHistory.BILLING_OVERTIME | code
+	elif (student_num > 20):
+		code = TimeHistory.BILLING_OVERPEOPLE_20 | code
+	elif (student_num > 15):
+		code = TimeHistory.BILLING_OVERPEOPLE_15 | code
+	elif (student_num > 10):
+		code = TimeHistory.BILLING_OVERPEOPLE_10 | code
 	elif (student_num > 5):
 		code = TimeHistory.BILLING_OVERPEOPLE | code
 	if (passenger == True):

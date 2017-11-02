@@ -36,6 +36,18 @@ def isOverTime(value):
     return bool(value & TimeHistory.BILLING_OVERTIME)
 
 @register.filter
+def isOverPeople10(value):
+    return bool(value & TimeHistory.BILLING_OVERPEOPLE_10)
+
+@register.filter
+def isOverPeople15(value):
+    return bool(value & TimeHistory.BILLING_OVERPEOPLE_15)
+
+@register.filter
+def isOverPeople20(value):
+    return bool(value & TimeHistory.BILLING_OVERPEOPLE_20)
+
+@register.filter
 def contained(item, itemlist):
     for i in itemlist:
         if item == i.id:
