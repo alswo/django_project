@@ -333,14 +333,27 @@ def salary_management(request):
                 bid = int(request.GET.get('bid'))
             else:
                 bid = -1
+            
+            if request.GET.get('cid'):
+                cid = int(request.GET.get('cid'))
+            else:
+                cid = -1
 
             area = Area.objects.all()
             if aid > 0:
                 if bid > 0:
-                    branch = Branch.objects.filter(areaid=aid)
-                    car = Car.objects.filter(branchid_id = bid)
+                    if cid > 0:
+                        branch = Branch.objects.filter(areaid=aid)
+                        car = Car.objects.filter(branchid_id = bid)
+                        salary = list(Salary.objects.filter(carnum_id = cid).order_by('-payment_date'))
 
-                    return render_to_response('salaryManagement.html', {'area':area, 'branch':branch, 'car' : car, 'aid':aid, 'bid':bid, 'user':request.user})
+                        return render_to_response('salaryManagement.html', {'area':area,'branch':branch,'salary':salary,'car':car,'aid':aid,'bid':bid,'cid':cid,'user':request.user})
+
+                    else:
+                        branch = Branch.objects.filter(areaid=aid)
+                        car = Car.objects.filter(branchid_id = bid)
+
+                        return render_to_response('salaryManagement.html', {'area':area, 'branch':branch, 'car' : car, 'aid':aid, 'bid':bid, 'user':request.user})
 
                 else:
                     branch = Branch.objects.filter(areaid=aid)                
@@ -352,10 +365,35 @@ def salary_management(request):
         else:
                                                                               
             return render_to_response('salaryManagement.html', {'user':request.user})
-    elif request.method == 'POST':
-        carnum = int(request.POST.get('car'))
-        salary = Salary.objects.filter(carnum_id = carnum)
 
-        return HttpResponse(json.dumps(salary))
+    else:
+        id = request.POST.get('id')
+        payment_date = request.POST.get('payment_date')
+        p_salary = request.POST.get('p_salary')
+        d_salary = request.POST.get('d_salary')
+        etc = request.POST.get('etc')
+        etc_content = request.POST.get('etc_content')
+        cid = request.POST.get('cid')
+        flag = request.POST.get('flag')
 
- 
+        if flag == 'create':
+            try:
+                Salary.objects.create(carnum_id = cid, payment_date = payment_date, p_salary = p_salary, d_salary = d_salary, etc = etc, etc_content = etc_content)
+                return HttpResponse(1)
+        
+            except:
+                return HttpResponse(-1)
+        elif flag == 'update':
+            try:
+                Salary.objects.filter(id=id).update(payment_date = payment_date, p_salary = p_salary, d_salary = d_salary, etc = etc, etc_content = etc_content)
+                return HttpResponse(1)
+            except:
+                return HttpResponse(-1)
+
+        elif flag == 'delete':
+            try:
+                Salary.objects.filter(id=id).delete()
+                
+                return HttpResponse(1)
+            except:
+                return HttpResponse(-1)
