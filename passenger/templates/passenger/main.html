@@ -308,13 +308,18 @@
         }
 
         function getDriButton(t, bid){
+
+
+
             $.ajax({
                 type: 'GET',
                 url: 'getDriButton',
                 data: {
-                    bid: bid
+                    bid: bid,
+
                   },
                 success: function(resp) {
+                    
                     $('#driverspecific').html(resp)
                }
              });
