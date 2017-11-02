@@ -123,14 +123,14 @@ def pushConfirmInfo(request):
 
 @csrf_exempt
 def pushchecker(request):
-    # fcmdevice =  FCMDevice.objects.all()
-    # push_check = {}
-    # i = 0
-    # for fcmdevices in fcmdevice:
-    #     i +=1
-    #     push_check[fcmdevices.id] = str(i)
-	#
-    # return render(request, 'pushchecker.html', {'fcmdevice': fcmdevice, 'push_check':push_check});
+    fcmdevice =  FCMDevice.objects.all()
+    push_check = {}
+    i = 0
+    for fcmdevices in fcmdevice:
+        i +=1
+        push_check[fcmdevices.id] = str(i)
+
+    return render(request, 'pushchecker.html', {'fcmdevice': fcmdevice, 'push_check':push_check});
 
 
 
