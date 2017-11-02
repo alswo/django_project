@@ -123,5 +123,55 @@ def pushConfirmInfo(request):
 
 @csrf_exempt
 def pushchecker(request):
+    # fcmdevice =  FCMDevice.objects.all()
+    # push_check = {}
+    # i = 0
+    # for fcmdevices in fcmdevice:
+    #     i +=1
+    #     push_check[fcmdevices.id] = str(i)
+	#
+    # return render(request, 'pushchecker.html', {'fcmdevice': fcmdevice, 'push_check':push_check});
 
-	return render(request, 'pushchecker.html', );
+
+
+@csrf_exempt
+def notice(request):
+    if request.method == "GET":
+        com = Community.objects.all()
+
+        return render(request, 'pushchecker.html', {'com': com} );
+
+    elif request.method == "POST":
+        choice = request.POST.get('choice')
+
+        cid = request.POST.get('cid')
+        response_data = {}
+
+        if choice:
+            try:
+                com = Community.objects.get(id=cid)
+
+                com.clike = com.clike+1
+                response_data['num'] = com.clike
+
+                com.save()
+
+                return HttpResponse(json.dumps(response_data), content_type="application/json")
+
+            except Exception as e:
+
+                return HttpResponse(e.message)
+
+        else:
+            response_data = {}
+            aname = request.POST.get('aname')
+            complain = request.POST.get('complain')
+            plan = request.POST.get('plan')
+            t = timeToDate()
+            toDate = t.timeToYmd()
+            c = Community(aname=aname, complain=complain, plan=plan,showdate = toDate,clike=0,dlike=0,disuser=[],disuserid=[],likeuserid=[],likeuser=[])
+            c.save()
+
+            com = Community.objects.all()
+
+            return render(request, 'pushchecker.html', {'com': com} );
