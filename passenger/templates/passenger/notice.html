@@ -122,7 +122,7 @@ table.dataTable tbody td.no-padding {
         <DIV class="table-reponsive" >
            <table id="communityListTable" class="display">
              <tfoot>
-                <td class = "jb-th-1" onclick=""></th>
+                <td class = "jb-th-1"></th>
                 <td class = "jb-th-2"></th>
                 <td class = "jb-th-3"></th>
                 <td class = "jb-th-4"></th>
@@ -168,12 +168,14 @@ var dataSet = [
 $(document).ready(function() {
 
  var table = $('#communityListTable').DataTable({
+
    "scrollY":        "600px",
           "scrollCollapse": true,
 
           "lengthMenu": [5,10],
    data : dataSet,
    columns : [
+
                { title : "번호" },
                { title : "제목" },
                { title : "작성자" },
@@ -181,7 +183,10 @@ $(document).ready(function() {
                { title : "조회수" },
          ],
 
+				 "order": [
+				                       [3, 'desc'],
 
+				                      ]
 });
 
 
@@ -212,7 +217,7 @@ $(document).ready(function() {
 		               cid: row.data()[0]
 		           },
 		           success: function(data) {
-								 
+
 		           }
 		       });
        }

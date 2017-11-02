@@ -135,8 +135,8 @@
 					<div class="col-md-5" align="center">
 				총운행횟수 : <span id="total_count"></span><br>
 						<div class="etc">
-				일반(<span id="normal_count"></span>) + 동승자 포함(<span id="passenger_count"></span>) + 5인 초과(<span id="overpeople_count"></span>) + {{overtime}}분 초과(<span id="overtime_count"></span>)<br>
-				동승자 포함, 5인 초과(<span id="passenger_overpeople_count"></span>) + 동승자 포함, {{overtime}}분 초과(<span id="passenger_overtime_count"></span>)<br>
+				일반(<span id="normal_count"></span>) + 동승자 포함(<span id="passenger_count"></span>) + 5인 초과(<span id="overpeople_count"></span>) +10인 초과(<span id="overpeople10_count"></span>) + {{overtime}}분 초과(<span id="overtime_count"></span>)<br>
+				동승자 포함, 5인 초과(<span id="passenger_overpeople_count"></span>) + 동승자 포함, 10인 초과(<span id="passenger_overpeople10_count"></span>) + 동승자 포함, {{overtime}}분 초과(<span id="passenger_overtime_count"></span>)<br>
 				비과금 횟수: <span id="noncharge_count"></span><br>
 				예상 과금횟수 : <span id="uniq_count"></span><br>
 						</div>
@@ -241,6 +241,11 @@
 						<select class="price_item priceoption timehistoryoption" inventory_id="{{timehistory.inventory_id}}" multiple="multiple">
 							<option value="{% get_constants 'BILLING_PASSENGER' %}" {% if timehistory.billing_code|isPassenger %} selected="selected" {% endif %}>동승자 포함</option>
 							<option value="{% get_constants 'BILLING_OVERPEOPLE' %}" {% if timehistory.billing_code|isOverPeople %} selected="selected" {% endif %}>5인 초과 (+1,500원)</option>
+							{% if timehistory.billing_code|isOverPeople10 or timehistory.billing_code|isOverPeople15 or timehistory.billing_code|isOverPeople20 %}
+							<option value="{% get_constants 'BILLING_OVERPEOPLE_10' %}" {% if timehistory.billing_code|isOverPeople10 %} selected="selected" {% endif %}>10인 초과</option>
+							<option value="{% get_constants 'BILLING_OVERPEOPLE_15' %}" {% if timehistory.billing_code|isOverPeople15 %} selected="selected" {% endif %}>15인 초과</option>
+							<option value="{% get_constants 'BILLING_OVERPEOPLE_20' %}" {% if timehistory.billing_code|isOverPeople20 %} selected="selected" {% endif %}>20인 초과</option>
+							{% endif %}
 							<option value="{% get_constants 'BILLING_OVERTIME' %}" {% if timehistory.billing_code|isOverTime %} selected="selected" {% endif %}>{{overtime}}분 초과(X2)</option>
 							<option value="{% get_constants 'BILLING_NONCHARGE' %}" {% if timehistory.warning == True %} selected="selected" {% endif %}>비과금</option>
 						</select>
@@ -426,21 +431,25 @@ function calculate() {
 
 	normal_count = dictObject[{% get_constants 'BILLING_NORMAL' %}] || 0;
 	overpeople_count = dictObject[{% get_constants 'BILLING_OVERPEOPLE' %}] || 0;
+	overpeople10_count = dictObject[{% get_constants 'BILLING_OVERPEOPLE_10' %}] || 0;
 	passenger_count = dictObject[{% get_constants 'BILLING_PASSENGER' %}] || 0;
 	overtime_count = dictObject[{% get_constants 'BILLING_OVERTIME' %}] || 0;
 	passenger_overtime_count = dictObject[{% get_constants 'BILLING_PASSENGER' %} + {% get_constants 'BILLING_OVERTIME' %}] || 0;
 	passenger_overpeople_count = dictObject[{% get_constants 'BILLING_PASSENGER' %} + {% get_constants 'BILLING_OVERPEOPLE' %}] || 0;
+	passenger_overpeople10_count = dictObject[{% get_constants 'BILLING_PASSENGER' %} + {% get_constants 'BILLING_OVERPEOPLE_10' %}] || 0;
 	noncharge_count = dictObject[{% get_constants 'BILLING_NONCHARGE' %}] || 0;
 	uniq_count = total - noncharge_count;
 
-	calculate_amount = normal_count * per_amount_value + passenger_count * (per_amount_value + passenger_amount_value) + overpeople_count * (per_amount_value + 1500) + overtime_count * (per_amount_value * 2) + passenger_overtime_count * (per_amount_value + passenger_amount_value) * 2 + passenger_overpeople_count * (per_amount_value + passenger_amount_value + 1500);
+	calculate_amount = normal_count * per_amount_value + passenger_count * (per_amount_value + passenger_amount_value) + overpeople_count * (per_amount_value + 1500) + overpeople10_count * (per_amount_value * 2 + 1500 ) + overtime_count * (per_amount_value * 2) + passenger_overtime_count * (per_amount_value + passenger_amount_value) * 2 + passenger_overpeople_count * (per_amount_value + passenger_amount_value + 1500) + passenger_overpeople10_count * 22000;
 
 	$('#normal_count')[0].innerText = numberWithCommas(normal_count);
 	$('#passenger_count')[0].innerText = numberWithCommas(passenger_count);
 	$('#overpeople_count')[0].innerText = numberWithCommas(overpeople_count);
+	$('#overpeople10_count')[0].innerText = numberWithCommas(overpeople10_count);
 	$('#overtime_count')[0].innerText = numberWithCommas(overtime_count);
 	$('#passenger_overtime_count')[0].innerText = numberWithCommas(passenger_overtime_count);
 	$('#passenger_overpeople_count')[0].innerText = numberWithCommas(passenger_overpeople_count);
+	$('#passenger_overpeople10_count')[0].innerText = numberWithCommas(passenger_overpeople10_count);
 	$('#noncharge_count')[0].innerText = numberWithCommas(noncharge_count);
 	$('#uniq_count')[0].innerText = numberWithCommas(uniq_count);
 
@@ -497,6 +506,10 @@ function todayLoad(offset,invenid, stableid){
 }
 
 function makeHistorySettingList(default_value) {
+	if ("{{academy.id}}" == "") {
+		return;
+	}
+
 	var xmlhttp = new XMLHttpRequest();
 	xmlhttp.onreadystatechange = function() {
 		if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
@@ -603,16 +616,24 @@ $("#temp-save").click(function(event) {
 });
 
 function getDueDate() {
-	var yearmonth = $('#monthpick').val().split("-");
+	if ($('#monthpick').val()) {
+		var yearmonth = $('#monthpick').val().split("-");
 	
-	return yearmonth[0] + "." + (parseInt(yearmonth[1]) + 1) + "." + "15";
+		return yearmonth[0] + "." + (parseInt(yearmonth[1]) + 1) + "." + "15";
+	} 
+
+	return "0000.00.15";
 }
 
 function getAfterDueDate() {
-	var yearmonth = $('#monthpick').val().split("-");
-	var lastday = new Date(yearmonth[0], parseInt(yearmonth[1] + 1) + 1, 0);
+	if ($('#monthpick').val()) {
+		var yearmonth = $('#monthpick').val().split("-");
+		var lastday = new Date(yearmonth[0], parseInt(yearmonth[1] + 1) + 1, 0);
 	
-	return yearmonth[0] + "." + (parseInt(yearmonth[1]) + 1) + "." + lastday.getDate();
+		return yearmonth[0] + "." + (parseInt(yearmonth[1]) + 1) + "." + lastday.getDate();
+	}
+
+	return "0000.00.31";
 }
 
 function saveSetting(fix) {
@@ -789,9 +810,11 @@ $("#pdfdown").click(function() {
 	var normal_count = $('#normal_count')[0].innerText;
 	var passenger_count = $('#passenger_count')[0].innerText;
 	var overpeople_count = $('#overpeople_count')[0].innerText;
+	var overpeople10_count = $('#overpeople10_count')[0].innerText;
 	var overtime_count = $('#overtime_count')[0].innerText;
 	var passenger_overtime_count = $('#passenger_overtime_count')[0].innerText;
 	var passenger_overpeople_count = $('#passenger_overpeople_count')[0].innerText;
+	var passenger_overpeople10_count = $('#passenger_overpeople10_count')[0].innerText;
 	var noncharge_count = $('#noncharge_count')[0].innerText;
 	var uniq_count = $('#uniq_count')[0].innerText;
 	var total_count = $('#total_count')[0].innerText;
@@ -835,6 +858,13 @@ $("#pdfdown").click(function() {
 		}
 		str += '(' + numberWithCommas(parseInt(numberWithoutCommas(per_amount_value)) + 1500) + ' x ' + overpeople_count + ') ';
 	}
+	if (overpeople10_count > 0) {
+		dd['content'].push({text: "-- 10인 초과: " + overpeople10_count + "회 운행", fontSize: 11});
+		if (str != "") {
+			str += " + ";
+		}
+		str += '(' + numberWithCommas(parseInt(numberWithoutCommas(per_amount_value)) * 2 + 1500) + ' x ' + overpeople10_count + ') ';
+	}
 	if (overtime_count > 0) {
 		dd['content'].push({text: "-- {{overtime}}분 초과: : " + overtime_count + "회 운행", fontSize: 11});
 		if (str != "") {
@@ -848,6 +878,13 @@ $("#pdfdown").click(function() {
 			str += " + ";
 		}
 		str += '(' +  numberWithCommas(parseInt(numberWithoutCommas(per_amount_value)) + parseInt(numberWithoutCommas(passenger_amount_value)) + 1500) + ' x ' + passenger_overpeople_count + ') ';
+	}
+	if (passenger_overpeople10_count > 0) {
+		dd['content'].push({text: "-- 동승자 포함, 10인 초과: : " + passenger_overpeople10_count + "회 운행", fontSize: 11});
+		if (str != "") {
+			str += " + ";
+		}
+		str += '(' +  numberWithCommas(parseInt(numberWithoutCommas(per_amount_value)) + parseInt(22000)) + ' x ' + passenger_overpeople10_count + ') ';
 	}
 	if (passenger_overtime_count > 0) {
 		dd['content'].push({text: "-- 동승자 포함, {{overtime}}분 초과: : " + passenger_overtime_count + "회 운행", fontSize: 11});
