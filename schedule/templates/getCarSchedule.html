@@ -36,6 +36,11 @@
       opacity: 1.0;
     }
 
+    .institute-button {
+      font-size: 20;
+      color: black;
+    }
+
     .btn-small {
       padding: 0.5px 0.5px;
       margin-bottom: 1px;
@@ -98,9 +103,9 @@
         <div class="panel {% if c.passenger == 0%}panel-success{% else %}panel-default{% endif %}">
           <!-- Default panel contents -->
           <div class="panel-heading">
-            <button type="button" class="btn btn-small btn-warning">{{c.carnum}}호차</button>
-            <button type="button" class="btn btn-small btn-warning">{{c.day}}요일</button> {% for aname in c.anamelist %} {% for aid in c.alist %} {% if forloop.counter == forloop.parentloop.counter %}
-            <button type="button" class="btn btn-small btn-warning" role="button" data-toggle="collapse" href="#collapsePhone{{c.id}}" onclick="getAcaPhone(this, {{aid}},{{c.id}})" aria-expanded="false" aria-controls="collapseExample">{{aname}}</button>            {% endif %} {% endfor %} {% endfor %}
+            <button type="button" class="btn btn-small btn-warning institute-button">{{c.carnum}}호차</button>
+            <button type="button" class="btn btn-small btn-warning institute-button">{{c.day}}요일</button> {% for aname in c.anamelist %} {% for aid in c.alist %} {% if forloop.counter == forloop.parentloop.counter %}
+            <button type="button" class="btn btn-small btn-warning institute-button" role="button" data-toggle="collapse" href="#collapsePhone{{c.id}}" onclick="getAcaPhone(this, {{aid}},{{c.id}})" aria-expanded="false" aria-controls="collapseExample">{{aname}}</button>            {% endif %} {% endfor %} {% endfor %}
 	    {% if c.passenger == 0 %} [동승자 필요] {% endif %}
             <div class="collapse" id="collapsePhone{{c.id}}">
             </div>
