@@ -10,5 +10,3 @@ class Salary(models.Model):
     etc = models.CharField(max_length = 8,null=True)
     etc_content = models.TextField(null=True)
     
-    def __unicode__(self):
-        return self.carnum

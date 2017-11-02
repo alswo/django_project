@@ -155,7 +155,32 @@ def get_sales_status(car):
         temp_sales['month'] = m
         temp_sales['car'] = car                      
         temp_sales['sales'] = sales_count
-            
+
+        temp_month = m.split('-')
+        month = temp_month[0]+temp_month[1]
+
+        try:
+            salary = Salary.objects.filter(carnum_id = int(car)).filter(payment_date = int(month))
+
+            if salary[0].p_salary:
+                temp_sales['p_salary'] = int(salary[0].p_salary)
+            else:
+                temp_sales['p_salary'] = 0
+
+            if salary[0].d_salary:
+                temp_sales['d_salary'] = int(salary[0].d_salary)
+            else:
+                temp_sales['d_salary'] = 0
+
+            if salary[0].etc:
+                temp_sales['etc'] = int(salary[0].etc)
+            else:
+                temp_sales['etc'] = 0
+        except:
+            temp_sales['p_salary'] = 0
+            temp_sales['d_salary'] = 0
+            temp_sales['etc'] = 0
+       
         contacts.append(temp_sales) 
 
     return contacts
