@@ -104,7 +104,6 @@ def car_schedule(car):
    
 def get_sales_status(car):
     invens = Inventory.objects.filter(carnum = car)
-    
     thisyear = str(datetime.datetime.now())[:4]
     month = []
 
@@ -304,8 +303,30 @@ def car_sales_status(request):
             else:
                 return render_to_response('salesStatus.html', {'area':area, 'user':request.user})
         else:
- 
-            return render_to_response('salesStatus.html', {'user':request.user})
+            areaid = Profile.objects.get(user_id = request.user).areaid
+            branch = Branch.objects.filter(areaid = areaid)
+
+            if request.GET.get('bid'):
+                bid = int(request.GET.get('bid'))
+            else:
+                bid = -1
+
+            if request.GET.get('cid'):
+                cid = int(request.GET.get('cid'))
+            else:
+                cid = -1
+
+            if bid > 0:
+                if cid > 0:
+                    car = Car.objects.filter(branchid=bid)
+
+                    return render_to_response('salesStatus.html', {'branch':branch,'car':car, 'bid':bid, 'cid': cid, 'user':request.user})
+                else:
+                    car = Car.objects.filter(branchid=bid)
+
+                    return render_to_response('salesStatus.html', {'branch':branch,'car':car, 'bid':bid, 'user':request.user}) 
+            
+            return render_to_response('salesStatus.html', {'branch':branch, 'user':request.user})
 
     else:
         flag = request.POST.get('flag') 
@@ -363,9 +384,30 @@ def salary_management(request):
             else:
                 return render_to_response('salaryManagement.html', {'area':area, 'user':request.user})
         else:
-                                                                              
-            return render_to_response('salaryManagement.html', {'user':request.user})
+            areaid = Profile.objects.get(user_id = request.user).areaid
+            branch = Branch.objects.filter(areaid = areaid)
 
+            if request.GET.get('bid'):
+                bid = int(request.GET.get('bid'))
+            else:
+                bid = -1
+
+            if request.GET.get('cid'):
+                cid = int(request.GET.get('cid'))
+            else:
+                cid = -1
+
+            if bid > 0:
+                if cid > 0:
+                    car = Car.objects.filter(branchid=bid)
+
+                    return render_to_response('salaryManagement.html', {'branch':branch,'car':car, 'bid':bid, 'cid': cid, 'user':request.user})
+                else:
+                    car = Car.objects.filter(branchid=bid)
+
+                    return render_to_response('salaryManagement.html', {'branch':branch,'car':car, 'bid':bid, 'user':request.user})
+                         
+            return render_to_response('salaryManagement.html', {'branch':branch, 'user':request.user})
     else:
         id = request.POST.get('id')
         payment_date = request.POST.get('payment_date')

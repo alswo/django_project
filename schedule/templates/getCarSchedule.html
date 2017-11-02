@@ -86,8 +86,11 @@
       <button type="button" class="{% if day == '목' %}btn btn-primary{% else %} btn btn-info {% endif %}" onclick="location.href='getSchedule?bid={{bid}}&car={{car}}&day=목'">목</button>
       <button type="button" class="{% if day == '금' %}btn btn-primary{% else %} btn btn-info {% endif %}" onclick="location.href='getSchedule?bid={{bid}}&car={{car}}&day=금'">금</button>
       <button type="button" class="{% if day == '토' %}btn btn-primary{% else %} btn btn-info {% endif %}" onclick="location.href='getSchedule?bid={{bid}}&car={{car}}&day=토'">토</button>
-      <button type="button" class="{% if day == '10/2' %}btn btn-primary{% else %} btn btn-info {% endif %}" onclick="location.href='getSchedule?bid={{bid}}&car={{car}}&day=10/2'">10/2</button>
-      <!--<button type="button" class="btn btn-primary" onclick="window.print()">출력</button>-->
+      {% if user.is_staff %}
+      <label class="chekcbox-inline">
+        <input id="blink" type="checkbox">&nbsp깜빡비활성
+      </label>
+      {% endif %}
     </div>
     <br>
     <div class="row schedule">
@@ -241,12 +244,18 @@
         });
 
         function refreshfunc() {
-          location.reload();
+          if(doBlink == true){
+            location.reload();
+          }else{
+            return false;
+          }
         } 
 
         //for blinkBtn frequent
         var blinkBtn = -1;
+        var doBlink = true;
         function alarmfunc(){
+          if( doBlink == true){
           var date = new Date();
           var obj = document.getElementsByClassName('loadTime')
 
@@ -255,7 +264,9 @@
 
           loadObj = loadModule.compareLoadTime();
           console.log(loadModule.getPresentTime())
-          if (blinkBtn > -1) clearInterval(blinkBtn);
+          if (blinkBtn > -1){ 
+            clearInterval(blinkBtn);
+          }
 
           if(loadObj != undefined){
             loadObj.disabled = false;
@@ -291,8 +302,9 @@
             }
             clearInterval(blinkBtn);
           }
+          }else{ clearInterval(blinkBtn);}
+           
         }
-
 
         var curtime;
 
@@ -373,6 +385,14 @@
           }, 12000);
           lastfiretime = Date.now();
         }
-      </script>
+
+  $("#blink").click(function(){
+    if( $(this).is(':checked')){
+      doBlink = false;
+    }else{
+      doBlink = true;
+    }
+  })  
+</script>
 
 </html>
