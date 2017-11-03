@@ -55,9 +55,7 @@
         </tbody>
 </table>
 <script type="text/javascript">
-var cid;
 $('.select-car').change(function(){
-  cid = this.value;
   window.location.href = this.children[this.selectedIndex].getAttribute('href');
 })
 var dataSet = [
@@ -109,7 +107,7 @@ function saveRow(el,flag){
         d_salary : d_salary,
         etc : etc,
         etc_content : etc_content,
-        cid: cid,
+        cid: $('.select-car option:selected').val(),
         flag : flag
       },
       success: function(data){

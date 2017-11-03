@@ -75,6 +75,7 @@
     <canvas id="salesChart" width="200" height="100"></canvas>
   </div>
   <div class="col-md-4">
+    <canvas id="pie-chart" width="800" height="450"></canvas>
   </div>
 </div>
 <script>
@@ -99,7 +100,7 @@
      var sales = [];
      for(i = 0 ; i < salesData.length; i++){
          label.push(salesData[i]['month'])
-         sales.push(salesData[i]['sales'])
+         sales.push(salesData[i]['sales']-(salesData[i]['p_salary']+salesData[i]['d_salary']+salesData[i]['etc']))
      }
      var salesChart = new Chart(ctx, {
         type: 'bar',
@@ -120,6 +121,9 @@
                         offsetGridLines: true
                     }
                 }]
+           },
+           onClick: function barCliked(evt){
+             console.log(salesChart.getElementsAtEvent(evt))
            }
         }
     });

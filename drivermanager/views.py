@@ -14,7 +14,11 @@ import json
 
 def is_not_drivermanager(user):
     if user:
-        return (user.groups.filter(name='drivermanager').exists() == True)
+        if (user.is_superuser == True):
+            return True
+
+        elif (user.groups.filter(name='drivermanager').exists() == True):
+            return True
     
     return False
 
@@ -104,7 +108,6 @@ def car_schedule(car):
    
 def get_sales_status(car):
     invens = Inventory.objects.filter(carnum = car)
-    
     thisyear = str(datetime.datetime.now())[:4]
     month = []
 
@@ -152,7 +155,32 @@ def get_sales_status(car):
         temp_sales['month'] = m
         temp_sales['car'] = car                      
         temp_sales['sales'] = sales_count
-            
+
+        temp_month = m.split('-')
+        month = temp_month[0]+temp_month[1]
+
+        try:
+            salary = Salary.objects.filter(carnum_id = int(car)).filter(payment_date = int(month))
+
+            if salary[0].p_salary:
+                temp_sales['p_salary'] = int(salary[0].p_salary)
+            else:
+                temp_sales['p_salary'] = 0
+
+            if salary[0].d_salary:
+                temp_sales['d_salary'] = int(salary[0].d_salary)
+            else:
+                temp_sales['d_salary'] = 0
+
+            if salary[0].etc:
+                temp_sales['etc'] = int(salary[0].etc)
+            else:
+                temp_sales['etc'] = 0
+        except:
+            temp_sales['p_salary'] = 0
+            temp_sales['d_salary'] = 0
+            temp_sales['etc'] = 0
+       
         contacts.append(temp_sales) 
 
     return contacts
@@ -304,8 +332,30 @@ def car_sales_status(request):
             else:
                 return render_to_response('salesStatus.html', {'area':area, 'user':request.user})
         else:
- 
-            return render_to_response('salesStatus.html', {'user':request.user})
+            areaid = Profile.objects.get(user_id = request.user).areaid
+            branch = Branch.objects.filter(areaid = areaid)
+
+            if request.GET.get('bid'):
+                bid = int(request.GET.get('bid'))
+            else:
+                bid = -1
+
+            if request.GET.get('cid'):
+                cid = int(request.GET.get('cid'))
+            else:
+                cid = -1
+
+            if bid > 0:
+                if cid > 0:
+                    car = Car.objects.filter(branchid=bid)
+
+                    return render_to_response('salesStatus.html', {'branch':branch,'car':car, 'bid':bid, 'cid': cid, 'user':request.user})
+                else:
+                    car = Car.objects.filter(branchid=bid)
+
+                    return render_to_response('salesStatus.html', {'branch':branch,'car':car, 'bid':bid, 'user':request.user}) 
+            
+            return render_to_response('salesStatus.html', {'branch':branch, 'user':request.user})
 
     else:
         flag = request.POST.get('flag') 
@@ -345,7 +395,7 @@ def salary_management(request):
                     if cid > 0:
                         branch = Branch.objects.filter(areaid=aid)
                         car = Car.objects.filter(branchid_id = bid)
-                        salary = list(Salary.objects.filter(carnum_id = cid).order_by('-payment_date'))
+                        salary = Salary.objects.filter(carnum_id = cid).order_by('-payment_date')
 
                         return render_to_response('salaryManagement.html', {'area':area,'branch':branch,'salary':salary,'car':car,'aid':aid,'bid':bid,'cid':cid,'user':request.user})
 
@@ -363,9 +413,31 @@ def salary_management(request):
             else:
                 return render_to_response('salaryManagement.html', {'area':area, 'user':request.user})
         else:
-                                                                              
-            return render_to_response('salaryManagement.html', {'user':request.user})
+            areaid = Profile.objects.get(user_id = request.user).areaid
+            branch = Branch.objects.filter(areaid = areaid)
 
+            if request.GET.get('bid'):
+                bid = int(request.GET.get('bid'))
+            else:
+                bid = -1
+
+            if request.GET.get('cid'):
+                cid = int(request.GET.get('cid'))
+            else:
+                cid = -1
+
+            if bid > 0:
+                if cid > 0:
+                    car = Car.objects.filter(branchid=bid)
+                    salary = Salary.objects.filter(carnum_id = cid).order_by('-payment_date')
+
+                    return render_to_response('salaryManagement.html', {'branch':branch,'salary' : salary, 'car':car, 'bid':bid, 'cid': cid, 'user':request.user})
+                else:
+                    car = Car.objects.filter(branchid=bid)
+
+                    return render_to_response('salaryManagement.html', {'branch':branch,'car':car, 'bid':bid, 'user':request.user})
+                         
+            return render_to_response('salaryManagement.html', {'branch':branch, 'user':request.user})
     else:
         id = request.POST.get('id')
         payment_date = request.POST.get('payment_date')
@@ -373,7 +445,7 @@ def salary_management(request):
         d_salary = request.POST.get('d_salary')
         etc = request.POST.get('etc')
         etc_content = request.POST.get('etc_content')
-        cid = request.POST.get('cid')
+        cid = int(request.POST.get('cid'))
         flag = request.POST.get('flag')
 
         if flag == 'create':
