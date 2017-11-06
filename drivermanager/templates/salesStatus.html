@@ -32,6 +32,7 @@
     align:right;
     width:50px;
   }
+   .liquidFillGaugeText { font-family: Helvetica; font-weight: bold; }
 </style>
 <input id="aid" type="hidden" value="{{aid}}"></input>
 <input id="bid" type="hidden" value="{{bid}}"></input>
@@ -71,14 +72,22 @@
 </div>
 <br>
 <div class="row">
-  <div class="col-md-8">
+  <div class="col-md-7">
     <canvas id="salesChart" width="200" height="100"></canvas>
   </div>
-  <div class="col-md-4">
-    <canvas id="pie-chart" width="800" height="450"></canvas>
+  <div class="col-md-5" align="center">
+    <div class="row">
+      <canvas id="salesPie" width="800" height="450"></canvas>
+    </div>
+    <br>
+    <br>
+    <div class="row">
+      <svg id="fillgauge1" width="37%"></svg>
+    </div>
   </div>
 </div>
 <script>
+var temp_evt;
   $(".select-car").change(function(e){
     var car = this.value
     $.ajax({
@@ -102,12 +111,16 @@
          label.push(salesData[i]['month'])
          sales.push(salesData[i]['sales']-(salesData[i]['p_salary']+salesData[i]['d_salary']+salesData[i]['etc']))
      }
+
      var salesChart = new Chart(ctx, {
         type: 'bar',
         data: {
             labels : label,
             label: "Sales (won)",
-            datasets: [{ data : sales }]
+            datasets: [{
+              data : sales,
+              backgroundColor: ['#ff6384','#ff6384','#ff6384','#ff6384','#ff6384','#ff6384','#ff6384','#ff6384','#ff6384','#ff6384','#ff6384','#ff6384',]
+            }]
         },
         options: {
             legend: { display: false },
@@ -123,7 +136,28 @@
                 }]
            },
            onClick: function barCliked(evt){
-             console.log(salesChart.getElementsAtEvent(evt))
+             var ctx2 = document.getElementById("salesPie");
+             var index = salesChart.getElementsAtEvent(evt)[0]['_index'];
+             var salesRatio = sales[index]/salesData[index]['sales']*100
+             console.log(sales[index]-(salesData[index]['p_salary']+salesData[index]['d_salary']+salesData[index]['etc']))
+             console.log(salesData[8])
+             var salesPie = new Chart(ctx2, {
+               type: 'pie',
+               data: {
+                 datasets:[{
+                   data : [salesData[index]['sales'], salesData[index]['p_salary'], salesData[index]['d_salary'], salesData[index]['etc']],
+                   backgroundColor: ['#ff6384','#36a2eb','#20b2aa','#ffce56']
+                 }],
+                 labels: ['차량매출','동승자 임금','기사 임금','기타']
+               }
+             });
+             var config1 = liquidFillGaugeDefaultSettings();
+             config1.circleColor = "#FF7777";
+             config1.textColor = "#FF4444";
+             config1.waveTextColor = "#FFAAAA";
+             config1.waveColor = "#FFDDDD";
+             config1.textSize = 0.5;
+             loadLiquidFillGauge("fillgauge1", salesRatio );
            }
         }
     });
