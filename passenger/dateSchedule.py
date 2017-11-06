@@ -7,6 +7,9 @@ class timeToDate:
     def __init__(self):
         self.t = time.localtime()
 
+    def setTime(self, t):
+        self.t = t
+
     def timeToDmy(self):
         fmt ="%m/%d/%Y"
         dmy = time.strftime(fmt,self.t)

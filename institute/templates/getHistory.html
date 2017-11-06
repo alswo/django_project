@@ -424,8 +424,8 @@ function calculate() {
 
 	var discount_rate = $('#discount_rate')[0];
 	var discount_rate_value = numberWithoutCommas(discount_rate.options[discount_rate.selectedIndex].value);
-	var per_amount_value = {% if academy.bid == 11 or academy.bid == 12 %} 9000 {% else %} 7500 {% endif %};
-	var passenger_amount_value = {% if academy.bid == 11 or academy.bid == 12 %} 5000 {% else %} 3500 {% endif %};
+	var per_amount_value = {% if academy.id == 62 %} 9000 {% else %} 7500 {% endif %};
+	var passenger_amount_value = {% if academy.id == 62 %} 5000 {% else %} 3500 {% endif %};
 
 
 
@@ -440,7 +440,7 @@ function calculate() {
 	noncharge_count = dictObject[{% get_constants 'BILLING_NONCHARGE' %}] || 0;
 	uniq_count = total - noncharge_count;
 
-	calculate_amount = normal_count * per_amount_value + passenger_count * (per_amount_value + passenger_amount_value) + overpeople_count * (per_amount_value + 1500) + overpeople10_count * (per_amount_value * 2 + 1500 ) + overtime_count * (per_amount_value * 2) + passenger_overtime_count * (per_amount_value + passenger_amount_value) * 2 + passenger_overpeople_count * (per_amount_value + passenger_amount_value + 1500) + passenger_overpeople10_count * 22000;
+	calculate_amount = normal_count * per_amount_value + passenger_count * (per_amount_value + passenger_amount_value) + overpeople_count * (per_amount_value + 1500) + overpeople10_count * (per_amount_value * 2) + overtime_count * (per_amount_value * 2) + passenger_overtime_count * (per_amount_value + passenger_amount_value) * 2 + passenger_overpeople_count * (per_amount_value + passenger_amount_value + 1500) + passenger_overpeople10_count * 22000;
 
 	$('#normal_count')[0].innerText = numberWithCommas(normal_count);
 	$('#passenger_count')[0].innerText = numberWithCommas(passenger_count);
@@ -863,7 +863,7 @@ $("#pdfdown").click(function() {
 		if (str != "") {
 			str += " + ";
 		}
-		str += '(' + numberWithCommas(parseInt(numberWithoutCommas(per_amount_value)) * 2 + 1500) + ' x ' + overpeople10_count + ') ';
+		str += '(' + numberWithCommas(parseInt(numberWithoutCommas(per_amount_value)) * 2) + ' x ' + overpeople10_count + ') ';
 	}
 	if (overtime_count > 0) {
 		dd['content'].push({text: "-- {{overtime}}분 초과: : " + overtime_count + "회 운행", fontSize: 11});
@@ -884,7 +884,7 @@ $("#pdfdown").click(function() {
 		if (str != "") {
 			str += " + ";
 		}
-		str += '(' +  numberWithCommas(parseInt(numberWithoutCommas(per_amount_value)) + parseInt(22000)) + ' x ' + passenger_overpeople10_count + ') ';
+		str += '(' +  numberWithCommas(parseInt('22000')) + ' x ' + passenger_overpeople10_count + ') ';
 	}
 	if (passenger_overtime_count > 0) {
 		dd['content'].push({text: "-- 동승자 포함, {{overtime}}분 초과: : " + passenger_overtime_count + "회 운행", fontSize: 11});
