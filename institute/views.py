@@ -350,7 +350,7 @@ def chooseBillingCode(academy, first_time, last_time, isShare, student_num, pass
 	code = 0
 	overtime = 35
 
-	if (academy.bid == 11 or academy.bid == 12):
+	if (academy.id == 62):
 		overtime = 50
 
 	if (student_num <= 0):
@@ -483,7 +483,7 @@ def getHistory(request):
         academy = Academy.objects.get(id=aid)
 	#aname = Academy.objects.get(pk=aid).name
 
-        if (academy.bid == 11 or academy.bid == 12):
+        if (academy.id == 62):
             overtime = 45
 
         for day_number in range(total_days):

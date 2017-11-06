@@ -109,6 +109,7 @@ class HistoryScheduleTable(models.Model):
     #members = models.ManyToManyField('passenger.StudentInfo')
     members = models.ManyToManyField('passenger.StudentInfo', related_name='scheduled_members')
     offmembers = models.ManyToManyField('passenger.StudentInfo', related_name='off_members')
+    todayoffmembers = models.ManyToManyField('passenger.StudentInfo', related_name='today_off_members')
     tflag = ArrayField(models.IntegerField(null=True,blank=True),null=True,blank=True)
     lflag = models.IntegerField()
 
