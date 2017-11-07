@@ -11,6 +11,7 @@ from api.models import Notice, Clauses
 import json
 from django.views.decorators.csrf import csrf_exempt
 from datetime import datetime, timedelta
+import httplib, urllib
 
 ## time format : HH:MM
 def get_difference(time1, time2):
@@ -410,6 +411,7 @@ def experienceGetRouteMap(request):
 
 def getSchedulesForStudent(request):
     if request.method == "GET":
+
 	max_diff = 10
         t = timeToDate()
         d = t.timeToD()
@@ -627,12 +629,22 @@ def getNotice(request):
 def getStudentInfo2(request):
     if request.method == "POST":
         pin_number = request.POST.get('pin_number')
+        params = urllib.urlencode({
+        'v': 1,
+        'tid': 'UA-109205147-1',
+        'cid':pin_number,
+        't': 'pageview',
+        'ec': 'user',
+        'ea': 'start',
+        'ev': 0
+        })
 
 	debug = 0
 
         try:
             #sInfo = StudentInfo.objects.get(pin_number = pin_number)
             pInfos = PersonalInfo.objects.filter(pin_number = pin_number)
+
             if len(pInfos) <= 0:
                 raise PersonalInfo.DoesNotExist
             studentInfos = list()
@@ -654,7 +666,8 @@ def getStudentInfo2(request):
 	            studentInfo['personinfo_id'] = sInfo.personinfo_id
 
                     studentInfos.append(studentInfo)
-
+            connection = httplib.HTTPConnection('www.google-analytics.com')
+            connection.request('POST', '/collect', params)
             msg = {}
             msg['students'] = studentInfos
 
@@ -852,3 +865,18 @@ def pushConfirmInfo(request):
         except:
             msg = "error"
             return getResponse(debug, 400, msg)
+
+
+def usage_event():
+    params = urllib.urlencode({
+    'v': 1,
+    'tid': 'UA-109205147-1',
+    'cid':'111',
+    't': 'event',
+    'ec': 'user',
+    'ea': 'start',
+    'ev': 0
+})
+
+    connection = httplib.HTTPConnection('www.google-analytics.com')
+    connection.request('POST', '/collect', params)
