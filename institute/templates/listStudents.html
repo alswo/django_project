@@ -71,7 +71,7 @@
 			//val == 1 -> 전체전송 val == 0 -> 선택전송
 			var kind = $(this).val();
       var sid = $('input:checkbox[name="sid[]"]:checked').map(function(){return parseInt($(this).val())}).get();
-
+      
 			$.ajax({
         type: 'POST',
         url: '/message/sendMessage',
@@ -103,6 +103,13 @@
         }
     })
 })
+
+  $(document).ready(function () {
+    $(document).ajaxStart(function () {
+        $("body").loadingIndicator();
+    })
+  });
+
 
 </SCRIPT>
 {% endblock content %}

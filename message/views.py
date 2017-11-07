@@ -8,6 +8,7 @@ from send import sendPin
 from requests.auth import HTTPBasicAuth
 from base64 import b64encode
 from passenger.models import StudentInfo, PersonalInfo
+from util.PhoneNumber import CleanPhoneNumber
 from message.models import Report
 from django.views.decorators.csrf import csrf_exempt
 import json
@@ -51,17 +52,17 @@ def sendMessage(request):
             aname = s.aid.name
 
             if s.parents_phonenumber != None and s.parents_phonenumber != '':
-                to_parents = s.parents_phonenumber[1:]
+                to_parents = CleanPhoneNumber(s.parents_phonenumber[1:])
                 temp_p["to"] = ("82"+ to_parents).encode('utf8')
                 list_to.append(temp_p)
             
             if s.self_phonenumber != None and s.self_phonenumber != '':
-                to_self = s.self_phonenumber[1:]
+                to_self = CleanPhoneNumber(s.self_phonenumber[1:])
                 temp_s["to"] = ("82"+to_self).encode('utf8')
                 list_to.append(temp_s)
 
             if s.grandparents_phonenumber != None and s.grandparents_phonenumber != '':
-                to_grandparents = s.grandparents_phonenumber[1:]
+                to_grandparents = CleanPhoneNumber(s.grandparents_phonenumber[1:])
                 temp_g["to"] = ("82"+ to_grandparents).encode('utf8')
                 list_to.append(temp_g)
            
