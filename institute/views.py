@@ -1078,3 +1078,17 @@ def importStudentList(request):
 @login_required
 def importStudentListForm(request):
 	return render(request, 'importStudentListForm.html');
+
+@login_required
+def listSchedule(request):
+	areaid = request.GET.get('areaid')
+	branchid = request.GET.get('branchid')
+	day = request.GET.get('day')
+	week = request.GET.get('week')
+	carnum = int(request.GET.get('carnum', 0))
+	searchTime = request.GET.get('searchTime')
+
+	branch = Branch.objects.filter(id = branchid)
+
+	contacts = getContacts(branchid, day, carnum, week, searchTime)
+	return render(request, 'listSchedule.html', {'contacts': contacts});

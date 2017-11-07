@@ -290,7 +290,8 @@ def getSchedule(request):
 
         if request.user.is_staff:
             
-            invens = Inventory.objects.filter(bid = bid).filter(alist__contains = [aid]).filter(day = day)
+            #invens = Inventory.objects.filter(bid = bid).filter(alist__contains = [aid]).filter(day = day)
+            invens = Inventory.objects.filter(alist__contains = [aid]).filter(day = day)
             list_invensid = []
             contacts = invenToJson(invens)
 
@@ -307,7 +308,8 @@ def getSchedule(request):
 
         elif request.user.groups.filter(name__in = ['academy']).exists():
             if day:
-                invens = Inventory.objects.filter(bid = bid).filter(alist__contains = [aid]).filter(day = day)
+                #invens = Inventory.objects.filter(bid = bid).filter(alist__contains = [aid]).filter(day = day)
+                invens = Inventory.objects.filter(alist__contains = [aid]).filter(day = day)
                 list_invensid = []
 
                 contacts = invenToJson(invens)
@@ -319,7 +321,8 @@ def getSchedule(request):
                 aid = profile.aid
                 bid = profile.bid
 
-                invens = Inventory.objects.filter(bid = bid).filter(alist__contains = [aid]).filter(day='월')
+                #invens = Inventory.objects.filter(bid = bid).filter(alist__contains = [aid]).filter(day='월')
+                invens = Inventory.objects.filter(alist__contains = [aid]).filter(day='월')
 
                 list_invensid = []
                 contacts = invenToJson(invens)

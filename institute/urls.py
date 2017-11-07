@@ -25,4 +25,5 @@ urlpatterns = [
     url(r'^exportStudentList$', views.exportStudentList),
     url(r'^importStudentList$', views.importStudentList),
     url(r'^importStudentListForm$', views.importStudentListForm),
+    url(r'^listSchedule$', views.listSchedule),
 ]
