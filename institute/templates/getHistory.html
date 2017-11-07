@@ -589,7 +589,8 @@ $("#add-memo").click(function(event) {
 
 $("#fix").click(function(event) {
 	var aid = "{{academy.id}}";
-	var amount = numberWithoutCommas($("#pay_amount")[0].innerText);
+	//var amount = numberWithoutCommas($("#pay_amount")[0].innerText);
+	var amount = numberWithoutCommas($("#total_charge")[0].innerText);
 	var yearmonth = "{{lastmonth}}";
 
 	$.ajax({
