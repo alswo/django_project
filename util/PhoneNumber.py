@@ -2,7 +2,7 @@ import re
 
 def CleanPhoneNumber(phone_number):
 	if not phone_number:
-		return phone_number
+	 	return phone_number
 	clean_phone_number = re.sub(r'[^0-9]+', '', phone_number)
 	return clean_phone_number
 

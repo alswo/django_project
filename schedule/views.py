@@ -26,6 +26,7 @@ from schedule.updateInventory import UpdateInven
 from schedule.createInventory import CreateInven
 from schedule.maintainTodayLoad import getUnloadSid, getTflag
 from django.utils import timezone
+from django.db.models import Q
 
 class TimeHistory:
 	def __init__(self):
@@ -352,6 +353,9 @@ def putScheduleForm(request):
 			academy = Academy.objects.filter(bid = bid)
 			group = Car.objects.filter(branchid = bid)
 
+		if carnum == 16:
+			academy = Academy.objects.filter(Q(bid=bid) | Q(bid=5))
+
 		return render(request, 'putSchedule.html', {'academy': academy, 'bid': bid, 'carnum': carnum, 'day': day, 'week': week, 'group': group, 'user': request.user})
 
 	if request.method == 'POST':
@@ -417,6 +421,8 @@ def putSchedule(request):
         academy = Academy.objects.filter(bid = bid)
         group = Car.objects.filter(branchid = bid)
 
+    if carnum == 16:
+        academy = Academy.objects.filter(Q(bid=bid) | Q(bid=5))
 
     return render_to_response('putSchedule.html', {"academy" : academy, "bid" : bid,"carnum":carnum,"day":day,"week":week, "group" : group,'user':request.user, 'weekdaylist': weekdaylist, 'weeknum_range': range(0, 4)})
 
@@ -435,7 +441,7 @@ def updateSchedule(request):
                 bid = int(request.GET.get('bid'))
                 day = request.GET.get('day')
                 searchTime = request.GET.get('searchTime')
-                areaid = request.GET.get('areaid')
+                areaid = int(request.GET.get('areaid'))
 
                 academy = Academy.objects.filter(bid=bid)
                 branch = Branch.objects.filter(areaid = areaid)
