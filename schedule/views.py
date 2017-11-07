@@ -61,6 +61,7 @@ def invenToJson(invens):
         inventory['req'] = i.req
         inventory['memo'] = i.memo
         inventory['passenger'] = 1
+        inventory['snum'] = len(i.slist)        
 
         for studentInfo in i.slist:
             try:
