@@ -25,6 +25,7 @@ from import_export import resources
 import xlwt
 import xlrd
 from institute.forms import XlsInputForm
+from schedule.views import getContacts
 
 # Create your views here.
 BANKCODES = ['003', '004', '011', '020', '027', '071', '081', '088']
@@ -1090,5 +1091,6 @@ def listSchedule(request):
 
 	branch = Branch.objects.filter(id = branchid)
 
-	contacts = getContacts(branchid, day, carnum, week, searchTime)
+	#contacts = getContacts(branchid, day, carnum, week, searchTime)
+	contacts = getContacts(1, '월', 1, 1, '')
 	return render(request, 'listSchedule.html', {'contacts': contacts});
