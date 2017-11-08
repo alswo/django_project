@@ -34,6 +34,7 @@ def today_schedule_notification():
     push_num = 0
     push_false_num = 0
     total_msg = 0
+    refuse_user = 0
 
     time = timeToDate()
     date = time.timeToD()
@@ -110,17 +111,7 @@ def today_schedule_notification():
         for p in pin_prop:
             msg_count+= 1
             if p.receivePush == False:
-                print p.pin_number
-
-
-
-        pushconf = PushConfirming.objects.filter(date__icontains = today)
-        for pushconfs in pushconf:
-            push_num += 1
-	    if pushconfs.status == False:
-	        push_false_num += 1
-
-
+                refuse_user += 1
 
         count = module_push_content['count']-1
 	lflag = module_push_content['lflag']
@@ -156,8 +147,12 @@ def today_schedule_notification():
 		send_msg(module_push_content['sid'], module_push_content['pin'], msg)
     for fcmdevices in fcmdevice:
 		device_count +=1
-
-    pm = PushMonitoring.objects.create(date= today, total_S= device_count,expec_push=total_msg, expec_push_s=msg_count, push_num=push_num, false_num= push_false_num )
+    pushconf = PushConfirming.objects.filter(date__icontains = today)
+    for pushconfs in pushconf:
+	push_num += 1
+    if pushconfs.status == False:
+	push_false_num += 1
+    pm = PushMonitoring.objects.create(date= today, total_S= device_count,expec_push=total_msg, expec_push_s=msg_count, push_num=push_num, false_num= push_false_num, refuse_user =  refuse_user)
     pm.save()
 
 
