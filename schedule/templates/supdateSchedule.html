@@ -181,23 +181,23 @@
       <div class="row">
         <div class="col-md-4">
           동승자분과 공유 메모
-          <textarea class="form-control" style="" rows="4" id="{{c.id}}text">{{c.req}}</textarea>
+          <textarea class="form-control" style="" name="pMemo" rows="4" id="{{c.id}}text" form='scheduleform{{c.id}}'>{{c.req}}</textarea>
         </div>
         <div class="col-md-4">
           내 메모
-          <textarea class="form-control" style="" rows="4" id="{{c.id}}memo">{% if c.memo %} {{c.memo}} {% endif %} </textarea>
+          <textarea class="form-control" style="" rows="4" name="memo" id="{{c.id}}memo" form='scheduleform{{c.id}}'>{% if c.memo %}{{c.memo}}{% endif %}</textarea>
         </div>
         <div class="col-md-1">
           <br><br><br><br> {% if c.get_cname == 'editedinven' %}
-          <div class="row"><button type="button" class="btn btn-primary" onclick="reqInventory({{c.id}},1);">저장</button></div>
+          <div class="row"><button type="button" class="btn btn-primary" onclick="reqInventory({{c.id}},1,{{week}});">저장</button></div>
           {% else %}
-          <div class="row"><button type="button" class="btn btn-primary" onclick="reqInventory({{c.id}},0);">저장</button></div>
+          <div class="row"><button type="button" class="btn btn-primary" onclick="reqInventory({{c.id}},0,{{week}});">저장</button></div>
           {% endif %}
         </div>
         <div class="col-md-3">
           <ul class="list-group" style="margin:0px">
             <li class="list-group-item">
-              학원: {% for a in c.anamelist %} {{a}} | {%endfor%}
+              학원: {% for a in c.anamelist %} {{a}} | {% endfor %}
             </li>
             <li class="list-group-item">학생 수: {{c.snum}}</li>
             <li class="list-group-item">요일: {{c.day}} ( {{c.stime}} - {{c.etime}} )</li>
@@ -252,7 +252,7 @@
             </thead>
             <tbody class="table-body">
               {% if c.scheduletables %}
-              <select class="moveCarList">
+              <select class="moveCarList" name="changeCar" form='scheduleform{{c.id}}'>
                 {% for car in carlist %}
                   {% if car.carname == c.carnum %}
                     <option value="{{c.id}}/{{car.carname}}" selected>{{car.carname}}호차</option>
@@ -299,7 +299,7 @@
                 <td data-name="del" class="text-center tdstyle3"><button name="del" class="btn btn-sm btn-danger glyphicon glyphicon-remove row-remove"></button></td>
               </tr>
               {% endfor %} {% elif c.editedscheduletables %}
-              <select class="moveCarList">
+              <select class="moveCarList" name="changeCar" form='scheduleform{{c.id}}'>
                 {% for car in carlist %}
                   {% if car.carname == carnum %}
                     <option value="{{c.id}}/{{car.carname}}" selected>{{car.carname}}호차</option>
@@ -372,7 +372,7 @@
         <!-- /div //-->
         <!-- br //-->
         <!-- div class="row pull-right" //-->
-        <form class="savedelete submitForm" accept-charset="" action="updateSchedule" method="post" enctype='application/json' onsubmit="return validateTableForm(this.id)" id="scheduleform{{c.id}}">
+        <form class="savedelete submitForm" action="updateSchedule" method="post" enctype='application/json' onsubmit="return validateTableForm(this.id)" id="scheduleform{{c.id}}">
           <input class="hidden" name="week" value="{{week}}" form="scheduleform{{c.id}}" />
           <input class="hidden" name="iid" value="{{c.id}}" form="scheduleform{{c.id}}" />
           <input class="hidden" name="areaid" value="{{areaid}}" form="scheduleform{{c.id}}" />
@@ -436,16 +436,31 @@
     )
   });
 
-  function reqInventory(iid, flag) {
+  function reqInventory(iid, flag,week) {
     var req = $('#' + iid + 'text').val();
     var memo = $('#' + iid + 'memo').val();
     var weeklyFlag;
+    var week = week;
 
     if( flag == '0'){
       if(window.confirm('1,2,3주 전체 변경하시겠어요?')){
-          weeklyFlag = 1;
+        weeklyFlag = 1;
       }else{
-          weeklyFlag = 0;
+        weeklyFlag = 0;
+      }
+    }
+    else if( flag == '1' && week == 1){
+      if(window.confirm('2,3주도 변경하시겠어요?')){
+        weeklyFlag = 1;
+      }else{
+        weeklyFlag = 0;
+      }
+    }
+    else if( flag == '1' && week == 2){
+      if(window.confirm('3주도 변경하시겠어요?')){
+        weeklyFlag = 1;
+      }else{
+        weeklyFlag = 0;
       }
     }
 
@@ -453,11 +468,12 @@
       type: 'POST',
       url: 'reqInventory',
       data: {
+        week: week,
         iid: iid,
         req: req,
         memo: memo,
         flag: flag,
-        weeklyFlag: weeklyFlag
+        weeklyFlag: weeklyFlag,
       },
       success: function(data) {
         $('#' + iid + 'text').val(data);

@@ -3,11 +3,10 @@ from passenger.models import Academy, StudentInfo
 from schedule.maintainTodayLoad import getTflag 
 
 class CreateInven:
-    def __init__(self,bid,carnum,day,req,time,addr,name,name2,load,sid,week,alist):
+    def __init__(self,bid,carnum,day,time,addr,name,name2,load,sid,week,alist,p_memo,memo):
         self.bid = bid
         self.carnum = carnum
         self.day = day
-        self.req = req
         self.time = time
         self.addr = addr
         self.name = name
@@ -16,6 +15,8 @@ class CreateInven:
         self.sid = sid
         self.week = week
         self.alist = alist
+        self.p_memo = p_memo
+        self.memo = memo      
 
     def setAlist(self):
         if self.alist == 0:
@@ -84,7 +85,7 @@ class CreateInven:
 
     def setWeek0(self):
         for d in self.day:
-            inven = Inventory.objects.create(carnum = self.carnum, bid = self.bid, snum = self.snum, day = d , alist=self.alist, anamelist = self.anamelist_inven, slist=self.slist, stime = self.stime, etime = self.etime, req = self.req, week1 = 0, week2 = 0, week3 = 0)
+            inven = Inventory.objects.create(carnum = self.carnum, bid = self.bid, snum = self.snum, day = d , alist=self.alist, anamelist = self.anamelist_inven, slist=self.slist, stime = self.stime, etime = self.etime, req = self.p_memo, memo=self.memo,week1 = 0, week2 = 0, week3 = 0)
 
             iid = inven.id
 
@@ -127,7 +128,7 @@ class CreateInven:
     def setWeek1(self, unloadSidList = 0, iid = -1):
         #called by putSchedule
         if iid == -1:
-            inven = Inventory.objects.create(carnum = 0, bid = 0, snum = 0, day = 'fake', alist = '{}', slist = '{}',anamelist='{}', etime = 0, stime = 0, req = self.req, week1 = 1, week2 = 1, week3 = 1)
+            inven = Inventory.objects.create(carnum = 0, bid = 0, snum = 0, day = 'fake', alist = '{}', slist = '{}',anamelist='{}', etime = 0, stime = 0, req = self.p_memo, memo=self.memo, week1 = 1, week2 = 1, week3 = 1)
             iid = inven.id 
         #called by updateSchedule week0
         else:
@@ -136,7 +137,7 @@ class CreateInven:
         
         for j in range(3):
             for d in self.day:
-                ei = EditedInven(iid_id = iid, carnum = self.carnum, bid = self.bid, snum = self.snum, day = d, alist = self.alist, anamelist = self.anamelist_inven, slist = self.slist, stime = self.stime, etime = self.etime,  week = j+1)
+                ei = EditedInven(iid_id = iid, carnum = self.carnum, bid = self.bid, snum = self.snum, day = d, alist = self.alist, anamelist = self.anamelist_inven, slist = self.slist, stime = self.stime, etime = self.etime,req=self.p_memo, memo = self.memo, week = j+1)
                 ei.save()
                 eiid = ei.id
 
@@ -177,11 +178,11 @@ class CreateInven:
                         estable.save()
 
     def setWeek2(self):
-        inven = Inventory.objects.create(carnum = 0, bid = 0, snum = 0, day = 'fake', alist = '{}', slist = '{}',anamelist='{}', etime = 0, stime = 0, req = self.req, week1 = 0, week2 = 1, week3 = 1)
+        inven = Inventory.objects.create(carnum = 0, bid = 0, snum = 0, day = 'fake', alist = '{}', slist = '{}',anamelist='{}', etime = 0, stime = 0, req = self.p_memo,memo = self.memo, week1 = 0, week2 = 1, week3 = 1)
  
         for j in range(2):
             for d in self.day:
-                ei = EditedInven(iid_id = inven.id, carnum = self.carnum, bid = self.bid, snum = self.snum, day = d, alist = self.alist, anamelist = self.anamelist_inven, slist = self.slist, stime = self.stime, etime = self.etime, week = j+1)
+                ei = EditedInven(iid_id = inven.id, carnum = self.carnum, bid = self.bid, snum = self.snum, day = d, alist = self.alist, anamelist = self.anamelist_inven, slist = self.slist, stime = self.stime, etime = self.etime,req = self.p_memo, memo = self.memo, week = j+2)
                 ei.save()
                 eiid = ei.id
 
@@ -222,10 +223,10 @@ class CreateInven:
                         estable.save()
 
     def setWeek3(self):
-        inven = Inventory.objects.create(carnum = 0, bid = 0, snum = 0, day = 'fake', alist = '{}', slist = '{}',anamelist='{}', etime = 0, stime = 0, req = self.req, week1 = 0, week2 = 0, week3 = 1)
+        inven = Inventory.objects.create(carnum = 0, bid = 0, snum = 0, day = 'fake', alist = '{}', slist = '{}',anamelist='{}', etime = 0, stime = 0, req = self.p_memo, memo = self.memo, week1 = 0, week2 = 0, week3 = 1)
         
         for d in self.day:
-            ei = EditedInven(iid_id = inven.id, carnum = self.carnum, bid = self.bid, snum = self.snum, day = d, alist = self.alist, anamelist = self.anamelist_inven, slist = self.slist, stime = self.stime, etime = self.etime, week = self.week)
+            ei = EditedInven(iid_id = inven.id, carnum = self.carnum, bid = self.bid, snum = self.snum, day = d, alist = self.alist, anamelist = self.anamelist_inven, slist = self.slist, stime = self.stime, etime = self.etime, req = self.p_memo, memo = self.memo,week = self.week)
             ei.save()
             eiid = ei.id
 

@@ -3,7 +3,7 @@ from passenger.models import Academy, StudentInfo
 from schedule.maintainTodayLoad import getTflag
 
 class UpdateInven:
-    def __init__(self, bid, carnum, day, req, time, stime, etime, addr, name, name2, load, sid, week, alist, snum, anamelist_inven, slist_temp3):
+    def __init__(self, bid, carnum, day, req, time, stime, etime, addr, name, name2, load, sid, week, alist, snum, anamelist_inven, slist_temp3,p_memo,memo):
         self.bid = bid
         self.carnum = carnum
         self.day = day
@@ -21,7 +21,9 @@ class UpdateInven:
         self.snum = snum
         self.anamelist_inven = anamelist_inven
         self.slist_temp3 = slist_temp3
-    
+        self.p_memo = p_memo
+        self.memo = memo   
+ 
     def update_inven(self, iid, unloadSidList):
         inven = Inventory.objects.get(id = iid)
         
@@ -32,6 +34,8 @@ class UpdateInven:
         inven.stime = self.stime
         inven.etime = self.etime
         inven.carnum = self.carnum
+        inven.req = self.p_memo
+        inven.memo = self.memo
         
         inven.save()
 
@@ -63,6 +67,8 @@ class UpdateInven:
             ei.slist_temp3 = self.slist_temp3
             ei.stime = self.stime
             ei.etime = self.etime
+            ei.req = self.p_memo
+            ei.memo = self.memo
             ei.save()
 
             delete_estable = EditedScheduleTable.objects.filter(ieid_id = ei.id)
