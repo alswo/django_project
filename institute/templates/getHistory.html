@@ -530,7 +530,11 @@ function makeHistorySettingList(default_value) {
 			}
 		}
 	}
+	{% if request.path == '/institute/getMonthlyHistory' %}
 	xmlhttp.open("GET", "/institute/getBillingHistorySettingList?aid=" + "{{academy.id}}" + "&carid=" + "{{carid}}" + "&monthpick=" + "{{lastmonth}}");
+	{% else %}
+	xmlhttp.open("GET", "/institute/getBillingHistorySettingList?aid=" + "{{academy.id}}" + "&carid=" + "{{carid}}" + "&monthpick=" + "{{startdate}}_{{enddate}}");
+	{% endif %}
 	xmlhttp.send(null);
 }
 
@@ -617,24 +621,32 @@ $("#temp-save").click(function(event) {
 });
 
 function getDueDate() {
+	var current_d;
+
 	if ($('#monthpick').val()) {
 		var yearmonth = $('#monthpick').val().split("-");
-	
-		return yearmonth[0] + "." + (parseInt(yearmonth[1]) + 1) + "." + "15";
+		current_d = new Date(yearmonth[0], yearmonth[1], 15);
 	} 
+	else {
+		current_d = new Date();
+	}
 
-	return "0000.00.15";
+	return current_d.getFullYear() + "." + (current_d.getMonth() + 1) + "." + "15";
 }
 
 function getAfterDueDate() {
+	var current_d;
+
 	if ($('#monthpick').val()) {
 		var yearmonth = $('#monthpick').val().split("-");
-		var lastday = new Date(yearmonth[0], parseInt(yearmonth[1] + 1) + 1, 0);
-	
-		return yearmonth[0] + "." + (parseInt(yearmonth[1]) + 1) + "." + lastday.getDate();
+		current_d = new Date(yearmonth[0], parseInt(yearmonth[1]) + 1, 0);
+	}
+	else {
+		d = new Date();
+		current_d = new Date(d.getFullYear(), d.getMonth() + 1, 0)
 	}
 
-	return "0000.00.31";
+	return current_d.getFullYear() + "." + (current_d.getMonth() + 1) + "." + current_d.getDate();
 }
 
 function saveSetting(fix) {
@@ -692,7 +704,11 @@ function saveSetting(fix) {
 			}
 		}
 	};
+	{% if request.path == '/institute/getMonthlyHistory' %}
 	xmlhttp.open("POST", "/institute/saveBillingHistorySetting?aid=" + aid + "&carid=" + "{{carid}}" + "&monthpick=" + monthpick + "&fix=" + fix);
+	{% else %}
+	xmlhttp.open("POST", "/institute/saveBillingHistorySetting?aid=" + aid + "&carid=" + "{{carid}}" + "&monthpick=" + "{{startdate}}_{{enddate}}" + "&fix=" + fix);
+	{% endif %}
 	xmlhttp.setRequestHeader("Content-Type", "application/json");
 	xmlhttp.send(JSON.stringify(jsonObj));
 }
