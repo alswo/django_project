@@ -1,4 +1,7 @@
-{% extends 'admin/base.html' %} {% block content %}
+{% extends 'admin/base.html' %} 
+{% load get_academy %}
+{% block content %}
+
 <div class="row">
   <!-- Button trigger modal -->
   <div class="col-md-2">
@@ -197,7 +200,7 @@
         <div class="col-md-3">
           <ul class="list-group" style="margin:0px">
             <li class="list-group-item">
-              학원: {% for a in c.anamelist %} {{a}} | {%endfor%}
+              학원: {% for a in c|get_academynames %} {{a}} | {%endfor%}
             </li>
             <li class="list-group-item">학생 수: {{c.snum}}</li>
             <li class="list-group-item">요일: {{c.day}} ( {{c.stime}} - {{c.etime}} )</li>
@@ -213,8 +216,8 @@
         <div class="col-md-2">
           <select id='busAcademy' class="form-control selectpicker" name="alist[]" data-live-search="true" form="scheduleform{{c.id}}" multiple>
             <option value="">학원선택</option>
-            {% if c.anamelist %}
-              {% for ca in c.anamelist %}
+            {% if c|get_academynames %}
+              {% for ca in c|get_academynames %}
                 {% for a in academy %}
                     {% if a.name.strip == ca.strip %}
                         <option value = "{{a.id}}" selected>{{a.name}}</option>

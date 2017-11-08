@@ -17,17 +17,17 @@ class UpdateInven:
         self.load = load
         self.sid = sid
         self.week = week
-        self.alist = alist
+        #self.alist = alist
         self.snum = snum
-        self.anamelist_inven = anamelist_inven
+        #self.anamelist_inven = anamelist_inven
         self.slist_temp3 = slist_temp3
     
     def update_inven(self, iid, unloadSidList):
         inven = Inventory.objects.get(id = iid)
         
         inven.snum = self.snum
-        inven.alist = self.alist
-        inven.anamelist = self.anamelist_inven
+        #inven.alist = self.alist
+        #inven.anamelist = self.anamelist_inven
         inven.slist = self.slist_temp3
         inven.stime = self.stime
         inven.etime = self.etime
@@ -58,8 +58,8 @@ class UpdateInven:
             ei.bid = self.bid
             ei.snum = self.snum
             ei.day = self.day
-            ei.alist = self.alist
-            ei.anamelist = self.anamelist_inven
+            #ei.alist = self.alist
+            #ei.anamelist = self.anamelist_inven
             ei.slist_temp3 = self.slist_temp3
             ei.stime = self.stime
             ei.etime = self.etime
@@ -74,10 +74,10 @@ class UpdateInven:
 
         for i in range(len(self.time)):
             if i == 0:
-                estable = EditedScheduleTable(ieid_id = eiid, time = self.time[i], addr = self.addr[i], req = self.req[i], alist = '{}', slist = '{}', sname= list(self.name2[i]), tflag='{}', lflag = 2)
+                estable = EditedScheduleTable(ieid_id = eiid, time = self.time[i], addr = self.addr[i], req = self.req[i], slist = '{}', sname= list(self.name2[i]), tflag='{}', lflag = 2)
                 estable.save()
             elif i == len(self.time) -1:
-                estable = EditedScheduleTable(ieid_id = eiid, time = self.time[i], addr = self.addr[i], req = self.req[i], alist = '{}', slist = '{}', sname = list(self.name2[i]), tflag = '{}', lflag = 3)
+                estable = EditedScheduleTable(ieid_id = eiid, time = self.time[i], addr = self.addr[i], req = self.req[i], slist = '{}', sname = list(self.name2[i]), tflag = '{}', lflag = 3)
                 estable.save()
             else:
                 try:
@@ -97,11 +97,11 @@ class UpdateInven:
                 temp_tflag = [0]*len(sidlist)
                 anamelist = []
 
-                for aid in temp_aca:
-                    aname = Academy.objects.get(id = aid)
-                    anamelist.append(aname.name)
+                #for aid in temp_aca:
+                    #aname = Academy.objects.get(id = aid)
+                    #anamelist.append(aname.name)
 
-                estable = EditedScheduleTable(ieid_id = eiid, time = self.time[i], addr = self.addr[i], req = self.req[i], alist=temp_aca, anamelist = anamelist, slist=sidlist, sname=temp_name, tflag=temp_tflag, lflag=self.load[i])
+                estable = EditedScheduleTable(ieid_id = eiid, time = self.time[i], addr = self.addr[i], req = self.req[i], slist=sidlist, sname=temp_name, tflag=temp_tflag, lflag=self.load[i])
 
                 estable.save()
 
@@ -109,11 +109,11 @@ class UpdateInven:
         # lflag load -> 1 unload ->0 start -> 2 end -> 3
         for i in range(len(self.time)):
             if i == 0:
-                stable = ScheduleTable(iid_id = iid, time = self.time[i], addr = self.addr[i], req = self.req[i], alist='{}', slist='{}', sname=list(self.name2[i]), tflag='{}', lflag=2)
+                stable = ScheduleTable(iid_id = iid, time = self.time[i], addr = self.addr[i], req = self.req[i], slist='{}', sname=list(self.name2[i]), tflag='{}', lflag=2)
                 stable.save()
 
             elif i == len(self.time) - 1:
-                stable = ScheduleTable(iid_id = iid, time = self.time[i], addr = self.addr[i], req = self.req[i], alist='{}', slist='{}', sname=list(self.name2[i]), tflag='{}', lflag=3)
+                stable = ScheduleTable(iid_id = iid, time = self.time[i], addr = self.addr[i], req = self.req[i], slist='{}', sname=list(self.name2[i]), tflag='{}', lflag=3)
                 stable.save()
 
             elif 0 < i < len(self.time) - 1:
@@ -139,7 +139,7 @@ class UpdateInven:
                     aname = Academy.objects.get(id = aid)
                     anamelist.append(aname.name)
 
-                stable = ScheduleTable(iid_id = iid, time = self.time[i], addr = self.addr[i], req = self.req[i], alist=temp_aca, anamelist = anamelist, slist=sidlist, sname=temp_name, tflag=temp_tflag, lflag=self.load[i])
+                stable = ScheduleTable(iid_id = iid, time = self.time[i], addr = self.addr[i], req = self.req[i], slist=sidlist, sname=temp_name, tflag=temp_tflag, lflag=self.load[i])
                 stable.save()
 
 

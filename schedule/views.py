@@ -126,9 +126,23 @@ def invenToJson(invens):
 
             inventory['schedule'].append(schedule)
 
+        inventory['alist'] = list(inventory['alist'])
+        inventory['anamelist'] = list(inventory['anamelist'])
         contacts.append(inventory)
 
     return contacts
+
+def filterAid(inventory_queryset, aid):
+    idset = set()
+    for inventory in inventory_queryset:
+        stables = ScheduleTable.objects.filter(iid__id = inventory.id)
+        for stable in stables:
+            for sid in stable.slist:
+                studentinfo = StudentInfo.objects.get(id=sid)
+                if studentinfo.aid.id == aid:
+                    idset.add(inventory.id)
+
+    return idset
 
 #return inventory, editedInven where updateSchedule
 def getContacts(bid, day, carnum, week, searchTime, aid = -1):
@@ -137,25 +151,37 @@ def getContacts(bid, day, carnum, week, searchTime, aid = -1):
     
     #if aid == -1:
 
-    if searchTime == '':
-        inventory_queryset = Inventory.objects.all()
-    else:
+    inventory_queryset = Inventory.objects.filter(bid=bid).filter(day=day)
+    editedinventory_queryset = EditedInven.objects.filter(bid=bid).filter(day=day)
+
+    if searchTime != '':
         searchTime = int(searchTime)
-        inventory_queryset = Inventory.objects.filter(etime__gte = searchTime - 90, stime__lte = searchTime + 90)
-        editedinventory_queryset = EditedInven.objects.filter(etime__gte = searchTime - 90, stime__lte = searchTime + 90)
+        inventory_queryset = inventory_queryset.filter(etime__gte = searchTime - 90, stime__lte = searchTime + 90)
+        editedinventory_queryset = editedinventory_queryset.filter(etime__gte = searchTime - 90, stime__lte = searchTime + 90)
 
     if aid != -1:
-        inventory_queryset = inventory_queryset.filter(alist__contains = [aid])
-        editedinventory_queryset = editedinventory_queryset.filter(alist__contains = [aid])
+        inventory_idset = filterAid(inventory_queryset, aid)
+        #inventory_idset = set()
+        #for inventory in inventory_queryset:
+            #stables = ScheduleTable.objects.filter(iid__id = inventory.id)
+            #for stable in stables:
+                #for sid in stable.slist:
+                    #studentinfo = StudentInfo.objects.get(id=sid)
+		    #if studentinfo.aid.id == aid:
+                        #inventory_idset.add(inventory.id)
 
-    inventory_queryset = inventory_queryset.filter(bid=bid).filter(day=day).filter(carnum=carnum)
-    edtiedinventory_queryset = editedinventory_queryset.filter(bid=bid).filter(day=day).filter(carnum=carnum)
+        inventory_queryset = inventory_queryset.filter(id__in = inventory_idset)
+        editedinventory_queryset = editedinventory_queryset.filter(id__in = inventory_idset)
+    else:
+        inventory_queryset = inventory_queryset.filter(carnum=carnum)
+        editedinventory_queryset = editedinventory_queryset.filter(carnum=carnum)
+     
 
     if (week == 0):
         contacts.extend(inventory_queryset.prefetch_related('scheduletables'))
     else:
         contacts.extend(inventory_queryset.filter(week1=0).prefetch_related('scheduletables'))
-        contacts.extend(editedinventory_queryset.filter(week=week).prefetch_related('edtiedscheduletables'))
+        contacts.extend(editedinventory_queryset.filter(week=week).prefetch_related('editedscheduletables'))
 
 
         #if searchTime == '':
@@ -285,7 +311,10 @@ def getSchedule(request):
         if request.user.is_staff:
             
             #invens = Inventory.objects.filter(bid = bid).filter(alist__contains = [aid]).filter(day = day)
-            invens = Inventory.objects.filter(alist__contains = [aid]).filter(day = day)
+            #invens = Inventory.objects.filter(alist__contains = [aid]).filter(day = day)
+            invens = Inventory.objects.filter(day = day)
+            inventory_idset = filterAid(invens, aid)
+            invens = invens.filter(id__in = inventory_idset)
             list_invensid = []
             contacts = invenToJson(invens)
 
@@ -303,7 +332,10 @@ def getSchedule(request):
         elif request.user.groups.filter(name__in = ['academy']).exists():
             if day:
                 #invens = Inventory.objects.filter(bid = bid).filter(alist__contains = [aid]).filter(day = day)
-                invens = Inventory.objects.filter(alist__contains = [aid]).filter(day = day)
+                #invens = Inventory.objects.filter(alist__contains = [aid]).filter(day = day)
+                invens = Inventory.objects.filter(day = day)
+                inventory_idset = filterAid(invens, aid)
+                invens = invens.filter(id__in = inventory_idset)
                 list_invensid = []
 
                 contacts = invenToJson(invens)
@@ -316,7 +348,10 @@ def getSchedule(request):
                 bid = profile.bid
 
                 #invens = Inventory.objects.filter(bid = bid).filter(alist__contains = [aid]).filter(day='월')
-                invens = Inventory.objects.filter(alist__contains = [aid]).filter(day='월')
+                #invens = Inventory.objects.filter(alist__contains = [aid]).filter(day='월')
+                invens = Inventory.objects.filter(day='월')
+                inventory_idset = filterAid(invens, aid)
+                invens = invens.filter(id__in = inventory_idset)
 
                 list_invensid = []
                 contacts = invenToJson(invens)
@@ -389,14 +424,14 @@ def putSchedule(request):
 
         putInven = CreateInven(bid,carnum,day,req,time,addr,name,name2,load,sid,week,alist)
 
-        if putInven.setAlist() == 1:
-            return HttpResponse('error setAlist')
+        #if putInven.setAlist() == 1:
+            #return HttpResponse('error setAlist')
 
         if putInven.setSlist() == 1:
             return HttpResponse('error setSlist')
 
-        if putInven.setANameList() == 1:
-            return HttpResponse('error setANameList')
+        #if putInven.setANameList() == 1:
+            #return HttpResponse('error setANameList')
 
         if putInven.setSEtime() == 1:
             return HttpResponse('error setSEtime')
@@ -756,12 +791,12 @@ def updateSchedule(request):
 		        if alist != None:
 			    cInven = CreateInven(bid, carnum, day, req, time, addr, name, name2, load, sid, week, alist)
 		        
-                        if cInven.setAlist == 1:
-		            return HttpResponse('error setAlist')
+                        #if cInven.setAlist == 1:
+		            #return HttpResponse('error setAlist')
 		        if cInven.setSlist() == 1:
 			    return HttpResponse('error setSlist')
-		        if cInven.setANameList() == 1:
-			    return HttpResponse('error setANameList')
+		        #if cInven.setANameList() == 1:
+			    #return HttpResponse('error setANameList')
 		        if cInven.setSEtime() == 1:
 			    return HttpResponse('error setSEtime')
 		        
@@ -1145,12 +1180,12 @@ def acaUpdateSchedule(request):
 		        if alist != None:
 			    cInven = CreateInven(bid, carnum, day, req, time, addr, name, name2, load, sid, week, alist)
 		        
-                        if cInven.setAlist == 1:
-		            return HttpResponse('error setAlist')
+                        #if cInven.setAlist == 1:
+		            #return HttpResponse('error setAlist')
 		        if cInven.setSlist() == 1:
 			    return HttpResponse('error setSlist')
-		        if cInven.setANameList() == 1:
-			    return HttpResponse('error setANameList')
+		        #if cInven.setANameList() == 1:
+			    #return HttpResponse('error setANameList')
 		        if cInven.setSEtime() == 1:
 			    return HttpResponse('error setSEtime')
 		        

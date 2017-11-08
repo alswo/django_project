@@ -51,7 +51,7 @@ def store_historyschedule_func(t):
 		scheduletables = ScheduleTable.objects.filter(iid_id = inventory.id)
 		#print "# of scheduletables = " + str(len(scheduletables))
 		for scheduletable in scheduletables:
-			hst = HistoryScheduleTable(date=ymd, iid_id=scheduletable.iid_id, carnum=inventory.carnum, time=scheduletable.time, addr=scheduletable.addr, alist=scheduletable.alist, tflag=scheduletable.tflag, lflag=scheduletable.lflag, req=scheduletable.req)
+			hst = HistoryScheduleTable(date=ymd, iid_id=scheduletable.iid_id, carnum=inventory.carnum, time=scheduletable.time, addr=scheduletable.addr, tflag=scheduletable.tflag, lflag=scheduletable.lflag, req=scheduletable.req)
 			hst.save()
 			try :
 				for sid in scheduletable.slist:
