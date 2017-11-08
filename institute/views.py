@@ -166,15 +166,15 @@ def funcAddStudent(academy_name, student_name, p_number, g_number, s_number, c_n
 	if p_number:
 		p_number = str(p_number)
 		p_number.strip()
-	
+
 	if g_number:
 		g_number = str(g_number)
 		g_number.strip()
-	
+
 	if s_number:
 		s_nubmer = str(s_number)
 		s_number.strip()
-	
+
 	if c_number:
 		c_number = str(c_number)
 		c_number.strip()
@@ -226,7 +226,7 @@ def addStudent(request):
 	else:
 		return render(request, 'message.html', {'msg': "학원 권한이 필요합니다.", 'redirect_url': request.META.get('HTTP_REFERER')})
 
-	
+
 	rv = funcAddStudent(institute, request.POST.get('sname'), request.POST.get('parents_phonenumber'), request.POST.get('grandparents_phonenumber'), request.POST.get('self_phonenumber'), request.POST.get('care_phonenumber'), request.POST.get('age'))
 	if (rv == TAYO_ERROR_SAME_PERSON):
 		return render(request, 'message.html', {'msg': "동일한 학생이 존재합니다.", 'redirect_url': request.META.get('HTTP_REFERER')})
@@ -235,7 +235,7 @@ def addStudent(request):
 
 
 	return render(request, 'message.html', {'msg': "학원생 추가 성공했습니다.", 'redirect_url': request.META.get('HTTP_REFERER')})
-		
+
 @csrf_exempt
 @login_required
 def updateStudent(request):
@@ -430,7 +430,7 @@ def getHistory(request):
     total_uncollected = 0
     uncollectedes = []
 
-	
+
     if len(carids) == 0:
         carid = 'all'
     else:
@@ -444,7 +444,7 @@ def getHistory(request):
 	#uncollectedHistories = BillingHistory.objects.filter(academy = academy, billing_il__isnull = True, billing_bank__isnull = True).order_by('month')
 	for u in uncollectedHistories:
 		uncollected = Uncollected()
-		uncollected.month = u.month[:4] + '-' + u.month[4:] 
+		uncollected.month = u.month[:4] + '-' + u.month[4:]
 		uncollected.billing_amount = "{:,}".format(u.billing_amount)
 		# 2% 연체이자, 10원단위 절사
 		additional_charge = int(u.billing_amount * 0.02 * diffMonth(monthpick, uncollected.month) / 100) * 100
@@ -551,13 +551,13 @@ def getHistory(request):
 			    elif (schedule.lflag == 3 and lflag_on_count > lflag_off_count):
                        	        timeHistory.lflag = True
                                 timeHistory.last_time = convertMins(schedule.time)
-			# 2017-10-01 이전 기준을 위한 legacy 
+			# 2017-10-01 이전 기준을 위한 legacy
 			else:
 			    if (index == 0):
 			        timeHistory.first_time = convertMins(schedule.time)
 			    timeHistory.last_time = convertMins(schedule.time)
 
-			# 2017-10-01 이전 기준을 위한 legacy 
+			# 2017-10-01 이전 기준을 위한 legacy
 			if (lflag_on_count > lflag_off_count):
 			    timeHistory.lflag = True
 
@@ -770,14 +770,14 @@ def addAcademy(request):
 		bank071 = aca_bank.bank071
 		bank081 = aca_bank.bank081
 		bank088 = aca_bank.bank088
-		cursor.execute("UPDATE vacs_vact SET acct_st = %s WHERE acct_no = %s", ['1',bank003])
-		cursor.execute("UPDATE vacs_vact SET acct_st = %s WHERE acct_no = %s", ['1',bank004])
-		cursor.execute("UPDATE vacs_vact SET acct_st = %s WHERE acct_no = %s", ['1',bank011])
-		cursor.execute("UPDATE vacs_vact SET acct_st = %s WHERE acct_no = %s", ['1',bank020])
-		cursor.execute("UPDATE vacs_vact SET acct_st = %s WHERE acct_no = %s", ['1',bank027])
-		cursor.execute("UPDATE vacs_vact SET acct_st = %s WHERE acct_no = %s", ['1',bank071])
-		cursor.execute("UPDATE vacs_vact SET acct_st = %s WHERE acct_no = %s", ['1',bank081])
-		cursor.execute("UPDATE vacs_vact SET acct_st = %s WHERE acct_no = %s", ['1',bank088])
+		cursor.execute("UPDATE vacs_vact SET acct_st = %s, tramt_cond = %s WHERE acct_no = %s", ['1','0',bank003])
+		cursor.execute("UPDATE vacs_vact SET acct_st = %s, tramt_cond = %s WHERE acct_no = %s", ['1','0',bank004])
+		cursor.execute("UPDATE vacs_vact SET acct_st = %s, tramt_cond = %s WHERE acct_no = %s", ['1','0',bank011])
+		cursor.execute("UPDATE vacs_vact SET acct_st = %s, tramt_cond = %s WHERE acct_no = %s", ['1','0',bank020])
+		cursor.execute("UPDATE vacs_vact SET acct_st = %s, tramt_cond = %s WHERE acct_no = %s", ['1','0',bank027])
+		cursor.execute("UPDATE vacs_vact SET acct_st = %s, tramt_cond = %s WHERE acct_no = %s", ['1','0',bank071])
+		cursor.execute("UPDATE vacs_vact SET acct_st = %s, tramt_cond = %s WHERE acct_no = %s", ['1','0',bank081])
+		cursor.execute("UPDATE vacs_vact SET acct_st = %s, tramt_cond = %s WHERE acct_no = %s", ['1','0',bank088])
                 cursor.close()
 		connection.commit()
 		connection.close()
@@ -1024,7 +1024,7 @@ def exportStudentList(request):
 		row += 1
 
 	workbook.save(response)
-	
+
 	return response
 
 

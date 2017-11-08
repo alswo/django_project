@@ -216,32 +216,20 @@
     <div class="col-md-1"></div>
     <div class="col-md-10" style="border-radius: 25px; {% if c.week1 == 1 or c.week2 == 1 or c.week3 == 1 %}background-color: #EFB2B2;{% else %}background-color:#ABE8D0;{% endif %} height: auto; width: 100%" height: auto; width: 100%>
       <div class="col-md-12" style="margin:10px">
-        <!-- br>
-        <div class="row">
-          <div class="col-md-5">
-          </div>
-          <div class="col-md-2 text-center" style="background-color:white; border-radius:10px;">
-            <h3 style="font-family: 'Lucida Console'; font-weight: bold; color:rgb(77,77,77)">{{c.stime}} - {{c.etime}}</h3>
-          </div>
-          <div class="col-md-5">
-
-          </div>
-        </div>
-        <br//-->
         <div class="row">
           <div class="col-md-4">
             동승자분과 공유 메모
-            <textarea class="form-control" style="" rows="4" id="{{c.id}}text">{{c.req}}</textarea>
+            <textarea class="form-control" name="pMemo" rows="4" id="{{c.id}}text" form="scheduleform{{c.id}}">{{c.req}}</textarea>
           </div>
           <div class="col-md-4">
             내 메모
-            <textarea class="form-control" style="" rows="4" id="{{c.id}}memo">{% if c.memo %} {{c.memo}} {% endif %} </textarea>
+            <textarea class="form-control" name="memo" rows="4" id="{{c.id}}memo" form="scheduleform{{c.id}}">{% if c.memo %}{{c.memo}}{% endif %}</textarea>
           </div>
           <div class="col-md-1">
             <br><br><br><br> {% if c.get_cname == 'editedinven' %}
-            <div class="row"><button type="button" class="btn btn-primary" onclick="reqInventory({{c.id}},1);">저장</button></div>
+            <div class="row"><button type="button" class="btn btn-primary" onclick="reqInventory({{c.id}},1,{{week}});">저장</button></div>
             <br> {% else %}
-            <div class="row"><button type="button" class="btn btn-primary" onclick="reqInventory({{c.id}},0);">저장</button></div>
+            <div class="row"><button type="button" class="btn btn-primary" onclick="reqInventory({{c.id}},0,{{week}});">저장</button></div>
             <br> {% endif %}
           </div>
           <div class="col-md-3">
@@ -270,7 +258,7 @@
               </thead>
               <tbody class="table-body">
                 {% if c.scheduletables %}
-                <select class="moveCarList">
+                <select class="moveCarList" name="changeCar" form="scheduleform{{c.id}}">
                   {% for car in carlist %}
                     {% if car.carname == c.carnum %}
                       <option value="{{c.id}}/{{car.carname}}" selected>{{car.carname}}호차</option>
@@ -318,7 +306,7 @@
                 </tr>
                 {% endfor %}
                 {% elif c.editedscheduletables %}
-                <select class="moveCarList">
+                <select class="moveCarList" name="changeCar" form="scheduleform{{c.id}}">
                   {% for car in carlist %}
                     {% if car.carname == c.carnum %}
                       <option value="{{c.id}}/{{car.carname}}" selected>{{car.carname}}호차</option>
@@ -447,25 +435,37 @@
       )
     });
 
-    function reqInventory(iid, flag) {
-
+    function reqInventory(iid, flag,week) {
       var req = $('#' + iid + 'text').val();
       var memo = $('#' + iid + 'memo').val();
       var weeklyFlag;
+      var week = week;
 
       if( flag == '0'){
-      if(window.confirm('1,2,3주 전체 변경하시겠어요?')){
+        if(window.confirm('1,2,3주 전체 변경하시겠어요?')){
           weeklyFlag = 1;
-      }else{
+        }else{
           weeklyFlag = 0;
+        }
+      }else if( flag == '1' && week == 1){
+        if(window.confirm('2,3주도 변경하시겠어요?')){
+          weeklyFlag = 1;
+        }else{
+          weeklyFlag = 0;
+        }
+      }else if( flag == '1' && week == 2){
+        if(window.confirm('3주도 변경하시겠어요?')){
+          weeklyFlag = 1;
+        }else{
+          weeklyFlag = 0;
+        }
       }
-    }
-
 
       $.ajax({
         type: 'POST',
         url: 'reqInventory',
         data: {
+          week: week,
           iid: iid,
           req: req,
           memo: memo,
@@ -489,7 +489,7 @@
 
     function moveCarInven(contactId) {
       carname = $('#move' + contactId).val()
-      iid = contactId 
+      iid = contactId
       var flag;
 
     if(window.confirm('1,2,3주 전체 변경하시겠어요?')){
@@ -522,7 +522,7 @@
       }else{
         flag = 'single';
       }
- 
+
       $.ajax({
         type: 'POST',
         url: 'moveCarEditedInven',

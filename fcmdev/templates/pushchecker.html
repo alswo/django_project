@@ -1,4 +1,4 @@
-<!--
+
 <!DOCTYPE html>
 <HTML lang="ko-kr">
 {% load staticfiles %}
@@ -62,6 +62,7 @@ table.dataTable tbody td.no-padding {
      <div class="col-md-18" >
         <div class="table-reponsive" >
            <table id="fcmdevice" class="display"></table>
+
         </div>
      </div>
   </div>
@@ -70,13 +71,16 @@ table.dataTable tbody td.no-padding {
 
 
 var dataSet = [
- {% for fcmdevices in fcmdevice %}
- [  "{{fcmdevices.id}}",
-                                     "{{fcmdevices.id}}",
-                                     "{{fcmdevices.id}}",
-                                     "{{fcmdevices.id}}",
-                                     "{{fcmdevices.id}}",
-                                     "{{fcmdevices.id}}"
+
+ {% for pushmonitors in pushmonitor %}
+ [
+           "{{pushmonitors.date}}",
+           "{{pushmonitors.total_S}}",
+           "{{pushmonitors.expec_push}}",
+           "{{pushmonitors.expec_push_s}}",
+           "{{pushmonitors.push_num}}",
+           "{{pushmonitors.false_num}}"
+
  ],
   {% endfor %}
 ];
@@ -88,8 +92,8 @@ $(document).ready(function() {
     "lengthMenu": [5,10],
    data : dataSet,
    columns : [
-               { title : "날짜 " },
-               { title : "현재 앱 가입자 수 " },
+               { title : "날짜" },
+               { title : "앱 가입자수 " },
                { title : "총 푸시 예정 건" },
                { title : "푸시 예정 사용자 수" },
                { title : "전송 수" },
@@ -103,4 +107,4 @@ $(document).ready(function() {
 });
 
 </script>
-</HTML> -->
+</HTML>

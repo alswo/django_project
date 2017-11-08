@@ -24,7 +24,7 @@ def getResponse(debug, code, msg):
 
 @app.task
 def today_schedule_notification():
-    i = 0
+   msg_count= 0
     time = timeToDate()
     date = time.timeToD()
     si = []
@@ -97,8 +97,8 @@ def today_schedule_notification():
 
         pin_prop = PropOfDevice.objects.filter(pin_number = module_push_content['pin'])
         for p in pin_prop:
-            i += 1
+           msg_count+= 1
             if p.receivePush == False:
                 print p.pin_number
 
-    print i
+    print msg_count

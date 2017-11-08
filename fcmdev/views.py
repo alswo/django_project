@@ -4,10 +4,16 @@
 from django.shortcuts import render
 from django.shortcuts import render_to_response
 from django.http import HttpResponse, JsonResponse
-from fcmdev.models import PropOfDevice, PushConfirming
+from fcmdev.models import PropOfDevice, PushConfirming, PushMonitoring
+from passenger.dateSchedule import timeToDate
 from fcm_django.models import FCMDevice
 from passenger.models import Academy, StudentInfo, PersonalInfo, BillingHistory
+from schedule.models import Inventory, ScheduleTable
 from django.views.decorators.csrf import csrf_exempt
+from collections import Counter
+
+
+import datetime
 
 
 def getResponse(debug, code, msg):
@@ -111,7 +117,7 @@ def pushConfirmInfo(request):
         else:
             status = True
         try:
-            pushConfirm = PushConfirming.objects.create(sid = sid, pin=pin, confirming=confirming, status=status, token=token)
+            pushConfirm = PushConfirming.objects.create( sid = sid, pin=pin, confirming=confirming, status=status, token=token)
             pushConfirm.save()
             msg = "confirm"
             return getResponse(debug, 200, msg)
@@ -121,16 +127,6 @@ def pushConfirmInfo(request):
             return getResponse(debug, 400, msg)
 
 
-@csrf_exempt
-def pushchecker(request):
-    fcmdevice =  FCMDevice.objects.all()
-    push_check = {}
-    i = 0
-    for fcmdevices in fcmdevice:
-        i +=1
-        push_check[fcmdevices.id] = str(i)
-
-    return render(request, 'pushchecker.html', {'fcmdevice': fcmdevice, 'push_check':push_check});
 
 
 
@@ -175,3 +171,12 @@ def notice(request):
             com = Community.objects.all()
 
             return render(request, 'pushchecker.html', {'com': com} );
+
+
+
+
+def pushchecker(request):
+
+    pushmonitors = PushMonitoring.objects.all()
+
+    return render(request, 'pushchecker.html', {'pushmonitor':pushmonitors});

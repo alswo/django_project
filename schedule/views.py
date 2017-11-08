@@ -370,7 +370,7 @@ def putScheduleForm(request):
 
 @csrf_exempt
 def putSchedule(request):
-    weekdaylist = ['월', '화', '수', '목', '금', '토', '10/2']
+    weekdaylist = ['월', '화', '수', '목', '금', '토']
     if request.method == "GET":
         bid = request.GET.get('bid')
         carnum = int(request.GET.get('carnum', '0'))
@@ -381,7 +381,6 @@ def putSchedule(request):
         day = request.POST.getlist('day[]')
         carnum = request.POST.get('carnum')
         bid = request.POST.get('bid')
-        req = request.POST.get('req')
         time = request.POST.getlist('time[]')
         addr = request.POST.getlist('addr[]')
         name = request.POST.getlist('name[]')
@@ -390,11 +389,13 @@ def putSchedule(request):
         sid = request.POST.getlist('sid[]')
         week = int(request.POST.get('week'))
         alist = request.POST.getlist('alist[]')
+        p_memo = request.POST.get('pMemo')
+        memo = request.POST.get('memo')
 
         if not alist:
             alist = 0
 
-        putInven = CreateInven(bid,carnum,day,req,time,addr,name,name2,load,sid,week,alist)
+        putInven = CreateInven(bid,carnum,day,time,addr,name,name2,load,sid,week,alist,p_memo, memo)
 
         if putInven.setAlist() == 1:
             return HttpResponse('error setAlist')
@@ -543,8 +544,11 @@ def updateSchedule(request):
             bus_check = request.POST.get('bus_check')
 	    busAlist = request.POST.getlist('alist[]')
             option = request.POST.get('option')
+            p_memo = request.POST.get('pMemo')
+            memo = request.POST.get('memo')
             #redirect
-            carnum = int(request.POST.get('carnum'))
+            temp_carnum = request.POST.get('changeCar')
+            carnum = int(temp_carnum.split('/')[1])  
 
             #searchTime,day,area,branch for inventory searching and redirection
             searchTime = request.POST.get('searchTime')
@@ -588,7 +592,7 @@ def updateSchedule(request):
             comment = 'carnum: ' + str(carnum) + ', day: ' + str(day) + ', stime: ' + str(stime) + ', week: ' + str(week) + ' update'
             set_audit(comment, 'update', request.user)
 
-            uInven = UpdateInven(bid, carnum, day, req, time,stime, etime, addr, name, name2, load, sid, week, alist, snum, anamelist_inven, slist_temp3)
+            uInven = UpdateInven(bid, carnum, day, req, time,stime, etime, addr, name, name2, load, sid, week, alist, snum, anamelist_inven, slist_temp3,p_memo,memo)
 
             if week == 1:
                 eInven_index = checkEditedInven(iid, week)                
@@ -740,6 +744,8 @@ def updateSchedule(request):
                 inven.stime = stime 
                 inven.etime = etime 
                 inven.carnum = carnum
+                inven.req = p_memo
+                inven.memo = memo
                 inven.save()
 
                 if option == '1':
@@ -759,9 +765,9 @@ def updateSchedule(request):
                     else:
 		        if not alist:
 		            alist = 0
-			    cInven = CreateInven(bid, carnum, day,req, time, addr, name, name2, load, sid, week, alist)
+			    cInven = CreateInven(bid, carnum, day,req, time, addr, name, name2, load, sid, week, alist,p_memo,memo)
 		        if alist != None:
-			    cInven = CreateInven(bid, carnum, day, req, time, addr, name, name2, load, sid, week, alist)
+			    cInven = CreateInven(bid, carnum, day, req, time, addr, name, name2, load, sid, week, alist,p_memo,memo)
 		        
                         if cInven.setAlist == 1:
 		            return HttpResponse('error setAlist')
@@ -772,9 +778,10 @@ def updateSchedule(request):
 		        if cInven.setSEtime() == 1:
 			    return HttpResponse('error setSEtime')
 		        
-                        cInven.setWeek1(unloadSidList, iid)     
+                        cInven.setWeek1(unloadSidList, iid) 
+    
                 elif option == '0':
-                    Inventory.objects.filter(id=iid).update(snum = snum, alist=alist, anamelist = anamelist_inven, slist=slist_temp3, stime = stime, etime = etime, carnum = carnum)
+                    Inventory.objects.filter(id=iid).update(snum = snum, alist=alist, anamelist = anamelist_inven, slist=slist_temp3, stime = stime, etime = etime, carnum = carnum, req = p_memo, memo = memo)
 
 		    unloadSidList = getUnloadSid(iid)
 
@@ -936,10 +943,14 @@ def acaUpdateSchedule(request):
             raid = int(request.POST.get('aca'))
             areaid = int(request.POST.get('areaid'))
             bid = int(request.POST.get('bid'))
-            carnum = request.POST.get('carnum')
             carlist = Car.objects.filter(branchid=bid)
             alist = request.POST.getlist('alist[]')
             option = request.POST.get('option')
+            p_memo = request.POST.get('pMemo')
+            memo = request.POST.get('memo')
+           
+            temp_carnum = request.POST.get('changeCar')
+            carnum = int(temp_carnum.split('/')[1])
 
             #searchTime,day,area,branch for inventory searching and redirection
             searchTime = request.POST.get('searchTime')
@@ -973,7 +984,7 @@ def acaUpdateSchedule(request):
             comment = 'carnum: ' + str(carnum) + ', day: ' + str(day) +', stime: '+ str(time[0])+ ', week: ' + str(week) + ' update'
             set_audit(comment, 'update', request.user)
 
-            uInven = UpdateInven(bid, carnum, day, req, time,stime, etime, addr, name, name2, load, sid, week, alist, snum, anamelist_inven, slist_temp3)
+            uInven = UpdateInven(bid, carnum, day, req, time,stime, etime, addr, name, name2, load, sid, week, alist, snum, anamelist_inven, slist_temp3,p_memo,memo)
 
             if week == 1:
                 eInven_index = checkEditedInven(iid, week)
@@ -995,15 +1006,15 @@ def acaUpdateSchedule(request):
                 elif eInven_index == 1:
                     inven = Inventory.objects.get(id = iid)
 
-                    ei1 = EditedInven(iid = inven , carnum = carnum, bid = bid, snum = snum, day = day, alist = alist, anamelist= anamelist_inven, slist=slist_temp3, stime = stime, etime = etime, week = week)
+                    ei1 = EditedInven(iid = inven , carnum = carnum, bid = bid, snum = snum, day = day, alist = alist, anamelist= anamelist_inven, slist=slist_temp3, stime = stime, etime = etime, req = p_memo, memo = memo, week = week)
                     ei1.save()
                     e1iid = ei1.id
 
-                    ei2 = EditedInven(iid = inven , carnum = carnum, bid = bid, snum = snum, day = day, alist = alist, anamelist= anamelist_inven, slist=slist_temp3, stime = stime, etime = etime, week = 2)
+                    ei2 = EditedInven(iid = inven , carnum = carnum, bid = bid, snum = snum, day = day, alist = alist, anamelist= anamelist_inven, slist=slist_temp3, stime = stime, etime = etime, req = p_memo, memo = memo, week = 2)
                     ei2.save()
                     e2iid = ei2.id
 
-                    ei3 = EditedInven(iid = inven , carnum = carnum, bid = bid, snum = snum, day = day, alist = alist, anamelist= anamelist_inven, slist=slist_temp3, stime = stime, etime = etime, week = 3)
+                    ei3 = EditedInven(iid = inven , carnum = carnum, bid = bid, snum = snum, day = day, alist = alist, anamelist= anamelist_inven, slist=slist_temp3, stime = stime, etime = etime,req = p_memo, memo = memo, week = 3)
                     ei3.save()
                     e3iid = ei3.id
 
@@ -1051,11 +1062,11 @@ def acaUpdateSchedule(request):
                 elif eInven_index == 1:
                     inven = Inventory.objects.get(id = iid)
 
-                    ei2 = EditedInven(iid = inven , carnum = carnum, bid = bid, snum = snum, day = day, alist = alist, anamelist= anamelist_inven, slist=slist_temp3, stime = stime, etime = etime, week = 2)
+                    ei2 = EditedInven(iid = inven , carnum = carnum, bid = bid, snum = snum, day = day, alist = alist, anamelist= anamelist_inven, slist=slist_temp3, stime = stime, etime = etime, req = p_memo, memo = memo, week = 2)
                     ei2.save()
                     e2iid = ei2.id
 
-                    ei3 = EditedInven(iid = inven , carnum = carnum, bid = bid, snum = snum, day = day, alist = alist, anamelist= anamelist_inven, slist=slist_temp3, stime = stime, etime = etime, week = 3)
+                    ei3 = EditedInven(iid = inven , carnum = carnum, bid = bid, snum = snum, day = day, alist = alist, anamelist= anamelist_inven, slist=slist_temp3, stime = stime, etime = etime, req = p_memo, memo = memo, week = 3)
                     ei3.save()
                     e3iid = ei3.id
 
@@ -1103,7 +1114,7 @@ def acaUpdateSchedule(request):
                 elif eInven_index == 1:
                     inven = Inventory.objects.get(id = iid)
 
-                    ei3 = EditedInven(iid = inven , carnum = carnum, bid = bid, snum = snum, day = day, alist = alist, anamelist= anamelist_inven, slist=slist_temp3, stime = stime, etime = etime, week = 3)
+                    ei3 = EditedInven(iid = inven , carnum = carnum, bid = bid, snum = snum, day = day, alist = alist, anamelist= anamelist_inven, slist=slist_temp3, stime = stime, etime = etime, req = p_memo, memo = memo, week = 3)
                     ei3.save()
                     e3iid = ei3.id
                     
@@ -1129,10 +1140,11 @@ def acaUpdateSchedule(request):
                 inven.stime = stime 
                 inven.etime = etime 
                 inven.carnum = carnum
+                inven.req = p_memo
+                inven.memo = memo
                 inven.save()
 
                 if option == '1':
-
                     unloadSidList = getUnloadSid(iid)
 
                     #delete stable before updateing stable
@@ -1148,9 +1160,9 @@ def acaUpdateSchedule(request):
                     else:
                         if not alist:
                             alist = 0
-			    cInven = CreateInven(bid, carnum, day,req, time, addr, name, name2, load, sid, week, alist)
+			    cInven = CreateInven(bid, carnum, day, time, addr, name, name2, load, sid, week, alist, p_memo, memo)
 		        if alist != None:
-			    cInven = CreateInven(bid, carnum, day, req, time, addr, name, name2, load, sid, week, alist)
+			    cInven = CreateInven(bid, carnum, day, time, addr, name, name2, load, sid, week, alist, p_memo, memo)
 		        
                         if cInven.setAlist == 1:
 		            return HttpResponse('error setAlist')
@@ -1164,7 +1176,7 @@ def acaUpdateSchedule(request):
                         cInven.setWeek1(unloadSidList, iid) 
                 
                 elif option == '0':
-                    Inventory.objects.filter(id=iid).update(snum = snum, alist=alist, anamelist = anamelist_inven, slist=slist_temp3, stime = stime, etime = etime, carnum = carnum)
+                    Inventory.objects.filter(id=iid).update(snum = snum, alist=alist, anamelist = anamelist_inven, slist=slist_temp3, stime = stime, etime = etime, carnum = carnum, req = p_memo, memo = memo)
 
 		    unloadSidList = getUnloadSid(iid)
 
@@ -1453,30 +1465,42 @@ def reqInventory(request):
         memo = request.POST.get('memo')
         flag = request.POST.get('flag')
         wflag = request.POST.get('weeklyFlag')
+        week = request.POST.get('week')
 
         if flag == '0':
             if wflag == '1':
                 try:
-                    eInven = EditedInven.objects.filter(iid_id= iid)
-                
+                    eInven = EditedInven.objects.filter(iid_id = iid)
                     for ei in eInven:
                         ei.req = req
                         ei.memo = memo
                         ei.save()
+                     
                 except:
                     pass
 
-            inven = Inventory.objects.get(id=iid)
-            inven.req = req
-            inven.memo = memo
-            inven.save()
+            inven = Inventory.objects.filter(id=iid).update(req = req, memo = memo)
 
         elif flag == '1':
-            eInven = EditedInven.objects.get(id = iid)
-            eInven.req = req
-            eInven.memo = memo
-            eInven.save()
+            if wflag == '1':
+                inven_id = EditedInven.objects.get(id = iid).iid_id
 
+                if week == '1':
+                    eInven = EditedInven.objects.filter(iid_id = inven_id)
+                    for ei in eInven:
+                        ei.req = req
+                        ei.memo = memo
+                        ei.save()
+                    
+                elif week == '2':
+                    eInven = EditedInven.objects.filter(iid_id = inven_id).exclude(week = 1)
+                    for ei in eInven:
+                        ei.req = req
+                        ei.memo = memo
+                        ei.save()
+            else:
+                EditedInven.objects.filter(id = iid).update(req = req, memo = memo)
+            
         return HttpResponse(req)
 
 def setRealtimeLocation(request):
