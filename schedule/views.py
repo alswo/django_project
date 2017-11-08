@@ -51,8 +51,10 @@ def invenToJson(invens):
         inventory['carnum'] = i.carnum
         inventory['bid'] = i.bid
         inventory['day'] = i.day
-        inventory['alist'] = i.alist
-        inventory['anamelist'] = i.anamelist
+        #inventory['alist'] = i.alist
+        #inventory['anamelist'] = i.anamelist
+	inventory['alist'] = set()
+	inventory['anamelist'] = set()
         inventory['slist'] = i.slist
         inventory['stime'] = i.stime
         inventory['etime'] = i.etime
@@ -84,8 +86,8 @@ def invenToJson(invens):
             schedule['time'] = s.time
             schedule['addr'] = s.addr
             schedule['req'] = s.req
-            schedule['alist'] = s.alist
-            schedule['anamelist'] = s.anamelist
+            #schedule['alist'] = s.alist
+            #schedule['anamelist'] = s.anamelist
             schedule['slist'] = s.slist
             schedule['sinfo'] = []
 
@@ -110,6 +112,9 @@ def invenToJson(invens):
                     sInfo['self_phonenumber'] = studentInfo.self_phonenumber
                     sInfo['care_phonenumber'] = studentInfo.care_phonenumber
 
+                    inventory['alist'].add(academy.id)
+                    inventory['anamelist'].add(academy.name)
+
 		except:
 		    HttpResponse(si)
 
@@ -130,78 +135,66 @@ def getContacts(bid, day, carnum, week, searchTime, aid = -1):
     
     contacts = []
     
-    if aid == -1:
-        if searchTime == '':
-            if week == 0:
-                contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(carnum = carnum).prefetch_related('scheduletables'))
+    #if aid == -1:
 
-            elif week == 1:
-                contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(carnum = carnum).filter(week1 = 0).prefetch_related('scheduletables'))
-                contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(carnum = carnum).filter(week = 1).prefetch_related('editedscheduletables'))
-
-            elif week == 2:
-                contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(carnum = carnum).filter(week2 = 0).prefetch_related('scheduletables'))
-                contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(carnum = carnum).filter(week = 2).prefetch_related('editedscheduletables'))
-
-            elif week == 3:
-                contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(carnum = carnum).filter(week3 = 0).prefetch_related('scheduletables'))
-                contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(carnum = carnum).filter(week = 3).prefetch_related('editedscheduletables'))
-
-        else:
-            searchTime = int(searchTime)
-        
-            if week == 0:
-                contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).filter(carnum = carnum).prefetch_related('scheduletables'))
-
-            elif week == 1:
-                contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(week1=0).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).filter(carnum = carnum).prefetch_related('scheduletables'))
-                contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(week = 1).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).filter(carnum = carnum).prefetch_related('editedscheduletables'))
-
-            elif week == 2:
-                contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(week2=0).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).filter(carnum = carnum).prefetch_related('scheduletables'))
-                contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(week = 2).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).filter(carnum = carnum).prefetch_related('editedscheduletables'))
-
-
-            elif week == 3:
-                contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(week3=0).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).filter(carnum = carnum).prefetch_related('scheduletables'))
-                contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(week = 3).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).filter(carnum = carnum).prefetch_related('editedscheduletables'))
-
+    if searchTime == '':
+        inventory_queryset = Inventory.objects.all()
     else:
-        if searchTime == '':
+        searchTime = int(searchTime)
+        inventory_queryset = Inventory.objects.filter(etime__gte = searchTime - 90, stime__lte = searchTime + 90)
+        editedinventory_queryset = EditedInven.objects.filter(etime__gte = searchTime - 90, stime__lte = searchTime + 90)
 
-            if week == 0:
-                contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).prefetch_related('scheduletables'))
+    if aid != -1:
+        inventory_queryset = inventory_queryset.filter(alist__contains = [aid])
+        editedinventory_queryset = editedinventory_queryset.filter(alist__contains = [aid])
 
-            elif week == 1:
-                contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week1 = 0).prefetch_related('scheduletables'))
-                contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week = 1).prefetch_related('editedscheduletables'))
+    inventory_queryset = inventory_queryset.filter(bid=bid).filter(day=day).filter(carnum=carnum)
+    edtiedinventory_queryset = editedinventory_queryset.filter(bid=bid).filter(day=day).filter(carnum=carnum)
 
-            elif week == 2:
-                contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week2 = 0).prefetch_related('scheduletables'))
-                contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week = 2).prefetch_related('editedscheduletables'))
-
-            elif week == 3:
-                contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week3 = 0).prefetch_related('scheduletables'))
-                contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week = 3).prefetch_related('editedscheduletables'))
-
-        else:
-            searchTime = int(searchTime)
-
-            if week == 0:
-                contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('scheduletables'))
-
-            elif week == 1:
-                contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week1=0).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('scheduletables'))
-                contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week = 1).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('editedscheduletables'))
-
-            elif week == 2:
-                contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week2=0).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('scheduletables'))
-                contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week = 2).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('editedscheduletables'))
+    if (week == 0):
+        contacts.extend(inventory_queryset.prefetch_related('scheduletables'))
+    else:
+        contacts.extend(inventory_queryset.filter(week1=0).prefetch_related('scheduletables'))
+        contacts.extend(editedinventory_queryset.filter(week=week).prefetch_related('edtiedscheduletables'))
 
 
-            elif week == 3:
-                contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week3=0).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('scheduletables'))
-                contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week = 3).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('editedscheduletables'))  
+        #if searchTime == '':
+            #if week == 0:
+                #contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(carnum = carnum).prefetch_related('scheduletables'))
+
+            #else :
+                #contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(carnum = carnum).filter(week1 = 0).prefetch_related('scheduletables'))
+                #contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(carnum = carnum).filter(week = week).prefetch_related('editedscheduletables'))
+
+        #else:
+            #searchTime = int(searchTime)
+        #
+            #if week == 0:
+                #contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).filter(carnum = carnum).prefetch_related('scheduletables'))
+#
+            #else:
+                #contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(week1=0).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).filter(carnum = carnum).prefetch_related('scheduletables'))
+                #contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(week = week).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).filter(carnum = carnum).prefetch_related('editedscheduletables'))
+
+    #else:
+        #if searchTime == '':
+#
+            #if week == 0:
+                #contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).prefetch_related('scheduletables'))
+
+            #else:
+                #contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week1 = 0).prefetch_related('scheduletables'))
+                #contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week = week).prefetch_related('editedscheduletables'))
+
+        #else:
+            #searchTime = int(searchTime)
+#
+            #if week == 0:
+                #contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('scheduletables'))
+
+            #else:
+                #contacts.extend(Inventory.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week1=0).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('scheduletables'))
+                #contacts.extend(EditedInven.objects.filter(bid = bid).filter(day = day).filter(alist__contains = [aid]).filter(week = week).filter(etime__gte = searchTime-90, stime__lte = searchTime+90).prefetch_related('editedscheduletables'))
 
     contacts = sorted(contacts, key=lambda x: x.stime,reverse=False)
 
