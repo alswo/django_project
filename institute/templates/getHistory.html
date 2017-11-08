@@ -15,7 +15,7 @@
 			<div class="panel-body">
         			<form action="{{request.path}}" method="POST">
             			<div class="col-md-3">
-                			<label>학원</label> 
+                			<label>학원</label>
                 			<select class="form-control" id="aid" name="aid">
                         			{% for aca in academies %}
                         			<option value="{{aca.id}}" {% if aca.id == academy.id %} selected {% endif %}>{{aca.name}}</option>
@@ -23,7 +23,7 @@
                 			</select>
             			</div>
             			<div class="col-md-2">
-                			<label>차량별</label> 
+                			<label>차량별</label>
                 			<select class="form-control caroption" id="carid" name="carid[]" multiple="multiple">
                         			<!-- option value="all">모든차량</option //-->
                         			{% for carnum in cars %}
@@ -33,7 +33,7 @@
             			</div>
             			<div class="col-md-5">
 					{% if request.path == '/institute/getMonthlyHistory' %}
-                			<label>월별</label> 
+                			<label>월별</label>
                 			<select class="form-control" id="monthpick" name="monthpick">
                         			{% for monthpick in monthpick_range %}
                         			<option value="{{monthpick}}" {% if monthpick == lastmonth %} selected {% endif %}>{{monthpick}}</option>
@@ -46,7 +46,7 @@
             			</div>
             			<div class="col-md-2" align="right">
                 			<br>
-                			<button class="btn btn-info search" onclick="submit()" type="button" value="dateAcademy">적용</button>              
+                			<button class="btn btn-info search" onclick="submit()" type="button" value="dateAcademy">적용</button>
             			</div>
         			</form>
 			</div>
@@ -129,7 +129,7 @@
                         	<div class="panel-heading">
 				운행횟수 및 요금
 				</div>
-				
+
                         	<div class="panel-body">
 					<div class="row">
 					<div class="col-md-5" align="center">
@@ -155,7 +155,7 @@
 					<div class="col-md-3" align="left">
 				<br>
 				X ( - 특별할인 )
-				<select class="selectpicker price_item" id="discount_rate"> 
+				<select class="selectpicker price_item" id="discount_rate">
 					<option>0%</option>
 					<option>5%</option>
 					<option>10%</option>
@@ -163,9 +163,9 @@
 					<option>20%</option>
 					<option>25%</option>
 					<option>30%</option>
-				</select> 
+				</select>
 				<br>
-			
+
 					</div>
 					<span id="per_amount_value" style="display: none"></span>
 					<span id="passenger_amount_value" style="display: none"></span>
@@ -265,9 +265,9 @@
                                         {% for s in timehistory.scheduletable %}
                                             <tr {% if s.lflag == 1 %} class="info scheduletable" {% elif s.lflag == 0 %} class="warning scheduletable" {% else %} class="scheduletable" {% endif %}>
                                                 <td class="s.time"> {{ s.time }} </td>
-                                                <td class="s.addr"> 
+                                                <td class="s.addr">
                                                 {% if s.lflag == 2 %} 출발 {% elif s.lflag == 3 %} 도착 {% else %} {{ s.addr }} {% endif %} </td>
-                                                <td> 
+                                                <td>
                                                   {% for student in s.members.all %}
                                                     <button type="button" class="load btn-xs {% if student.id|contained:s.offmembers.all %} btn-default {% else %} btn-primary {% endif %} student.sname" id='student.sname'>
                                                     {% if student.aid_id == academy.id %} {{ student.sname }} {% else %} {{student.sname|masking}} {% endif %} </button>
@@ -413,7 +413,7 @@ function calculate() {
 		else {
 			dictObject[sum] = 1;
 		}
-		
+
 		priceoption_value = "";
 	}
 
@@ -576,7 +576,7 @@ $("#add-memo").click(function(event) {
                         	<div class="panel-heading">
 				메모
 				</div>
-				
+
                         	<div class="panel-body">
 				<textarea class="form-control" rows="5" id="memo"></textarea>
 				</div>
@@ -619,9 +619,9 @@ $("#temp-save").click(function(event) {
 function getDueDate() {
 	if ($('#monthpick').val()) {
 		var yearmonth = $('#monthpick').val().split("-");
-	
+
 		return yearmonth[0] + "." + (parseInt(yearmonth[1]) + 1) + "." + "15";
-	} 
+	}
 
 	return "0000.00.15";
 }
@@ -630,7 +630,7 @@ function getAfterDueDate() {
 	if ($('#monthpick').val()) {
 		var yearmonth = $('#monthpick').val().split("-");
 		var lastday = new Date(yearmonth[0], parseInt(yearmonth[1] + 1) + 1, 0);
-	
+
 		return yearmonth[0] + "." + (parseInt(yearmonth[1]) + 1) + "." + lastday.getDate();
 	}
 
@@ -652,14 +652,14 @@ function saveSetting(fix) {
 
 	jsonObj['discount_rate'] = $('#discount_rate option:selected').text();
 	jsonObj['memo'] = memo;
-	
+
 	jsonObj['extra'] = {};
 	$('.extra-fields').each(function(i, obj) {
 		jsonObj['extra'][i] = {};
 		jsonObj['extra'][i][$('.extra-fields')[i].value] = $('.extra-charge')[i].value;
 		console.log(i + " : " + $('.extra-fields')[i].value + " : " + $('.extra-charge')[i].value);
 	});
-	
+
 	jsonObj['data'] = {};
 	$('.dailyhistory').each(function(i, obj) {
 		jsonObj['data'][$(obj).attr('id')] = {};
@@ -669,7 +669,7 @@ function saveSetting(fix) {
 	});
 
 	console.log(jsonObj);
-	
+
 	var xmlhttp = new XMLHttpRequest();
 	xmlhttp.onreadystatechange = function() {
 		if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
@@ -719,7 +719,7 @@ $("#billingHistorySetting").on('change', function() {
 					$("#add-memo").click();
 					$('#memo')[0].value = jsonResponse['memo'];
 				}
-	
+
 				for (var index in jsonResponse['extra']) {
 					for (var fields in jsonResponse['extra'][index]) {
 						$('.extra-fields:last')[0].value = fields;
@@ -729,7 +729,7 @@ $("#billingHistorySetting").on('change', function() {
 						$('.btn-add:last').click();
 					}
 				}
-		
+
 				for (var date in jsonResponse['data']) {
 					for (var inventory_id in jsonResponse['data'][date]) {
 						$('#' + date).find('[inventory_id="' + inventory_id + '"]').multiselect('deselectAll', false);
@@ -755,7 +755,7 @@ $("#billingHistorySetting").on('change', function() {
 $( function() {
 	$(document).on('click', '.btn-add', function(e) {
 		e.preventDefault();
-		
+
 		var controlForm = $('.controls form:first'),
 		    currentEntry = $(this).parents('.entry:first'),
 		    newEntry = $(currentEntry.clone()).appendTo(controlForm);
@@ -794,7 +794,7 @@ $(document).ready(function() {
 
 
 $("#pdfdown").click(function() {
-	waitingDialog.show(); 
+	waitingDialog.show();
 	setTimeout(function () {
 		waitingDialog.hide();
 	}, 4000);
@@ -922,7 +922,7 @@ $("#pdfdown").click(function() {
 	console.log('total_uncollected = ' + total_uncollected);
 
 	dd['content'].push({text: '\n이용 금액: ' + pay_amount + '원', fontSize: total_uncollected ? 12 : 13, bold: true});
-	
+
 	if (total_uncollected != '0') {
 		dd['content'].push({text: '+ 연체 금액: ' + total_uncollected + '원', fontSize: 12, bold: true});
 	}
@@ -958,7 +958,7 @@ $("#pdfdown").click(function() {
 		var timehistory = dailyhistory[i].getElementsByClassName("timehistory");
 		var datestr = dailyhistory[i].getElementsByClassName("dailyhistory.date")[0].innerHTML;
 		dd['content'].push({text: datestr, fontSize: 12, bold: true});
-		
+
 		for (var j=0; j<timehistory.length; j++) {
 			var timetable = {};
 			timetable['body'] = [];

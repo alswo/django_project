@@ -4,7 +4,7 @@ from __future__ import absolute_import
 from tayo.celery import app
 from passenger.models import StudentInfo, PersonalInfo
 from passenger.dateSchedule import timeToDate
-from fcmdev.models import PropOfDevice
+from fcmdev.models import PropOfDevice, PushConfirming, PushMonitoring
 from fcm_django.models import FCMDevice
 from schedule.models import Inventory, ScheduleTable
 from collections import Counter
@@ -12,6 +12,7 @@ import sys
 import requests
 import simplejson
 import ast
+import datetime
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
@@ -24,6 +25,16 @@ def getResponse(debug, code, msg):
 
 @app.task
 def today_schedule_notification():
+
+    fcmdevice =  FCMDevice.objects.all()
+    device_count=0
+    day = datetime.datetime.now()
+    today = day.strftime('%Y-%m-%d')
+    msg_count= 0
+    push_num = 0
+    push_false_num = 0
+    total_msg = 0
+
     time = timeToDate()
     date = time.timeToD()
     si = []
@@ -93,11 +104,30 @@ def today_schedule_notification():
 	                        break
 			except PersonalInfo.DoesNotExist:
 			        break
+        total_msg += 1
+	pin_prop = PropOfDevice.objects.filter(pin_number = module_push_content['pin'])
+
+        for p in pin_prop:
+            msg_count+= 1
+            if p.receivePush == False:
+                print p.pin_number
+
+
+
+        pushconf = PushConfirming.objects.filter(date__icontains = today)
+        for pushconfs in pushconf:
+            push_num += 1
+	    if pushconfs.status == False:
+	        push_false_num += 1
+
+
 
         count = module_push_content['count']-1
 	lflag = module_push_content['lflag']
 	sname = module_push_content['sname']
 	sid = module_push_content['sid']
+
+
 	if dict_s.has_key(sid):
 		tflag_count = dict_s[sid]
 	else:
@@ -124,6 +154,11 @@ def today_schedule_notification():
 		send_msg(module_push_content['sid'], module_push_content['pin'], cancel_msg)
 	    else:
 		send_msg(module_push_content['sid'], module_push_content['pin'], msg)
+    for fcmdevices in fcmdevice:
+		device_count +=1
+
+    pm = PushMonitoring.objects.create(date= today, total_S= device_count,expec_push=total_msg, expec_push_s=msg_count, push_num=push_num, false_num= push_false_num )
+    pm.save()
 
 
 def send_msg(sid, pin, msg):

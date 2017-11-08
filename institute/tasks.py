@@ -10,12 +10,24 @@ import sys
 import requests
 import simplejson
 import ast
+import datetime
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
 
 @app.task
 def updateBillingHistory():
+	day = datetime.datetime.now()
+        y = day.strftime('%Y')
+	m = day.strftime('%m')
+	if m == '01':
+		m = '12'
+		y = int(y) -1
+	else:
+		y = y
+		m = m
+
+	today =  y+m
 	billinghistorys = BillingHistory.objects.all()
 
 
@@ -23,7 +35,7 @@ def updateBillingHistory():
 		academys = Academy.objects.filter(id = b.academy_id)
 		for a in academys:
 			cursor = connection.cursor()
-			cursor.execute("SELECT iacct_no FROM vacs_ahst;")
+			cursor.execute("SELECT iacct_no FROM vacs_ahst WHERE left(tr_il,6) =  %s",[today])
 			iacct_nos = cursor.fetchall()
 
 			for acct_no in iacct_nos:
@@ -32,52 +44,54 @@ def updateBillingHistory():
 				if a.bank003 == acct:
 					bank_cd = "기업은행"
 					aid = a.id
-					ex(acct, bank_cd, aid)
+					ex(acct, bank_cd, aid, today)
 
 				elif a.bank004 == acct:
 					bank_cd = "국민은행"
 					aid = a.id
-					ex(acct, bank_cd, aid)
+					ex(acct, bank_cd, aid, today)
 
 				elif a.bank011 == acct:
 					bank_cd = "농협은행"
 					aid = a.id
-					ex(acct, bank_cd, aid)
+					ex(acct, bank_cd, aid, today)
 
 				elif a.bank020 == acct:
 					bank_cd = "우리은행"
 					aid = a.id
-					ex(acct, bank_cd, aid)
+					ex(acct, bank_cd, aid, today)
 
 				elif a.bank027 == acct:
 					bank_cd = "시티은행"
 					aid = a.id
-					ex(acct, bank_cd, aid)
+					ex(acct, bank_cd, aid, today)
 
 				elif a.bank071 == acct:
 					bank_cd = "우체국은행"
 					aid = a.id
-					ex(acct, bank_cd, aid)
+					ex(acct, bank_cd, aid, today)
 
 				elif a.bank081 == acct:
 					bank_cd = "하나은행"
 					aid = a.id
-					ex(acct, bank_cd, aid)
+					ex(acct, bank_cd, aid, today)
 
 				elif a.bank088 == acct:
 					bank_cd = "신한은행"
 					aid = a.id
-					ex(acct, bank_cd, aid)
+					ex(acct, bank_cd, aid, today)
 
 				else:
-					print " nothing"
+					print "nothing"
 
-def ex(acct, bank_cd, aid):
+def ex(acct, bank_cd, aid, today):
 	cursor = connection.cursor()
-	cursor.execute("SELECT tr_il FROM vacs_ahst WHERE iacct_no = %s" , [acct])
+	cursor.execute("SELECT tr_il FROM vacs_ahst WHERE iacct_no = %s and left(tr_il,6) =  %s" , [acct, today])
 	tr_il = cursor.fetchone()
 	tr_il = u"%s" % tr_il
-	cursor.execute("UPDATE passenger_billinghistory SET billing_il = %s, billing_bank = %s WHERE academy_id = %s", [tr_il, bank_cd, aid])
+	tr_il_slice =  tr_il[0:6]
+	tr_month = int(tr_il_slice)-1
+	cursor.execute("UPDATE passenger_billinghistory SET billing_il = %s, billing_bank = %s WHERE academy_id = %s and month = %s", [tr_il, bank_cd, aid, str(tr_month)])
 	cursor.close()
 	connection.commit()
 	connection.close()
@@ -92,14 +106,14 @@ def getStartBillDay():
 
 def getEndBillDay():
 	return "%04d%02d31" % (timezone.now().year, timezone.now().month)
-	
+
 @app.task
 def updatePenaltyCharge():
 	billingHistories = BillingHistory.objects.filter(month = '201709').filter(billing_il__isnull = True)
 	start_billday = getStartBillDay()
 	end_billday = getEndBillDay()
 	for billingHistory in billingHistories:
-		print billingHistory.academy.name + " : " + str(billingHistory.billing_amount) + " : " + str(plusPenaltyCharge(billingHistory.billing_amount)) 
+		print billingHistory.academy.name + " : " + str(billingHistory.billing_amount) + " : " + str(plusPenaltyCharge(billingHistory.billing_amount))
 		billingHistory.billing_amount = plusPenaltyCharge(billingHistory.billing_amount)
 		billingHistory.save()
 
