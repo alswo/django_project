@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load bitwise_tags %}
 {% block content %}
 <!-- DIV class="row" //-->
 	<div id="left" class="col-md-2"> 
@@ -109,6 +110,21 @@
 					<DIV class="col-md-2">
 					</DIV>
 					<DIV class="col-md-4">
+						<label>노선버스 선택</label>
+					</DIV>
+					<DIV class="col-md-4 input-div">
+						<select class="form-control" id='linebuses' name='linebuses[]' multiple="multiple">
+							{% for bus in buses %}
+								<option value="{{bus.id}}" {% if bus.id|contained:academy.linebuses.all %}selected {% endif %}>{{bus.carname}}호차</option>
+							{% endfor %}
+						</select>
+					</DIV>
+				</DIV>
+				<BR>
+				<DIV class="row collapse in">
+					<DIV class="col-md-2">
+					</DIV>
+					<DIV class="col-md-4">
 						<button id="addsubmit" class="form-control">{% if academy %} 수정 {% else %} 추가 {% endif %}</button>
 					</DIV>
 				</DIV>
@@ -143,6 +159,10 @@ $(document).ready(function(){
 			alert("입력값이 올바르지 않습니다.4");
 			e.preventDefault();
 		}
+	});
+
+	$('#linebuses').multiselect({
+		nonSelectedText: '일반'
 	});
 });
 
@@ -369,6 +389,25 @@ function validatePhoneNumber(phonenumber) {
 		var ps = new daum.maps.services.Places();
 		ps.keywordSearch(keyword, placeSearchDB);
 	}
+
+	$('#bid').on('change', function() {
+		var xmlhttp = new XMLHttpRequest();
+		var bid = $('#bid').val();
+		xmlhttp.onreadystatechange = function() {
+			if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+				if (xmlhttp.getResponseHeader('content-type') == 'application/json') {
+					var jsonResponse = JSON.parse(xmlhttp.responseText);
+					$('#linebuses').find('option').remove();
+					for (var i=0; i<jsonResponse['cars'].length; i++) {
+						$('#linebuses').append("<option value='" + jsonResponse['cars'][i]['id'] + "'>" + jsonResponse['cars'][i]['name'] + "</option>");
+					}
+					$('#linebuses').multiselect('rebuild')
+				}
+			}
+		}
+		xmlhttp.open("GET", "/institute/getCarsByBranch?bid=" + bid);
+		xmlhttp.send(null);
+	});
 
 
       </script>

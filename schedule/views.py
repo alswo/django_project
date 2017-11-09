@@ -132,15 +132,33 @@ def invenToJson(invens):
 
     return contacts
 
+## Instead of Goto, use the exception
+class GotoException(Exception):
+    def __init__(self):
+       return
+
+
 def filterAid(inventory_queryset, aid):
     idset = set()
+    academy = Academy.objects.get(id = aid)
+
+
     for inventory in inventory_queryset:
-        stables = ScheduleTable.objects.filter(iid__id = inventory.id)
-        for stable in stables:
-            for sid in stable.slist:
-                studentinfo = StudentInfo.objects.get(id=sid)
-                if studentinfo.aid.id == aid:
+        try: 
+            for bus in academy.linebuses.all():
+                if inventory.carnum == bus.carname:
                     idset.add(inventory.id)
+                    raise GotoException()
+
+            stables = ScheduleTable.objects.filter(iid__id = inventory.id)
+            for stable in stables:
+                for sid in stable.slist:
+                    studentinfo = StudentInfo.objects.get(id=sid)
+                    if studentinfo.aid.id == aid:
+                        idset.add(inventory.id)
+                        raise GotoException()
+        except GotoException, e:
+            pass
 
     return idset
 

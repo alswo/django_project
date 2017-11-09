@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from passenger.models import Academy, StudentInfo, PersonalInfo, BillingHistory
-from schedule.models import Branch, HistoryScheduleTable, Poi, Placement
+from schedule.models import Branch, HistoryScheduleTable, Poi, Placement, Car
 from django.db import connection
 from util.PhoneNumber import CleanPhoneNumber, FormatPhoneNumber
 from util.PersonalInfoUtil import compareLists, saveNewPersonInfo2, findSamePerson
@@ -676,7 +676,9 @@ def addAcademyForm(request):
 	if not request.user.is_staff :
 		return render(request, 'message.html', {'msg': "staff 권한이 필요합니다.", 'redirect_url': redirect_url})
 
-	return render(request, 'addUpdateAcademyForm.html', )
+	buses = Car.objects.all()
+
+	return render(request, 'addUpdateAcademyForm.html', {'buses' : buses})
 
 @login_required
 def updateAcademyForm(request):
@@ -688,7 +690,9 @@ def updateAcademyForm(request):
 	aid = request.GET.get('aid')
 	academy = Academy.objects.get(id = aid)
 
-	return render(request, 'addUpdateAcademyForm.html', {'academy' : academy})
+	buses = Car.objects.filter(branchid__id = academy.bid)
+
+	return render(request, 'addUpdateAcademyForm.html', {'academy' : academy, 'buses' : buses})
 
 @csrf_exempt
 @login_required
@@ -736,6 +740,8 @@ def addAcademy(request):
 	lat = request.POST.get('lat')
 	lng = request.POST.get('lng')
 	address = request.POST.get('address')
+	address2 = request.POST.get('address2')
+        linebuses = request.POST.getlist('linebuses[]')
 
 	branch = Branch.objects.get(id=bid)
 	msg = None
@@ -752,7 +758,12 @@ def addAcademy(request):
 	placement = None
 
 	try:
-		Academy.objects.create(name = aname, address = address, phone_1 = phone_1, phone_2 = phone_2, bid = bid, maxvehicle = maxvehicle, placement = placement, bank003 = giup[0].strip(), bank004 = gukmin[0].strip(), bank011 = nonghyup[0].strip(), bank020 = woori[0].strip(), bank027 = city[0].strip(), bank071 = woochegook[0].strip(), bank081 = hana[0].strip(), bank088 = shinhan[0].strip())
+		academy = Academy.objects.create(name = aname, address = address, address2 = address2, phone_1 = phone_1, phone_2 = phone_2, bid = bid, maxvehicle = maxvehicle, placement = placement, bank003 = giup[0].strip(), bank004 = gukmin[0].strip(), bank011 = nonghyup[0].strip(), bank020 = woori[0].strip(), bank027 = city[0].strip(), bank071 = woochegook[0].strip(), bank081 = hana[0].strip(), bank088 = shinhan[0].strip())
+
+		for busid in linebuses:
+			bus = Car.objects.get(id = busid)
+			academy.linebuses.add(bus)
+
 	except IntegrityError as e:
 		#if 'unique constraint' in e.message:
 		msg = "중복되는 학원명입니다."
@@ -800,6 +811,7 @@ def updateAcademy(request):
 	lng = request.POST.get('lng')
 	address = request.POST.get('address')
 	address2 = request.POST.get('address2')
+        linebuses = request.POST.getlist('linebuses[]')
 
 	branch = Branch.objects.get(id=bid)
 	msg = None
@@ -826,6 +838,11 @@ def updateAcademy(request):
 		academy.placement = placement
 		academy.save()
 
+		for busid in linebuses:
+			bus = Car.objects.get(id = busid)
+			academy.linebuses.add(bus)
+
+
 		#academy.placement = placement
 
 	except IntegrityError as e:
@@ -833,7 +850,7 @@ def updateAcademy(request):
 	except:
 		msg = "에러가 발생했습니다."
 	else:
-		msg = "학원 추가 성공했습니다."
+		msg = "학원 정보 수정 성공했습니다."
 
 	return render(request, 'message.html', {'msg': msg, 'redirect_url': request.META.get('HTTP_REFERER')})
 
@@ -1092,3 +1109,19 @@ def listSchedule(request):
 
 	contacts = getContacts(branchid, day, carnum, week, searchTime)
 	return render(request, 'listSchedule.html', {'contacts': contacts});
+
+def getCarsByBranch(request):
+	bid = request.GET.get('bid')
+
+	cars = Car.objects.filter(branchid__id = bid)
+
+	msg = {}
+	msg['cars'] = []
+
+	for car in cars:
+		data = {}
+		data['id'] = car.id
+		data['name'] = car.carname
+		msg['cars'].append(data)
+
+	return JsonResponse(msg)

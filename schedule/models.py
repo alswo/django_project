@@ -158,6 +158,9 @@ class Car(models.Model):
     class Meta:
         ordering=['carname']
 
+    def __unicode__(self):
+        return str(self.carname)
+
 class Building(models.Model):
     #branch = Branch.objects.all()
 
