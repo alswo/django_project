@@ -93,6 +93,7 @@ var salesChart;
 var salesPie;
 
   $(".select-car").change(function(e){
+    if(salesPie){salesPie.destroy();}
     var car = this.value
     $.ajax({
       url: "carSalesStatus",
