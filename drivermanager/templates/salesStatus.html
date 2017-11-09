@@ -89,7 +89,11 @@
 </div>
 <script>
 var temp_evt;
+var salesChart;
+var salesPie;
+
   $(".select-car").change(function(e){
+    if(salesPie){salesPie.destroy();}
     var car = this.value
     $.ajax({
       url: "carSalesStatus",
@@ -99,6 +103,7 @@ var temp_evt;
           car : car
       },
       success: function(data){
+          if(salesChart){salesChart.destroy();}
           var sales = JSON.parse(data);
           setBarChart(sales);
       }
@@ -112,8 +117,7 @@ var temp_evt;
          label.push(salesData[i]['month'])
          sales.push(salesData[i]['sales']-(salesData[i]['p_salary']+salesData[i]['d_salary']+salesData[i]['etc']))
      }
-
-     var salesChart = new Chart(ctx, {
+     salesChart = new Chart(ctx, {
         type: 'bar',
         data: {
             labels : label,
@@ -137,12 +141,13 @@ var temp_evt;
                 }]
            },
            onClick: function barCliked(evt){
+             if(salesPie){salesPie.destroy();}
              var ctx2 = document.getElementById("salesPie");
              var index = salesChart.getElementsAtEvent(evt)[0]['_index'];
              var salesRatio = sales[index]/salesData[index]['sales']*100
              console.log(sales[index]-(salesData[index]['p_salary']+salesData[index]['d_salary']+salesData[index]['etc']))
              console.log(salesData[8])
-             var salesPie = new Chart(ctx2, {
+             salesPie = new Chart(ctx2, {
                type: 'pie',
                data: {
                  datasets:[{

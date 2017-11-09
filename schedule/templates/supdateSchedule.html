@@ -308,7 +308,7 @@
                   {% endif %}
                 {% endfor %}
               </select> &nbsp&nbsp
-              <button type="button" class="btn-sm btn-primary" value="" id="move{{c.id}}" onclick="moveCarEditedInven({{c.id}});">차량만 바꾸기</button>
+              <button type="button" class="btn-sm btn-primary" value="" id="move{{c.id}}" onclick="moveCarEditedInven({{c.id}},{{week}});">차량만 바꾸기</button>
               <br><br> {% for es in c.editedscheduletables.all %}
               <tr>
                 <td data-name="time" class="tdstyle4"><input onchange="emptyTempList();" type="text" name="time[]" placeholder="Time" class="form-control" form="scheduleform{{c.id}}" value="{{es.time}}" /></td>
@@ -516,28 +516,36 @@
     });
   }
 
-  function moveCarEditedInven(contactId) {
+  function moveCarEditedInven(contactId,week) {
+    var week = week;
     carname = $('#move' + contactId).val()
     iid = contactId
-
     var flag;
 
-    if(window.confirm('1,2,3주 전체 변경하시겠어요?')){
-      flag = 'all';
-    }else{
-      flag = 'single';
-    }
+    if( week == '1'){
+      if(window.confirm('2,3주도 변경하시겠어요?')){
+        flag = 'all';
+      }else{
+        flag = 'single';
+      }
+    }else if ( week == '2'){
+      if(window.confirm('3주도 변경하시겠어요?')){
+        flag = 'all';
+      }else{
+        flag = 'single';
+      }
+    }else{flag='single';}
 
     $.ajax({
       type: 'POST',
       url: 'moveCarEditedInven',
       data: {
         iid: iid,
+        carname: carname,
         flag: flag,
-        carname: carname
+        week: week
       },
       success: function(data) {
-        console.log(data)
         alert(data + '차량으로 이동 완료')
         window.location.replace(window.location.href);
       }

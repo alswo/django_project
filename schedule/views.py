@@ -62,7 +62,6 @@ def invenToJson(invens):
         inventory['req'] = i.req
         inventory['memo'] = i.memo
         inventory['passenger'] = 1
-        inventory['snum'] = len(i.slist)        
 
         for studentInfo in i.slist:
             try:
@@ -78,6 +77,7 @@ def invenToJson(invens):
 
         inventory['schedule'] = []
 
+        snum = 0
         for s in schedules:
             schedule={}
             schedule['id'] = s.id
@@ -109,16 +109,19 @@ def invenToJson(invens):
                     sInfo['grandparents_phonenumber'] = studentInfo.grandparents_phonenumber
                     sInfo['self_phonenumber'] = studentInfo.self_phonenumber
                     sInfo['care_phonenumber'] = studentInfo.care_phonenumber
+                    snum += 1
 
 		except:
 		    HttpResponse(si)
 
 	        schedule['sinfo'].append(sInfo)
+                                
 
 	    schedule['sname']= s.sname
             schedule['tflag'] = s.tflag
             schedule['lflag'] = s.lflag
-
+            
+            inventory['snum'] = snum
             inventory['schedule'].append(schedule)
 
         contacts.append(inventory)
@@ -765,9 +768,9 @@ def updateSchedule(request):
                     else:
 		        if not alist:
 		            alist = 0
-			    cInven = CreateInven(bid, carnum, day,req, time, addr, name, name2, load, sid, week, alist,p_memo,memo)
+			    cInven = CreateInven(bid, carnum, day, time, addr, name, name2, load, sid, week, alist,p_memo,memo)
 		        if alist != None:
-			    cInven = CreateInven(bid, carnum, day, req, time, addr, name, name2, load, sid, week, alist,p_memo,memo)
+			    cInven = CreateInven(bid, carnum, day, time, addr, name, name2, load, sid, week, alist,p_memo,memo)
 		        
                         if cInven.setAlist == 1:
 		            return HttpResponse('error setAlist')
@@ -1609,6 +1612,7 @@ def moveCarEditedInven(request):
         iid = request.POST.get('iid')
         carname = request.POST.get('carname')
         flag = request.POST.get('flag')
+        week = request.POST.get('week')
 
         if flag == 'all':
             try:
@@ -1618,12 +1622,11 @@ def moveCarEditedInven(request):
                 pass
            
             try:
-                targetEditedInven = EditedInven.objects.filter(iid_id = iid_id)
-                for ei in targetEditedInven:
-                    ei.carnum = carname
-    
-                    ei.save()
-    
+                if week == '1':
+                    eInven = EditedInven.objects.filter(iid_id = iid_id).update(carnum = carname)
+                elif week == '2':
+                    eInven = EditedInven.objects.filter(iid_id = iid_id).exclude(week = 1).update(carnum = carname)
+
             except EditedInven.DoesNotExist:
                 pass
         else:
