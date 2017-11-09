@@ -126,32 +126,33 @@ def get_sales_status(car):
             inventory_option = b.setting['data'].values()
             for io in inventory_option:
                 for i in invens:
-                    temp_value = io.values()[0]
-                    if i.id == int(io.keys()[0]):
-                        if 8 in temp_value:
-                            sales_count += 0
-                        elif 1 in temp_value:
-                            if 2 in temp_value:
-                                if 4 in temp_value:
-                                    sales_count = 22000
+                    for selected_option in io:
+                        temp_value = io[selected_option]
+                        if i.id == int(io.keys()[0]):
+                            if 8 in temp_value:
+                                sales_count += 0
+                            elif 1 in temp_value:
+                                if 2 in temp_value:
+                                    if 4 in temp_value:
+                                        sales_count = 22000
+                                    else:
+                                        sales_count += 12500
                                 else:
-                                    sales_count += 12500
+                                    if 4 in temp_value:
+                                        sales_count += 22000
+                                    else:
+                                        sales_count += 11000           
                             else:
-                                if 4 in temp_value:
-                                    sales_count += 22000
+                                if 2 in temp_value:
+                                    if 4 in temp_value:
+                                        sales_count += 15000
+                                    else:
+                                        sales_count += 9000
                                 else:
-                                    sales_count += 11000           
-                        else:
-                            if 2 in temp_value:
-                                if 4 in temp_value:
-                                    sales_count += 15000
-                                else:
-                                    sales_count += 9000
-                            else:
-                                if 4 in temp_value:
-                                    sales_count += 15000
-                                else:
-                                    sales_count += 7500
+                                    if 4 in temp_value:
+                                        sales_count += 15000
+                                    else:
+                                        sales_count += 7500
         temp_sales['month'] = m
         temp_sales['car'] = car                      
         temp_sales['sales'] = sales_count
