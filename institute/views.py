@@ -171,7 +171,7 @@ def funcAddStudent(academy_name, student_name, p_number, g_number, s_number, c_n
 		g_number.strip()
 	
 	if s_number:
-		s_nubmer = str(s_number)
+		s_number = str(s_number)
 		s_number.strip()
 	
 	if c_number:
@@ -666,7 +666,7 @@ def getHistory(request):
 
 
 
-    return render(request, 'getHistory.html', {"history": history, "academy" : academy, 'total_count': total_count, 'startdate': startdate, 'enddate': enddate, 'user':request.user, 'cars':sorted(cars), 'carids':carids, 'carid':carid, 'overtime':overtime, 'monthpick_range': monthpick_range, 'lastmonth': lastmonth, "billingHistorySettings": billingHistorySettings, 'uncollectedes': uncollectedes, 'total_uncollected': "{:,}".format(total_uncollected)})
+    return render(request, 'getHistory.html', {"history": history, "academy" : academy, 'total_count': total_count, 'startdate': startdate, 'enddate': enddate, 'user':request.user, 'cars':sorted(cars), 'carids':carids, 'carid':carid, 'overtime':overtime, 'monthpick_range': monthpick_range, 'lastmonth': lastmonth, "billingHistorySettings": billingHistorySettings, 'uncollectedes': uncollectedes, 'total_uncollected': "{:,}".forma(total_uncollected)})
 
 
 @login_required
