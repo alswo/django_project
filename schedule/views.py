@@ -765,9 +765,9 @@ def updateSchedule(request):
                     else:
 		        if not alist:
 		            alist = 0
-			    cInven = CreateInven(bid, carnum, day,req, time, addr, name, name2, load, sid, week, alist,p_memo,memo)
+			    cInven = CreateInven(bid, carnum, day, time, addr, name, name2, load, sid, week, alist,p_memo,memo)
 		        if alist != None:
-			    cInven = CreateInven(bid, carnum, day, req, time, addr, name, name2, load, sid, week, alist,p_memo,memo)
+			    cInven = CreateInven(bid, carnum, day, time, addr, name, name2, load, sid, week, alist,p_memo,memo)
 		        
                         if cInven.setAlist == 1:
 		            return HttpResponse('error setAlist')
@@ -1609,6 +1609,7 @@ def moveCarEditedInven(request):
         iid = request.POST.get('iid')
         carname = request.POST.get('carname')
         flag = request.POST.get('flag')
+        week = request.POST.get('week')
 
         if flag == 'all':
             try:
@@ -1618,12 +1619,11 @@ def moveCarEditedInven(request):
                 pass
            
             try:
-                targetEditedInven = EditedInven.objects.filter(iid_id = iid_id)
-                for ei in targetEditedInven:
-                    ei.carnum = carname
-    
-                    ei.save()
-    
+                if week == '1':
+                    eInven = EditedInven.objects.filter(iid_id = iid_id).update(carnum = carname)
+                elif week == '2':
+                    eInven = EditedInven.objects.filter(iid_id = iid_id).exclude(week = 1).update(carnum = carname)
+
             except EditedInven.DoesNotExist:
                 pass
         else:
