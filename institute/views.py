@@ -172,7 +172,7 @@ def funcAddStudent(academy_name, student_name, p_number, g_number, s_number, c_n
 		g_number.strip()
 
 	if s_number:
-		s_nubmer = str(s_number)
+		s_number = str(s_number)
 		s_number.strip()
 
 	if c_number:
