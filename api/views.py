@@ -629,11 +629,11 @@ def getNotice(request):
 def getStudentInfo2(request):
     if request.method == "POST":
         pin_number = request.POST.get('pin_number')
-        token = request.POST.get('token')
+
         params = urllib.urlencode({
         'v': 1,
-        'tid': 'UA-109205147-1',
-        'cid':token,
+        'tid': 'UA-109141243-1',
+        'cid':pin_number,
         't': 'event',
         'ec': 'user',
         'ea': 'start',
