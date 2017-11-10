@@ -27,7 +27,7 @@ def getResponse(debug, code, msg):
 
 @app.task
 def today_schedule_notification():
-    if socket.gethostbyname(socket.gethostname()) == '172.31.1.206':
+    if socket.gethostbyname(socket.gethostname()) == '172.31.2.185':
         fcmdevice =  FCMDevice.objects.all()
         device_count=0
         day = datetime.datetime.now()
@@ -154,49 +154,48 @@ def today_schedule_notification():
 	            else:
 		        send_msg(module_push_content['sid'], module_push_content['pin'], msg)
 			module_push_content['personinfoid'] = 'None'
-            for fcmdevices in fcmdevice:
-		        device_count +=1
-            pushconf = PushConfirming.objects.filter(date__icontains = today)
-            for pushconfs in pushconf:
-	        push_num += 1
-                if pushconfs.status == False:
-	            push_false_num += 1
-            pm = PushMonitoring.objects.create(date= today, total_S= device_count,expec_push=total_msg, expec_push_s=msg_count, push_num=push_num, false_num= push_false_num, refuse_user =  refuse_user)
-            pm.save()
+        for fcmdevices in fcmdevice:
+		    device_count +=1
+        pushconf = PushConfirming.objects.filter(date__icontains = today)
+        for pushconfs in pushconf:
+	    push_num += 1
+            if pushconfs.status == False:
+	        push_false_num += 1
+        pm = PushMonitoring.objects.create(date= today, total_S= device_count,expec_push=total_msg, expec_push_s=msg_count, push_num=push_num, false_num= push_false_num, refuse_user =  refuse_user)
+        pm.save()
     else:
         print "not this server"
 
 
 def send_msg(sid, pin, msg):
     url = 'https://fcm.googleapis.com/fcm/send'
-    print sid
-    # header = {'authorization': 'key=AAAAWVvmwNU:APA91bH0IjidQtMmX6q9SRVekZqzNmWKRR15mdjOFFAt05v3E7PziYRb7sLMbtCtNXZYyKrz--fKvoZdDY94yjOrH9G6z-axN7qWS7H5VMBRUy8Z6-dysdj9ZaCYrESl2wnIfOoSnh7X','content-type': 'application/json'}
-    # result = {}
-    # prop = PropOfDevice.objects.filter(pin_number = pin)
-    # for p in prop:
-	# pushcheck = p.receivePush
-	# fcm = FCMDevice.objects.filter(device_id = p.device_id)
-	# for f in fcm:
-	#     token = f.registration_id
-	#     types = f.type
-	#     if pushcheck == False:
-	#         print ("he/she doesn't want to receive push message.")
-	#     else:
-	#         if types == 'android':
-	#             payload = '{\n    "to" : "' + str(token) + '","priority" : "high", "content-available" : "true","collapse_key" : "Updates Available" ,"notification": {\t  "body" : "'+str(msg)+'","title" : "셔틀타요", "sound":"default"},\t}'
-	# 	elif types == 'ios':
-	# 	    payload = '{\n    "to" : "' + str(token) + '","priority" : "high", "content-available" : "true","collapse_key" : "Updates Available" ,"notification": {\t  "body" : "'+str(msg)+'", "sound":"default"},\t}'
-	# 	try:
-	#             sid = str(sid)
-	# 	    response = requests.request('POST', url, data=payload, headers=header)
-	# 	    try:
-    #                     result = ast.literal_eval(response.text)
-    #                     status = str(result['success'])
-    #                     pushurl = 'http://api.edticket.com/fcmdev/pushConfirmInfo'
-    #                     data = "pin="+pin+"&confirming="+response.text+"&status="+status+"&token="+token+"&sid="+sid
-    #                     headers = {'content-type': "application/x-www-form-urlencoded"}
-    #                     response = requests.request("POST", pushurl, data=data, headers=headers)
-	# 	    except:
-    #                     print "msg check error"
-	# 	except:
-                    # print "msg send error"
+    header = {'authorization': 'key=AAAAWVvmwNU:APA91bH0IjidQtMmX6q9SRVekZqzNmWKRR15mdjOFFAt05v3E7PziYRb7sLMbtCtNXZYyKrz--fKvoZdDY94yjOrH9G6z-axN7qWS7H5VMBRUy8Z6-dysdj9ZaCYrESl2wnIfOoSnh7X','content-type': 'application/json'}
+    result = {}
+    prop = PropOfDevice.objects.filter(pin_number = pin)
+    for p in prop:
+	pushcheck = p.receivePush
+	fcm = FCMDevice.objects.filter(device_id = p.device_id)
+	for f in fcm:
+	    token = f.registration_id
+	    types = f.type
+	    if pushcheck == False:
+	        print ("he/she doesn't want to receive push message.")
+	    else:
+	        if types == 'android':
+	            payload = '{\n    "to" : "' + str(token) + '","priority" : "high", "content-available" : "true","collapse_key" : "Updates Available" ,"notification": {\t  "body" : "'+str(msg)+'","title" : "셔틀타요", "sound":"default"},\t}'
+		elif types == 'ios':
+		    payload = '{\n    "to" : "' + str(token) + '","priority" : "high", "content-available" : "true","collapse_key" : "Updates Available" ,"notification": {\t  "body" : "'+str(msg)+'", "sound":"default"},\t}'
+		try:
+	            sid = str(sid)
+		    response = requests.request('POST', url, data=payload, headers=header)
+		    try:
+                        result = ast.literal_eval(response.text)
+                        status = str(result['success'])
+                        pushurl = 'http://api.edticket.com/fcmdev/pushConfirmInfo'
+                        data = "pin="+pin+"&confirming="+response.text+"&status="+status+"&token="+token+"&sid="+sid
+                        headers = {'content-type': "application/x-www-form-urlencoded"}
+                        response = requests.request("POST", pushurl, data=data, headers=headers)
+		    except:
+                        print "msg check error"
+		except:
+                    print "msg send error"
