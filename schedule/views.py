@@ -1267,7 +1267,7 @@ def studentLoad(request):
     if request.method == "POST":
 
         aid = request.POST.get('aid')
-        stu = StudentInfo.objects.filter(aid = aid).order_by('sname')
+        stu = StudentInfo.objects.filter(aid = aid).filter(delete_date = '').order_by('sname')
 
         data = serialize('json', stu)
 
