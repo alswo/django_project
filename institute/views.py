@@ -172,7 +172,7 @@ def funcAddStudent(academy_name, student_name, p_number, g_number, s_number, c_n
 		g_number.strip()
 
 	if s_number:
-		s_nubmer = str(s_number)
+		s_number = str(s_number)
 		s_number.strip()
 
 	if c_number:
@@ -192,7 +192,7 @@ def funcAddStudent(academy_name, student_name, p_number, g_number, s_number, c_n
 	if (age):
 		birth_year = str(timezone.now().year - int(float(age)) + 1)
 
-	students = StudentInfo.objects.filter(aid = academy)
+	students = StudentInfo.objects.filter(aid = academy).filter(deleted_date__isnull=True)
 	studentinfo = StudentInfo(sname = student_name, aid = academy, parents_phonenumber = parents_phonenumber, grandparents_phonenumber = grandparents_phonenumber, self_phonenumber = self_phonenumber, care_phonenumber = care_phonenumber, birth_year = birth_year)
 
 	for student in students:
@@ -1002,7 +1002,7 @@ def exportStudentList(request):
 	font_style = xlwt.easyxf('font: height 280, bold on')
 	worksheet.row(0).set_style(font_style)
 
-	studentList = StudentInfo.objects.filter(aid__name = institute)
+	studentList = StudentInfo.objects.filter(aid__name = institute).filter(deleted_date__isnull=True).order_by('sname')
 	row = 0
 	worksheet.write(row, 0, u'학원')
 	worksheet.write(row, 1, u'이름')
