@@ -157,7 +157,7 @@ def filterAid(inventory_queryset, aid):
             for stable in stables:
                 for sid in stable.slist:
                     studentinfo = StudentInfo.objects.get(id=sid)
-                    if studentinfo.aid.id == aid:
+                    if studentinfo.aid.id == int(aid):
                         idset.add(inventory.id)
                         raise GotoException()
         except GotoException, e:
@@ -323,6 +323,8 @@ def getSchedule(request):
 	t = timeToDate()
         today = t.timeToYmd()
        	realtimelocation = RealtimeLocation.objects.filter(date=today, carnum=car).order_by('schedule_time').last()
+
+        msg  = ''
 		
 	if (day and t.timeToD() == day):
 		pass
@@ -372,6 +374,7 @@ def getSchedule(request):
                 #invens = Inventory.objects.filter(bid = bid).filter(alist__contains = [aid]).filter(day='월')
                 #invens = Inventory.objects.filter(alist__contains = [aid]).filter(day='월')
                 invens = Inventory.objects.filter(day='월')
+
                 inventory_idset = filterAid(invens, aid)
                 invens = invens.filter(id__in = inventory_idset)
 
