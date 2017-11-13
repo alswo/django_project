@@ -333,12 +333,6 @@ def getSchedule(request):
             
             #invens = Inventory.objects.filter(bid = bid).filter(alist__contains = [aid]).filter(day = day)
             #invens = Inventory.objects.filter(alist__contains = [aid]).filter(day = day)
-            invens = Inventory.objects.filter(day = day)
-            inventory_idset = filterAid(invens, aid)
-            invens = invens.filter(id__in = inventory_idset)
-            list_invensid = []
-            contacts = invenToJson(invens)
-
             if car:
                 cars = Car.objects.filter(branchid_id = bid)
                 branch = Car.objects.get(carname = car)
@@ -347,6 +341,13 @@ def getSchedule(request):
                 contacts = invenToJson(invens)
 
                 return render_to_response('getCarSchedule.html', {"cars" : cars, "bid": bid, "contacts": contacts,"car": car, 'user':request.user, 'realtimelocation':realtimelocation, 'day':day})
+
+            else :
+                invens = Inventory.objects.filter(day = day)
+                inventory_idset = filterAid(invens, aid)
+                invens = invens.filter(id__in = inventory_idset)
+                list_invensid = []
+                contacts = invenToJson(invens)
 
             return render_to_response('getSchedule.html', {"day" : day, "contacts": contacts, "bid" : bid, "aid" : aid,'user':request.user})
 
