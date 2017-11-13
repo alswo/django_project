@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="row" align="center">
+	<div class="col-md-1">
+	</div>
+	<div class="col-md-10">
+		<div class="panel panel-info">
+			<div class="panel-heading">
+			검색 조건
+			</div>
+			<div class="panel-body">
+				<form action="{{request.path}}" method="POST">
+					<div class="col-md-5">
+						<label>지역</label>
+						<select class="form-control" name="area">
+							{% for branch in branches %}
+								<option value="{{branch.id}}" {% if mybranch.id == branch.id %} selected {% endif %}>{{branch.bname}}</option>
+							{% endfor %}
+						</select>
+					</div>
+					<div class="col-md-3">
+						<label>요일</label>
+						<select class="form-control" name="day">
+							{% for weekday in weekdaylist %}
+								<option value="{{weekday}}" {% if myweekday == weekday %} selected {% endif %}>{{weekday}}</option>
+							{% endfor %}
+						</select>
+					</div>
+					<div class="col-md-4">
+						<br>
+						<button class="btn btn-info search" onclick="submit()" type="button" value="">적용</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+	<div class="col-md-1">
+	</div>
+</div>
+
+{% for c in contacts %}
+<div class="row" align="center">
+	<div class="col-md-1">
+	</div>
+	<div class="col-md-10" style="border-radius: 25px;background-color: {% if c.week1 == 1 or c.week2 == 1 or c.week3 == 1 %}#EFB2B2{% else %}#ABE8D0{% endif %}; height:auto">
+		<br>
+		<div class="row">
+			<div class="col-md-3">
+			</div>
+			<div class="col-md-6" style="background-color:white; border-radius:10px;">
+				<h3 style="font-family: 'Lucida Console'; font-weight: bold; color:rgb(77,77,77)"><a href='#'>{{c.stime}} - {{c.etime}}</a></h3>
+			</div>
+			<div class="col-md-3">
+			</div>
+		</div>
+
+		<div class="row">
+			<div class="col-md-4">
+				동승자분과 공유 메모
+				<textarea class="form-control" rows="4" id="{{c.id}}text" readonly="readonly">{{c.req}}</textarea>
+			</div>
+			<div class="col-md-4">
+				내 메모
+				<textarea class="form-control" rows="4" id="{{c.id}}memo" readonly="readonly">{{c.req}}</textarea>
+			</div>
+			<div class="col-md-1">
+			</div>
+			<div class="col-md-3">
+				<ul class="list-group" style="margin:0px">
+					<li class="list-group-item">
+						학원: {% for a in c.anamelist %} {{a}} | {%endfor%}
+					</li>
+					<li class="list-group-item">학생 수: {{c.snum}}</li>
+					<li class="list-group-item">요일: {{c.day}} ( {{c.stime}} - {{c.etime}} )</li>
+				</ul>
+			</div>
+		</div>
+		<!-- div class="row">
+			<div class="col-md-3">
+				{% if c.anamelist %}
+					{% for ca in c.anamelist %}
+						{{ca.strip}}
+					{% endfor %}
+				{% endif %}
+			</div>
+			<div class="col-md-9">
+			</div>
+		</div //-->
+		<div class="row">
+			<div class="col-md-12">
+				<table class="table table-bordered table-schedule" style="background-color:white">
+					<thead>
+						<th>시간</th>
+						<th>주소</th>
+						<th>Req</th>
+						<th>이름</th>
+						<th>등하원</th>
+					</thead>
+					<tbody class="table-body">
+						{% if c.scheduletables %}{{c.carnum}}호차{% endif %}
+						<br>
+						{% for s in c.scheduletables.all %}
+						<tr>
+							<td>{{s.time}}</td>
+							<td>{{s.addr}}</td>
+							<td>{% if s.req %}{{s.req}}{% endif %}</td>
+							<td>{% for name in s.sname %} {{name}}, {% endfor %}</td>
+							<td>{% if s.lflag == 1 %}등원{% elif s.lflag == 0 %}하원{% elif s.lflag == 2 %}출발{% elif s.lflag == 3 %}도착{% endif %}</td>	
+						</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+	<div class="col-md-1">
+	</div>
+</div>
+<br>
+{% endfor %}
+
+{% endblock content %}
