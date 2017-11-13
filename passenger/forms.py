@@ -1,6 +1,7 @@
 from django import forms
 from django.utils.safestring import mark_safe
 from passenger.models import StudentInfo, Branch, Profile, Academy
+from schedule.models import Area
 from django.contrib.auth.models import User
 from django.template.loader import render_to_string
 
@@ -16,12 +17,11 @@ class StudentInfoForm(forms.ModelForm):
         fields = "__all__"
 
 class ProfileInfoWidget(forms.Widget):
-    template_name = "studentInfo_widget.html"
-
+    template_name = "profile_widget.html"
 
     def render(self, name, value , attrs=None):
-        branch = Branch.objects.all()
-        context = {'branch':branch}
+        bid = Branch.objects.all()
+        context = {'bid':bid}
         return mark_safe(render_to_string(self.template_name, context))
 
 class ProfileInfoForm(forms.ModelForm):

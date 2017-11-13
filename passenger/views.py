@@ -9,6 +9,7 @@ from django.core import serializers
 from django.core.serializers import serialize
 from passenger.dateSchedule import timeToDate
 from django.utils.crypto import get_random_string
+from django.db import connection
 import json
 
 def is_not_driver(user):
@@ -570,7 +571,160 @@ def studentInfo(request):
 
             return HttpResponse(data, content_type="application/json" )
 
+@csrf_exempt
+def profileInfo(request):
+    if request.method == "POST":
+        areaid = request.POST.get('bid')
+        branch = Branch.objects.filter(areaid__in = areaid)
+        temp_bid = [ b.id for b in branch]
+        aca = Academy.objects.filter(bid__in = temp_bid)
+        data = serialize('json', aca)
+
+        return HttpResponse(data, content_type="application/json")
+
 
 
 def robots(request):
 	return render_to_response('passenger/robots.txt', content_type="text/plain")
+
+
+
+def insertBanksAcademy():
+    academy = Academy.objects.all()
+    cursor = connection.cursor()
+    for a in academy:
+        if a.bank003 == '0':
+            try:
+                cursor = connection.cursor()
+                cursor.execute("SELECT acct_no  FROM vacs_vact WHERE bank_cd = %s AND acct_st = %s", ['03','0'])
+                giup = cursor.fetchone()
+                print giup[0].strip()
+                cursor.execute("UPDATE vacs_vact SET acct_st = %s WHERE acct_no = %s", ['1',giup[0].strip()])
+            except Exception, e:
+                print ("Can't call Insert", e)
+
+            a.bank003 = giup[0].strip()
+
+        if a.bank004 == '0':
+            try:
+                cursor = connection.cursor()
+                cursor.execute("SELECT acct_no  FROM vacs_vact WHERE bank_cd = %s AND acct_st = %s", ['04','0'])
+                gukmin = cursor.fetchone()
+                cursor.execute("UPDATE vacs_vact SET acct_st = %s WHERE acct_no = %s", ['1',gukmin[0].strip()])
+            except Exception, e:
+                print ("Can't call Insert", e)
+
+            a.bank004 = gukmin[0].strip()
+
+        if a.bank011 == '0':
+            try:
+                cursor = connection.cursor()
+                cursor.execute("SELECT acct_no  FROM vacs_vact WHERE bank_cd = %s AND acct_st = %s", ['11','0'])
+                nonghyup = cursor.fetchone()
+                cursor.execute("UPDATE vacs_vact SET acct_st = %s WHERE acct_no = %s", ['1',nonghyup[0].strip()])
+            except Exception, e:
+                print ("Can't call Insert", e)
+
+            a.bank011 = nonghyup[0].strip()
+
+        if a.bank020 == '0':
+            try:
+                cursor = connection.cursor()
+                cursor.execute("SELECT acct_no  FROM vacs_vact WHERE bank_cd = %s AND acct_st = %s", ['20','0'])
+                woori = cursor.fetchone()
+                cursor.execute("UPDATE vacs_vact SET acct_st = %s WHERE acct_no = %s", ['1',woori[0].strip()])
+            except Exception, e:
+                print ("Can't call Insert", e)
+
+            a.bank020 = woori[0].strip()
+
+        if a.bank027 == '0':
+            try:
+                cursor = connection.cursor()
+                cursor.execute("SELECT acct_no  FROM vacs_vact WHERE bank_cd = %s AND acct_st = %s", ['27','0'])
+                city = cursor.fetchone()
+                cursor.execute("UPDATE vacs_vact SET acct_st = %s WHERE acct_no = %s", ['1',city[0].strip()])
+            except Exception, e:
+                print ("Can't call Insert", e)
+
+            a.bank027 = city[0].strip()
+
+        if a.bank071 == '0':
+            try:
+                cursor = connection.cursor()
+                cursor.execute("SELECT acct_no  FROM vacs_vact WHERE bank_cd = %s AND acct_st = %s", ['71','0'])
+                woochegook = cursor.fetchone()
+                cursor.execute("UPDATE vacs_vact SET acct_st = %s WHERE acct_no = %s", ['1',woochegook[0].strip()])
+            except Exception, e:
+                print ("Can't call Insert", e)
+
+            a.bank071 = woochegook[0].strip()
+
+        if a.bank081 == '0':
+            try:
+                cursor = connection.cursor()
+                cursor.execute("SELECT acct_no  FROM vacs_vact WHERE bank_cd = %s AND acct_st = %s", ['81','0'])
+                hana = cursor.fetchone()
+                cursor.execute("UPDATE vacs_vact SET acct_st = %s WHERE acct_no = %s", ['1',hana[0].strip()])
+            except Exception, e:
+                print ("Can't call Insert", e)
+
+            a.bank081 = hana[0].strip()
+
+        if a.bank088 == '0':
+            try:
+                cursor = connection.cursor()
+                cursor.execute("SELECT acct_no  FROM vacs_vact WHERE bank_cd = %s AND acct_st = %s", ['88','0'])
+                shinhan = cursor.fetchone()
+                cursor.execute("UPDATE vacs_vact SET acct_st = %s WHERE acct_no = %s", ['1',shinhan[0].strip()])
+            except Exception, e:
+                print ("Can't call Insert", e)
+
+            a.bank088 = shinhan[0].strip()
+        cursor.close()
+        connection.commit()
+        connection.close()
+        a.save()
+
+@csrf_exempt
+@login_required
+def notice(request):
+    if request.method == "GET":
+        com = Community.objects.all()
+
+        return render(request, 'passenger/notice.html', {'com': com} );
+
+    elif request.method == "POST":
+        choice = request.POST.get('choice')
+
+        cid = request.POST.get('cid')
+        response_data = {}
+
+        if choice:
+            try:
+                com = Community.objects.get(id=cid)
+
+                com.clike = com.clike+1
+                response_data['num'] = com.clike
+
+                com.save()
+
+                return HttpResponse(json.dumps(response_data), content_type="application/json")
+
+            except Exception as e:
+
+                return HttpResponse(e.message)
+
+        else:
+            response_data = {}
+            aname = request.POST.get('aname')
+            complain = request.POST.get('complain')
+            plan = request.POST.get('plan')
+            t = timeToDate()
+            toDate = t.timeToYmd()
+            c = Community(aname=aname, complain=complain, plan=plan,showdate = toDate,clike=0,dlike=0,disuser=[],disuserid=[],likeuserid=[],likeuser=[])
+            c.save()
+
+            com = Community.objects.all()
+
+            return render(request, 'passenger/notice.html', {'com': com} );

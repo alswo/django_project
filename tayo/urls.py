@@ -20,6 +20,7 @@ urlpatterns = [
     url(r'^monitor/',include('monitor.urls')),
     url(r'^fcm/', include('fcm.urls')),
     url(r'^fcmdev/',include('fcmdev.urls')),
+    url(r'^dm/',include('drivermanager.urls')),
     url(r'^', include(router.urls)),
     url(
         r'^accounts/login/',

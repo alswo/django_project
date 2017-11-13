@@ -5,13 +5,15 @@ from django.conf import settings
 from passenger.models import StudentInfo, PersonalInfo
 from django.utils.crypto import get_random_string
 from django.db.models import Q
-from util.PersonalInfoUtil import compareLists, saveNewPersonInfo, getHangul
+from util.PersonalInfoUtil import compareLists, getHangul, TAYO_PINNUMBER_ALLOWED_CHARS
 from util.PhoneNumber import FormatPhoneNumber
 from django.db import transaction
 
-
 def isSamePhoneNumber(phone1, phone2):
 	if (not phone1 or not phone2):
+		return False
+
+	if ((len(phone1) == 0) or (len(phone2) == 0)):
 		return False
 
 	return (phone1 == phone2)
@@ -41,11 +43,12 @@ def run():
 	for student in students:
 		try:
 			# 12 o'clock
-			otherStudents = StudentInfo.objects.filter(bid = student.bid, personinfo__created_time__gt = '2017-09-13 02:00').exclude(id=student.id)
+			otherStudents = StudentInfo.objects.filter(bid = student.bid).exclude(id=student.id)
 			#print "otherStudent len = " + str(len(otherStudents))
 			found = False
 			for otherStudent in otherStudents:
-				if (isSamePerson(student, otherStudent) == True):
+				#if (isSamePerson(student, otherStudent) == True and otherStudent.personinfo.created_time >= '2017-10-08 23:34:00'):
+				if (findSamePerson(student, otherStudent) == True and otherStudent.personinfo.created_time >= '2017-10-08 23:34:00'):
 					pin_number = otherStudent.personinfo.pin_number
 					student.personinfo = otherStudent.personinfo
 					student.save(update_fields=['personinfo'])
@@ -54,7 +57,8 @@ def run():
 
 			if (found == False):
 				for otherStudent in otherStudents:
-					if (isSibling(student, otherStudent) == True):
+					#if (isSibling(student, otherStudent) == True and otherStudent.personinfo.created_time >= '2017-10-08 23:34:00'):
+					if (findSibling(student, otherStudent) == True and otherStudent.personinfo.created_time >= '2017-10-08 23:34:00'):
 						pin_number = otherStudent.personinfo.pin_number
 						personinfo = PersonalInfo(pin_number = otherStudent.personinfo.pin_number)
 						personinfo.save()
@@ -66,7 +70,7 @@ def run():
 			if (found == False):
 				for i in range(0, 5):
 					try:
-						pin_number = get_random_string(length=7)
+						pin_number = get_random_string(length=7, allowed_chars=TAYO_PINNUMBER_ALLOWED_CHARS)
 						personinfos = PersonalInfo.objects.filter(pin_number = pin_number)
 						if (len(personinfos) == 0):
 							sys.stderr.write(str(i) + "th pin_number [" + pin_number + "] newly created\n")

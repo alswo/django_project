@@ -125,7 +125,7 @@ class PoiGraph(Graph):
 
     	#urlstr = "http://route-tayotayo.edticket.com:8080/routes/routeSequential30?version=1"
     	#urlstr = "https://apis.skplanetx.com/tmap/routes"
-	urlstr = "http://route-tayotayo.edticket.com:8080/routes"
+	urlstr = "http://route2-tayotayo.edticket.com:8080/routes"
 	payload = {'appKey': '9c78e49d-c72c-36a6-8e25-5c249e9291a3', 'version': '1', 'reqCoordType': self.reqCoordType}
         #r = requests.get(urlstr, params=payload)
         #r.json()
@@ -175,7 +175,7 @@ class PoiGraph(Graph):
                     weight = current_vertex.get_weight(prev_vertex)
                     total_weight += weight
                     prev_vertex = self.get_vertex(route)
-                obj['features'].append({'index': index, 'viaPointName': route, 'requiredTime': weight})
+                obj['features'].append({'index': index, 'viaPointName': route, 'requiredTime': weight, 'lat': self.get_vertex(route).lat, 'lng': self.get_vertex(route).lon})
                 index += 1
             obj['properties']['totalTime'] = total_weight
         return json.dumps(obj)

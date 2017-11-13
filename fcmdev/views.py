@@ -4,9 +4,16 @@
 from django.shortcuts import render
 from django.shortcuts import render_to_response
 from django.http import HttpResponse, JsonResponse
-from fcmdev.models import PropOfDevice, PushConfirming
+from fcmdev.models import PropOfDevice, PushConfirming, PushMonitoring
+from passenger.dateSchedule import timeToDate
 from fcm_django.models import FCMDevice
+from passenger.models import Academy, StudentInfo, PersonalInfo, BillingHistory
+from schedule.models import Inventory, ScheduleTable
 from django.views.decorators.csrf import csrf_exempt
+from collections import Counter
+
+
+import datetime
 
 
 def getResponse(debug, code, msg):
@@ -110,7 +117,7 @@ def pushConfirmInfo(request):
         else:
             status = True
         try:
-            pushConfirm = PushConfirming.objects.create(sid = sid, pin=pin, confirming=confirming, status=status, token=token)
+            pushConfirm = PushConfirming.objects.create( sid = sid, pin=pin, confirming=confirming, status=status, token=token)
             pushConfirm.save()
             msg = "confirm"
             return getResponse(debug, 200, msg)
@@ -118,3 +125,58 @@ def pushConfirmInfo(request):
         except:
             msg = "error"
             return getResponse(debug, 400, msg)
+
+
+
+
+
+@csrf_exempt
+def notice(request):
+    if request.method == "GET":
+        com = Community.objects.all()
+
+        return render(request, 'pushchecker.html', {'com': com} );
+
+    elif request.method == "POST":
+        choice = request.POST.get('choice')
+
+        cid = request.POST.get('cid')
+        response_data = {}
+
+        if choice:
+            try:
+                com = Community.objects.get(id=cid)
+
+                com.clike = com.clike+1
+                response_data['num'] = com.clike
+
+                com.save()
+
+                return HttpResponse(json.dumps(response_data), content_type="application/json")
+
+            except Exception as e:
+
+                return HttpResponse(e.message)
+
+        else:
+            response_data = {}
+            aname = request.POST.get('aname')
+            complain = request.POST.get('complain')
+            plan = request.POST.get('plan')
+            t = timeToDate()
+            toDate = t.timeToYmd()
+            c = Community(aname=aname, complain=complain, plan=plan,showdate = toDate,clike=0,dlike=0,disuser=[],disuserid=[],likeuserid=[],likeuser=[])
+            c.save()
+
+            com = Community.objects.all()
+
+            return render(request, 'pushchecker.html', {'com': com} );
+
+
+
+
+def pushchecker(request):
+
+    pushmonitors = PushMonitoring.objects.all()
+
+    return render(request, 'pushchecker.html', {'pushmonitor':pushmonitors});

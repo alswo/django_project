@@ -26,9 +26,18 @@ class PropOfDevice(models.Model):
 
 
 class PushConfirming(models.Model):
+
     date = models.DateTimeField(auto_now_add=True, null=True)
     confirming = models.TextField()
     sid = models.IntegerField(blank=True, null=True)
     status = models.BooleanField(default=True)
     token = models.TextField(blank=True, null=True)
     pin = models.CharField(max_length=255, blank=True, null=True)
+
+class PushMonitoring(models.Model):
+    date = models.CharField(max_length=20, blank=True, null=True)
+    total_S = models.CharField(max_length=10, blank=True, null=True)
+    expec_push = models.CharField(max_length=10, blank=True, null=True)
+    expec_push_s = models.CharField(max_length=10, blank=True, null=True)
+    push_num = models.CharField(max_length=10, blank=True, null=True)
+    false_num = models.CharField(max_length=10, blank=True, null=True)

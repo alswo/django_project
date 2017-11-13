@@ -13,9 +13,9 @@
 			검색 조건
 			</div>
 			<div class="panel-body">
-        			<form action="getHistory" method="POST">
+        			<form action="{{request.path}}" method="POST">
             			<div class="col-md-3">
-                			<label>학원</label> 
+                			<label>학원</label>
                 			<select class="form-control" id="aid" name="aid">
                         			{% for aca in academies %}
                         			<option value="{{aca.id}}" {% if aca.id == academy.id %} selected {% endif %}>{{aca.name}}</option>
@@ -23,21 +23,30 @@
                 			</select>
             			</div>
             			<div class="col-md-2">
-                			<label>차량별</label> 
-                			<select class="form-control" id="carid" name="carid">
-                        			<option value="all">모든차량</option>
+                			<label>차량별</label>
+                			<select class="form-control caroption" id="carid" name="carid[]" multiple="multiple">
+                        			<!-- option value="all">모든차량</option //-->
                         			{% for carnum in cars %}
-                        			<option value="{{carnum}}" {% if carnum == carid %} selected {% endif %}>{{carnum}}호차</option>
+                        			<option value="{{carnum}}" {% for cid in carids %}{% if carnum|slugify == cid %} selected {% endif %}{% endfor %}>{{carnum}}호차</option>
                         			{% endfor %}
                 			</select>
             			</div>
             			<div class="col-md-5">
+					{% if request.path == '/institute/getMonthlyHistory' %}
+                			<label>월별</label>
+                			<select class="form-control" id="monthpick" name="monthpick">
+                        			{% for monthpick in monthpick_range %}
+                        			<option value="{{monthpick}}" {% if monthpick == lastmonth %} selected {% endif %}>{{monthpick}}</option>
+                        			{% endfor %}
+                			</select>
+					{% else %}
                     			<label>기간</label>
                     			<input class="form-control calendar" name="daterange" type="text" id="daterange">
+					{% endif %}
             			</div>
             			<div class="col-md-2" align="right">
                 			<br>
-                			<button class="btn btn-info" onclick="submit()" type="button" value="dateAcademy">적용</button>              
+                			<button class="btn btn-info search" onclick="submit()" type="button" value="dateAcademy">적용</button>
             			</div>
         			</form>
 			</div>
@@ -51,24 +60,102 @@
 		</div>
 		<div class="col-md-10">
 			<div class="panel panel-info">
+				<div class="panel-heading">
+					저장 History
+				</div>
+				<div class="panel-body">
+					<div class="col-md-2">
+					</div>
+					<div class="col-md-8">
+					<select class="form-control" id="billingHistorySetting">
+					</select>
+					</div>
+					<div class="col-md-2">
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-1">
+		</div>
+	</div>
+	{% if uncollectedes %}
+	<div class="row" align="center">
+		<div class="col-md-1">
+		</div>
+		<div class="col-md-10">
+			<div class="panel panel-info">
+				<div class="panel-heading">
+					연체 내역
+				</div>
+				<div class="panel-body">
+					<div class="col-md-2">
+					</div>
+					<div class="col-md-8">
+                                		<table class="table table-bordered table-reponsive uncollected">
+                                    			<thead>
+                                        			<tr>
+                                            				<th>월</th>
+                                            				<th>금액</th>
+									<th>가산금</th>
+									<th>총액</th>
+                                        			</tr>
+                                    			</thead>
+                                    			<tbody>
+								{% for uncollected in uncollectedes %}
+								<tr class="uncollected_monthly">
+									<td class='uncollected.month'>{{uncollected.month}}</td>
+									<td class='uncollected.billing_amount'>{{uncollected.billing_amount}}</td>
+									<td class='uncollected.additional_charge'>{{uncollected.additional_charge}}</td>
+									<td class='uncollected.total_charge'>{{uncollected.total_charge}}</td>
+								</tr>
+								{% endfor %}
+							</tbody>
+						</table>
+					</div>
+					<div class="col-md-2">
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-1">
+		</div>
+	</div>
+	{% endif %}
+	<div class="row" align="center">
+		<div class="col-md-1">
+		</div>
+		<div class="col-md-10">
+			<div class="panel panel-info">
                         	<div class="panel-heading">
 				운행횟수 및 요금
 				</div>
-				
+
                         	<div class="panel-body">
+					<div class="row">
 					<div class="col-md-5" align="center">
 				총운행횟수 : <span id="total_count"></span><br>
 						<div class="etc">
-				일반(<span id="normal_count"></span>) + 동승자 포함(<span id="passenger_count"></span>) + 5인 초과(<span id="overpeople_count"></span>) + {{overtime}}분 초과(<span id="overtime_count"></span>)<br>
-				동승자 포함, 5인 초과(<span id="passenger_overpeople_count"></span>) + 동승자 포함, {{overtime}}분 초과(<span id="passenger_overtime_count"></span>)<br>
+				일반(<span id="normal_count"></span>) + 동승자 포함(<span id="passenger_count"></span>) + 5인 초과(<span id="overpeople_count"></span>) +10인 초과(<span id="overpeople10_count"></span>) + {{overtime}}분 초과(<span id="overtime_count"></span>)<br>
+				동승자 포함, 5인 초과(<span id="passenger_overpeople_count"></span>) + 동승자 포함, 10인 초과(<span id="passenger_overpeople10_count"></span>) + 동승자 포함, {{overtime}}분 초과(<span id="passenger_overtime_count"></span>)<br>
 				비과금 횟수: <span id="noncharge_count"></span><br>
 				예상 과금횟수 : <span id="uniq_count"></span><br>
+						</div>
+						<div align="right">
+				입금계좌<br>
+				신한은행 : {{academy.bank088}}<br>
+				국민은행 : {{academy.bank004}}<br>
+				하나은행 : {{academy.bank081}}<br>
+				우리은행 : {{academy.bank020}}<br>
+				기업은행 : {{academy.bank003}}<br>
+				시티은행 : {{academy.bank027}}<br>
+				우체국 : {{academy.bank071}}<br>
+				농협 : {{academy.bank011}}<br>
 						</div>
 					</div>
 					<div class="col-md-3" align="left">
 				<br>
 				X ( - 특별할인 )
-				<select class="selectpicker price_item" id="discount_rate"> 
+				<select class="selectpicker price_item" id="discount_rate">
 					<option>0%</option>
 					<option>5%</option>
 					<option>10%</option>
@@ -76,19 +163,46 @@
 					<option>20%</option>
 					<option>25%</option>
 					<option>30%</option>
-				</select> 
+				</select>
 				<br>
-			
+
 					</div>
 					<span id="per_amount_value" style="display: none"></span>
 					<span id="passenger_amount_value" style="display: none"></span>
 					<span id="calculate_amount" style="display: none"></span>
-					<div class="col-md-2" align="right">
+					<div class="col-md-4" align="right">
+				<br>
 				= 이용요금 <br>: <span id="pay_amount"></span> 원<br>
+				+ 미납요금 <br>: <span id="total_uncollected">{{total_uncollected}}</span> 원<br>
+				<br>
+				<div class="controls">
+				<form class="input-append" role="form" autocomplete="off">
+					<div class="entry row">
+						<div class="col-xs-8">
+						<input class="form-control extra-fields" name="extra-fields" type="text" size='10' placeholder="항목" />
+						</div>
+						<div class="input-group col-xs-4">
+						<input class="form-control extra-charge" name="extra-charge" type="text" size='3' placeholder="금액" />
+						<span class="input-group-btn">
+							<button class="btn btn-success btn-add" type="button" style="height: 34px;">
+								<span class="glyphicon glyphicon-plus"></span>
+							</button>
+						</span>
+						</div>
 					</div>
-					<div class="col-md-2" align="right">
-						<button type="button" class="btn-md btn-info" id="add-memo">Memo <span class="glyphicon glyphicon-pencil"></span></button><br><br>
-						<button type="button" id='pdfdown' class="btn-md btn-info">PDF <span class="glyphicon glyphicon-download-alt"></span></button>
+				</form>
+				</div>
+				= 청구요금 <br>납기내 ( <span id="due_date"></span> 까지 ) : <span id="total_charge"></span> 원<br>
+						납기후 ( <span id="after_due_date"></span> 까지 ) : <span id="after_total_charge"></span> 원<br>
+					</div>
+					</div>
+					<div class="row">
+						<div class="col-md-12">
+							<button type="button" class="btn-md btn-info" id="add-memo">Memo <span class="glyphicon glyphicon-pencil"></span></button>
+							<button type="button" id='pdfdown' class="btn-md btn-info">PDF <span class="glyphicon glyphicon-download-alt"></span></button>
+							<button type="button" class="btn-md btn-info" id="temp-save">임시저장 <span class="glyphicon glyphicon-check"></span></button>
+							<button type="button" class="btn-md btn-info" id="fix">확정 <span class="glyphicon glyphicon-check"></span></button>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -101,7 +215,7 @@
 	</div>
 
         {% for dailyhistory in history %}
-        <div class="row dailyhistory">
+        <div class="row dailyhistory" id="{{dailyhistory.date}}">
                 <div class="col-md-1"></div>
                 <div class="col-md-10">
                     <div class="panel panel-primary">
@@ -124,13 +238,17 @@
 			            		{% endfor %}
 					</div>
 					<div class="col-xs-6" align="right">
-						<select class="price_item priceoption timehistoryoption" multiple="multiple">
+						<select class="price_item priceoption timehistoryoption" inventory_id="{{timehistory.inventory_id}}" multiple="multiple">
 							<option value="{% get_constants 'BILLING_PASSENGER' %}" {% if timehistory.billing_code|isPassenger %} selected="selected" {% endif %}>동승자 포함</option>
 							<option value="{% get_constants 'BILLING_OVERPEOPLE' %}" {% if timehistory.billing_code|isOverPeople %} selected="selected" {% endif %}>5인 초과 (+1,500원)</option>
+							{% if timehistory.billing_code|isOverPeople10 or timehistory.billing_code|isOverPeople15 or timehistory.billing_code|isOverPeople20 %}
+							<option value="{% get_constants 'BILLING_OVERPEOPLE_10' %}" {% if timehistory.billing_code|isOverPeople10 %} selected="selected" {% endif %}>10인 초과</option>
+							<option value="{% get_constants 'BILLING_OVERPEOPLE_15' %}" {% if timehistory.billing_code|isOverPeople15 %} selected="selected" {% endif %}>15인 초과</option>
+							<option value="{% get_constants 'BILLING_OVERPEOPLE_20' %}" {% if timehistory.billing_code|isOverPeople20 %} selected="selected" {% endif %}>20인 초과</option>
+							{% endif %}
 							<option value="{% get_constants 'BILLING_OVERTIME' %}" {% if timehistory.billing_code|isOverTime %} selected="selected" {% endif %}>{{overtime}}분 초과(X2)</option>
 							<option value="{% get_constants 'BILLING_NONCHARGE' %}" {% if timehistory.warning == True %} selected="selected" {% endif %}>비과금</option>
 						</select>
-						<!-- button class="btn-xs btn-danger glyphicon glyphicon-remove table-remove"></button //-->
 					</div>
 				</div>
                             </div>
@@ -147,9 +265,9 @@
                                         {% for s in timehistory.scheduletable %}
                                             <tr {% if s.lflag == 1 %} class="info scheduletable" {% elif s.lflag == 0 %} class="warning scheduletable" {% else %} class="scheduletable" {% endif %}>
                                                 <td class="s.time"> {{ s.time }} </td>
-                                                <td class="s.addr"> 
+                                                <td class="s.addr">
                                                 {% if s.lflag == 2 %} 출발 {% elif s.lflag == 3 %} 도착 {% else %} {{ s.addr }} {% endif %} </td>
-                                                <td> 
+                                                <td>
                                                   {% for student in s.members.all %}
                                                     <button type="button" class="load btn-xs {% if student.id|contained:s.offmembers.all %} btn-default {% else %} btn-primary {% endif %} student.sname" id='student.sname'>
                                                     {% if student.aid_id == academy.id %} {{ student.sname }} {% else %} {{student.sname|masking}} {% endif %} </button>
@@ -295,7 +413,7 @@ function calculate() {
 		else {
 			dictObject[sum] = 1;
 		}
-		
+
 		priceoption_value = "";
 	}
 
@@ -306,28 +424,32 @@ function calculate() {
 
 	var discount_rate = $('#discount_rate')[0];
 	var discount_rate_value = numberWithoutCommas(discount_rate.options[discount_rate.selectedIndex].value);
-	var per_amount_value = {% if academy.bid == 11 or academy.bid == 12 %} 9000 {% else %} 7500 {% endif %};
-	var passenger_amount_value = {% if academy.bid == 11 or academy.bid == 12 %} 5000 {% else %} 3500 {% endif %};
+	var per_amount_value = {% if academy.id == 62 %} 9000 {% else %} 7500 {% endif %};
+	var passenger_amount_value = {% if academy.id == 62 %} 5000 {% else %} 3500 {% endif %};
 
 
 
 	normal_count = dictObject[{% get_constants 'BILLING_NORMAL' %}] || 0;
 	overpeople_count = dictObject[{% get_constants 'BILLING_OVERPEOPLE' %}] || 0;
+	overpeople10_count = dictObject[{% get_constants 'BILLING_OVERPEOPLE_10' %}] || 0;
 	passenger_count = dictObject[{% get_constants 'BILLING_PASSENGER' %}] || 0;
 	overtime_count = dictObject[{% get_constants 'BILLING_OVERTIME' %}] || 0;
 	passenger_overtime_count = dictObject[{% get_constants 'BILLING_PASSENGER' %} + {% get_constants 'BILLING_OVERTIME' %}] || 0;
 	passenger_overpeople_count = dictObject[{% get_constants 'BILLING_PASSENGER' %} + {% get_constants 'BILLING_OVERPEOPLE' %}] || 0;
+	passenger_overpeople10_count = dictObject[{% get_constants 'BILLING_PASSENGER' %} + {% get_constants 'BILLING_OVERPEOPLE_10' %}] || 0;
 	noncharge_count = dictObject[{% get_constants 'BILLING_NONCHARGE' %}] || 0;
 	uniq_count = total - noncharge_count;
 
-	calculate_amount = normal_count * per_amount_value + passenger_count * (per_amount_value + passenger_amount_value) + overpeople_count * (per_amount_value + 1500) + overtime_count * (per_amount_value * 2) + passenger_overtime_count * (per_amount_value + passenger_amount_value) * 2 + passenger_overpeople_count * (per_amount_value + passenger_amount_value + 1500);
+	calculate_amount = normal_count * per_amount_value + passenger_count * (per_amount_value + passenger_amount_value) + overpeople_count * (per_amount_value + 1500) + overpeople10_count * (per_amount_value * 2 + 1500) + overtime_count * (per_amount_value * 2) + passenger_overtime_count * (per_amount_value + passenger_amount_value) * 2 + passenger_overpeople_count * (per_amount_value + passenger_amount_value + 1500) + passenger_overpeople10_count * ((per_amount_value + passenger_amount_value) * 2 + 1500);
 
 	$('#normal_count')[0].innerText = numberWithCommas(normal_count);
 	$('#passenger_count')[0].innerText = numberWithCommas(passenger_count);
 	$('#overpeople_count')[0].innerText = numberWithCommas(overpeople_count);
+	$('#overpeople10_count')[0].innerText = numberWithCommas(overpeople10_count);
 	$('#overtime_count')[0].innerText = numberWithCommas(overtime_count);
 	$('#passenger_overtime_count')[0].innerText = numberWithCommas(passenger_overtime_count);
 	$('#passenger_overpeople_count')[0].innerText = numberWithCommas(passenger_overpeople_count);
+	$('#passenger_overpeople10_count')[0].innerText = numberWithCommas(passenger_overpeople10_count);
 	$('#noncharge_count')[0].innerText = numberWithCommas(noncharge_count);
 	$('#uniq_count')[0].innerText = numberWithCommas(uniq_count);
 
@@ -338,6 +460,25 @@ function calculate() {
 	$('#calculate_amount')[0].innerText = numberWithCommas(calculate_amount);
 	console.log("calculate_amount = " +  $('#calculate_amount')[0].innerText);
 	$('#pay_amount')[0].innerText = numberWithCommas(calculate_amount * (100 - discount_rate_value)/ 100);
+
+
+	var extra_charge = 0;
+	for (var i=0; i<$('.extra-charge').length; i++) {
+		if ($('.extra-charge')[i].value == '' || isNaN($('.extra-charge')[i].value)) {
+		}
+		else {
+			extra_charge += parseInt($('.extra-charge')[i].value);
+		}
+	}
+	var total_charge = numberWithoutCommas($('#pay_amount')[0].innerText) + numberWithoutCommas($('#total_uncollected')[0].innerText) + extra_charge;
+	$('#total_charge')[0].innerText = numberWithCommas(total_charge);
+	$('#after_total_charge')[0].innerText = numberWithCommas(Math.floor(total_charge * 1.02 / 100) * 100);
+
+	$('#due_date')[0].innerText = getDueDate();
+	$('#after_due_date')[0].innerText = getAfterDueDate();
+
+	console.log("due date = " + getDueDate());
+	console.log("after due date = " + getAfterDueDate());
 
 	return null;
 }
@@ -364,6 +505,38 @@ function todayLoad(offset,invenid, stableid){
     });
 }
 
+function makeHistorySettingList(default_value) {
+	if ("{{academy.id}}" == "") {
+		return;
+	}
+
+	var xmlhttp = new XMLHttpRequest();
+	xmlhttp.onreadystatechange = function() {
+		if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+			if(xmlhttp.getResponseHeader('content-type') == 'application/json') {
+				var jsonResponse = JSON.parse(xmlhttp.responseText);
+				$('#billingHistorySetting').find('option').remove();
+				$('#billingHistorySetting').append("<option value=''>선택</option>");
+				for (var i=0; i<jsonResponse['list'].length; i++) {
+					$('#billingHistorySetting').append("<option value='" + jsonResponse['list'][i]['value'] + "'>" + jsonResponse['list'][i]['name'] + "</option>");
+				}
+
+				if (default_value != null) {
+					$('#billingHistorySetting').val(default_value);
+				}
+			}
+			else {
+				alert(xmlhttp.responseText);
+			}
+		}
+	}
+	{% if request.path == '/institute/getMonthlyHistory' %}
+	xmlhttp.open("GET", "/institute/getBillingHistorySettingList?aid=" + "{{academy.id}}" + "&carid=" + "{{carid}}" + "&monthpick=" + "{{lastmonth}}");
+	{% else %}
+	xmlhttp.open("GET", "/institute/getBillingHistorySettingList?aid=" + "{{academy.id}}" + "&carid=" + "{{carid}}" + "&monthpick=" + "{{startdate}}_{{enddate}}");
+	{% endif %}
+	xmlhttp.send(null);
+}
 
 $( function() {
             $('input[name="daterange"]').daterangepicker(
@@ -374,6 +547,8 @@ $( function() {
                 {% if startdate != None %}startDate: '{{startdate}}',{% endif %}
                 {% if enddate != None %}endDate: '{{enddate}}'{% endif %}
             });
+
+            makeHistorySettingList();
 } );
 
 function findUpClass(el, classname) {
@@ -405,7 +580,7 @@ $("#add-memo").click(function(event) {
                         	<div class="panel-heading">
 				메모
 				</div>
-				
+
                         	<div class="panel-body">
 				<textarea class="form-control" rows="5" id="memo"></textarea>
 				</div>
@@ -416,14 +591,226 @@ $("#add-memo").click(function(event) {
 		`;
 });
 
+$("#fix").click(function(event) {
+	var aid = "{{academy.id}}";
+	//var amount = numberWithoutCommas($("#pay_amount")[0].innerText);
+	var amount = numberWithoutCommas($("#total_charge")[0].innerText);
+	var yearmonth = "{{lastmonth}}";
+
+	$.ajax({
+		url:"/institute/saveBill",
+		type:"POST",
+		data:{
+			aid: aid,
+			amount: amount,
+			yearmonth: yearmonth,
+		},
+		success: function(data) {
+			//alert(yearmonth + "의 정산 금액이 저장되었습니다.");
+		},
+		error: function(request, status, error) {
+			alert("정산 금액 저장에 실패했습니다.");
+		},
+	});
+
+	saveSetting('fix');
+});
+
+$("#temp-save").click(function(event) {
+	saveSetting('temp-save');
+});
+
+function getDueDate() {
+	var current_d;
+
+	if ($('#monthpick').val()) {
+		var yearmonth = $('#monthpick').val().split("-");
+		current_d = new Date(yearmonth[0], yearmonth[1], 15);
+	} 
+	else {
+		current_d = new Date();
+	}
+
+	return current_d.getFullYear() + "." + (current_d.getMonth() + 1) + "." + "15";
+}
+
+function getAfterDueDate() {
+	var current_d;
+
+	if ($('#monthpick').val()) {
+		var yearmonth = $('#monthpick').val().split("-");
+		current_d = new Date(yearmonth[0], parseInt(yearmonth[1]) + 1, 0);
+	}
+	else {
+		d = new Date();
+		current_d = new Date(d.getFullYear(), d.getMonth() + 1, 0)
+	}
+
+	return current_d.getFullYear() + "." + (current_d.getMonth() + 1) + "." + current_d.getDate();
+}
+
+function saveSetting(fix) {
+	var jsonObj = {};
+
+	var aid = $('#aid').val();
+	var carid = $('#carid').val();
+	var monthpick = $('#monthpick').val();
+
+	var memo;
+
+	if ($('#memo') && $('#memo')[0]) {
+		memo = $('#memo')[0].value;
+	}
+
+	jsonObj['discount_rate'] = $('#discount_rate option:selected').text();
+	jsonObj['memo'] = memo;
+
+	jsonObj['extra'] = {};
+	$('.extra-fields').each(function(i, obj) {
+		jsonObj['extra'][i] = {};
+		jsonObj['extra'][i][$('.extra-fields')[i].value] = $('.extra-charge')[i].value;
+		console.log(i + " : " + $('.extra-fields')[i].value + " : " + $('.extra-charge')[i].value);
+	});
+
+	jsonObj['data'] = {};
+	$('.dailyhistory').each(function(i, obj) {
+		jsonObj['data'][$(obj).attr('id')] = {};
+		$('#' + $(obj).attr('id')).find('.timehistoryoption').each(function(j, obj2) {
+			jsonObj['data'][$(obj).attr('id')][$(obj2).attr('inventory_id')] = $(obj2).val();
+		});
+	});
+
+	console.log(jsonObj);
+
+	var xmlhttp = new XMLHttpRequest();
+	xmlhttp.onreadystatechange = function() {
+		if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+			if(xmlhttp.getResponseHeader('content-type') == 'application/json') {
+				var jsonResponse = JSON.parse(xmlhttp.responseText);
+				if (jsonResponse['msg'] == 'Success') {
+					console.log(jsonResponse['name']);
+					if (fix == 'fix') {
+						msg = "'" + jsonResponse['name'] + "' 으로 확정되었고 가상 계좌에 저장되었습니다.";
+					}
+					else {
+						msg = "'" + jsonResponse['name'] + "' 으로 임시저장되었습니다.";
+					}
+					alert(msg);
+					makeHistorySettingList(jsonResponse['value']);
+				}
+				else {
+					console.log(jsonResponse['msg']);
+				}
+			}
+		}
+	};
+	{% if request.path == '/institute/getMonthlyHistory' %}
+	xmlhttp.open("POST", "/institute/saveBillingHistorySetting?aid=" + aid + "&carid=" + "{{carid}}" + "&monthpick=" + monthpick + "&fix=" + fix);
+	{% else %}
+	xmlhttp.open("POST", "/institute/saveBillingHistorySetting?aid=" + aid + "&carid=" + "{{carid}}" + "&monthpick=" + "{{startdate}}_{{enddate}}" + "&fix=" + fix);
+	{% endif %}
+	xmlhttp.setRequestHeader("Content-Type", "application/json");
+	xmlhttp.send(JSON.stringify(jsonObj));
+}
+
+$("#billingHistorySetting").on('change', function() {
+	var billingHistorySetting = $('#billingHistorySetting')[0];
+	var billingHistorySetting_value = billingHistorySetting.options[billingHistorySetting.selectedIndex].value;
+	var billingHistorySetting_text = billingHistorySetting.options[billingHistorySetting.selectedIndex].text;
+	var values = billingHistorySetting_value.split("_");
+
+	if (billingHistorySetting_value == "") {
+		console.log("search");
+		$('.search').click();
+		alert("새로 loading 됩니다.");
+		return;
+	}
+
+	var xmlhttp = new XMLHttpRequest();
+	xmlhttp.onreadystatechange = function() {
+		if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+			if(xmlhttp.getResponseHeader('content-type') == 'application/json') {
+				var jsonResponse = JSON.parse(xmlhttp.responseText);
+				if (jsonResponse['memo'] != null) {
+					$("#add-memo").click();
+					$('#memo')[0].value = jsonResponse['memo'];
+				}
+
+				for (var index in jsonResponse['extra']) {
+					for (var fields in jsonResponse['extra'][index]) {
+						$('.extra-fields:last')[0].value = fields;
+						$('.extra-charge:last')[0].value = jsonResponse['extra'][index][fields];
+					}
+					if (index < Object.keys(jsonResponse['extra']).length - 1) {
+						$('.btn-add:last').click();
+					}
+				}
+
+				for (var date in jsonResponse['data']) {
+					for (var inventory_id in jsonResponse['data'][date]) {
+						$('#' + date).find('[inventory_id="' + inventory_id + '"]').multiselect('deselectAll', false);
+						$('#' + date).find('[inventory_id="' + inventory_id + '"]').multiselect('select', jsonResponse['data'][date][inventory_id]);
+					}
+				}
+
+				$('#discount_rate').val(jsonResponse['discount_rate']);
+				calculate();
+				alert(billingHistorySetting_text + " 가 적용되었습니다.");
+			}
+			else {
+				alert(xmlhttp.responseText);
+			}
+		}
+	}
+	xmlhttp.open("GET", "/institute/getBillingHistorySetting?created_time=" + encodeURIComponent(values[0]) + "&created_user_id=" + encodeURIComponent(values[1]));
+	xmlhttp.send(null);
+
+});
+
+
+$( function() {
+	$(document).on('click', '.btn-add', function(e) {
+		e.preventDefault();
+
+		var controlForm = $('.controls form:first'),
+		    currentEntry = $(this).parents('.entry:first'),
+		    newEntry = $(currentEntry.clone()).appendTo(controlForm);
+
+		newEntry.change(function() {
+			calculate();
+		});
+
+		newEntry.find('input').val('');
+		controlForm.find('.entry:not(:last) .btn-add')
+			.removeClass('btn-add').addClass('btn-remove')
+			.removeClass('btn-success').addClass('btn-danger')
+			.html('<span class="glyphicon glyphicon-minus"></span>');
+	}).on('click', '.btn-remove', function(e) {
+		$(this).parents('.entry:first').remove();
+
+		e.preventDefault();
+		calculate();
+		return false;
+	});
+});
+
 $(document).ready(function() {
 	$('.timehistoryoption').multiselect({
 		nonSelectedText: '일반'
 	});
+
+	$('.caroption').multiselect({
+		nonSelectedText: '모든차량'
+	});
+
+	$('.extra-charge').change(function() {
+		calculate();
+	});
 });
 
+
 $("#pdfdown").click(function() {
-	waitingDialog.show(); 
+	waitingDialog.show();
 	setTimeout(function () {
 		waitingDialog.hide();
 	}, 4000);
@@ -440,12 +827,19 @@ $("#pdfdown").click(function() {
 	var normal_count = $('#normal_count')[0].innerText;
 	var passenger_count = $('#passenger_count')[0].innerText;
 	var overpeople_count = $('#overpeople_count')[0].innerText;
+	var overpeople10_count = $('#overpeople10_count')[0].innerText;
 	var overtime_count = $('#overtime_count')[0].innerText;
 	var passenger_overtime_count = $('#passenger_overtime_count')[0].innerText;
 	var passenger_overpeople_count = $('#passenger_overpeople_count')[0].innerText;
+	var passenger_overpeople10_count = $('#passenger_overpeople10_count')[0].innerText;
 	var noncharge_count = $('#noncharge_count')[0].innerText;
 	var uniq_count = $('#uniq_count')[0].innerText;
 	var total_count = $('#total_count')[0].innerText;
+	var total_uncollected = $('#total_uncollected')[0].innerText;
+	var total_charge = $('#total_charge')[0].innerText;
+	var after_total_charge = $('#after_total_charge')[0].innerText;
+	var due_date = $('#due_date')[0].innerText;
+	var after_due_date = $('#after_due_date')[0].innerText;
 
 	var str = "";
 	var dd = {};
@@ -454,6 +848,7 @@ $("#pdfdown").click(function() {
 
 	dd['content'].push({text: "<{{academy.aname}} {{startdate}} ~ {{enddate}} 이용내역>", fontSize: 15, bold: true, alignment: 'center'});
 	dd['content'].push({text: "\n\n총 " + total_count + "회 운행", fontSize: 12, bold: true});
+
 
         if ($('#memo') && $('#memo')[0]) {
 		var memo = $('#memo')[0].value;
@@ -480,6 +875,13 @@ $("#pdfdown").click(function() {
 		}
 		str += '(' + numberWithCommas(parseInt(numberWithoutCommas(per_amount_value)) + 1500) + ' x ' + overpeople_count + ') ';
 	}
+	if (overpeople10_count > 0) {
+		dd['content'].push({text: "-- 10인 초과: " + overpeople10_count + "회 운행", fontSize: 11});
+		if (str != "") {
+			str += " + ";
+		}
+		str += '(' + numberWithCommas(parseInt(numberWithoutCommas(per_amount_value)) * 2 + 1500) + ' x ' + overpeople10_count + ') ';
+	}
 	if (overtime_count > 0) {
 		dd['content'].push({text: "-- {{overtime}}분 초과: : " + overtime_count + "회 운행", fontSize: 11});
 		if (str != "") {
@@ -494,6 +896,13 @@ $("#pdfdown").click(function() {
 		}
 		str += '(' +  numberWithCommas(parseInt(numberWithoutCommas(per_amount_value)) + parseInt(numberWithoutCommas(passenger_amount_value)) + 1500) + ' x ' + passenger_overpeople_count + ') ';
 	}
+	if (passenger_overpeople10_count > 0) {
+		dd['content'].push({text: "-- 동승자 포함, 10인 초과: : " + passenger_overpeople10_count + "회 운행", fontSize: 11});
+		if (str != "") {
+			str += " + ";
+		}
+		str += '(' +  numberWithCommas((parseInt(numberWithoutCommas(per_amount_value)) + parseInt(numberWithoutCommas(passenger_amount_value))) * 2 + 1500) + ' x ' + passenger_overpeople10_count + ') ';
+	}
 	if (passenger_overtime_count > 0) {
 		dd['content'].push({text: "-- 동승자 포함, {{overtime}}분 초과: : " + passenger_overtime_count + "회 운행", fontSize: 11});
 		if (str != "") {
@@ -501,20 +910,71 @@ $("#pdfdown").click(function() {
 		}
 		str += '(' +  numberWithCommas((parseInt(numberWithoutCommas(per_amount_value)) + parseInt(numberWithoutCommas(passenger_amount_value))) * 2) + ' x ' + passenger_overtime_count + ') ';
 	}
-	dd['content'].push({text: '\n\n이용료: ' + str + ' = ' + calculate_amount + '원\n', fontSize: 12});
+	dd['content'].push({text: '\n\n이용료: ' + str + '\n= ' + calculate_amount + '원\n', fontSize: 12});
 	if (discount_rate_value != '0%') {
 		dd['content'].push({text: '{{academy.aname}} 특별할인 ' + discount_rate_value + '\n', fontSize: 12});
 	}
-	dd['content'].push({text: '\n결제금액: ' + pay_amount + '원 \n\n', fontSize: 13, bold: true});
+
+	if (total_uncollected != '0') {
+	// 미납
+		var uncollectedtable = {};
+		uncollectedtable['body'] = [];
+		uncollectedtable['headerRows'] = 1;
+		uncollectedtable['widths'] = [50, 100, 100, 100];
+		uncollectedtable['body'].push(['월', '금액', '가산금', '총액']);
+
+		var uncollected_monthly = document.getElementsByClassName('uncollected_monthly');
+		dd['content'].push({text: '\n미납내역', fontSize: 12, bold: true});
+		for (var i=0; i<uncollected_monthly.length; i++) {
+			var rows = []
+			rows[0] = {'text': $.trim(uncollected_monthly[i].getElementsByClassName("uncollected.month")[0].innerHTML), 'fillColor': '#eeeeee', 'alignment': 'right'};
+			rows[1] = {'text': $.trim(uncollected_monthly[i].getElementsByClassName("uncollected.billing_amount")[0].innerHTML), 'fillColor': '#eeeeee', 'alignment': 'right'};
+			rows[2] = {'text': $.trim(uncollected_monthly[i].getElementsByClassName("uncollected.additional_charge")[0].innerHTML), 'fillColor': '#eeeeee', 'alignment': 'right'};
+			rows[3] = {'text': $.trim(uncollected_monthly[i].getElementsByClassName("uncollected.total_charge")[0].innerHTML), 'fillColor': '#eeeeee', 'alignment': 'right'};
+			uncollectedtable['body'].push(rows);
+		}
+		dd['content'].push({table: uncollectedtable});
+	}
+	console.log('total_uncollected = ' + total_uncollected);
+
+	dd['content'].push({text: '\n이용 금액: ' + pay_amount + '원', fontSize: total_uncollected ? 12 : 13, bold: true});
+
+	if (total_uncollected != '0') {
+		dd['content'].push({text: '+ 연체 금액: ' + total_uncollected + '원', fontSize: 12, bold: true});
+	}
+
+	for (var i=0; i<$('.extra-charge').length; i++) {
+		if ($('.extra-charge')[i].value == '' || isNaN($('.extra-charge')[i].value)) {
+		}
+		else {
+			dd['content'].push({text: '+ ' + $('.extra-fields')[i].value + ': ' + numberWithCommas($('.extra-charge')[i].value) + '원', fontSize: 12, bold: true});
+		}
+	}
+
+	dd['content'].push({text: '= 결제 금액: ' + total_charge + '원', fontSize: 13, bold: true});
+	dd['content'].push({text: '납기내 ( ' + due_date + ' 까지 ) : ' + total_charge + '원', fontSize: 13, bold: true});
+	dd['content'].push({text: '납기후 ( ' + after_due_date + ' 까지 ) : ' + after_total_charge + '원', fontSize: 13, bold: true, color: 'red'});
+	dd['content'].push({text: '\n\n', fontSize: 13});
 
 
-	dd['content'].push({text: '입금계좌: 우리은행 1005-603-067444 주식회사 에티켓\n\n\n', fontSize: 13, bold: true});
+	//dd['content'].push({text: '입금계좌: 우리은행 1005-603-067444 주식회사 에티켓\n\n\n', fontSize: 13, bold: true});
+
+	dd['content'].push({text: '입금계좌\n', fontSize: 13, bold: true});
+	dd['content'].push({text: '        : 신한은행 {{academy.bank088}} 주식회사 에티켓\n', fontSize: 11, bold: true});
+	dd['content'].push({text: '        : 국민은행 {{academy.bank004}} 주식회사 에티켓\n', fontSize: 11, bold: true});
+	dd['content'].push({text: '        : 하나은행 {{academy.bank081}} 주식회사 에티켓\n', fontSize: 11, bold: true});
+	dd['content'].push({text: '        : 우리은행 {{academy.bank020}} 주식회사 에티켓\n', fontSize: 11, bold: true});
+	dd['content'].push({text: '        : 기업은행 {{academy.bank003}} 주식회사 에티켓\n', fontSize: 11, bold: true});
+	dd['content'].push({text: '        : 시티은행 {{academy.bank027}} 주식회사 에티켓\n', fontSize: 11, bold: true});
+	dd['content'].push({text: '        : 우체국 {{academy.bank071}} 주식회사 에티켓\n', fontSize: 11, bold: true});
+	dd['content'].push({text: '        : 농협 {{academy.bank011}} 주식회사 에티켓\n\n\n', fontSize: 11, bold: true});
+
 	var dailyhistory = document.getElementsByClassName("dailyhistory");
 	for (var i=0; i<dailyhistory.length; i++) {
 		var timehistory = dailyhistory[i].getElementsByClassName("timehistory");
 		var datestr = dailyhistory[i].getElementsByClassName("dailyhistory.date")[0].innerHTML;
 		dd['content'].push({text: datestr, fontSize: 12, bold: true});
-		
+
 		for (var j=0; j<timehistory.length; j++) {
 			var timetable = {};
 			timetable['body'] = [];

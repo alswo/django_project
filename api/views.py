@@ -11,6 +11,7 @@ from api.models import Notice, Clauses
 import json
 from django.views.decorators.csrf import csrf_exempt
 from datetime import datetime, timedelta
+import httplib, urllib
 
 ## time format : HH:MM
 def get_difference(time1, time2):
@@ -410,6 +411,7 @@ def experienceGetRouteMap(request):
 
 def getSchedulesForStudent(request):
     if request.method == "GET":
+
 	max_diff = 10
         t = timeToDate()
         d = t.timeToD()
@@ -466,7 +468,6 @@ def getSchedulesForStudent(request):
 		data['inventory_id'] = scheduletable.iid_id
 		data['start_time'] = makeTimeStr(scheduletable.iid.stime)
 		data['end_time'] = makeTimeStr(scheduletable.iid.etime)
-		#data['institute_name'] = list(map(lambda x: (Academy.objects.get(id=x)).name, (set(scheduletable.iid.alist) & set(student.aid))))
 		data['institute_name'] = Academy.objects.get(id=student.aid_id).name
 		data['scheduletable_id'] = scheduletable.id
 
@@ -495,7 +496,8 @@ def getSchedulesForStudent(request):
 			#else:
 				#msg['schedules'][daydictionary[scheduletable.iid.day]]['today'] = False
 
-		msg['schedules'][daydictionary[scheduletable.iid.day]]['list'].append(data)
+		if (scheduletable.iid.day in daydictionary.keys()):
+			msg['schedules'][daydictionary[scheduletable.iid.day]]['list'].append(data)
 
 	return JsonResponse(msg)
 	#return JsonResponse(json.dumps(msg, ensure_ascii=False), safe=False)
@@ -624,41 +626,25 @@ def getNotice(request):
 	return JsonResponse(msg)
 
 @csrf_exempt
-def getStudentInfo(request):
-    if request.method == "POST":
-        pin_number = request.POST.get('pin_number')
-
-	debug = 0
-
-        try:
-            sInfo = StudentInfo.objects.get(pin_number = pin_number)
-
-            studentInfo = {}
-
-            studentInfo['sid'] = sInfo.id
-            studentInfo['aid'] = sInfo.aid_id
-            studentInfo['phone'] = sInfo.phone1
-            studentInfo['pin'] = sInfo.pin_number
-	    studentInfo['grade'] = sInfo.grade
-
-            return JsonResponse(studentInfo)
-
-        except:
-
-            msg = 'PIN값을 다시 입력해주세요'
-
-            return getResponse(debug,400,msg)
-
-@csrf_exempt
 def getStudentInfo2(request):
     if request.method == "POST":
         pin_number = request.POST.get('pin_number')
+        params = urllib.urlencode({
+        'v': 1,
+        'tid': 'UA-109205147-1',
+        'cid':pin_number,
+        't': 'pageview',
+        'ec': 'user',
+        'ea': 'start',
+        'ev': 0
+        })
 
 	debug = 0
 
         try:
             #sInfo = StudentInfo.objects.get(pin_number = pin_number)
             pInfos = PersonalInfo.objects.filter(pin_number = pin_number)
+
             if len(pInfos) <= 0:
                 raise PersonalInfo.DoesNotExist
             studentInfos = list()
@@ -680,7 +666,8 @@ def getStudentInfo2(request):
 	            studentInfo['personinfo_id'] = sInfo.personinfo_id
 
                     studentInfos.append(studentInfo)
-
+            connection = httplib.HTTPConnection('www.google-analytics.com')
+            connection.request('POST', '/collect', params)
             msg = {}
             msg['students'] = studentInfos
 
@@ -878,3 +865,18 @@ def pushConfirmInfo(request):
         except:
             msg = "error"
             return getResponse(debug, 400, msg)
+
+
+def usage_event():
+    params = urllib.urlencode({
+    'v': 1,
+    'tid': 'UA-109205147-1',
+    'cid':'111',
+    't': 'event',
+    'ec': 'user',
+    'ea': 'start',
+    'ev': 0
+})
+
+    connection = httplib.HTTPConnection('www.google-analytics.com')
+    connection.request('POST', '/collect', params)

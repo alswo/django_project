@@ -15,10 +15,11 @@
 	<link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.15/css/jquery.dataTables.css">
 	<link href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.20.1/vis.min.css" rel="stylesheet" type="text/css" />
 	<link href="/static/css/monitor.css" rel="stylesheet">
+	<link href="/static/css/getHistory.css" rel="stylesheet">
 	<link href="{% static 'css/timeline.css' %}" rel="stylesheet">
 	<link href="{% static 'css/bootstrap-multiselect.css' %}" rel="stylesheet">
 	<link rel="stylesheet" type="text/css" href="http://cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.css" />
-
+        <link rel="stylesheet" type="text/css" href="{% static 'css/loading/jquery.loading-indicator.css' %}"/>
 
 	<script src="/static/js/jquery-3.1.0.min.js"></script>
     	<script src="/static/js/jquery-ui.js"></script>
@@ -37,6 +38,7 @@
 	<script type="text/javascript" src="{% static 'js/plugins/vfs_fonts.js' %}"></script>
 	<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 	<script type="text/javascript" src="{% static 'js/bootstrap-multiselect.js' %}"></script>
+        <script type="text/javascript" src="{% static 'js/loading/jquery.loading-indicator.min.js' %}"></script>  
 <style>
 .entry:not(:first-of-type)
 {
@@ -137,6 +139,8 @@
                 <ul class="dropdown-menu">
                   <li><a href="/institute/listStudents">보기</a></li>
                   <li><a href="/institute/addStudentsForm">추가</a></li>
+                  <li><a href="/institute/exportStudentList">엑셀 다운로드</a></li>
+                  <li><a href="/institute/importStudentListForm">엑셀 업로드</a></li>
                 </ul>
               </li>
               <li class="dropdown">
@@ -146,18 +150,15 @@
                   <li><a href="/institute/addClassForm">추가</a></li>
                 </ul>
               </li>
-              <li><a href="/institute/getHistory">정산</a></li>
-              <!-- li><a href="#">Contact</a></li //-->
        {% if request.user.is_authenticated and request.user.is_staff %}
-              <!-- li class="dropdown">
-                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">학원선택<span class="caret"></span></a>
+              <li class="dorpdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">정산<span class="caret"></span></a>
                 <ul class="dropdown-menu">
-                  <li><a href="#" class="selectInstitute" data-instituteid="0">전체</a></li>
-		  {% for academy in academies %}
-                  <li {% if request.session.instituteid == academy.id %} class="hiddenactive"{% endif %}><a href="#" class="selectInstitute" data-instituteid="{{academy.id}}">{{academy.name}}</a></li>
-		  {% endfor %}
+                  <li><a href="/institute/getHistory">기간정산</a></li>
+                  <li><a href="/institute/getMonthlyHistory">월별정산</a></li>
+									<li><a href="/institute/listAcademiesBilling">결제 현황</a></li>
                 </ul>
-              </li//-->
+              </li>
 
               <li class="dropdown">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">학원선택<span class="caret"></span></a>
@@ -199,6 +200,7 @@
                   <li><a href="/opti2" target="_blank">V2</a></li>
                 </ul>
               </li>
+							
 	{% endif %}
             </ul>
             <ul class="nav navbar-nav navbar-right">

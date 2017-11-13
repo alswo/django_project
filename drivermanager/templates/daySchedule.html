@@ -1,0 +1,129 @@
+{% extends 'basic.html' %}
+{% block content %}
+<input id="bid" type="hidden" value="{{bid}}"></input>
+<div class="row" align="center">
+    {% for b in branch %}
+      {% if bid == b.id %}
+        <a href="/dm/getSchedule?bid={{b.id}}" type="button" class="btn btn-info">{{b.bname}}</a>
+      {% else %}
+        <a href="/dm/getSchedule?bid={{b.id}}" type="button" class="btn btn-default">{{b.bname}}</a>
+      {% endif %}
+    {% endfor %}
+</div>
+<br>
+<div class="row" align="center">
+  {% for w in weekdaylist %}
+  <button id="{{w}}" type="button" class="btn btn-primary" onclick="getSchedule('{{w}}', '{{bid}}')">{{w}}</button>
+  {% endfor %}
+</div>
+<br>
+<div id="skeduler-container">
+</div>
+<script type="text/javascript">
+function getSchedule(day, bid){
+  day = day
+  bid = bid
+  $.ajax({
+      url: "/dm/getSchedule",
+      type: "POST",
+      data: {
+        day: day,
+        bid: bid,
+      },
+      success: function(data) {
+        var obj = eval(data)
+        var day = obj[0]['invens'][0]['day']
+	document.getElementsByClassName('btn-success')[0].className = 'btn btn-primary';
+        document.getElementById(day).className = 'btn btn-success';
+        generate(obj)
+      }
+  });
+
+};
+
+(function (){
+  $.ajax({
+      url: "/dm/getSchedule",
+      type: "POST",
+      data: {
+        day: '월',
+        bid: $('#bid').val(),
+      },
+      success: function(data) {
+        var obj = eval(data)
+        console.log(obj)
+        var day = obj[0]['invens'][0]['day']
+        document.getElementById(day).className = 'btn btn-success';
+        generate(obj)
+      }
+  });
+
+})();
+
+function generate(obj) {
+  var tasks = [];
+  var headers = [];
+  for( i in obj){
+    headers.push(obj[i]['carnum']+"호차")
+  }
+
+  for (var i = 0; i < obj.length ; i++) {
+      for ( var j = 0 ; j < obj[i]['invens'].length; j++) {
+          var forDStime = obj[i]['invens'][j]['stime']
+          var forDEtime = obj[i]['invens'][j]['etime']
+          var stime = obj[i]['invens'][j]['stime'].toString();
+          var etime = obj[i]['invens'][j]['etime'].toString();
+          var startTime_h;
+          var startTime_t;
+          var d;
+          var passenger = obj[i]['invens'][j]['passenger'] == 0 ? '' : 'X';
+
+          if(parseInt(stime.slice(2,4)) >= 50){
+              startTime_h = parseInt(stime.slice(0,2)-9) + 1 
+              startTime_t = 0;
+              forDStime = (startTime_h+9)*100
+          }
+          else{ 
+              startTime_h = parseInt(stime.slice(0,2)-9)
+              startTime_t = parseInt(stime.slice(2,4)) >= 20 ? 0.5 : 0;
+          }
+
+          if (0 <= parseInt(etime.slice(2,4)) && parseInt(etime.slice(2,4)) <= 5) d = 30 - parseInt(stime.slice(2,4));
+          else d = forDEtime - forDStime;
+
+          console.log(obj[i]['invens'][j]['aname'])
+          console.log(startTime_h, startTime_t)
+          console.log(d)
+
+          var startTime = startTime_h + startTime_t 
+          
+          if(d <= 40) duration = 0.5;
+          else if(40 < d <= 70) duration = 1;
+          else if(70 < d <= 100) duration = 1.5;
+          else if(100 < d <= 130) duration = 2;         
+
+          var task = {
+            startTime: startTime,
+            duration: duration,
+            snum: obj[i]['invens'][j]['snum'],
+            aname: obj[i]['invens'][j]['aname'],
+            passenger: passenger,
+            column: i,
+            id: obj[i]['invens'][j]['iid'],
+            title: "학생수: " + obj[i]['invens'][j]['snum'] + "<br>" + obj[i]['invens'][j]['stime'] + "~" + obj[i]['invens'][j]['etime'], 
+          };
+
+      tasks.push(task);
+      }
+      console.log(tasks)
+  }
+
+  $("#skeduler-container").skeduler({
+    headers: headers,
+    tasks: tasks,
+    cardTemplate: '<div>${aname}&nbsp&nbsp${passenger}</div><div>${title}</div>',
+    onClick: function (e, t) { console.log(e, t); }
+  });
+}
+</script>
+{% endblock content %}

@@ -36,6 +36,11 @@
       opacity: 1.0;
     }
 
+    .institute-button {
+      font-size: 20;
+      color: black;
+    }
+
     .btn-small {
       padding: 0.5px 0.5px;
       margin-bottom: 1px;
@@ -86,7 +91,11 @@
       <button type="button" class="{% if day == '목' %}btn btn-primary{% else %} btn btn-info {% endif %}" onclick="location.href='getSchedule?bid={{bid}}&car={{car}}&day=목'">목</button>
       <button type="button" class="{% if day == '금' %}btn btn-primary{% else %} btn btn-info {% endif %}" onclick="location.href='getSchedule?bid={{bid}}&car={{car}}&day=금'">금</button>
       <button type="button" class="{% if day == '토' %}btn btn-primary{% else %} btn btn-info {% endif %}" onclick="location.href='getSchedule?bid={{bid}}&car={{car}}&day=토'">토</button>
-      <!--<button type="button" class="btn btn-primary" onclick="window.print()">출력</button>-->
+      {% if user.is_staff %}
+      <label class="chekcbox-inline">
+        <input id="blink" type="checkbox">&nbsp깜빡비활성
+      </label>
+      {% endif %}
     </div>
     <br>
     <div class="row schedule">
@@ -97,10 +106,12 @@
         <div class="panel {% if c.passenger == 0%}panel-success{% else %}panel-default{% endif %}">
           <!-- Default panel contents -->
           <div class="panel-heading">
-            <button type="button" class="btn btn-small btn-warning">{{c.carnum}}호차</button>
-            <button type="button" class="btn btn-small btn-warning">{{c.day}}요일</button> {% for aname in c.anamelist %} {% for aid in c.alist %} {% if forloop.counter == forloop.parentloop.counter %}
-            <button type="button" class="btn btn-small btn-warning" role="button" data-toggle="collapse" href="#collapsePhone{{c.id}}" onclick="getAcaPhone(this, {{aid}},{{c.id}})" aria-expanded="false" aria-controls="collapseExample">{{aname}}</button>            {% endif %} {% endfor %} {% endfor %}
-	    {% if c.passenger == 0 %} [동승자 필요] {% endif %}
+            <button type="button" class="btn btn-small btn-warning institute-button">{{c.carnum}}호차</button>
+            <button type="button" class="btn btn-small btn-warning institute-button">{{c.day}}요일</button> {% for aname in c.anamelist %} {% for aid in c.alist %} {% if forloop.counter == forloop.parentloop.counter %}
+            <button type="button" class="btn btn-small btn-warning institute-button" role="button" data-toggle="collapse" href="#collapsePhone{{c.id}}" onclick="getAcaPhone(this, {{aid}},{{c.id}})" aria-expanded="false" aria-controls="collapseExample">{{aname}}</button>            {% endif %} {% endfor %} {% endfor %}
+	    <br>
+            {% if c.passenger == 0 %} [동승자 필요] {% endif %}
+            <span class="badge">{{c.snum}}</span>
             <div class="collapse" id="collapsePhone{{c.id}}">
             </div>
           </div>
@@ -128,6 +139,7 @@
                     <div class="dropdown">
                       <button type="button" id="{{c.id}}{{s.id}}{{forloop.counter}}" class="load btn btn-small btn-space {% if f == 0 %} btn-primary {% elif f == 2 %} btn-warning blink {% else %} btn-default {% endif %} dropdown-toggle" data-toggle="dropdown">
                                     {{si.name}}
+{% if si.age <= 9 %}<span class="glyphicon glyphicon-eye-open"></span>{% elif si.age <= 13 %}<span class="glyphicon glyphicon-user"></span>{% endif %} 
                                   </button>
                       <ul class="dropdown-menu pull-right">
                         <li><a href="tel:{{si.aphone}}">{{si.aname}}</a></li>
@@ -239,12 +251,18 @@
         });
 
         function refreshfunc() {
-          location.reload();
+          if(doBlink == true){
+            location.reload();
+          }else{
+            return false;
+          }
         } 
 
         //for blinkBtn frequent
         var blinkBtn = -1;
+        var doBlink = true;
         function alarmfunc(){
+          if( doBlink == true){
           var date = new Date();
           var obj = document.getElementsByClassName('loadTime')
 
@@ -253,7 +271,9 @@
 
           loadObj = loadModule.compareLoadTime();
           console.log(loadModule.getPresentTime())
-          if (blinkBtn > -1) clearInterval(blinkBtn);
+          if (blinkBtn > -1){ 
+            clearInterval(blinkBtn);
+          }
 
           if(loadObj != undefined){
             loadObj.disabled = false;
@@ -289,8 +309,9 @@
             }
             clearInterval(blinkBtn);
           }
+          }else{ clearInterval(blinkBtn);}
+           
         }
-
 
         var curtime;
 
@@ -371,6 +392,14 @@
           }, 12000);
           lastfiretime = Date.now();
         }
-      </script>
+
+  $("#blink").click(function(){
+    if( $(this).is(':checked')){
+      doBlink = false;
+    }else{
+      doBlink = true;
+    }
+  })  
+</script>
 
 </html>

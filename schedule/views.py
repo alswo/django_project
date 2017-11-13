@@ -25,6 +25,8 @@ import re
 from schedule.updateInventory import UpdateInven 
 from schedule.createInventory import CreateInven
 from schedule.maintainTodayLoad import getUnloadSid, getTflag
+from django.utils import timezone
+from django.db.models import Q
 
 class TimeHistory:
 	def __init__(self):
@@ -75,6 +77,7 @@ def invenToJson(invens):
 
         inventory['schedule'] = []
 
+        snum = 0
         for s in schedules:
             schedule={}
             schedule['id'] = s.id
@@ -96,23 +99,29 @@ def invenToJson(invens):
                     sInfo['aid'] = studentInfo.aid
                     sInfo['aname'] = academy.name
                     sInfo['aphone'] = academy.phone_1
-                    sInfo['grade'] = studentInfo.grade
-                    sInfo['phone1'] = studentInfo.phone1
-                    sInfo['phonelist'] = studentInfo.phonelist
+                    if (studentInfo.birth_year):
+                        sInfo['age'] = timezone.now().year - int(studentInfo.birth_year) + 1
+                    else:
+                        sInfo['age'] = 30
+                    sInfo['phone1'] = ''
+                    sInfo['phonelist'] = ''
                     sInfo['parents_phonenumber'] = studentInfo.parents_phonenumber
                     sInfo['grandparents_phonenumber'] = studentInfo.grandparents_phonenumber
                     sInfo['self_phonenumber'] = studentInfo.self_phonenumber
                     sInfo['care_phonenumber'] = studentInfo.care_phonenumber
+                    snum += 1
 
 		except:
 		    HttpResponse(si)
 
 	        schedule['sinfo'].append(sInfo)
+                                
 
 	    schedule['sname']= s.sname
             schedule['tflag'] = s.tflag
             schedule['lflag'] = s.lflag
-
+            
+            inventory['snum'] = snum
             inventory['schedule'].append(schedule)
 
         contacts.append(inventory)
@@ -285,7 +294,8 @@ def getSchedule(request):
 
         if request.user.is_staff:
             
-            invens = Inventory.objects.filter(bid = bid).filter(alist__contains = [aid]).filter(day = day)
+            #invens = Inventory.objects.filter(bid = bid).filter(alist__contains = [aid]).filter(day = day)
+            invens = Inventory.objects.filter(alist__contains = [aid]).filter(day = day)
             list_invensid = []
             contacts = invenToJson(invens)
 
@@ -302,7 +312,8 @@ def getSchedule(request):
 
         elif request.user.groups.filter(name__in = ['academy']).exists():
             if day:
-                invens = Inventory.objects.filter(bid = bid).filter(alist__contains = [aid]).filter(day = day)
+                #invens = Inventory.objects.filter(bid = bid).filter(alist__contains = [aid]).filter(day = day)
+                invens = Inventory.objects.filter(alist__contains = [aid]).filter(day = day)
                 list_invensid = []
 
                 contacts = invenToJson(invens)
@@ -314,7 +325,8 @@ def getSchedule(request):
                 aid = profile.aid
                 bid = profile.bid
 
-                invens = Inventory.objects.filter(bid = bid).filter(alist__contains = [aid]).filter(day='월')
+                #invens = Inventory.objects.filter(bid = bid).filter(alist__contains = [aid]).filter(day='월')
+                invens = Inventory.objects.filter(alist__contains = [aid]).filter(day='월')
 
                 list_invensid = []
                 contacts = invenToJson(invens)
@@ -386,6 +398,9 @@ def putScheduleForm(request):
     if not week:
         week = 0
 
+    if carnum == 16:
+        academy = Academy.objects.filter(Q(bid=bid) | Q(bid=5))
+
     return render_to_response('putSchedule.html', {"academy" : academy, "bid" : bid,"carnum":carnum,"day":day,"week":week, "group" : group,'user':request.user, 'weekdaylist': weekdaylist, 'weeknum_range': range(0, 4), 'timeaddrpairs': timeaddrpairs})
 
 
@@ -402,7 +417,6 @@ def putSchedule(request):
         day = request.POST.getlist('day[]')
         carnum = request.POST.get('carnum')
         bid = request.POST.get('bid')
-        req = request.POST.get('req')
         time = request.POST.getlist('time[]')
         addr = request.POST.getlist('addr[]')
         name = request.POST.getlist('name[]')
@@ -411,11 +425,13 @@ def putSchedule(request):
         sid = request.POST.getlist('sid[]')
         week = int(request.POST.get('week', '0'))
         alist = request.POST.getlist('alist[]')
+        p_memo = request.POST.get('pMemo')
+        memo = request.POST.get('memo')
 
         if not alist:
             alist = 0
 
-        putInven = CreateInven(bid,carnum,day,req,time,addr,name,name2,load,sid,week,alist)
+        putInven = CreateInven(bid,carnum,day,time,addr,name,name2,load,sid,week,alist,p_memo, memo)
 
         if putInven.setAlist() == 1:
             return HttpResponse('error setAlist')
@@ -445,11 +461,15 @@ def putSchedule(request):
         academy = Academy.objects.filter(bid = bid)
         group = Car.objects.filter(branchid = bid)
 
+    if carnum == 16:
+        academy = Academy.objects.filter(Q(bid=bid) | Q(bid=5))
+
     return render_to_response('putSchedule.html', {"academy" : academy, "bid" : bid,"carnum":carnum,"day":day,"week":week, "group" : group,'user':request.user, 'weekdaylist': weekdaylist, 'weeknum_range': range(0, 4)})
 
 
 @csrf_exempt
 def updateSchedule(request):
+    weekdaylist = ['월', '화', '수', '목', '금', '토']
     if request.method == "GET":
         searchflag = request.GET.get('searchinven')
         if searchflag:
@@ -461,7 +481,7 @@ def updateSchedule(request):
                 bid = int(request.GET.get('bid'))
                 day = request.GET.get('day')
                 searchTime = request.GET.get('searchTime')
-                areaid = request.GET.get('areaid')
+                areaid = int(request.GET.get('areaid'))
 
                 academy = Academy.objects.filter(bid=bid)
                 branch = Branch.objects.filter(areaid = areaid)
@@ -478,13 +498,13 @@ def updateSchedule(request):
                 
                 contacts = getContacts(bid, day, carnum, week, searchTime)
 
-                return render_to_response('supdateSchedule.html',{"area":area,"searchTime":searchTime,"day":day,"branch":branch,"academy":academy,"carlist": carlist,"carnum": carnum,"bid":bid,"areaid": areaid,"week": week,"contacts":contacts,'user':request.user})
+                return render_to_response('supdateSchedule.html',{"area":area,"searchTime":searchTime,"day":day,"branch":branch,"academy":academy,"carlist": carlist,"carnum": carnum,"bid":bid,"areaid": areaid,"week": week,"contacts":contacts,'user':request.user, 'weekdaylist': weekdaylist, 'day':day})
 
 
         area = Area.objects.all()
         branch = Branch.objects.all()
 
-        return render_to_response('supdateSchedule.html',{'area':area, 'branch': branch, 'user':request.user})
+        return render_to_response('supdateSchedule.html',{'area':area, 'branch': branch, 'user':request.user, 'weekdaylist': weekdaylist})
 
 
     elif request.method == "POST":
@@ -529,7 +549,7 @@ def updateSchedule(request):
                     for i in invens:
                         contacts.extend(Inventory.objects.filter(id = i.id).prefetch_related('scheduletables'))
 
-                    return render_to_response('supdateSchedule.html',{"area":area,"searchTime":searchTime,"academy":academy,"branch":branch,"day":day,"carlist": carlist,"carnum":carnum,"bid":bid,"areaid": areaid,"week": 0,"contacts":contacts,'user':request.user})
+                    return render_to_response('supdateSchedule.html',{"area":area,"searchTime":searchTime,"academy":academy,"branch":branch,"weekdaylist":weekdaylist, "day":day,"carlist": carlist,"carnum":carnum,"bid":bid,"areaid": areaid,"week": 0,"contacts":contacts,'user':request.user})
 
                 else:
                     searchTime = int(searchTime)
@@ -540,7 +560,7 @@ def updateSchedule(request):
                     for i in invens:
                         contacts.extend(Inventory.objects.filter(id = i.id).prefetch_related('scheduletables'))
 
-                    return render_to_response('supdateSchedule.html',{"area":area,"searchTime":searchTime,"academy":academy,"branch":branch,"day":day,"carlist": carlist,"carnum":carnum,"bid":bid,"areaid": areaid,"week": 0 ,"contacts":contacts,'user':request.user})
+                    return render_to_response('supdateSchedule.html',{"area":area,"searchTime":searchTime,"academy":academy,"branch":branch,"day":day,"weekdaylist":weekdaylist,"carlist": carlist,"carnum":carnum,"bid":bid,"areaid": areaid,"week": 0 ,"contacts":contacts,'user':request.user})
 
         #update -> 1 : update inven
         if update == '1':
@@ -559,8 +579,11 @@ def updateSchedule(request):
             bus_check = request.POST.get('bus_check')
 	    busAlist = request.POST.getlist('alist[]')
             option = request.POST.get('option')
+            p_memo = request.POST.get('pMemo')
+            memo = request.POST.get('memo')
             #redirect
-            carnum = int(request.POST.get('carnum'))
+            temp_carnum = request.POST.get('changeCar')
+            carnum = int(temp_carnum.split('/')[1])  
 
             #searchTime,day,area,branch for inventory searching and redirection
             searchTime = request.POST.get('searchTime')
@@ -604,7 +627,7 @@ def updateSchedule(request):
             comment = 'carnum: ' + str(carnum) + ', day: ' + str(day) + ', stime: ' + str(stime) + ', week: ' + str(week) + ' update'
             set_audit(comment, 'update', request.user)
 
-            uInven = UpdateInven(bid, carnum, day, req, time,stime, etime, addr, name, name2, load, sid, week, alist, snum, anamelist_inven, slist_temp3)
+            uInven = UpdateInven(bid, carnum, day, req, time,stime, etime, addr, name, name2, load, sid, week, alist, snum, anamelist_inven, slist_temp3,p_memo,memo)
 
             if week == 1:
                 eInven_index = checkEditedInven(iid, week)                
@@ -619,7 +642,7 @@ def updateSchedule(request):
 
                     academy = Academy.objects.filter(bid=bid)
 
-                    return render_to_response('supdateSchedule.html',{"area":area,"branch":branch,"searchTime":searchTime,"academy":academy,"day":day,"carlist": carlist,"carnum":carnum,"bid":bid,"areaid": areaid,"week": week,"contacts":contacts,'user':request.user})
+                    return render_to_response('supdateSchedule.html',{"area":area,"branch":branch,"searchTime":searchTime,"academy":academy,"day":day,"weekdaylist":weekdaylist,"carlist": carlist,"carnum":carnum,"bid":bid,"areaid": areaid,"week": week,"contacts":contacts,'user':request.user})
 
                 #first update editedinven
                 elif eInven_index == 1:
@@ -660,7 +683,7 @@ def updateSchedule(request):
                     
                     contacts = getContacts(bid, day, carnum, week, searchTime)                    
 
-                    return render_to_response('supdateSchedule.html',{"area":area,"branch":branch,"searchTime":searchTime,"academy":academy,"day":day,"carlist": carlist,"carnum":carnum,"bid":bid,"areaid": areaid,"week": week,"contacts":contacts,'user':request.user})
+                    return render_to_response('supdateSchedule.html',{"area":area,"branch":branch,"searchTime":searchTime,"academy":academy,"day":day,"weekdaylist":weekdaylist,"carlist": carlist,"carnum":carnum,"bid":bid,"areaid": areaid,"week": week,"contacts":contacts,'user':request.user})
 
             elif week == 2:
                 eInven_index = checkEditedInven(iid, week)
@@ -675,7 +698,7 @@ def updateSchedule(request):
 
                     contacts = getContacts(bid, day, carnum, week, searchTime)
 
-                    return render_to_response('supdateSchedule.html',{"area":area,"branch":branch,"searchTime":searchTime,"academy":academy,"day":day,"carlist": carlist,"carnum":carnum,"bid":bid,"areaid": areaid,"week": week,"contacts":contacts,'user':request.user})
+                    return render_to_response('supdateSchedule.html',{"area":area,"branch":branch,"searchTime":searchTime,"academy":academy,"day":day,"weekdaylist":weekdaylist,"carlist": carlist,"carnum":carnum,"bid":bid,"areaid": areaid,"week": week,"contacts":contacts,'user':request.user})
 
                 #first update editedinven
                 elif eInven_index == 1:
@@ -709,7 +732,7 @@ def updateSchedule(request):
                     
                     contacts = getContacts(bid, day, carnum, week, searchTime)
                     
-                    return render_to_response('supdateSchedule.html',{"area":area,"branch":branch,"searchTime":searchTime,"academy":academy,"day":day,"carlist": carlist,"carnum":carnum,"bid":bid,"areaid": areaid,"week": week,"contacts":contacts,'user':request.user})
+                    return render_to_response('supdateSchedule.html',{"area":area,"branch":branch,"searchTime":searchTime,"academy":academy,"day":day,"weekdaylist":weekdaylist,"carlist": carlist,"carnum":carnum,"bid":bid,"areaid": areaid,"week": week,"contacts":contacts,'user':request.user})
 
             elif week == 3:
 
@@ -725,7 +748,7 @@ def updateSchedule(request):
  
                     contacts = getContacts(bid, day, carnum, week, searchTime)
 
-                    return render_to_response('supdateSchedule.html',{"area":area,"branch":branch,"searchTime":searchTime,"academy":academy,"day":day,"carlist": carlist,"carnum":carnum,"bid":bid,"areaid": areaid,"week": week,"contacts":contacts,'user':request.user})
+                    return render_to_response('supdateSchedule.html',{"area":area,"branch":branch,"searchTime":searchTime,"academy":academy,"day":day,"weekdaylist":weekdaylist,"carlist": carlist,"carnum":carnum,"bid":bid,"areaid": areaid,"week": week,"contacts":contacts,'user':request.user})
 
                 #first update editedinven
                 elif eInven_index == 1:
@@ -744,7 +767,7 @@ def updateSchedule(request):
                     academy = Academy.objects.filter(bid=bid)
                     contacts = getContacts(bid, day, carnum, week, searchTime)
 
-                    return render_to_response('supdateSchedule.html',{"area":area,"branch":branch,"searchTime":searchTime,"academy":academy,"day":day,"carlist": carlist,"carnum":carnum,"bid":bid,"areaid": areaid,"week": week,"contacts":contacts,'user':request.user})
+                    return render_to_response('supdateSchedule.html',{"area":area,"branch":branch,"searchTime":searchTime,"academy":academy,"day":day,"weekdaylist":weekdaylist,"carlist": carlist,"carnum":carnum,"bid":bid,"areaid": areaid,"week": week,"contacts":contacts,'user':request.user})
 
             #week0 update
             else:
@@ -756,6 +779,8 @@ def updateSchedule(request):
                 inven.stime = stime 
                 inven.etime = etime 
                 inven.carnum = carnum
+                inven.req = p_memo
+                inven.memo = memo
                 inven.save()
 
                 if option == '1':
@@ -775,9 +800,9 @@ def updateSchedule(request):
                     else:
 		        if not alist:
 		            alist = 0
-			    cInven = CreateInven(bid, carnum, day,req, time, addr, name, name2, load, sid, week, alist)
+			    cInven = CreateInven(bid, carnum, day, time, addr, name, name2, load, sid, week, alist,p_memo,memo)
 		        if alist != None:
-			    cInven = CreateInven(bid, carnum, day, req, time, addr, name, name2, load, sid, week, alist)
+			    cInven = CreateInven(bid, carnum, day, time, addr, name, name2, load, sid, week, alist,p_memo,memo)
 		        
                         if cInven.setAlist == 1:
 		            return HttpResponse('error setAlist')
@@ -788,9 +813,10 @@ def updateSchedule(request):
 		        if cInven.setSEtime() == 1:
 			    return HttpResponse('error setSEtime')
 		        
-                        cInven.setWeek1(unloadSidList, iid)     
+                        cInven.setWeek1(unloadSidList, iid) 
+    
                 elif option == '0':
-                    Inventory.objects.filter(id=iid).update(snum = snum, alist=alist, anamelist = anamelist_inven, slist=slist_temp3, stime = stime, etime = etime, carnum = carnum)
+                    Inventory.objects.filter(id=iid).update(snum = snum, alist=alist, anamelist = anamelist_inven, slist=slist_temp3, stime = stime, etime = etime, carnum = carnum, req = p_memo, memo = memo)
 
 		    unloadSidList = getUnloadSid(iid)
 
@@ -813,7 +839,7 @@ def updateSchedule(request):
 
                 academy = Academy.objects.filter(bid=bid)
 
-                return render_to_response('supdateSchedule.html',{"area":area,"branch":branch,"searchTime":searchTime,"academy":academy,"day":day,"carlist": carlist,"carnum":carnum,"bid":bid,"areaid": areaid,"week": week,"contacts":contacts,'user':request.user})
+                return render_to_response('supdateSchedule.html',{"area":area,"branch":branch,"searchTime":searchTime,"academy":academy,"day":day,"weekdaylist":weekdaylist,"carlist": carlist,"carnum":carnum,"bid":bid,"areaid": areaid,"week": week,"contacts":contacts,'user':request.user})
 
         #update -> 0 delete inventory, stable
         elif update == '0':
@@ -876,7 +902,7 @@ def updateSchedule(request):
             #redirect
             academy = Academy.objects.filter(bid=bid)
 
-            return render_to_response('supdateSchedule.html',{"area":area,"branch":branch,"searchTime":searchTime,"academy":academy,"day":day,"carlist": carlist,"carnum": int(carnum),"bid":bid,"areaid": areaid,"week": week,"contacts":contacts,'user':request.user})
+            return render_to_response('supdateSchedule.html',{"area":area,"branch":branch,"searchTime":searchTime,"academy":academy,"day":day,"weekdaylist":weekdaylist,"carlist": carlist,"carnum": int(carnum),"bid":bid,"areaid": areaid,"week": week,"contacts":contacts,'user':request.user})
 
 
 @csrf_exempt
@@ -892,7 +918,6 @@ def acaUpdateSchedule(request):
             bid = int(request.GET.get('bid'))
             aid = int(request.GET.get('aca'))
             week = request.GET.get('week')
-            
 
             academy = Academy.objects.filter(bid=bid)
             branch = Branch.objects.filter(areaid = areaid)
@@ -953,10 +978,14 @@ def acaUpdateSchedule(request):
             raid = int(request.POST.get('aca'))
             areaid = int(request.POST.get('areaid'))
             bid = int(request.POST.get('bid'))
-            carnum = request.POST.get('carnum')
             carlist = Car.objects.filter(branchid=bid)
             alist = request.POST.getlist('alist[]')
             option = request.POST.get('option')
+            p_memo = request.POST.get('pMemo')
+            memo = request.POST.get('memo')
+           
+            temp_carnum = request.POST.get('changeCar')
+            carnum = int(temp_carnum.split('/')[1])
 
             #searchTime,day,area,branch for inventory searching and redirection
             searchTime = request.POST.get('searchTime')
@@ -990,7 +1019,7 @@ def acaUpdateSchedule(request):
             comment = 'carnum: ' + str(carnum) + ', day: ' + str(day) +', stime: '+ str(time[0])+ ', week: ' + str(week) + ' update'
             set_audit(comment, 'update', request.user)
 
-            uInven = UpdateInven(bid, carnum, day, req, time,stime, etime, addr, name, name2, load, sid, week, alist, snum, anamelist_inven, slist_temp3)
+            uInven = UpdateInven(bid, carnum, day, req, time,stime, etime, addr, name, name2, load, sid, week, alist, snum, anamelist_inven, slist_temp3,p_memo,memo)
 
             if week == 1:
                 eInven_index = checkEditedInven(iid, week)
@@ -1003,7 +1032,8 @@ def acaUpdateSchedule(request):
 
                     academy = Academy.objects.filter(bid=bid)
                     contacts = getContacts(bid, day, carnum, week, searchTime,aid)
-
+                    
+                    branch = Branch.objects.filter(areaid = areaid)
                     return render_to_response('acaUpdateSchedule.html',{"area":area,"branch":branch,"searchTime":searchTime,"carlist":carlist, "academy":academy,"day":day,"carnum":carnum,"aid":raid,"bid":bid,"areaid": areaid,"week": week,"contacts":contacts,'user':request.user})
 
 
@@ -1011,15 +1041,15 @@ def acaUpdateSchedule(request):
                 elif eInven_index == 1:
                     inven = Inventory.objects.get(id = iid)
 
-                    ei1 = EditedInven(iid = inven , carnum = carnum, bid = bid, snum = snum, day = day, alist = alist, anamelist= anamelist_inven, slist=slist_temp3, stime = stime, etime = etime, week = week)
+                    ei1 = EditedInven(iid = inven , carnum = carnum, bid = bid, snum = snum, day = day, alist = alist, anamelist= anamelist_inven, slist=slist_temp3, stime = stime, etime = etime, req = p_memo, memo = memo, week = week)
                     ei1.save()
                     e1iid = ei1.id
 
-                    ei2 = EditedInven(iid = inven , carnum = carnum, bid = bid, snum = snum, day = day, alist = alist, anamelist= anamelist_inven, slist=slist_temp3, stime = stime, etime = etime, week = 2)
+                    ei2 = EditedInven(iid = inven , carnum = carnum, bid = bid, snum = snum, day = day, alist = alist, anamelist= anamelist_inven, slist=slist_temp3, stime = stime, etime = etime, req = p_memo, memo = memo, week = 2)
                     ei2.save()
                     e2iid = ei2.id
 
-                    ei3 = EditedInven(iid = inven , carnum = carnum, bid = bid, snum = snum, day = day, alist = alist, anamelist= anamelist_inven, slist=slist_temp3, stime = stime, etime = etime, week = 3)
+                    ei3 = EditedInven(iid = inven , carnum = carnum, bid = bid, snum = snum, day = day, alist = alist, anamelist= anamelist_inven, slist=slist_temp3, stime = stime, etime = etime,req = p_memo, memo = memo, week = 3)
                     ei3.save()
                     e3iid = ei3.id
 
@@ -1044,7 +1074,7 @@ def acaUpdateSchedule(request):
 
                     academy = Academy.objects.filter(bid=bid)
                     contacts = getContacts(bid, day, carnum, week, searchTime, aid) 
-
+                    branch = Branch.objects.filter(areaid = areaid)
                     return render_to_response('acaUpdateSchedule.html',{"area":area,"branch":branch,"searchTime":searchTime,"carlist":carlist,"academy":academy,"day":day,"carnum":carnum,"aid":raid,"bid":bid,"areaid": areaid,"week": week,"contacts":contacts,'user':request.user})
 
             elif week == 2:
@@ -1059,7 +1089,7 @@ def acaUpdateSchedule(request):
                     contacts = getContacts(bid, day, carnum, week, searchTime, aid)
 
                     academy = Academy.objects.filter(bid=bid)
-
+                    branch = Branch.objects.filter(areaid = areaid)
                     return render_to_response('acaUpdateSchedule.html',{"area":area,"branch":branch,"searchTime":searchTime,"carlist":carlist,"academy":academy,"day":day,"carnum":carnum,"aid":raid,"bid":bid,"areaid": areaid,"week": week,"contacts":contacts,'user':request.user})
 
 
@@ -1067,11 +1097,11 @@ def acaUpdateSchedule(request):
                 elif eInven_index == 1:
                     inven = Inventory.objects.get(id = iid)
 
-                    ei2 = EditedInven(iid = inven , carnum = carnum, bid = bid, snum = snum, day = day, alist = alist, anamelist= anamelist_inven, slist=slist_temp3, stime = stime, etime = etime, week = 2)
+                    ei2 = EditedInven(iid = inven , carnum = carnum, bid = bid, snum = snum, day = day, alist = alist, anamelist= anamelist_inven, slist=slist_temp3, stime = stime, etime = etime, req = p_memo, memo = memo, week = 2)
                     ei2.save()
                     e2iid = ei2.id
 
-                    ei3 = EditedInven(iid = inven , carnum = carnum, bid = bid, snum = snum, day = day, alist = alist, anamelist= anamelist_inven, slist=slist_temp3, stime = stime, etime = etime, week = 3)
+                    ei3 = EditedInven(iid = inven , carnum = carnum, bid = bid, snum = snum, day = day, alist = alist, anamelist= anamelist_inven, slist=slist_temp3, stime = stime, etime = etime, req = p_memo, memo = memo, week = 3)
                     ei3.save()
                     e3iid = ei3.id
 
@@ -1095,7 +1125,7 @@ def acaUpdateSchedule(request):
 
                     academy = Academy.objects.filter(bid=bid)
                     contacts = sorted(contacts, key=lambda x: x.stime,reverse=False)
-
+                    branch = Branch.objects.filter(areaid = areaid)
                     return render_to_response('acaUpdateSchedule.html',{"area":area,"branch":branch,"searchTime":searchTime,"carlist":carlist,"academy":academy,"day":day,"carnum":carnum,"aid":raid,"bid":bid,"areaid": areaid,"week": week,"contacts":contacts,'user':request.user})
 
 
@@ -1111,7 +1141,7 @@ def acaUpdateSchedule(request):
                     contacts = getContacts(bid, day, carnum, week, searchTime, aid)
 
                     academy = Academy.objects.filter(bid=bid)
-
+                    branch = Branch.objects.filter(areaid = areaid)
                     return render_to_response('acaUpdateSchedule.html',{"area":area,"branch":branch,"searchTime":searchTime,"carlist":carlist,"academy":academy,"day":day,"carnum":carnum,"aid":raid,"bid":bid,"areaid": areaid,"week": week,"contacts":contacts,'user':request.user})
 
 
@@ -1119,7 +1149,7 @@ def acaUpdateSchedule(request):
                 elif eInven_index == 1:
                     inven = Inventory.objects.get(id = iid)
 
-                    ei3 = EditedInven(iid = inven , carnum = carnum, bid = bid, snum = snum, day = day, alist = alist, anamelist= anamelist_inven, slist=slist_temp3, stime = stime, etime = etime, week = 3)
+                    ei3 = EditedInven(iid = inven , carnum = carnum, bid = bid, snum = snum, day = day, alist = alist, anamelist= anamelist_inven, slist=slist_temp3, stime = stime, etime = etime, req = p_memo, memo = memo, week = 3)
                     ei3.save()
                     e3iid = ei3.id
                     
@@ -1133,7 +1163,7 @@ def acaUpdateSchedule(request):
                     contacts = getContacts(bid, day, carnum, week, searchTime, aid)
 
                     academy = Academy.objects.filter(bid=bid)
-
+                    branch = Branch.objects.filter(areaid = areaid)
                     return render_to_response('acaUpdateSchedule.html',{"area":area,"branch":branch,"searchTime":searchTime,"carlist":carlist,"academy":academy,"day":day,"carnum":carnum,"aid":raid,"bid":bid,"areaid": areaid,"week": week,"contacts":contacts,'user':request.user})
             
             else:
@@ -1145,10 +1175,11 @@ def acaUpdateSchedule(request):
                 inven.stime = stime 
                 inven.etime = etime 
                 inven.carnum = carnum
+                inven.req = p_memo
+                inven.memo = memo
                 inven.save()
 
                 if option == '1':
-
                     unloadSidList = getUnloadSid(iid)
 
                     #delete stable before updateing stable
@@ -1164,9 +1195,9 @@ def acaUpdateSchedule(request):
                     else:
                         if not alist:
                             alist = 0
-			    cInven = CreateInven(bid, carnum, day,req, time, addr, name, name2, load, sid, week, alist)
+			    cInven = CreateInven(bid, carnum, day, time, addr, name, name2, load, sid, week, alist, p_memo, memo)
 		        if alist != None:
-			    cInven = CreateInven(bid, carnum, day, req, time, addr, name, name2, load, sid, week, alist)
+			    cInven = CreateInven(bid, carnum, day, time, addr, name, name2, load, sid, week, alist, p_memo, memo)
 		        
                         if cInven.setAlist == 1:
 		            return HttpResponse('error setAlist')
@@ -1180,7 +1211,7 @@ def acaUpdateSchedule(request):
                         cInven.setWeek1(unloadSidList, iid) 
                 
                 elif option == '0':
-                    Inventory.objects.filter(id=iid).update(snum = snum, alist=alist, anamelist = anamelist_inven, slist=slist_temp3, stime = stime, etime = etime, carnum = carnum)
+                    Inventory.objects.filter(id=iid).update(snum = snum, alist=alist, anamelist = anamelist_inven, slist=slist_temp3, stime = stime, etime = etime, carnum = carnum, req = p_memo, memo = memo)
 
 		    unloadSidList = getUnloadSid(iid)
 
@@ -1197,7 +1228,7 @@ def acaUpdateSchedule(request):
                 contacts = []
 
                 contacts = getContacts(bid, day, carnum, week, searchTime, aid)
-
+                branch = Branch.objects.filter(areaid = areaid)
                 return render_to_response('acaUpdateSchedule.html',{"area":area,"searchTime":searchTime,"week":week,"day":day,"carlist":carlist,"branch":branch,"academy":academy,"areaid": areaid,"aid":raid,"bid":bid, "contacts":contacts,'user':request.user})
 
         #update -> 0 delete inventory, stable
@@ -1260,7 +1291,7 @@ def acaUpdateSchedule(request):
             contacts = getContacts(bid, day, carnum, week, searchTime, aid) 
 
             academy = Academy.objects.filter(bid=bid)
-
+            branch = Branch.objects.filter(areaid = areaid)
             return render_to_response('acaUpdateSchedule.html',{"area":area,"searchTime":searchTime,"carlist":carlist,"week":week,"day":day,"branch":branch,"academy":academy,"areaid": areaid,"aid":raid,"bid":bid, "contacts":contacts,'user':request.user})
 
 @csrf_exempt
@@ -1468,19 +1499,43 @@ def reqInventory(request):
         req = request.POST.get('req')
         memo = request.POST.get('memo')
         flag = request.POST.get('flag')
+        wflag = request.POST.get('weeklyFlag')
+        week = request.POST.get('week')
 
         if flag == '0':
-            inven = Inventory.objects.get(id=iid)
-            inven.req = req
-            inven.memo = memo
-            inven.save()
+            if wflag == '1':
+                try:
+                    eInven = EditedInven.objects.filter(iid_id = iid)
+                    for ei in eInven:
+                        ei.req = req
+                        ei.memo = memo
+                        ei.save()
+                     
+                except:
+                    pass
+
+            inven = Inventory.objects.filter(id=iid).update(req = req, memo = memo)
 
         elif flag == '1':
-            eInven = EditedInven.objects.get(id = iid)
-            eInven.req = req
-            eInven.memo = memo
-            eInven.save()
+            if wflag == '1':
+                inven_id = EditedInven.objects.get(id = iid).iid_id
 
+                if week == '1':
+                    eInven = EditedInven.objects.filter(iid_id = inven_id)
+                    for ei in eInven:
+                        ei.req = req
+                        ei.memo = memo
+                        ei.save()
+                    
+                elif week == '2':
+                    eInven = EditedInven.objects.filter(iid_id = inven_id).exclude(week = 1)
+                    for ei in eInven:
+                        ei.req = req
+                        ei.memo = memo
+                        ei.save()
+            else:
+                EditedInven.objects.filter(id = iid).update(req = req, memo = memo)
+            
         return HttpResponse(req)
 
 def setRealtimeLocation(request):
@@ -1561,19 +1616,58 @@ def getRealtimeLocation(request):
 def moveCarInven(request):
     if request.method == 'POST':
         iid = request.POST.get('iid')
-        carname = request.POST.get('carname')
-        Inventory.objects.filter(id = iid).update(carnum = carname)
+        carnum = request.POST.get('carname')
+        flag = request.POST.get('flag')
 
-    return HttpResponse(carname)
+        if flag == 'all':
+            try:
+                Inventory.objects.filter(id = iid).update(carnum = carnum)
+            except Inventory.DoesNotExist:
+                pass
+
+            try:
+                eInven = EditedInven.objects.filter(iid_id = iid)
+                for e in eInven:
+                    e.carnum = carnum
+                    e.save()
+ 
+            except EditedInven.DoesNotExist:
+                pass
+            
+        else:
+            Inventory.objects.filter(id = iid).update(carnum = carnum)
+
+    return HttpResponse(carnum)
 
 @csrf_exempt
 def moveCarEditedInven(request):
     if request.method == "POST":
         iid = request.POST.get('iid')
         carname = request.POST.get('carname')
+        flag = request.POST.get('flag')
+        week = request.POST.get('week')
 
-        EditedInven.objects.filter(id = iid).update(carnum = carname)
+        if flag == 'all':
+            try:
+                eInven = EditedInven.objects.get(id = iid)
+                iid_id = eInven.iid_id
+            except EditedInven.DoesNotExist:
+                pass
+           
+            try:
+                if week == '1':
+                    eInven = EditedInven.objects.filter(iid_id = iid_id).update(carnum = carname)
+                elif week == '2':
+                    eInven = EditedInven.objects.filter(iid_id = iid_id).exclude(week = 1).update(carnum = carname)
 
+            except EditedInven.DoesNotExist:
+                pass
+        else:
+            try:
+                EditedInven.objects.filter(id = iid).update(carnum = carname)
+            except EditedInven.DoesNotExist:
+                pass
+    
     return HttpResponse(carname)
 
 @csrf_exempt

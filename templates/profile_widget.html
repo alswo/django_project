@@ -1,0 +1,16 @@
+{# auth_button_widget.html #}
+<div class="col-md-2">
+<label>BRANCH:</label>
+<select class="form-control" form="searchform" id="branchSelected">
+        <option vlaue="default" selected>지점선택</option>
+    {% for b in bid %}
+        <option value="{{b.id}}">{{b.bname}}</option>
+    {% endfor %}
+</select>
+</div>
+<div class="col-md-2">
+  <label>ACADEMY:</label>
+  <select class="form-control" form="searchform" placeholder='학원' id="academyStuInfo">
+
+  </select>
+</div>

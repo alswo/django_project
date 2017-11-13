@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% load bitwise_tags %}
+{% block content %}
+<style>
+   tfoot {
+   display: table-header-group;
+
+  }
+
+</style>
+<DIV class="row">
+   <DIV class="col-md-12">
+      <DIV class="table-reponsive">
+         <table id="academybillingListTable" class="display" width = "100%" style="table-layout:fixed">
+            <tfoot>
+               <th>학원 </th>
+               <th>청구 월 </th>
+               <th>청구 금액 </th>
+               <th>결제 일 </th>
+               <th>결제 은행 </th>
+							 <th>전화번호 </th>
+            </tfoot>
+         </table>
+      </DIV>
+   </DIV>
+</DIV>
+<SCRIPT>
+   var dataSet = [
+   	{% for billinghistorys in billinghistory %}
+   	[ "{{aca_name_dict|get_item:billinghistorys.academy_id}}",
+                          "{{billinghistorys.month}}",
+                          "{{billinghistorys.billing_amount}}",
+                          "{{billinghistorys.billing_il}}",
+                          "{{billinghistorys.billing_bank}}",
+													"{{aca_phone_dict|get_item:billinghistorys.academy_id}}",
+
+   ],
+   	{% endfor %}
+   ];
+
+   $(document).ready(function() {
+   	$('#academybillingListTable tfoot th').each( function () {
+       var title = $(this).text();
+       $(this).html('<input type="text" size="15" placeholder="'+title+'검색" />' );
+   				} );
+
+   	var table = $('#academybillingListTable').DataTable({
+   		data : dataSet,
+      columns : [
+                  { title : "학원" },
+		   						{ title : "청구 월" },
+		   						{ title : "청구 금액" },
+		   						{ title : "결제 일" },
+		   						{ title : "결제 은행" },
+									{ title : "전화번호" },
+   					],
+            "order": [
+         				 [1, 'desc'],
+                     ]
+   	});
+
+   	 table.columns().every( function () {
+
+   	     var that = this;
+   	     $( 'input', this.footer() ).on( 'keyup change', function () {
+   	         if ( that.search() !== this.value ) {
+   	             that
+   	                 .search( this.value )
+   	                 .draw();
+   	         }
+   	     } );
+   	 } );
+   });
+
+</SCRIPT>
+{% endblock content %}

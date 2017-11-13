@@ -4,7 +4,7 @@ from tayo.celery import app
 from schedule.models import Inventory,ScheduleTable,HistoryScheduleTable, EditedInven, EditedScheduleTable
 from passenger.models import StudentInfo, Academy, ShuttleSchedule, ScheduleDate
 from passenger.dateSchedule import timeToDate
-from schedule.models import Inventory, ScheduleTable, EditedInven, EditedScheduleTable
+from schedule.models import Inventory, ScheduleTable, EditedInven, EditedScheduleTable, TodayLoadTimeLog
 import sys
 import requests
 import simplejson
@@ -20,10 +20,28 @@ def get_offmember_list(tflag, slist):
 
 	return ret
 
+def get_offmember_list_today_click(tflag, slist, stableid, ymd):
+	ret = []
+	for idx, t in enumerate(tflag):
+		if t == 1:
+			try:
+				todayloadtimelog = TodayLoadTimeLog.objects.filter(stable__id=stableid, sid__id=slist[idx]).last()
+			except TodayLoadTimeLog.DoesNotFound:
+				print "None [" + ymd + "] sid = " + str(slist[idx]) + ", stable_id = " + str(stableid)
+				pass
+
+			if (todayloadtimelog != None):
+				if (todayloadtimelog.reqtime > ymd + ' 00:00'):
+					ret.append(slist[idx])
+
+	return ret
+
 @app.task
 def store_historyschedule():
 	t = timeToDate()
-	dmy = t.timeToDmy()
+	store_historyschedule_func(t)
+
+def store_historyschedule_func(t):
 	ymd = t.timeToYmd()
 	d = t.timeToD()
 
@@ -47,6 +65,11 @@ def store_historyschedule():
 				for offmember in offmembers:
 					student = StudentInfo.objects.get(id=offmember)
 					hst.offmembers.add(student)
+
+				todayoffmembers = get_offmember_list_today_click(scheduletable.tflag, scheduletable.slist, scheduletable.id, ymd)
+				for todayoffmember in todayoffmembers:
+					student = StudentInfo.objects.get(id=todayoffmember)
+					hst.todayoffmembers.add(student)
 			except Exception as e:
 				print(e)
 
@@ -241,5 +264,3 @@ def resetTodayLoad():
         lenTflag = len(s.tflag)
         s.tflag = [0]*lenTflag
         s.save()
-
-

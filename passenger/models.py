@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.contrib.postgres.fields import ArrayField
-from schedule.models import Branch, Placement
+from schedule.models import Branch, Placement, Area
 from django.db import models
 from django.utils import timezone
 import datetime
@@ -15,6 +15,7 @@ class Profile(models.Model):
     user = models.OneToOneField(User, on_delete = models.CASCADE)
     bid = models.IntegerField(null=True)
     aid = models.IntegerField(null=True)
+    areaid = models.ForeignKey(Area,null=True)
     cid = models.IntegerField(null=True)
 
 @receiver(post_save, sender=User)
@@ -49,6 +50,14 @@ class Academy(models.Model):
     branch = models.ForeignKey(Branch, null=True)
     maxvehicle = models.IntegerField(default=1)
     placement = models.ForeignKey(Placement, null=True)
+    bank003 = models.CharField(max_length = 16, null = False, default = 0)
+    bank004 = models.CharField(max_length = 16, null = False, default = 0)
+    bank011 = models.CharField(max_length = 16, null = False, default = 0)
+    bank020 = models.CharField(max_length = 16, null = False, default = 0)
+    bank027 = models.CharField(max_length = 16, null = False, default = 0)
+    bank071 = models.CharField(max_length = 16, null = False, default = 0)
+    bank081 = models.CharField(max_length = 16, null = False, default = 0)
+    bank088 = models.CharField(max_length = 16, null = False, default = 0)
 
     class Meta:
         unique_together = ('bid', 'name')
@@ -153,14 +162,14 @@ class Daily(models.Model):
 
 class ShuttleSchedule(models.Model):
     #aca = Academy.objects.all()
-    grp = Group.objects.all()
+    #grp = Group.objects.all()
 
     GID = ()
     #ACA = ()
     #ACA_2 = ()
 
-    for g in grp:
-        GID = GID + ((g.gid, g.gname),)
+    #for g in grp:
+        #GID = GID + ((g.gid, g.gname),)
 
     #for a in aca:
         #ACA = ACA + ((a.id, a.name),)
@@ -188,14 +197,14 @@ class PersonalInfo(models.Model):
 
 class StudentInfo(models.Model):
     aid = models.ForeignKey('Academy', null=True)
-    bid = models.IntegerField()
-    aname = models.CharField(max_length = 20)
-    bname = models.CharField(max_length = 20)
+    #bid = models.IntegerField()
+    #aname = models.CharField(max_length = 20)
+    #bname = models.CharField(max_length = 20)
     sname = models.CharField(max_length = 10)
-    grade = models.IntegerField(null = True, blank = True)
-    phone1 = models.IntegerField()
-    phonelist = ArrayField(models.IntegerField(null = True, blank = True,default=0),default=0)
-    pin_number = models.CharField(max_length = 20, default=uuid.uuid4().hex[:10].upper())
+    #grade = models.IntegerField(null = True, blank = True)
+    #phone1 = models.IntegerField()
+    #phonelist = ArrayField(models.IntegerField(null = True, blank = True,default=0),default=0)
+    #pin_number = models.CharField(max_length = 20, default=uuid.uuid4().hex[:10].upper())
     deleted_date = models.DateField(null=True)
     personinfo = models.ForeignKey(PersonalInfo, null=True)
     parents_phonenumber = models.CharField(max_length=15, null = True)
@@ -211,7 +220,7 @@ class StudentInfo(models.Model):
     sended_time = models.CharField(max_length = 20, null = True)
 
     def __unicode__(self):
-        return u"{0} // {1} // {2} // {3} // {4}".format(self.bname,self.aname,self.sname,self.grade,self.phone1)
+        return u"{0} // {1} // {2}".format(self.aid.bname,self.aid.name,self.sname)
 
 class AcademySchedule(models.Model):
     gid = models.IntegerField()
@@ -250,3 +259,14 @@ class Community(models.Model):
     likeuserid = ArrayField(models.IntegerField(null=True,default=0))
     disuser = ArrayField(models.CharField(null=True,max_length=30,default=''))
     likeuser = ArrayField(models.CharField(null=True,max_length=30,default=''))
+
+class BillingHistory(models.Model):
+
+     academy = models.ForeignKey(Academy)
+     month = models.CharField(max_length = 8, null=True)
+     billing_amount = models.IntegerField(null=True)
+     billing_il = models.CharField(max_length = 8, null=True)
+     billing_bank = models.CharField(max_length = 8, null=True)
+
+     class Meta:
+         unique_together = ('academy', 'month')

@@ -10,12 +10,12 @@
     <div class="row">
         <div class="col-xs-2 col-sm-4"></div>
         <div class="col-xs-8 col-md-4">
-            {% if user.is_staff or user|in_group:"academy" or user|in_group:"driver"%}
+            {% if user.profile.aid == 3 %}
             <div class="dropdown">
                 <button id="dLabel" type="button" class="btn btn-success btn-lg btn-block" data-toggle="dropdown" aria-expanded="true">학원별 스케줄 보기</button>
                 <ul class="dropdown-menu" aria-labelledby="dLabel">
                     {% for academy in academies %}
-		    {% if academy.name != 'primo' and academy.name != '에뚜알' and academy.name != '헬로아트' %}
+		    {% if academy.name == '프리모음악학원' %}
                     {% if user.first_name = academy.name %}
                     <li>
                         <a onclick="getDay({{academy.id}})">{{academy.name}}</a>
@@ -33,58 +33,67 @@
             <br>
             {% endif %}
             <div class="dropdown">
-                <button id="dLabel" type="button" class="btn btn-danger btn-lg btn-block" aria-expanded="true" onclick="location.href='community'">불편 사례 보기</button>
+                <button id="dLabel" type="button" class="btn btn-success btn-lg btn-block" aria-expanded="true" onclick="location.href='notice'">공지사항</button>
             </div>
             <br>
-            {% if user.is_staff or user|in_group:"driver" %}
+            {% if user.profile.aid == 3 %}
             <div class="dropdown">
                 <button id="dLabel" type="button" class="btn btn-success btn-lg btn-block" data-toggle="dropdown" aria-expanded="true">기사님용 스케줄 보기</button>
                 <ul class="dropdown-menu" aria-labelledby="dLabel">
                     {% for d in driver %}
+                    {% if d.gid == 1 %}
                     <li>
                         <a onclick="getDayDriver({{d.gid}})">{{ d.gname }} {{d.bname}}</a>
                     </li>
+                    {% endif %}
                     {% endfor %}
                 </ul>
             </div>
             <br>
             {% endif %}
-            {% if user.is_staff %}
+<!--            {% if user.is_staff %}
             <button id="dLabel" type="button" class="btn btn-success btn-lg btn-block" data-toggle="dropdown" aria-expanded="true" onclick="location.href='dateSchedule?what=single'">지난 스케줄 보기</button>
             <br>
             {% endif %}
-            {% if user.is_staff %}
+          {% if user.username == 'cco' %}
             <div class="dropdown">
                 <button id="dLabel" type="button" class="btn btn-success btn-lg btn-block" data-toggle="dropdown" aria-expanded="true">호차별 스케줄 관리</button>
                 <ul class="dropdown-menu" aria-labelledby="dLabel">
                     {% for d in driver %}
+                    {% if d.gid == 1 %}
                     <li>
                         <a onclick="updateDay({{d.gid}})">{{ d.gname }} {{d.bname}}</a>
                     </li>
+                    {% endif %}
                     {% endfor %}
                 </ul>
             </div>
             <br>
             {% endif %}
-            {% if user.is_staff %}
+-->
+            {% if user.username == 'primo' %}
             <div class="dropdown">
                 <button id="dLabel" type="button" class="btn btn-success btn-lg btn-block" data-toggle="dropdown" aria-expanded="true">학원별 스케줄 관리</button>
                 <ul class="dropdown-menu" aria-labelledby="dLabel">
                     {% for academy in academies %}
+                    {% if academy.id == 3 %}
                     <li>
                         <a onclick="updateDayAca({{academy.id}})">{{academy.name}}</a>
                     </li>
+                    {% endif %}
                     {% endfor %}
                 </ul>
             </div>
             <br>
             {% endif %}
+<!--
             {% if user.is_staff %}
             <div class="dropdown">
                 <button id="dLabel" type="button" class="btn btn-info btn-lg btn-block" data-toggle="dropdown" aria-expanded="true" onclick="studata()">학원별 학생 데이터관리(Beta)</button>
             </div>
             <br>
             {% endif %}
+-->
             {% if user.is_staff %}
             <div class="dropdown">
                 <button id="dLabel" type="button" class="btn btn-primary btn-lg btn-block" data-toggle="dropdown" aria-expanded="true">PUT SCHEDULE</button>
@@ -160,11 +169,7 @@
                     </div>
                 </div>
             </div>
-            <br>
-            <div class="dropdown">
-                <button id="dLabel" type="button" class="btn btn-primary btn-lg btn-block" aria-expanded="true" onclick="location.href='getBilling'">학원별 청구서 보기</button>
-            </div>
-            <br>
+
             {% endif %}
             <!--{% if user.is_staff %}
             <button id="dLabel" type="button" class="btn btn-warning btn-lg btn-block" data-toggle="dropdown" aria-expanded="true" onclick="location.href='sturegi'">신입생 등록요청(테스트중)</button>
@@ -303,13 +308,18 @@
         }
 
         function getDriButton(t, bid){
+
+
+
             $.ajax({
                 type: 'GET',
                 url: 'getDriButton',
                 data: {
-                    bid: bid
+                    bid: bid,
+
                   },
                 success: function(resp) {
+                    
                     $('#driverspecific').html(resp)
                }
              });

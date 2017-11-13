@@ -1,4 +1,4 @@
-<html> 
+<html>
 <head>
   {% load staticfiles %}
   <script src="{% static 'js/jquery-1.10.2.js' %}"></script>
@@ -72,7 +72,7 @@
             </div>
             <div class="col-md-4">
               <label>DAY:</label>
-              <br> 
+              <br>
               {% for weekday in weekdaylist %}
               <div class="checkbox-inline">
                 <label><input type="checkbox" id="{{contact.id}}gid" form="scheduleform" name="day[]" value="{{weekday}}" {% if day == weekday %}checked{%endif%}>{{weekday}}</label>
@@ -101,9 +101,18 @@
         <br><br><br><br><br><br>
       </div>
       <br><br><br><br><br><br><br><br><br><br>
+      <br>
       <div class="table-container">
-        <p>요청사항</p>
-        <textarea class="form-control" rows="4" name="req" form="scheduleform"></textarea>
+        <div class="row">
+          <div class="col-md-6">
+            동승자분과 공유 메모
+            <textarea class="form-control" name="pMemo" rows="4" form='scheduleform'></textarea>
+          </div>
+          <div class="col-md-6">
+            내 메모
+            <textarea class="form-control" rows="4" name="memo" form='scheduleform'></textarea>
+          </div>
+        </div>
         <br>
         <table class="table table-bordered table-schedule">
           <thead>
@@ -446,7 +455,6 @@
           i++;
 
       {% endfor %}
-
     {% else %}
       for (i = 0; i < 3; i++) {
         $('.addrow').click();
@@ -550,6 +558,14 @@
     }
     sibling_sid.value = delete_sid
   });
-</script>
 
+  //등하원 첫번째 선택시 일괄 변화
+  $(document).on('change', '.loadSelect:eq(1)', function(e){
+    if($(this).val() == '0'){
+      $('.loadSelect').val('0')
+    }else if($(this).val() == '1'){
+      $('.loadSelect').val('1')
+    }
+  });
+</script>
 </html>

@@ -3,18 +3,36 @@ from django.shortcuts import render_to_response, render, redirect
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
-from passenger.models import Academy, StudentInfo, PersonalInfo
+from passenger.models import Academy, StudentInfo, PersonalInfo, BillingHistory
 from schedule.models import Branch, HistoryScheduleTable, Poi, Placement
+from django.db import connection
 from util.PhoneNumber import CleanPhoneNumber, FormatPhoneNumber
-from util.PersonalInfoUtil import compareLists, saveNewPersonInfo2
+from util.PersonalInfoUtil import compareLists, saveNewPersonInfo2, findSamePerson
 from django.utils import timezone
 import datetime
 import re
 from django.db.models import Min
 from django.db import IntegrityError, transaction
 import math
+import psycopg2
+from django.db import connection
+import calendar
+import json
+from institute.models import BillingHistorySetting
+from django.contrib.auth.models import User
+from django.http import JsonResponse
+from import_export import resources
+import xlwt
+import xlrd
+from institute.forms import XlsInputForm
+from schedule.views import getContacts
 
 # Create your views here.
+BANKCODES = ['003', '004', '011', '020', '027', '071', '081', '088']
+
+TAYO_SUCCESS = 200
+TAYO_ERROR_SAME_PERSON = 400
+TAYO_ERROR_SAVE_FAILURE = 500
 
 class BeautifyStudent :
 	def __init__(self):
@@ -24,17 +42,24 @@ class BeautifyStudent :
 		self.age = None
 		self.billing_date = None
 
+class Uncollected :
+	def __init__(self):
+		self.month = ''
+		self.billing_amount = ''
+		self.additional_charge = ''
+		self.total_charge = ''
+
 
 def compareStudents(student1, student2):
-	if (student1.bid == student2.bid and student1.sname == student2.sname):
+	if (student1.aid.bid == student2.aid.bid and student1.sname == student2.sname):
 		list1 = []
 		list1.append(student1.parents_phonenumber)
 		list1.append(student1.grandparents_phonenumber)
 		list1.append(student1.self_phonenumber)
 		list2 = []
-		list2.append(student1.parents_phonenumber)
-		list2.append(student1.grandparents_phonenumber)
-		list2.append(student1.self_phonenumber)
+		list2.append(student2.parents_phonenumber)
+		list2.append(student2.grandparents_phonenumber)
+		list2.append(student2.self_phonenumber)
 
 		if not set(list1).isdisjoint(list2):
 			return True
@@ -47,7 +72,7 @@ def setSession(request):
 	try:
 		request.session['instituteid'] = int(instituteid)
 		request.session['institute'] = Academy.objects.get(id = instituteid).name
-		
+
 	except Academy.DoesNotExist:
 		del request.session['institute']
 		del request.session['instituteid']
@@ -131,6 +156,58 @@ def updateStudentsForm(request):
 		beautifyStudent.billing_date = int(student.billing_date)
 	return render(request, 'addUpdateStudentsForm.html', {'student': beautifyStudent})
 
+def funcAddStudent(academy_name, student_name, p_number, g_number, s_number, c_number, age):
+	if academy_name:
+		academy_name.strip()
+
+	if student_name:
+		student_name.strip()
+
+	if p_number:
+		p_number = str(p_number)
+		p_number.strip()
+
+	if g_number:
+		g_number = str(g_number)
+		g_number.strip()
+
+	if s_number:
+		s_number = str(s_number)
+		s_number.strip()
+
+	if c_number:
+		c_number = str(c_number)
+		c_number.strip()
+
+	if age:
+		age = str(age)
+		age.strip()
+
+	academy = Academy.objects.get(name = academy_name)
+	parents_phonenumber = CleanPhoneNumber(p_number)
+	grandparents_phonenumber = CleanPhoneNumber(g_number)
+	self_phonenumber = CleanPhoneNumber(s_number)
+	care_phonenumber = CleanPhoneNumber(c_number)
+	birth_year = None
+	if (age):
+		birth_year = str(timezone.now().year - int(float(age)) + 1)
+
+	students = StudentInfo.objects.filter(aid = academy).filter(deleted_date__isnull=True)
+	studentinfo = StudentInfo(sname = student_name, aid = academy, parents_phonenumber = parents_phonenumber, grandparents_phonenumber = grandparents_phonenumber, self_phonenumber = self_phonenumber, care_phonenumber = care_phonenumber, birth_year = birth_year)
+
+	for student in students:
+		if findSamePerson(student, studentinfo):
+			return TAYO_ERROR_SAME_PERSON
+
+	if (studentinfo.parents_phonenumber or studentinfo.grandparents_phonenumber or studentinfo.self_phonenumber) :
+		rv = saveNewPersonInfo2(studentinfo)
+		if (rv == False):
+			return TAYO_ERROR_SAVE_FAILURE
+
+	studentinfo.save()
+
+	return TAYO_SUCCESS
+
 @csrf_exempt
 @login_required
 def addStudent(request):
@@ -138,6 +215,8 @@ def addStudent(request):
 		institute = request.session.get('institute', None)
 	else :
 		institute = request.user.first_name
+
+	academy = None
 
 	if institute:
 		try:
@@ -147,62 +226,15 @@ def addStudent(request):
 	else:
 		return render(request, 'message.html', {'msg': "학원 권한이 필요합니다.", 'redirect_url': request.META.get('HTTP_REFERER')})
 
-	bname = Branch.objects.get(id=academy.bid).bname
-	academy = Academy.objects.get(name=institute)
-	sname = request.POST.get('sname')
-	if sname:
-		sname.strip()
-	parents_phonenumber = CleanPhoneNumber(request.POST.get('parents_phonenumber'))
-	grandparents_phonenumber = CleanPhoneNumber(request.POST.get('grandparents_phonenumber'))
-	self_phonenumber = CleanPhoneNumber(request.POST.get('self_phonenumber'))
-	care_phonenumber = CleanPhoneNumber(request.POST.get('care_phonenumber'))
-	age = request.POST.get('age')
-	billing_date = request.POST.get('billing_date')
-	birth_year = None
-	if age:
-		birth_year = str(timezone.now().year - int(age) + 1)
 
-	birmon = request.POST.get('birmon')
-	birday = request.POST.get('birday')
+	rv = funcAddStudent(institute, request.POST.get('sname'), request.POST.get('parents_phonenumber'), request.POST.get('grandparents_phonenumber'), request.POST.get('self_phonenumber'), request.POST.get('care_phonenumber'), request.POST.get('age'))
+	if (rv == TAYO_ERROR_SAME_PERSON):
+		return render(request, 'message.html', {'msg': "동일한 학생이 존재합니다.", 'redirect_url': request.META.get('HTTP_REFERER')})
+	elif (rv == TAYO_ERROR_SAVE_FAILURE):
+		return render(request, 'message.html', {'msg': '학원생 추가 실패했습니다. error : Too many retry for make random pin_number', 'redirect_url': request.META.get('HTTP_REFERER')})
 
-	if (birmon and birday):
-		birthday = '%02d%02d' % (int(birmon), int(birday))
-
-	students = StudentInfo.objects.filter(bid=academy.bid, aid=academy, sname=sname)
-	studentinfo = StudentInfo(bid=academy.bid, sname=sname, bname=bname, phone1=0, aid=academy, aname=institute, parents_phonenumber=parents_phonenumber, grandparents_phonenumber=grandparents_phonenumber, self_phonenumber=self_phonenumber, care_phonenumber=care_phonenumber, birth_year=birth_year, billing_date=billing_date, phonelist=None)
-
-	# same person in the same academy
-	for student in students:
-		if compareStudents(student, studentinfo):
-			return render(request, 'message.html', {'msg': "동일한 학생이 존재합니다.", 'redirect_url': request.META.get('HTTP_REFERER')})
-
-
-	rv = True
-	# for PersonalINfo
-	# same person in another academy
-	try:
-		found = False
-		anotherStudents = StudentInfo.objects.filter(sname = studentinfo.sname, bid = studentinfo.bid)
-		for anotherStudent in anotherStudents:
-			if compareStudents(studentinfo, anotherStudent):
-				studentinfo.personinfo = anotherStudent.personinfo
-				#studentinfo.save(update_fields=['personinfo'])
-				found = True
-				break
-		if (found == False):
-			rv = saveNewPersonInfo2(studentinfo)
-
-	except StudentInfo.DoesNotExist:
-		# add PersnoalInfo if there is no record
-		rv = saveNewPersonInfo2(studentinfo)
-
-	if (rv == False):
-		return render(request, 'message.html', {'msg': '학원생 추가 실해했습니다. error : Too many retry for make random pin_number', 'redirect_url': request.META.get('HTTP_REFERER')})
-
-	studentinfo.save()
 
 	return render(request, 'message.html', {'msg': "학원생 추가 성공했습니다.", 'redirect_url': request.META.get('HTTP_REFERER')})
-	#return redirect(addStudentsForm)
 
 @csrf_exempt
 @login_required
@@ -215,14 +247,18 @@ def updateStudent(request):
 
 	student = None
 	age = None
+	noPersoninfo = False
 	try:
 		student = StudentInfo.objects.get(id=sid)
 
+		if ((not student.parents_phonenumber) and (not student.grandparents_phonenumber) and (not student.self_phonenumber)):
+			noPersoninfo = True
+
 		student.sname = request.POST.get('sname')
-		student.parents_phonenumber = request.POST.get('parents_phonenumber')
-		student.grandparents_phonenumber = request.POST.get('grandparents_phonenumber')
-		student.self_phonenumber = request.POST.get('self_phonenumber')
-		student.care_phonenumber = request.POST.get('care_phonenumber')
+		student.parents_phonenumber = CleanPhoneNumber(request.POST.get('parents_phonenumber'))
+		student.grandparents_phonenumber = CleanPhoneNumber(request.POST.get('grandparents_phonenumber'))
+		student.self_phonenumber = CleanPhoneNumber(request.POST.get('self_phonenumber'))
+		student.care_phonenumber = CleanPhoneNumber(request.POST.get('care_phonenumber'))
 		if (request.POST.get('age')):
 			age = int(request.POST.get('age'))
 			student.birth_year = str(timezone.now().year - age + 1)
@@ -231,7 +267,10 @@ def updateStudent(request):
 	except:
 		return render(request, 'message.html', {'msg': "학생 수정에 에러가 발생했습니다.", 'redirect_url': request.META.get('HTTP_REFERER')})
 
-	student.save()
+	if (noPersoninfo == True):
+		saveNewPersonInfo2(student)
+	else:
+		student.save()
 	beautifyStudent = BeautifyStudent()
 	beautifyStudent.info = student
 	beautifyStudent.age = age
@@ -267,13 +306,17 @@ def addClassForm(request):
 	return render(request, 'addClassForm.html')
 
 class TimeHistory:
-	BILLING_NORMAL = 0b0000
-	BILLING_OVERPEOPLE = 0b0001
-	BILLING_PASSENGER = 0b0010
-	BILLING_OVERTIME = 0b0100
-	BILLING_NONCHARGE = 0b1000
+	BILLING_NORMAL =         0b00000000
+	BILLING_OVERPEOPLE =     0b00000001
+	BILLING_PASSENGER =      0b00000010
+	BILLING_OVERTIME =       0b00000100
+	BILLING_NONCHARGE =      0b00001000
+	BILLING_OVERPEOPLE_10 =  0b00010000
+	BILLING_OVERPEOPLE_15 =  0b00100000
+	BILLING_OVERPEOPLE_20 =  0b01000000
 	def __init__(self):
 		self.carnum = -1
+		self.inventory_id = -1
 		self.academies = set()
 		self.scheduletable = list()
 		self.warning = False
@@ -281,6 +324,7 @@ class TimeHistory:
 		self.last_time = 0
                 self.lflag = False
 		self.studentnum = 0
+		self.msg = ''
 
 class DailyHistory:
 	def __init__(self):
@@ -307,7 +351,7 @@ def chooseBillingCode(academy, first_time, last_time, isShare, student_num, pass
 	code = 0
 	overtime = 35
 
-	if (academy.bid == 11 or academy.bid == 12):
+	if (academy.id == 62):
 		overtime = 50
 
 	if (student_num <= 0):
@@ -316,15 +360,36 @@ def chooseBillingCode(academy, first_time, last_time, isShare, student_num, pass
 	## overtime 과 overpeople 은 동시에 setting 되지 않음
 	if ((not isShare) and (last_time - first_time > overtime)):
 		code = TimeHistory.BILLING_OVERTIME | code
+	elif (student_num > 20):
+		code = TimeHistory.BILLING_OVERPEOPLE_20 | code
+	elif (student_num > 15):
+		code = TimeHistory.BILLING_OVERPEOPLE_15 | code
+	elif (student_num > 10):
+		code = TimeHistory.BILLING_OVERPEOPLE_10 | code
 	elif (student_num > 5):
 		code = TimeHistory.BILLING_OVERPEOPLE | code
 	if (passenger == True):
 		code = TimeHistory.BILLING_PASSENGER | code
 
 	if (code == 0):
-		code = TimeHistory.BILLING_NORMAL 
+		code = TimeHistory.BILLING_NORMAL
 
 	return code
+
+def setNonCharge(academy, studentNum, warning_number_set, warning_set):
+	maxvehicle = max(academy.maxvehicle, int(math.ceil(float(studentNum)/10.0)))
+	if (len(warning_number_set) > maxvehicle):
+		sorted_warning = sorted(warning_set, key=lambda timehistory: timehistory.billing_code, reverse=True)
+		for i_warning in range(maxvehicle, len(sorted_warning)):
+			sorted_warning[i_warning].warning = True
+
+# 개월차 계산
+# ex. 2017-09, 2017-03 이면 6 return
+def diffMonth(a, b):
+	(a_year, a_month) = a.split('-')
+	(b_year, b_month) = b.split('-')
+
+	return (int(a_year) * 12 + int(a_month)) - (int(b_year) * 12 + int(b_month))
 
 @csrf_exempt
 @login_required
@@ -346,25 +411,47 @@ def getHistory(request):
     if (rv != None):
         return rv
 
-    carid = 0
-
     if request.method == 'GET':
     	aid = request.GET.get('aid')
     	daterange = request.GET.get('daterange')
         startdate = request.GET.get('startdate')
         enddate = request.GET.get('enddate')
-        carid = request.GET.get('carid')
+        carids = request.GET.getlist('carid[]')
+        monthpick = request.GET.get('monthpick')
     elif request.method == 'POST':
     	aid = request.POST.get('aid')
     	daterange = request.POST.get('daterange')
         startdate = request.POST.get('startdate')
         enddate = request.POST.get('enddate')
-        carid = request.POST.get('carid')
+        carids = request.POST.getlist('carid[]')
+        monthpick = request.POST.get('monthpick')
 
-    if (carid == None or carid == 'all'):
-        carid = 0
+    billingHistorySettings = None
+    total_uncollected = 0
+    uncollectedes = []
+
+
+    if len(carids) == 0:
+        carid = 'all'
     else:
-        carid = int(carid)
+        carid = ':'.join(carids)
+
+    if (aid != None and monthpick != None):
+        academy = Academy.objects.get(id = aid)
+
+        billingHistorySettings = BillingHistorySetting.objects.filter(academy = academy, carid = carid, monthpick = monthpick)
+	uncollectedHistories = BillingHistory.objects.filter(academy = academy, billing_il__isnull = True, billing_bank__isnull = True, month__lt = monthpick.replace('-', '')).order_by('month')
+	#uncollectedHistories = BillingHistory.objects.filter(academy = academy, billing_il__isnull = True, billing_bank__isnull = True).order_by('month')
+	for u in uncollectedHistories:
+		uncollected = Uncollected()
+		uncollected.month = u.month[:4] + '-' + u.month[4:]
+		uncollected.billing_amount = "{:,}".format(u.billing_amount)
+		# 2% 연체이자, 10원단위 절사
+		additional_charge = int(u.billing_amount * 0.02 * diffMonth(monthpick, uncollected.month) / 100) * 100
+		uncollected.additional_charge = "{:,}".format(additional_charge)
+		uncollected.total_charge = "{:,}".format(u.billing_amount + additional_charge)
+		total_uncollected += u.billing_amount + additional_charge
+		uncollectedes.append(uncollected)
 
     if daterange is not None and daterange != '':
     	(startdate, enddate) = daterange.split(' - ')
@@ -380,14 +467,24 @@ def getHistory(request):
     overtime = 30
 
 
-    if aid is not None and aid != '' and startdate is not None and startdate != '' and enddate is not None and enddate != '':
-        start_date = datetime.date(*map(int, startdate.split('-')))
-        end_date = datetime.date(*map(int, enddate.split('-')))
+    if aid is not None and aid != '' and ((startdate is not None and startdate != '' and enddate is not None and enddate != '') or (monthpick is not None)):
+        if monthpick :
+            ym = monthpick.split('-')
+            tt, end = calendar.monthrange(int(ym[0]), int(ym[1]))
+            begin = '01'
+            start_date = datetime.date(*map(int, monthpick.split('-') + [begin]))
+            end_date = datetime.date(*map(int, monthpick.split('-') + [end]))
+            startdate = monthpick + '-' + str(begin)
+            enddate = monthpick + '-' + str(end)
+        else :
+            start_date = datetime.date(*map(int, startdate.split('-')))
+            end_date = datetime.date(*map(int, enddate.split('-')))
+
         total_days = (end_date - start_date).days + 1
         academy = Academy.objects.get(id=aid)
 	#aname = Academy.objects.get(pk=aid).name
 
-        if (academy.bid == 11 or academy.bid == 12):
+        if (academy.id == 62):
             overtime = 45
 
         for day_number in range(total_days):
@@ -408,6 +505,7 @@ def getHistory(request):
                     timeHistory = TimeHistory()
                     timeHistory.scheduletable = scheduletable
                     timeHistory.carnum = scheduletable[0].carnum
+                    timeHistory.inventory_id = i
                     cars.add(timeHistory.carnum)
                     index = 0
                     studentNum = 0
@@ -417,18 +515,21 @@ def getHistory(request):
                     lflag_off_count = 0
                     for schedule in scheduletable:
                         #timeHistory.studentnum += schedule.members.count()
+			currentStudentNum = 0
                         for student in schedule.members.all():
                             if student.aid != academy:
                                 sharingFlag = True
                             else:
-                                studentNum += 1
+				currentStudentNum += 1
                                 timeHistory.studentnum += 1
 				for offmember in schedule.offmembers.all():
 					if (offmember == student):
                                                 #return HttpResponse("offmember = " + str(offmember.id))
-						studentNum -= 1
+						currentStudentNum -= 1
                                 if ((student.birth_year == None) or ((datetime.datetime.now().year - int(student.birth_year) + 1) <= 13)):
                                     isPassenger = True
+
+			studentNum += currentStudentNum
 
                         if (schedule.lflag == 1):
                                 lflag_on_count += 1
@@ -438,9 +539,28 @@ def getHistory(request):
                         for aca in schedule.academies.all():
 		            timeHistory.academies.add(aca.name)
 
-                        if (index == 0):
-                            timeHistory.first_time = convertMins(schedule.time)
-                        timeHistory.last_time = convertMins(schedule.time)
+			if (single_date >= '2017-10-01'):
+                            if (index == 0):
+                                timeHistory.first_time = convertMins(schedule.time)
+			    # 등원인 경우 최초 탑승학생 스케쥴 이전 row 가 시작시간
+			    if (schedule.lflag == 1 and studentNum == 0):
+			        timeHistory.first_time = convertMins(schedule.time)
+			    # 하원인 경우 마지막 하차학생 스케쥴 row 가 끝나는 시간
+			    if (schedule.lflag == 0 and currentStudentNum > 0):
+			        timeHistory.last_time = convertMins(schedule.time)
+			    elif (schedule.lflag == 3 and lflag_on_count > lflag_off_count):
+                       	        timeHistory.lflag = True
+                                timeHistory.last_time = convertMins(schedule.time)
+			# 2017-10-01 이전 기준을 위한 legacy
+			else:
+			    if (index == 0):
+			        timeHistory.first_time = convertMins(schedule.time)
+			    timeHistory.last_time = convertMins(schedule.time)
+
+			# 2017-10-01 이전 기준을 위한 legacy
+			if (lflag_on_count > lflag_off_count):
+			    timeHistory.lflag = True
+
                         index += 1
 
                     if (lflag_on_count > lflag_off_count):
@@ -457,28 +577,42 @@ def getHistory(request):
 
             standard_h = None
             warning_set = set()
+            warning_number_set = set()
             studentNum = 0
-            for h in dailyHistory.timehistory:
+            for idx, h in enumerate(dailyHistory.timehistory):
                 fire = False
 
                 if ((standard_h == None) or (standard_h.last_time <= h.first_time)):
                     if (len(warning_set) > 0):
                         # warning 처리
                         # 학생 수가 많아서 어쩔 수 없이 차량이 많아진 경우는 maxvehicle 보다 우선시한다.
-                        maxvehicle = max(academy.maxvehicle, int(math.ceil(float(studentNum)/10.0)))
-                        if (len(warning_set) > maxvehicle):
-                            sorted_warning = sorted(warning_set, key=lambda timehistory: timehistory.billing_code, reverse=True)
-                            for i_warning in range(maxvehicle, len(sorted_warning)):
-                                sorted_warning[i_warning].warning = True 
+			setNonCharge(academy, studentNum, warning_number_set, warning_set)
+                        #if (len(warning_number_set) > maxvehicle):
+                            #sorted_warning = sorted(warning_set, key=lambda timehistory: timehistory.billing_code, reverse=True)
+                            #for i_warning in range(maxvehicle, len(sorted_warning)):
+                                #sorted_warning[i_warning].warning = True
                     standard_h = h
                     warning_set = set()
+                    warning_number_set = set()
                     studentNum = h.studentnum
                     if not (h.billing_code & TimeHistory.BILLING_NONCHARGE):
                         warning_set.add(h)
+                        warning_number_set.add(h.carnum)
                 else:
                     studentNum += h.studentnum
                     if not (h.billing_code & TimeHistory.BILLING_NONCHARGE):
                         warning_set.add(h)
+                        warning_number_set.add(h.carnum)
+
+		if (idx == len(dailyHistory.timehistory)-1 and (len(warning_set) > 0)):
+			setNonCharge(academy, studentNum, warning_number_set, warning_set)
+			# warning 처리
+			# 학생 수가 많아서 어쩔 수 없이 차량이 많아진 경우는 maxvehicle 보다 우선시한다.
+			#maxvehicle = max(academy.maxvehicle, int(math.ceil(float(studentNum)/10.0)))
+			#if (len(warning_number_set) > maxvehicle):
+				#sorted_warning = sorted(warning_set, key=lambda timehistory: timehistory.billing_code, reverse=True)
+				#for i_warning in range(maxvehicle, len(sorted_warning)):
+					#sorted_warning[i_warning].warning = True
 
 		#if (h.warning == True):
 			#continue
@@ -510,11 +644,30 @@ def getHistory(request):
 
 
         rem = 0
-        if (carid != 0):
+        if (len(carids) != 0):
             for dailyHistory in history:
-                dailyHistory.timehistory[:] = [x for x in dailyHistory.timehistory if x.carnum == carid]
+                dailyHistory.timehistory[:] = [x for x in dailyHistory.timehistory if str(x.carnum) in carids]
 
-    return render(request, 'getHistory.html', {"history": history, "academy" : academy, 'total_count': total_count, 'startdate': startdate, 'enddate': enddate, 'user':request.user, 'cars':sorted(cars), 'carid':carid, 'overtime':overtime})
+    cur_year = datetime.datetime.now().year
+    cur_month = datetime.datetime.now().month
+    monthpick_range = [
+        '{}-{:0>2}'.format(year, month)
+            for year in xrange(2016, cur_year+1)
+            for month in xrange(1, 12+1)
+            if not (year == cur_year and month > cur_month)
+    ]
+
+    if (monthpick) :
+        lastmonth = monthpick
+    else :
+        if (cur_month > 1):
+            lastmonth = '{}-{:0>2}'.format(cur_year, cur_month - 1)
+        else:
+            lastmonth = '{}-{:0>2}'.format(cur_year - 1, 12)
+
+
+
+    return render(request, 'getHistory.html', {"history": history, "academy" : academy, 'total_count': total_count, 'startdate': startdate, 'enddate': enddate, 'user':request.user, 'cars':sorted(cars), 'carids':carids, 'carid':carid, 'overtime':overtime, 'monthpick_range': monthpick_range, 'lastmonth': lastmonth, "billingHistorySettings": billingHistorySettings, 'uncollectedes': uncollectedes, 'total_uncollected': "{:,}".format(total_uncollected)})
 
 
 @login_required
@@ -542,9 +695,38 @@ def updateAcademyForm(request):
 @login_required
 def addAcademy(request):
 	redirect_url = request.META.get('HTTP_REFERER', 'http://' + request.META.get('SERVER_NAME') + '/institute/listStudents')
-
+        cursor = connection.cursor()
 	if not request.user.is_staff :
 		return render(request, 'message.html', {'msg': "staff 권한이 필요합니다.", 'redirect_url': redirect_url})
+
+	try:
+	    cursor.execute("SELECT acct_no  FROM vacs_vact WHERE bank_cd = %s AND acct_st = %s", ['003','0'])
+	    giup = cursor.fetchone()
+
+	    cursor.execute("SELECT acct_no  FROM vacs_vact WHERE bank_cd = %s AND acct_st = %s", ['004','0'])
+	    gukmin = cursor.fetchone()
+
+	    cursor.execute("SELECT acct_no  FROM vacs_vact WHERE bank_cd = %s AND acct_st = %s", ['011','0'])
+	    nonghyup = cursor.fetchone()
+
+	    cursor.execute("SELECT acct_no  FROM vacs_vact WHERE bank_cd = %s AND acct_st = %s", ['020','0'])
+	    woori = cursor.fetchone()
+
+	    cursor.execute("SELECT acct_no  FROM vacs_vact WHERE bank_cd = %s AND acct_st = %s", ['027','0'])
+	    city = cursor.fetchone()
+
+	    cursor.execute("SELECT acct_no  FROM vacs_vact WHERE bank_cd = %s AND acct_st = %s", ['071','0'])
+	    woochegook = cursor.fetchone()
+
+	    cursor.execute("SELECT acct_no  FROM vacs_vact WHERE bank_cd = %s AND acct_st = %s", ['081','0'])
+	    hana = cursor.fetchone()
+
+	    cursor.execute("SELECT acct_no  FROM vacs_vact WHERE bank_cd = %s AND acct_st = %s", ['088','0'])
+	    shinhan = cursor.fetchone()
+
+	except Exception, e:
+		print ("Can't call Insert", e)
+
 
 
 	bid = request.POST.get('bid')
@@ -568,10 +750,10 @@ def addAcademy(request):
 		placement = Placement.objects.get(poi = poi, alias = aname)
 	except Placement.DoesNotExist:
 		placement = Placement.objects.create(poi = poi, alias = aname, branch = branch)
-	#placement = None
+	placement = None
 
 	try:
-		Academy.objects.create(name = aname, address = address, phone_1 = phone_1, phone_2 = phone_2, bid = bid, maxvehicle = maxvehicle, placement = placement)
+		Academy.objects.create(name = aname, address = address, phone_1 = phone_1, phone_2 = phone_2, bid = bid, maxvehicle = maxvehicle, placement = placement, bank003 = giup[0].strip(), bank004 = gukmin[0].strip(), bank011 = nonghyup[0].strip(), bank020 = woori[0].strip(), bank027 = city[0].strip(), bank071 = woochegook[0].strip(), bank081 = hana[0].strip(), bank088 = shinhan[0].strip())
 	except IntegrityError as e:
 		#if 'unique constraint' in e.message:
 		msg = "중복되는 학원명입니다."
@@ -579,7 +761,26 @@ def addAcademy(request):
 		msg = "에러가 발생했습니다."
 	else:
 		msg = "학원 추가 성공했습니다."
-
+		aca_bank = Academy.objects.get(name = aname)
+		bank003 = aca_bank.bank003
+		bank004 = aca_bank.bank004
+		bank011 = aca_bank.bank011
+		bank020 = aca_bank.bank020
+		bank027 = aca_bank.bank027
+		bank071 = aca_bank.bank071
+		bank081 = aca_bank.bank081
+		bank088 = aca_bank.bank088
+		cursor.execute("UPDATE vacs_vact SET acct_st = %s, tramt_cond = %s WHERE acct_no = %s", ['1','0',bank003])
+		cursor.execute("UPDATE vacs_vact SET acct_st = %s, tramt_cond = %s WHERE acct_no = %s", ['1','0',bank004])
+		cursor.execute("UPDATE vacs_vact SET acct_st = %s, tramt_cond = %s WHERE acct_no = %s", ['1','0',bank011])
+		cursor.execute("UPDATE vacs_vact SET acct_st = %s, tramt_cond = %s WHERE acct_no = %s", ['1','0',bank020])
+		cursor.execute("UPDATE vacs_vact SET acct_st = %s, tramt_cond = %s WHERE acct_no = %s", ['1','0',bank027])
+		cursor.execute("UPDATE vacs_vact SET acct_st = %s, tramt_cond = %s WHERE acct_no = %s", ['1','0',bank071])
+		cursor.execute("UPDATE vacs_vact SET acct_st = %s, tramt_cond = %s WHERE acct_no = %s", ['1','0',bank081])
+		cursor.execute("UPDATE vacs_vact SET acct_st = %s, tramt_cond = %s WHERE acct_no = %s", ['1','0',bank088])
+                cursor.close()
+		connection.commit()
+		connection.close()
 	return render(request, 'message.html', {'msg': msg, 'redirect_url': request.META.get('HTTP_REFERER')})
 
 @csrf_exempt
@@ -589,7 +790,6 @@ def updateAcademy(request):
 
 	if not request.user.is_staff :
 		return render(request, 'message.html', {'msg': "staff 권한이 필요합니다.", 'redirect_url': redirect_url})
-
 
 	aid = request.POST.get('aid')
 	bid = request.POST.get('bid')
@@ -626,6 +826,9 @@ def updateAcademy(request):
 		academy.maxvehicle = maxvehicle
 		academy.placement = placement
 		academy.save()
+
+		#academy.placement = placement
+
 	except IntegrityError as e:
 		msg = "중복되는 학원명입니다."
 	except:
@@ -649,3 +852,245 @@ def listAcademies(request):
 
 	return render(request, 'listAcademies.html', {'academies': academies, 'branch_dict': branch_dict});
 
+def prevmonth(yearmonth):
+	arr = yearmonth.split('-')
+
+	return arr[0] + arr[1]
+
+def thismonth():
+	return "%04d%02d" % (timezone.now().year, timezone.now().month)
+
+@csrf_exempt
+@login_required
+def saveBill(request):
+	aid = request.POST.get('aid')
+	amount = request.POST.get('amount')
+	yearmonth = request.POST.get('yearmonth')
+
+	current_yearmonth = thismonth()
+	previous_yearmonth = prevmonth(yearmonth)
+
+	start_billday = current_yearmonth + "07"
+	end_billday = current_yearmonth + "15"
+
+	academy = Academy.objects.get(id = aid)
+
+
+	conn = None
+
+	with connection.cursor() as cursor:
+		try:
+			for bankcode in BANKCODES:
+				field = "bank" + bankcode
+				cursor.execute("""UPDATE vacs_vact SET tr_amt = %s, trbegin_il = %s, trend_il = %s WHERE bank_cd = %s AND acct_no = %s;""", (amount, start_billday, end_billday, bankcode, getattr(academy, field)))
+		except:
+			return HttpResponse("error occured")
+
+	obj, created = BillingHistory.objects.update_or_create(academy = academy, month = previous_yearmonth, defaults = {'billing_amount': int(amount)},)
+	#billinghistory = BillingHistory.objects.create(academy = academy, month = prevmonth, billing_amount = int(amount))
+
+	return HttpResponse("start : " + start_billday + " <> end : " + end_billday)
+
+
+@login_required
+def listAcademiesBilling(request):
+	if not request.user.is_staff :
+		msg = "staff 권한이 필요합니다."
+		return render(request, 'message.html', {'msg': msg, 'redirect_url': request.META.get('HTTP_REFERER')})
+
+
+	billinghistorys = BillingHistory.objects.all()
+	academy = Academy.objects.all()
+	aca_name_dict = {}
+	aca_phone_dict = {}
+
+	for aname in academy:
+		aca_name_dict[aname.id] = aname.name
+
+	for aphone in academy:
+		aca_phone_dict[aphone.id] = aphone.phone_1
+
+	return render(request, 'listAcademiesBilling.html', {'billinghistory': billinghistorys, 'aca_name_dict': aca_name_dict, 'aca_phone_dict': aca_phone_dict});
+
+def makeBillingHistorySettingName(billingHistorySetting):
+	return billingHistorySetting.created_time + " By " + billingHistorySetting.created_user.username + "(" + billingHistorySetting.created_user.first_name + " " + billingHistorySetting.created_user.last_name + ") " + billingHistorySetting.fix
+
+def makeBillingHistorySettingValue(billingHistorySetting):
+	return billingHistorySetting.created_time + "_" + str(billingHistorySetting.created_user_id)
+
+@csrf_exempt
+@login_required
+def saveBillingHistorySetting(request):
+	aid = request.GET.get('aid')
+	carid = request.GET.get('carid')
+	monthpick = request.GET.get('monthpick')
+	fix = request.GET.get('fix')
+
+	received_json_data = json.loads(request.body)
+
+	if (aid == None or carid == None or monthpick == None or fix == None):
+		return JsonResponse({'msg' : 'Error'})
+
+	if (fix == 'fix'):
+		fix_msg = '확정'
+	else:
+		fix_msg = '임시저장'
+
+	academy = Academy.objects.get(id = aid)
+	billingHistorySetting = BillingHistorySetting.objects.create(academy = academy, carid = carid, monthpick = monthpick, fix = fix_msg, created_user = request.user, setting = received_json_data)
+	name = makeBillingHistorySettingName(billingHistorySetting)
+	value = makeBillingHistorySettingValue(billingHistorySetting)
+
+	return JsonResponse({'msg' : 'Success', 'name' : name, 'value' : value})
+
+@login_required
+def getBillingHistorySetting(request):
+	created_time = request.GET.get('created_time')
+	created_user_id = request.GET.get('created_user_id')
+
+	try :
+		created_user = User.objects.get(id = created_user_id)
+		billingHistorySetting = BillingHistorySetting.objects.filter(created_time = created_time, created_user = created_user)
+	except User.DoesNotExist:
+		return HttpResponse("해당 히스토리의 사용자가 존재하지 않습니다.")
+	except BillingHistorySetting.DoesNotExist:
+		return HttpResponse("해당 히스토리가 존재하지 않습니다.")
+
+	return JsonResponse(billingHistorySetting[0].setting)
+
+@login_required
+def getBillingHistorySettingList(request):
+    	aid = request.GET.get('aid')
+        carid = request.GET.get('carid')
+        monthpick = request.GET.get('monthpick')
+
+	try :
+        	academy = Academy.objects.get(id = aid)
+        	billingHistorySettings = BillingHistorySetting.objects.filter(academy = academy, carid = carid, monthpick = monthpick).order_by('created_time')
+	except BillingHistorySetting.DoesNotExist:
+		return HttpResponse("해당 히스토리가 존재하지 않습니다.")
+
+	jsonObj = {}
+	jsonObj['list'] = []
+
+	for billingHistorySetting in billingHistorySettings:
+		name = makeBillingHistorySettingName(billingHistorySetting)
+		value = makeBillingHistorySettingValue(billingHistorySetting)
+		jsonObj['list'].append({'name' : name, 'value' : value})
+
+	return JsonResponse(jsonObj)
+
+@login_required
+def exportStudentList(request):
+	rv = checkAuth(request)
+	if rv != None :
+		return rv
+
+	if request.user.is_staff :
+		institute = request.session.get('institute', None)
+	else :
+		institute = request.user.first_name
+
+	response = HttpResponse(content_type='application/vnd.ms-excel')
+	response['Content-Disposition'] = 'attachment; filename="student.xls"'
+
+	workbook = xlwt.Workbook(encoding='utf-8')
+	workbook.default_style.font.height = 20 * 11 # 11pt
+
+	worksheet = workbook.add_sheet(u'학생리스트')
+
+	font_style = xlwt.easyxf('font: height 280, bold on')
+	worksheet.row(0).set_style(font_style)
+
+	studentList = StudentInfo.objects.filter(aid__name = institute).filter(deleted_date__isnull=True).order_by('sname')
+	row = 0
+	worksheet.write(row, 0, u'학원')
+	worksheet.write(row, 1, u'이름')
+	worksheet.write(row, 2, u'부모님전화번호')
+	worksheet.write(row, 3, u'조부모님전화번호')
+	worksheet.write(row, 4, u'학생전화번호')
+	worksheet.write(row, 5, u'돌봄전화번호')
+	worksheet.write(row, 6, u'나이')
+	row += 1
+	for student in studentList:
+		worksheet.write(row, 0, student.aid.name)
+		worksheet.write(row, 1, student.sname)
+		worksheet.write(row, 2, student.parents_phonenumber)
+		worksheet.write(row, 3, student.grandparents_phonenumber)
+		worksheet.write(row, 4, student.self_phonenumber)
+		worksheet.write(row, 5, student.care_phonenumber)
+		if (student.birth_year):
+			worksheet.write(row, 6, timezone.now().year - int(student.birth_year) + 1)
+		row += 1
+
+	workbook.save(response)
+
+	return response
+
+
+@login_required
+@csrf_exempt
+def importStudentList(request):
+	rv = checkAuth(request)
+
+	if request.user.is_staff :
+		institute = request.session.get('institute', None)
+	else :
+		institute = request.user.first_name
+
+	if request.method == 'POST':
+		form = XlsInputForm(request.POST, request.FILES)
+		msg = ''
+		same_person = 0
+		nrows = 0
+		if form.is_valid():
+			input_excel = request.FILES['input_excel']
+			workbook = xlrd.open_workbook(file_contents = input_excel.read(), encoding_override = 'utf8')
+			worksheet = workbook.sheet_by_index(0)
+			nrows = worksheet.nrows
+
+			for row_num in range(nrows) :
+				if (row_num != 0) :
+					values = worksheet.row_values(row_num)
+					if len(values) != 7 :
+						return render(request, 'message.html', {'msg': 'excel file 의 format 이 정상적이지 않습니다.', 'redirect_url': request.META.get('HTTP_REFERER')})
+					if (values[0] != institute) :
+						return render(request, 'message.html', {'msg': 'excel file 의 format 이 정상적이지 않습니다.', 'redirect_url': request.META.get('HTTP_REFERER')})
+
+			for row_num in range(nrows) :
+				if (row_num != 0) :
+					values = worksheet.row_values(row_num)
+					# values[0] = 학원명
+					rv = funcAddStudent(*values)
+					if (rv == TAYO_ERROR_SAME_PERSON):
+						same_person += 1
+						#return render(request, 'message.html', {'msg': str(row_num) + "번째 row : 동일한 학생이 존재합니다.", 'redirect_url': request.META.get('HTTP_REFERER')})
+					elif (rv == TAYO_ERROR_SAVE_FAILURE):
+						return render(request, 'message.html', {'msg': str(row_num) + '번째 row : 학원생 추가 실패했습니다. error : Too many retry for make random pin_number', 'redirect_url': request.META.get('HTTP_REFERER')})
+
+		if (same_person > 0):
+			msg = str(same_person) + '명의 중복 사용자가 존재합니다. '
+
+		msg += str(nrows-1-same_person) + '명의 신규 학원생 추가 성공했습니다.'
+		return render(request, 'message.html', {'msg': msg, 'redirect_url': request.META.get('HTTP_REFERER')})
+
+	return HttpResponse("Error")
+
+@login_required
+def importStudentListForm(request):
+	return render(request, 'importStudentListForm.html');
+
+@login_required
+def listSchedule(request):
+	areaid = request.GET.get('areaid')
+	branchid = request.GET.get('branchid')
+	day = request.GET.get('day')
+	week = request.GET.get('week')
+	carnum = int(request.GET.get('carnum', 0))
+	searchTime = request.GET.get('searchTime')
+
+	branch = Branch.objects.filter(id = branchid)
+
+	#contacts = getContacts(branchid, day, carnum, week, searchTime)
+	contacts = getContacts(1, '월', 1, 1, '')
+	return render(request, 'listSchedule.html', {'contacts': contacts});

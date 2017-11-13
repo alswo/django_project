@@ -46,7 +46,8 @@ function callNumber(num){
           <button type="button" class="{% if day == '수' %}btn btn-primary{% else %} btn btn-info {% endif %}" onclick="location.href='getSchedule?bid={{bid}}&aid={{aid}}&day=수'">수</button>
           <button type="button" class="{% if day == '목' %}btn btn-primary{% else %} btn btn-info {% endif %}" onclick="location.href='getSchedule?bid={{bid}}&aid={{aid}}&day=목'">목</button>
           <button type="button" class="{% if day == '금' %}btn btn-primary{% else %} btn btn-info {% endif %}" onclick="location.href='getSchedule?bid={{bid}}&aid={{aid}}&day=금'">금</button>
-          <button type="button" class="{% if day == '토' %}btn btn-primary{% else %} btn btn-info {% endif %}" onclick="location.href='getSchedule?bid={{bid}}&aid={{aid}}&day=토'">토</button></div>
+          <button type="button" class="{% if day == '토' %}btn btn-primary{% else %} btn btn-info {% endif %}" onclick="location.href='getSchedule?bid={{bid}}&aid={{aid}}&day=토'">토</button>
+        </div>
       <div class="col-md-4">
 
       </div>
@@ -209,25 +210,29 @@ function callNumber(num){
 // }
 
 function todayLoad(sid,stableid){
+    if(window.confirm('정말 적용하세요?')){
+        var btnid = sid+''+stableid
 
-    var btnid = sid+''+stableid
-
-    $.ajax({
-      url:"/inventory/todayLoad",
-      type:"POST",
-      data:{
-        sid: sid,
-        stableid: stableid,
-      },
-      success: function(data){
-          if(data == 0){
-              $("#"+btnid).attr('class','load btn btn-small btn-default dropdown-toggle')
-          }
-          else if(data == 1){
-              $("#"+btnid).attr('class','load btn btn-small btn-primary dropdown-toggle')
-          }
-      }
-    });
+        $.ajax({
+            url:"/inventory/todayLoad",                                             
+            type:"POST",
+            data:{
+                sid: sid,
+                stableid: stableid,                                                   
+            },
+            success: function(data){                                                
+                if(data == 0){                                                      
+                    $("#"+btnid).attr('class','load btn btn-small btn-default dropdown-toggle')
+                }
+                else if(data == 1){                                                 
+                    $("#"+btnid).attr('class','load btn btn-small btn-primary dropdown-toggle')
+                }
+            }
+        });
+        
+    }else{
+        return false
+    }
 }
 
 function getCarPhone(e, cid,fc){

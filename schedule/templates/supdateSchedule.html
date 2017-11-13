@@ -31,56 +31,9 @@
   <div class="col-md-2">
     <label>DAY:</label>
     <select name="day" class="form-control" form="searchform">
-      {% if day == '월' %}
-      <option value="월" selected>월</option>
-      <option value="화">화</option>
-      <option value="수">수</option>
-      <option value="목">목</option>
-      <option value="금">금</option>
-      <option value="토">토</option>
-      {% elif day == '화' %}
-      <option value="월">월</option>
-      <option value="화" selected>화</option>
-      <option value="수">수</option>
-      <option value="목">목</option>
-      <option value="금">금</option>
-      <option value="토">토</option>
-      {% elif day == '수' %}
-      <option value="월">월</option>
-      <option value="화">화</option>
-      <option value="수" selected>수</option>
-      <option value="목">목</option>
-      <option value="금">금</option>
-      <option value="토">토</option>
-      {% elif day == '목' %}
-      <option value="월">월</option>
-      <option value="화">화</option>
-      <option value="수">수</option>
-      <option value="목" selected>목</option>
-      <option value="금">금</option>
-      <option value="토">토</option>
-      {% elif day == '금' %}
-      <option value="월">월</option>
-      <option value="화">화</option>
-      <option value="수">수</option>
-      <option value="목">목</option>
-      <option value="금" selected>금</option>
-      <option value="토">토</option>
-      {% elif day == '토' %}
-      <option value="월">월</option>
-      <option value="화">화</option>
-      <option value="수">수</option>
-      <option value="목">목</option>
-      <option value="금">금</option>
-      <option value="토" selected>토</option>
-      {% else %}
-      <option value="월" selected>월</option>
-      <option value="화">화</option>
-      <option value="수">수</option>
-      <option value="목">목</option>
-      <option value="금">금</option>
-      <option value="토">토</option>
-      {% endif %}
+      {% for weekday in weekdaylist %}
+      <option value="{{weekday}}" {% if day == weekday %}selected{%endif%}>{{weekday}}</option>
+      {% endfor %}
     </select>
   </div>
   <!--<div class="col-md-3">
@@ -228,23 +181,23 @@
       <div class="row">
         <div class="col-md-4">
           동승자분과 공유 메모
-          <textarea class="form-control" style="" rows="4" id="{{c.id}}text">{{c.req}}</textarea>
+          <textarea class="form-control" style="" name="pMemo" rows="4" id="{{c.id}}text" form='scheduleform{{c.id}}'>{{c.req}}</textarea>
         </div>
         <div class="col-md-4">
           내 메모
-          <textarea class="form-control" style="" rows="4" id="{{c.id}}memo">{% if c.memo %} {{c.memo}} {% endif %} </textarea>
+          <textarea class="form-control" style="" rows="4" name="memo" id="{{c.id}}memo" form='scheduleform{{c.id}}'>{% if c.memo %}{{c.memo}}{% endif %}</textarea>
         </div>
         <div class="col-md-1">
           <br><br><br><br> {% if c.get_cname == 'editedinven' %}
-          <div class="row"><button type="button" class="btn btn-primary" onclick="reqInventory({{c.id}},1);">저장</button></div>
+          <div class="row"><button type="button" class="btn btn-primary" onclick="reqInventory({{c.id}},1,{{week}});">저장</button></div>
           {% else %}
-          <div class="row"><button type="button" class="btn btn-primary" onclick="reqInventory({{c.id}},0);">저장</button></div>
+          <div class="row"><button type="button" class="btn btn-primary" onclick="reqInventory({{c.id}},0,{{week}});">저장</button></div>
           {% endif %}
         </div>
         <div class="col-md-3">
           <ul class="list-group" style="margin:0px">
             <li class="list-group-item">
-              학원: {% for a in c.anamelist %} {{a}} | {%endfor%}
+              학원: {% for a in c.anamelist %} {{a}} | {% endfor %}
             </li>
             <li class="list-group-item">학생 수: {{c.snum}}</li>
             <li class="list-group-item">요일: {{c.day}} ( {{c.stime}} - {{c.etime}} )</li>
@@ -299,7 +252,7 @@
             </thead>
             <tbody class="table-body">
               {% if c.scheduletables %}
-              <select class="moveCarList">
+              <select class="moveCarList" name="changeCar" form='scheduleform{{c.id}}'>
                 {% for car in carlist %}
                   {% if car.carname == c.carnum %}
                     <option value="{{c.id}}/{{car.carname}}" selected>{{car.carname}}호차</option>
@@ -346,7 +299,7 @@
                 <td data-name="del" class="text-center tdstyle3"><button name="del" class="btn btn-sm btn-danger glyphicon glyphicon-remove row-remove"></button></td>
               </tr>
               {% endfor %} {% elif c.editedscheduletables %}
-              <select class="moveCarList">
+              <select class="moveCarList" name="changeCar" form='scheduleform{{c.id}}'>
                 {% for car in carlist %}
                   {% if car.carname == carnum %}
                     <option value="{{c.id}}/{{car.carname}}" selected>{{car.carname}}호차</option>
@@ -355,7 +308,7 @@
                   {% endif %}
                 {% endfor %}
               </select> &nbsp&nbsp
-              <button type="button" class="btn-sm btn-primary" value="" id="move{{c.id}}" onclick="moveCarEditedInven({{c.id}});">차량만 바꾸기</button>
+              <button type="button" class="btn-sm btn-primary" value="" id="move{{c.id}}" onclick="moveCarEditedInven({{c.id}},{{week}});">차량만 바꾸기</button>
               <br><br> {% for es in c.editedscheduletables.all %}
               <tr>
                 <td data-name="time" class="tdstyle4"><input onchange="emptyTempList();" type="text" name="time[]" placeholder="Time" class="form-control" form="scheduleform{{c.id}}" value="{{es.time}}" /></td>
@@ -419,7 +372,7 @@
         <!-- /div //-->
         <!-- br //-->
         <!-- div class="row pull-right" //-->
-        <form class="savedelete submitForm" accept-charset="" action="updateSchedule" method="post" enctype='application/json' onsubmit="return validateTableForm(this.id)" id="scheduleform{{c.id}}">
+        <form class="savedelete submitForm" action="updateSchedule" method="post" enctype='application/json' onsubmit="return validateTableForm(this.id)" id="scheduleform{{c.id}}">
           <input class="hidden" name="week" value="{{week}}" form="scheduleform{{c.id}}" />
           <input class="hidden" name="iid" value="{{c.id}}" form="scheduleform{{c.id}}" />
           <input class="hidden" name="areaid" value="{{areaid}}" form="scheduleform{{c.id}}" />
@@ -465,6 +418,8 @@
 </div>
 <br> {% endfor %}
 <script>
+  //학생리스트 리셋을 위한 글로벌 aid
+  var aid;
   $(document).on('click', '.addrow', function() {
     id = $(this).attr('id')
     console.log(id)
@@ -481,18 +436,44 @@
     )
   });
 
-  function reqInventory(iid, flag) {
-
+  function reqInventory(iid, flag,week) {
     var req = $('#' + iid + 'text').val();
     var memo = $('#' + iid + 'memo').val();
+    var weeklyFlag;
+    var week = week;
+
+    if( flag == '0'){
+      if(window.confirm('1,2,3주 전체 변경하시겠어요?')){
+        weeklyFlag = 1;
+      }else{
+        weeklyFlag = 0;
+      }
+    }
+    else if( flag == '1' && week == 1){
+      if(window.confirm('2,3주도 변경하시겠어요?')){
+        weeklyFlag = 1;
+      }else{
+        weeklyFlag = 0;
+      }
+    }
+    else if( flag == '1' && week == 2){
+      if(window.confirm('3주도 변경하시겠어요?')){
+        weeklyFlag = 1;
+      }else{
+        weeklyFlag = 0;
+      }
+    }
+
     $.ajax({
       type: 'POST',
       url: 'reqInventory',
       data: {
+        week: week,
         iid: iid,
         req: req,
         memo: memo,
         flag: flag,
+        weeklyFlag: weeklyFlag,
       },
       success: function(data) {
         $('#' + iid + 'text').val(data);
@@ -511,13 +492,22 @@
 
   function moveCarInven(contactId) {
     carname = $('#move' + contactId).val()
+    var flag;
+
+    if(window.confirm('1,2,3주 전체 변경하시겠어요?')){
+      flag = 'all';
+    }else{
+      flag = 'single';
+    }
+
     iid = contactId
     $.ajax({
       type: 'POST',
       url: 'moveCarInven',
       data: {
         iid: iid,
-        carname: carname
+        carname: carname,
+        flag : flag
       },
       success: function(data) {
         alert(data + '차량으로 이동 완료')
@@ -526,15 +516,34 @@
     });
   }
 
-  function moveCarEditedInven(contactId) {
+  function moveCarEditedInven(contactId,week) {
+    var week = week;
     carname = $('#move' + contactId).val()
     iid = contactId
+    var flag;
+
+    if( week == '1'){
+      if(window.confirm('2,3주도 변경하시겠어요?')){
+        flag = 'all';
+      }else{
+        flag = 'single';
+      }
+    }else if ( week == '2'){
+      if(window.confirm('3주도 변경하시겠어요?')){
+        flag = 'all';
+      }else{
+        flag = 'single';
+      }
+    }else{flag='single';}
+
     $.ajax({
       type: 'POST',
       url: 'moveCarEditedInven',
       data: {
         iid: iid,
-        carname: carname
+        carname: carname,
+        flag: flag,
+        week: week
       },
       success: function(data) {
         alert(data + '차량으로 이동 완료')
@@ -545,11 +554,6 @@
 
   function validateSearchForm() {
     var num = /^\d+$/;
-
-    //if (document.forms["searchform"]["area"].selectedIndex < 1) {
-    //alert("지역, 지점을 선택해 주세요.")
-    //return false;
-    //} else
     if (document.forms["searchform"]["time"].value != '') {
       if (num.test(document.forms["searchform"]["time"].value) == false) {
         alert("시간은 숫자만 입력해 주세요.(예:1500)")
@@ -624,71 +628,6 @@
     });
   }
 
-  window.onload = function() {
-    $(".table-schedule").on('click', '.row-remove', function(event) {
-      $(this).parent().parent().remove();
-    });
-
-    $('#areaSelected').on('change', function() {
-      // updateflag = 1 -> select area;
-      $.ajax({
-        type: 'POST',
-        url: 'updateSchedule',
-        data: {
-          area: this.value,
-          updateflag: 1,
-        },
-        success: function(data) {
-          console.log(data)
-          tempTag = "<option vlaue='default' selected>지점선택</option>"
-          for (i = 0; i < data.length; i++) {
-            tempTag = tempTag + "<option value=" + data[i]['pk'] + ">" + data[i]['fields']['bname'] + "</option>"
-          }
-          document.getElementById('branch').innerHTML = tempTag
-        }
-      });
-    })
-
-    $('#branch').on('change', function() {
-      // updateflag = 1 -> select area;
-      $.ajax({
-        type: 'POST',
-        url: 'acaUpdateSchedule',
-        data: {
-          branch: this.value,
-          acaSelected: 1,
-        },
-        success: function(data) {
-          console.log(data)
-          tempTag = ""
-          for (i = 0; i < data.length; i++) {
-            tempTag = tempTag + "<option value=" + data[i]['pk'] + ">" + data[i]['fields']['name'] + "</option>"
-          }
-          document.getElementById('academy_branch').innerHTML = tempTag
-          $('#academy_branch').selectpicker('refresh');
-        }
-      });
-    })
-
-    $(document).on('change', '#academyselect', function() {
-      $.ajax({
-        type: 'POST',
-        url: 'studentLoad',
-        data: {
-          aid: this.value,
-        },
-        success: function(data) {
-          console.log(data)
-          tempTag = ""
-          for (i = 0; i < data.length; i++) {
-            tempTag = tempTag + "<option value=" + data[i]['pk'] + ">" + data[i]['fields']['sname'] + "</option>"
-          }
-          document.getElementById('studentList').innerHTML = tempTag
-          $('#studentList').selectpicker('refresh');
-        }
-      });
-    })
-
     function validateSearchForm() {
       var num = /^\d+$/;
 
@@ -737,16 +676,6 @@
       }
 
     }
-
-    $(".table-body").sortable({
-      update: function(event, ui) {
-        $(this).children().each(function(index) {
-          $(this).find('td')
-        });
-      }
-    });
-
-  }
 
   $('input:checkbox').click(function() {
     var checked = $(this).is(':checked');
@@ -862,5 +791,6 @@
       $(e).parent().children("[name='option']").val(0)
     }
   }
+
 </script>
 {% endblock content %}
