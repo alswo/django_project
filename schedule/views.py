@@ -1664,12 +1664,12 @@ def copy_inven(request):
                 inventory.pk = None
                 inventory.day = d
                 inventory.carnum = data['cid']
-                
+                """
                 if data['week'] == 0:
-                    
                 elif data['week'] == 1:
                 elif data['week'] == 2:
-                else:                              
+                else: 
+                """                             
                 inventory.save()
       
                 schedule_table = ScheduleTable.objects.filter(iid_id = data['id']) 
