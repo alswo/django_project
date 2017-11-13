@@ -22,4 +22,5 @@ urlpatterns = [
     url(r'^moveCarEditedInven$', views.moveCarEditedInven),
     url(r'^busAcademy$', views.busAcademy),
     url(r'^putScheduleForm$', views.putScheduleForm),
+    url(r'^copyInven$', views.copy_inven),
 ]
