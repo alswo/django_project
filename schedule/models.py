@@ -17,8 +17,8 @@ class Inventory(models.Model):
     bid = models.IntegerField()
     snum = models.IntegerField()
     day = models.CharField(max_length=5)
-    alist = ArrayField(models.IntegerField())
-    anamelist = ArrayField(models.CharField(max_length = 10, default={'none'}),default={'none'})
+    #alist = ArrayField(models.IntegerField())
+    #anamelist = ArrayField(models.CharField(max_length = 10, default={'none'}),default={'none'})
     slist = ArrayField(models.IntegerField())
     stime = models.IntegerField()
     etime = models.IntegerField()
@@ -41,8 +41,8 @@ class ScheduleTable(models.Model):
     time = models.CharField(max_length = 10,null=True,blank=True)
     addr = models.CharField(max_length = 60,null=True,blank=True)
     req = models.CharField(max_length = 20,null=True,blank=True)
-    alist = ArrayField(models.IntegerField(null=True,blank=True),null=True,blank=True)
-    anamelist = ArrayField(models.CharField(max_length = 10, null=True, blank=True),null=True, blank=True)
+    #alist = ArrayField(models.IntegerField(null=True,blank=True),null=True,blank=True)
+    #anamelist = ArrayField(models.CharField(max_length = 10, null=True, blank=True),null=True, blank=True)
     slist = ArrayField(models.IntegerField(null=True,blank=True),null=True,blank=True)
     sname = ArrayField(models.CharField(max_length = 10,null=True,blank=True),null=True,blank=True)
     tflag = ArrayField(models.IntegerField(null=True,blank=True),null=True,blank=True)
@@ -61,8 +61,8 @@ class EditedInven(models.Model):
     snum = models.IntegerField()
     iid = models.ForeignKey(Inventory,related_name='editedinvens', null = True)
     day = models.CharField(max_length=5)
-    alist = ArrayField(models.IntegerField())
-    anamelist = ArrayField(models.CharField(max_length = 10, default={'none'}),default={'none'})
+    #alist = ArrayField(models.IntegerField())
+    #anamelist = ArrayField(models.CharField(max_length = 10, default={'none'}),default={'none'})
     slist = ArrayField(models.IntegerField())
     stime = models.IntegerField()
     etime = models.IntegerField()
@@ -82,8 +82,8 @@ class EditedScheduleTable(models.Model):
     time = models.CharField(max_length = 10,null=True,blank=True)
     addr = models.CharField(max_length = 60,null=True,blank=True)
     req = models.CharField(max_length = 20,null=True,blank=True)
-    alist = ArrayField(models.IntegerField(null=True,blank=True),null=True,blank=True)
-    anamelist = ArrayField(models.CharField(max_length = 10, null=True, blank=True),null=True, blank=True)
+    #alist = ArrayField(models.IntegerField(null=True,blank=True),null=True,blank=True)
+    #anamelist = ArrayField(models.CharField(max_length = 10, null=True, blank=True),null=True, blank=True)
     slist = ArrayField(models.IntegerField(null=True,blank=True),null=True,blank=True)
     sname = ArrayField(models.CharField(max_length = 10,null=True,blank=True),null=True,blank=True)
     tflag = ArrayField(models.IntegerField(null=True,blank=True),null=True,blank=True)
@@ -157,6 +157,9 @@ class Car(models.Model):
 
     class Meta:
         ordering=['carname']
+
+    def __unicode__(self):
+        return str(self.carname)
 
 class Building(models.Model):
     #branch = Branch.objects.all()

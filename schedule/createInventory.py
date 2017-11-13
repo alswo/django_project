@@ -14,26 +14,25 @@ class CreateInven:
         self.load = load
         self.sid = sid
         self.week = week
-        self.alist = alist
         self.p_memo = p_memo
         self.memo = memo      
 
-    def setAlist(self):
-        if self.alist == 0:
-            slist_temp = list(set([i for i in self.sid if i is not None and i != '']))
-            slist_temp2 = ','.join(slist_temp)
-            slist_temp3 = list(set(slist_temp2.split(',')))
-            slist = []
- 
-            for s in slist_temp3:
-                slist.append(int(s))
-
-            slist_temp3 = slist
-            academy = StudentInfo.objects.filter(id__in = slist_temp3)
-            self.alist = [a.aid_id for a in academy]
-            
-        else:
-            self.alist = self.alist
+    #def setAlist(self):
+        #if self.alist == 0:
+            #slist_temp = list(set([i for i in self.sid if i is not None and i != '']))
+            #slist_temp2 = ','.join(slist_temp)
+            #slist_temp3 = list(set(slist_temp2.split(',')))
+            #slist = []
+ #
+            #for s in slist_temp3:
+                ##slist.append(int(s))
+#
+            #slist_temp3 = slist
+            #academy = StudentInfo.objects.filter(id__in = slist_temp3)
+            #self.alist = [a.aid_id for a in academy]
+            #
+        #else:
+            #self.alist = self.alist
 
     def setSlist(self):
         try:
@@ -59,18 +58,18 @@ class CreateInven:
         except:
             return(1)
 
-    def setANameList(self):
-        try:
-            academyList = Academy.objects.filter(id__in = self.alist)
-            anamelist_inven = []
+    #def setANameList(self):
+        #try:
+            #academyList = Academy.objects.filter(id__in = self.alist)
+            #anamelist_inven = []
+#
+            #for a in academyList:
+                #anamelist_inven.append(a.name)
+#
+            #self.anamelist_inven = anamelist_inven
 
-            for a in academyList:
-                anamelist_inven.append(a.name)
-
-            self.anamelist_inven = anamelist_inven
-
-        except:
-            return(1)
+        #except:
+            #return(1)
 
     def setSEtime(self):
         try:

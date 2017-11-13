@@ -1,4 +1,6 @@
-{% extends 'admin/base.html' %} {% block content %}
+{% extends 'admin/base.html' %}
+{% load get_academy %}
+{% block content %}
 <div class="row">
   <!-- Button trigger modal -->
   <div class="col-md-2">
@@ -32,7 +34,7 @@
     <label>DAY:</label>
     <select name="day" class="form-control" form="searchform">
       {% for weekday in weekdaylist %}
-      <option value="{{weekday}}" {% if day == weekday %}selected{%endif%}>{{weekday}}</option>
+      <option value="{{weekday}}" {% if day == weekday %}selected{% endif %}>{{weekday}}</option>
       {% endfor %}
     </select>
   </div>
@@ -76,9 +78,12 @@
         <input type="hidden" name='day' class="form-control" value="{{day}}" />
         <input type="hidden" id='forInvenAddCheck' name='searchTime' class="form-control" value="{{searchTime}}" />
         <input type="hidden" name='updateflag' class="form-control" value="2" />
-        <input type="hidden" name='searchinven' class="form-control" value="2" /> {% if car.carname == carnum %}
-        <button type="submit" class="btn btn-info" name="car" value="{{car.carname}}">{{car.carname}}</button> {% else %}
-        <button type="submit" class="btn btn-primary" name="car" value="{{car.carname}}">{{car.carname}}</button> {% endif %}
+        <input type="hidden" name='searchinven' class="form-control" value="2" />
+        {% if car.carname == carnum %}
+        <button type="submit" class="btn btn-info" name="car" value="{{car.carname}}">{{car.carname}}</button>
+        {% else %}
+        <button type="submit" class="btn btn-primary" name="car" value="{{car.carname}}">{{car.carname}}</button>
+        {% endif %}
       </form>
       {% endfor %}
       <a href="#" class="btn btn-warning" id="openBtn">인벤추가</a>
@@ -116,9 +121,12 @@
         <input type="hidden" name='searchTime' class="form-control" value="{{searchTime}}" />
         <input type="hidden" name='car' class="form-control" value="{{carnum}}" />
         <input type="hidden" name='updateflag' class="form-control" value="2" />
-        <input type="hidden" name='searchinven' class="form-control" value="2" /> {% if week == 0 %}
-        <button type="submit" class="btn btn-info">금주</button> {% else %}
-        <button type="submit" class="btn btn-primary">금주</button> {% endif %}
+        <input type="hidden" name='searchinven' class="form-control" value="2" />
+        {% if week == 0 %}
+        <button type="submit" class="btn btn-info">금주</button>
+        {% else %}
+        <button type="submit" class="btn btn-primary">금주</button>
+        {% endif %}
       </form>
       <form action="updateSchedule" method="get" class="searchedByCar">
         <input type="hidden" name='week' class="form-control" value="1" />
@@ -128,9 +136,12 @@
         <input type="hidden" name='searchTime' class="form-control" value="{{searchTime}}" />
         <input type="hidden" name='car' class="form-control" value="{{carnum}}" />
         <input type="hidden" name='updateflag' class="form-control" value="2" />
-        <input type="hidden" name='searchinven' class="form-control" value="2" /> {% if week == 1 %}
-        <button type="submit" class="btn btn-info">1주 후</button> {% else %}
-        <button type="submit" class="btn btn-primary">1주 후</button> {% endif %}
+        <input type="hidden" name='searchinven' class="form-control" value="2" />
+        {% if week == 1 %}
+        <button type="submit" class="btn btn-info">1주 후</button>
+        {% else %}
+        <button type="submit" class="btn btn-primary">1주 후</button>
+        {% endif %}
       </form>
       <form action="updateSchedule" method="get" class="searchedByCar">
         <input type="hidden" name='week' class="form-control" value="2" />
@@ -140,9 +151,12 @@
         <input type="hidden" name='searchTime' class="form-control" value="{{searchTime}}" />
         <input type="hidden" name='car' class="form-control" value="{{carnum}}" />
         <input type="hidden" name='updateflag' class="form-control" value="2" />
-        <input type="hidden" name='searchinven' class="form-control" value="2" /> {% if week == 2 %}
-        <button type="submit" class="btn btn-info">2주 후</button> {% else %}
-        <button type="submit" class="btn btn-primary">2주 후</button> {% endif %}
+        <input type="hidden" name='searchinven' class="form-control" value="2" />
+        {% if week == 2 %}
+        <button type="submit" class="btn btn-info">2주 후</button>
+        {% else %}
+        <button type="submit" class="btn btn-primary">2주 후</button>
+        {% endif %}
       </form>
       <form action="updateSchedule" method="get" class="searchedByCar">
         <input type="hidden" name='week' class="form-control" value="3" />
@@ -152,9 +166,12 @@
         <input type="hidden" name='searchTime' class="form-control" value="{{searchTime}}" />
         <input type="hidden" name='car' class="form-control" value="{{carnum}}" />
         <input type="hidden" name='updateflag' class="form-control" value="2" />
-        <input type="hidden" name='searchinven' class="form-control" value="2" /> {% if week == 3 %}
-        <button type="submit" class="btn btn-info">3주 후</button> {% else %}
-        <button type="submit" class="btn btn-primary">3주 후</button> {% endif %}
+        <input type="hidden" name='searchinven' class="form-control" value="2" />
+        {% if week == 3 %}
+        <button type="submit" class="btn btn-info">3주 후</button>
+        {% else %}
+        <button type="submit" class="btn btn-primary">3주 후</button>
+        {% endif %}
       </form>
     </div>
   </div>
@@ -163,7 +180,8 @@
   </div>
 </div>
 <br>
-<br> {% for c in contacts %}
+<br>
+{% for c in contacts %}
 <div class="row">
   <div class="col-md-1"></div>
   <div class="col-md-10" style="border-radius: 25px;{% if c.week1 == 1 or c.week2 == 1 or c.week3 == 1 %}background-color: #EFB2B2;{% else %}background-color:#ABE8D0;{% endif %} height: auto; width: 100%">
@@ -188,7 +206,8 @@
           <textarea class="form-control" style="" rows="4" name="memo" id="{{c.id}}memo" form='scheduleform{{c.id}}'>{% if c.memo %}{{c.memo}}{% endif %}</textarea>
         </div>
         <div class="col-md-1">
-          <br><br><br><br> {% if c.get_cname == 'editedinven' %}
+          <br><br><br><br>
+          {% if c.get_cname == 'editedinven' %}
           <div class="row"><button type="button" class="btn btn-primary" onclick="reqInventory({{c.id}},1,{{week}});">저장</button></div>
           {% else %}
           <div class="row"><button type="button" class="btn btn-primary" onclick="reqInventory({{c.id}},0,{{week}});">저장</button></div>
@@ -197,7 +216,7 @@
         <div class="col-md-3">
           <ul class="list-group" style="margin:0px">
             <li class="list-group-item">
-              학원: {% for a in c.anamelist %} {{a}} | {% endfor %}
+              학원: {% for a in c|get_academynames %} {{a}} | {%endfor%}
             </li>
             <li class="list-group-item">학생 수: {{c.snum}}</li>
             <li class="list-group-item">요일: {{c.day}} ( {{c.stime}} - {{c.etime}} )</li>
@@ -214,22 +233,22 @@
             </div>
             <div class="col-md-7">
               <select id='busAcademy' class="form-control selectpicker" name="alist[]" data-live-search="true" form="scheduleform{{c.id}}" multiple>
-                <option value="">학원선택</option>
-                {% if c.anamelist %}
-                  {% for ca in c.anamelist %}
-                    {% for a in academy %}
-                        {% if a.name.strip == ca.strip %}
-                            <option value = "{{a.id}}" selected>{{a.name}}</option>
-                        {% elif forloop.parentloop.last %}
-                            <option value = "{{a.id}}">{{a.name}}</option>
-                        {% endif %}
-                    {% endfor %}
-                  {% endfor %}
-                {% else %}
-                  {% for a in academy %}
-                    <option value = "{{a.id}}">{{a.name}}</option>
-                  {% endfor %}
-                {% endif %}
+              <option value="">학원선택</option>
+            {% if c|get_academynames %}
+              {% for ca in c|get_academynames %}
+                {% for a in academy %}
+                    {% if a.name.strip == ca.strip %}
+                        <option value = "{{a.id}}" selected>{{a.name}}</option>
+                    {% elif forloop.parentloop.last %}
+                        <option value = "{{a.id}}">{{a.name}}</option>
+                    {% endif %}
+                {% endfor %}
+              {% endfor %}
+            {% else %}
+              {% for a in academy %}
+                <option value = "{{a.id}}">{{a.name}}</option>
+              {% endfor %}
+              {% endif %}
               </select>
             </div>
             <div class="col-md-2">
@@ -238,8 +257,8 @@
             <br><br><br><br>
           </div>
         </div>
-      <div class="col-md-6 panel-warning copy-panel">
-        <div class="panel-heading copyInven">
+        <div class="col-md-6 panel-warning copy-panel">
+          <div class="panel-heading copyInven">
             <select class="selectpicker modal-select" id="cid{{c.id}}" name="car" data-live-search="true">
               <option value="" selected>호차선택</option>
               {% for car in carlist %}
@@ -264,9 +283,9 @@
             </select>
             <button class="btn btn-primary pull-right copybtn" name="button" {% if c.editedscheduletables %} value="{{c.id}}/e" {% else %} value="{{c.id}}/i" {% endif %}>복사</button>
             <br>
+          </div>
         </div>
       </div>
-    </div>
       <br>
       <div class="row">
         <div class="col-md-12">
@@ -294,7 +313,8 @@
                 {% endfor %}
               </select> &nbsp&nbsp
               <button type="button" class="btn-sm btn-primary" value="" id="move{{c.id}}" onclick="moveCarInven({{c.id}});">차량만 바꾸기</button>
-              <br><br> {% for s in c.scheduletables.all %}
+              <br><br>
+              {% for s in c.scheduletables.all %}
               <tr>
                 <td data-name="time" class="tdstyle4"><input type="text" name="time[]" placeholder="Time" class="form-control inputstyle" form="scheduleform{{c.id}}" value="{{s.time}}" /></td>
                 <td data-name="addr" class="tdstyle2"><input type="text" name="addr[]" placeholder="Address" class="form-control inputstyle" form="scheduleform{{c.id}}" value="{{s.addr}}" /></td>
@@ -315,22 +335,30 @@
                     <option value="">등하원</option>
                     <option value="1" selected>등원</option>
                     <option value="0">하원</option>
-                  </select> {% endif %} {% if s.lflag == 0 %}
+                  </select>
+                  {% endif %}
+                  {% if s.lflag == 0 %}
                   <select name="load[]" form="scheduleform{{c.id}}">
                     <option value="">등하원</option>
                     <option value="1">등원</option>
                     <option value="0" selected>하원</option>
-                  </select> {% endif %} {% if s.lflag == 2 %}
+                  </select>
+                  {% endif %}
+                  {% if s.lflag == 2 %}
                   <select name="load[]" form="scheduleform{{c.id}}">
                     <option value="">출발</option>
-                  </select> {% endif %} {% if s.lflag == 3 %}
+                  </select>
+                  {% endif %}
+                  {% if s.lflag == 3 %}
                   <select name="load[]" form="scheduleform{{c.id}}">
                     <option value="">도착</option>
-                  </select> {% endif %}
+                  </select>
+                  {% endif %}
                 </td>
                 <td data-name="del" class="text-center tdstyle3"><button name="del" class="btn btn-sm btn-danger glyphicon glyphicon-remove row-remove"></button></td>
               </tr>
-              {% endfor %} {% elif c.editedscheduletables %}
+              {% endfor %}
+              {% elif c.editedscheduletables %}
               <select class="moveCarList" name="changeCar" form='scheduleform{{c.id}}'>
                 {% for car in carlist %}
                   {% if car.carname == carnum %}
@@ -362,22 +390,30 @@
                     <option value="">등하원</option>
                     <option value="1" selected>등원</option>
                     <option value="0">하원</option>
-                  </select> {% endif %} {% if es.lflag == 0 %}
+                  </select>
+                  {% endif %}
+                  {% if es.lflag == 0 %}
                   <select name="load[]" form="scheduleform{{c.id}}">
                     <option value="">등하원</option>
                     <option value="1">등원</option>
                     <option value="0" selected>하원</option>
-                  </select> {% endif %} {% if es.lflag == 2 %}
+                  </select>
+                  {% endif %}
+                  {% if es.lflag == 2 %}
                   <select name="load[]" form="scheduleform{{c.id}}">
                     <option value="">출발</option>
-                  </select> {% endif %} {% if es.lflag == 3 %}
+                  </select>
+                  {% endif %}
+                  {% if es.lflag == 3 %}
                   <select name="load[]" form="scheduleform{{c.id}}">
                     <option value="">도착</option>
-                  </select> {% endif %}
+                  </select>
+                  {% endif %}
                 </td>
                 <td data-name="del" class="text-center tdstyle3"><button name="del" class="btn btn-danger glyphicon glyphicon-remove row-remove"></button></td>
               </tr>
-              {% endfor %} {% endif %}
+              {% endfor %}
+              {% endif %}
             </tbody>
           </table>
           <div class="modal fade" id="addstu" role="dialog" aria-labelledby="myModalLabel">
@@ -432,7 +468,8 @@
           <input id="carnum{{c.id}}" class="hidden" name='carnum' value="{{c.carnum}}" form="deleteform{{c.id}}" />
           <button type="submit" class="btn btn-danger">삭제</button>
         </form>
-        {% else %} {% endif %}
+        {% else %}
+        {% endif %}
         <a id="{{c.id}}" class="btn btn-default pull-right addrow">Add Row</a>
       </div>
       <div class="row">
@@ -448,7 +485,8 @@
   </div>
   <div class="col-md-1"></div>
 </div>
-<br> {% endfor %}
+<br>
+{% endfor %}
 <script>
   //학생리스트 리셋을 위한 글로벌 aid
   var aid;
@@ -468,30 +506,28 @@
     )
   });
 
-  function reqInventory(iid, flag,week) {
+  function reqInventory(iid, flag, week) {
     var req = $('#' + iid + 'text').val();
     var memo = $('#' + iid + 'memo').val();
     var weeklyFlag;
     var week = week;
 
-    if( flag == '0'){
-      if(window.confirm('1,2,3주 전체 변경하시겠어요?')){
+    if (flag == '0') {
+      if (window.confirm('1,2,3주 전체 변경하시겠어요?')) {
         weeklyFlag = 1;
-      }else{
+      } else {
         weeklyFlag = 0;
       }
-    }
-    else if( flag == '1' && week == 1){
-      if(window.confirm('2,3주도 변경하시겠어요?')){
+    } else if (flag == '1' && week == 1) {
+      if (window.confirm('2,3주도 변경하시겠어요?')) {
         weeklyFlag = 1;
-      }else{
+      } else {
         weeklyFlag = 0;
       }
-    }
-    else if( flag == '1' && week == 2){
-      if(window.confirm('3주도 변경하시겠어요?')){
+    } else if (flag == '1' && week == 2) {
+      if (window.confirm('3주도 변경하시겠어요?')) {
         weeklyFlag = 1;
-      }else{
+      } else {
         weeklyFlag = 0;
       }
     }
@@ -526,9 +562,9 @@
     carname = $('#move' + contactId).val()
     var flag;
 
-    if(window.confirm('1,2,3주 전체 변경하시겠어요?')){
+    if (window.confirm('1,2,3주 전체 변경하시겠어요?')) {
       flag = 'all';
-    }else{
+    } else {
       flag = 'single';
     }
 
@@ -539,7 +575,7 @@
       data: {
         iid: iid,
         carname: carname,
-        flag : flag
+        flag: flag
       },
       success: function(data) {
         alert(data + '차량으로 이동 완료')
@@ -548,25 +584,27 @@
     });
   }
 
-  function moveCarEditedInven(contactId,week) {
+  function moveCarEditedInven(contactId, week) {
     var week = week;
     carname = $('#move' + contactId).val()
     iid = contactId
     var flag;
 
-    if( week == '1'){
-      if(window.confirm('2,3주도 변경하시겠어요?')){
+    if (week == '1') {
+      if (window.confirm('2,3주도 변경하시겠어요?')) {
         flag = 'all';
-      }else{
+      } else {
         flag = 'single';
       }
-    }else if ( week == '2'){
-      if(window.confirm('3주도 변경하시겠어요?')){
+    } else if (week == '2') {
+      if (window.confirm('3주도 변경하시겠어요?')) {
         flag = 'all';
-      }else{
+      } else {
         flag = 'single';
       }
-    }else{flag='single';}
+    } else {
+      flag = 'single';
+    }
 
     $.ajax({
       type: 'POST',
@@ -660,54 +698,54 @@
     });
   }
 
-    function validateSearchForm() {
-      var num = /^\d+$/;
+  function validateSearchForm() {
+    var num = /^\d+$/;
 
-      if (document.forms["searchform"]["area"].selectedIndex < 1) {
-        alert("지역, 지점을 선택해 주세요.")
+    if (document.forms["searchform"]["area"].selectedIndex < 1) {
+      alert("지역, 지점을 선택해 주세요.")
+      return false;
+    } else if (document.forms["searchform"]["time"].value != '') {
+      if (num.test(document.forms["searchform"]["time"].value) == false) {
+        alert("시간은 숫자만 입력해 주세요.(예:1500)")
         return false;
-      } else if (document.forms["searchform"]["time"].value != '') {
-        if (num.test(document.forms["searchform"]["time"].value) == false) {
-          alert("시간은 숫자만 입력해 주세요.(예:1500)")
-          return false;
-        }
+      }
+    }
+  }
+
+  function validateTableForm(e) {
+    console.log(e)
+    tableLength = document.forms[e]['time[]'].length
+    tempAddrS = document.forms[e]['addr[]'][0].value
+    tempAddrE = document.forms[e]['addr[]'][tableLength - 1].value
+    var timepattern = /([01]\d|2[0-3]):([0-5]\d)/;
+
+    if (tempAddrS != "" || tempAddrE != "") {
+      alert("시작,끝 주소는 반드시 비워주세요.")
+      return false;
+    }
+    tempTime = document.forms[e]['time[]']
+    for (i = 0; i < tableLength; i++) {
+      if (timepattern.test(tempTime[i].value) == false) {
+        alert(i + 1 + "번째 로우의 숫자를 정확히 입력해 주세요.")
+        return false;
       }
     }
 
-    function validateTableForm(e) {
-      console.log(e)
-      tableLength = document.forms[e]['time[]'].length
-      tempAddrS = document.forms[e]['addr[]'][0].value
-      tempAddrE = document.forms[e]['addr[]'][tableLength - 1].value
-      var timepattern = /([01]\d|2[0-3]):([0-5]\d)/;
-
-      if (tempAddrS != "" || tempAddrE != "") {
-        alert("시작,끝 주소는 반드시 비워주세요.")
-        return false;
-      }
-      tempTime = document.forms[e]['time[]']
-      for (i = 0; i < tableLength; i++) {
-        if (timepattern.test(tempTime[i].value) == false) {
-          alert(i + 1 + "번째 로우의 숫자를 정확히 입력해 주세요.")
-          return false;
-        }
-      }
-
-      tempName = document.forms[e]['name[]']
-      if (tempName[0].value != "" || tempName[tableLength - 1].value != "") {
-        alert("시작,끝 이름은 반드시 비워주세요.")
-        return false;
-      }
-
-      tempLoad = document.forms[e]['load[]']
-      for (i = 1; i < tableLength - 1; i++) {
-        if (tempLoad[i].value == '') {
-          alert(i + 1 + "번째 등하원 여부를 선택해 주세요.")
-          return false;
-        }
-      }
-
+    tempName = document.forms[e]['name[]']
+    if (tempName[0].value != "" || tempName[tableLength - 1].value != "") {
+      alert("시작,끝 이름은 반드시 비워주세요.")
+      return false;
     }
+
+    tempLoad = document.forms[e]['load[]']
+    for (i = 1; i < tableLength - 1; i++) {
+      if (tempLoad[i].value == '') {
+        alert(i + 1 + "번째 등하원 여부를 선택해 주세요.")
+        return false;
+      }
+    }
+
+  }
 
   $('input:checkbox').click(function() {
     var checked = $(this).is(':checked');
@@ -816,35 +854,34 @@
     sibling_sid.value = delete_sid
   });
 
-  function updateInven(e){
-    if(window.confirm('1,2,3주 전체 변경하시겠어요?')){
+  function updateInven(e) {
+    if (window.confirm('1,2,3주 전체 변경하시겠어요?')) {
       $(e).parent().children("[name='option']").val(1)
-    }else{
+    } else {
       $(e).parent().children("[name='option']").val(0)
     }
   }
 
-  $('.copybtn').click(function(){
+  $('.copybtn').click(function() {
     var id = $(this).val().split('/')[0];
 
     var data = {
-      week: $('#week'+id).val(),
-      day:$('#day'+id).val(),
-      cid: $('#cid'+id).val(),
+      week: $('#week' + id).val(),
+      day: $('#day' + id).val(),
+      cid: $('#cid' + id).val(),
       id: id,
       flag: $(this).val().split('/')[1]
     }
     $.ajax({
       type: 'POST',
       url: 'copyInven',
-      contentType:'application/json;charset=utf-8',
+      contentType: 'application/json;charset=utf-8',
       data: JSON.stringify(data),
-      success: function(data){
+      success: function(data) {
         console.log(data)
       }
     });
 
   })
-
 </script>
 {% endblock content %}
