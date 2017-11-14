@@ -1082,7 +1082,6 @@ def importStudentListForm(request):
 
 @login_required
 def listSchedule(request):
-	areaid = request.GET.get('areaid')
 	branchid = request.GET.get('branchid')
 	day = request.GET.get('day')
 	week = request.GET.get('week')
@@ -1094,3 +1093,15 @@ def listSchedule(request):
 	#contacts = getContacts(branchid, day, carnum, week, searchTime)
 	contacts = getContacts(1, '월', 1, 1, '')
 	return render(request, 'listSchedule.html', {'contacts': contacts});
+
+@login_required
+def getCars(request):
+	branchid = request.GET.get('branchid')
+	day = request.GET.get('day')
+
+	branch = Branch.objects.filter(id = branchid)
+	carnum = Inventory.objects.filter(bid = branchid).filter(day = day).values('carnum').distinct()
+
+	jsonObj = {}
+	jsonObj['carnum'] = carnum
+	return JsonResponse(jsonObj)
