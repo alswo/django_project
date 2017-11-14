@@ -13,7 +13,7 @@
 				<form action="{{request.path}}" method="GET">
 					<div class="col-md-5">
 						<label>지역</label>
-						<select class="form-control" name="area">
+						<select class="form-control" name="area" id="area">
 							{% for branch in branches %}
 								<option value="{{branch.id}}" {% if mybranch.id == branch.id %} selected {% endif %}>{{branch.bname}}</option>
 							{% endfor %}
@@ -21,7 +21,7 @@
 					</div>
 					<div class="col-md-3">
 						<label>요일</label>
-						<select class="form-control" name="day">
+						<select class="form-control" name="day" id="day">
 							{% for weekday in weekdaylist %}
 								<option value="{{weekday}}" {% if myweekday == weekday %} selected {% endif %}>{{weekday}}</option>
 							{% endfor %}
@@ -29,15 +29,19 @@
 					</div>
 					<div class="col-md-4">
 						<br>
-						<button class="btn btn-info search" onclick="submit()" type="button" value="">적용</button>
+						<button class="btn btn-info search" onclick="submit()" type="button" value="">검색</button>
 					</div>
 				</form>
+			</div>
+			<div class="panel-body" id="carnum">
+				
 			</div>
 		</div>
 	</div>
 	<div class="col-md-1">
 	</div>
 </div>
+
 
 {% for c in contacts %}
 <div class="row" align="center">
@@ -119,5 +123,26 @@
 </div>
 <br>
 {% endfor %}
+
+<script type="text/javascript">
+$("#area,#day").on('change', function() {
+	var xmlhttp = new XMLHttpRequest();
+	xmlhttp.onreadystatechange = function() {
+		if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+			if (xmlhttp.getResponseHeader('content-type') == 'application/json') {
+				var jsonResponse = JSON.parse(xmlhttp.responseText);
+				msg = '';
+				for (var i=0; i<jsonResponse['carnum'].length; i++) {
+					msg += "<a href<button class='btn btn-info'>" + jsonResponse['carnum'][i] + "</button> ";
+				}
+				$('#carnum').html(msg);
+			}
+		}
+	}
+
+	xmlhttp.open("GET", "/institute/getCarsByBranchIdAndDay?branchid=" + $('#area option:selected').val() + "&day=" + encodeURI($('#day option:selected').val()));
+	xmlhttp.send(null);
+});
+</script>
 
 {% endblock content %}

@@ -26,5 +26,5 @@ urlpatterns = [
     url(r'^importStudentList$', views.importStudentList),
     url(r'^importStudentListForm$', views.importStudentListForm),
     url(r'^listSchedule$', views.listSchedule),
-    url(r'^getCars$', views.getCars),
+    url(r'^getCarsByBranchIdAndDay$', views.getCarsByBranchIdAndDay),
 ]

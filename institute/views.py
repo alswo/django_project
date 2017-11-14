@@ -26,6 +26,7 @@ import xlwt
 import xlrd
 from institute.forms import XlsInputForm
 from schedule.views import getContacts
+from schedule.models import Inventory
 
 # Create your views here.
 BANKCODES = ['003', '004', '011', '020', '027', '071', '081', '088']
@@ -1095,13 +1096,15 @@ def listSchedule(request):
 	return render(request, 'listSchedule.html', {'contacts': contacts});
 
 @login_required
-def getCars(request):
+def getCarsByBranchIdAndDay(request):
 	branchid = request.GET.get('branchid')
 	day = request.GET.get('day')
 
 	branch = Branch.objects.filter(id = branchid)
-	carnum = Inventory.objects.filter(bid = branchid).filter(day = day).values('carnum').distinct()
+	carnums = Inventory.objects.filter(bid = branchid).filter(day = day).order_by('carnum').values_list('carnum', flat=True).distinct()
 
 	jsonObj = {}
-	jsonObj['carnum'] = carnum
+	jsonObj['carnum'] = []
+	for carnum in carnums:
+		jsonObj['carnum'].append(carnum)
 	return JsonResponse(jsonObj)
