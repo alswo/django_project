@@ -3,7 +3,7 @@ from passenger.models import Academy, StudentInfo
 from schedule.maintainTodayLoad import getTflag
 
 class UpdateInven:
-    def __init__(self, bid, carnum, day, req, time, stime, etime, addr, name, name2, load, sid, week, alist, snum, anamelist_inven, slist_temp3,p_memo,memo):
+    def __init__(self, bid, carnum, day, req, time, stime, etime, addr, name, name2, load, sid, week,snum,slist_temp3,p_memo,memo):
         self.bid = bid
         self.carnum = carnum
         self.day = day

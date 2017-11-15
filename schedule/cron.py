@@ -151,8 +151,6 @@ def weekly_update():
 			tempInven.bid = eiw1.bid
 			tempInven.snum = eiw1.snum
 			tempInven.day = eiw1.day
-			tempInven.alist = eiw1.alist
-			tempInven.anamelist = eiw1.anamelist
 			tempInven.slist = eiw1.slist
 			tempInven.stime = eiw1.stime
 			tempInven.etime = eiw1.etime
@@ -165,7 +163,7 @@ def weekly_update():
 			editedScheduleTablesWeek1 = eiw1.editedscheduletables.all()
 
 			for estw1 in editedScheduleTablesWeek1:
-				stable = ScheduleTable(iid = tempInven, time = estw1.time, addr = estw1.addr, req = estw1.req, alist=estw1.alist, anamelist=estw1.anamelist,slist=estw1.slist,sname=estw1.sname, tflag=estw1.tflag, lflag=estw1.lflag)
+				stable = ScheduleTable(iid = tempInven, time = estw1.time, addr = estw1.addr, req = estw1.req,slist=estw1.slist,sname=estw1.sname, tflag=estw1.tflag, lflag=estw1.lflag)
 				stable.save()
 
 
@@ -191,12 +189,12 @@ def weekly_update():
 	editedInvenWeek2 = EditedInven.objects.filter(week=2)
 
 	for eiw2 in editedInvenWeek2:
-		createInvenWeek3 = EditedInven.objects.create(carnum = eiw2.carnum, bid = eiw2.bid, snum = eiw2.snum, iid = eiw2.iid,day = eiw2.day, alist =eiw2.alist, anamelist = eiw2.anamelist, slist = eiw2.slist, stime = eiw2.stime, etime = eiw2.etime, req = eiw2.req, memo = eiw2.memo, week = 3)
+		createInvenWeek3 = EditedInven.objects.create(carnum = eiw2.carnum, bid = eiw2.bid, snum = eiw2.snum, iid = eiw2.iid,day = eiw2.day,slist = eiw2.slist, stime = eiw2.stime, etime = eiw2.etime, req = eiw2.req, memo = eiw2.memo, week = 3)
 
 		editedScheduleTablesWeek2 = eiw2.editedscheduletables.all()
 
 		for estw2 in editedScheduleTablesWeek2:
-			EditedScheduleTable.objects.create(ieid = createInvenWeek3, time = estw2.time, addr = estw2.addr, req = estw2.req, alist = estw2.alist, anamelist = estw2.anamelist, slist = estw2.slist, sname = estw2.sname, tflag = estw2.tflag, lflag = estw2.lflag)
+			EditedScheduleTable.objects.create(ieid = createInvenWeek3, time = estw2.time, addr = estw2.addr, req = estw2.req,slist = estw2.slist, sname = estw2.sname, tflag = estw2.tflag, lflag = estw2.lflag)
 
 
 	#Inventory week3 -> week2, week2 -> week1, week1->week

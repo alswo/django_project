@@ -3,7 +3,7 @@ from passenger.models import Academy, StudentInfo
 from schedule.maintainTodayLoad import getTflag 
 
 class CreateInven:
-    def __init__(self,bid,carnum,day,time,addr,name,name2,load,sid,week,alist,p_memo,memo):
+    def __init__(self,bid,carnum,day,time,addr,name,name2,load,sid,week,p_memo,memo):
         self.bid = bid
         self.carnum = carnum
         self.day = day
@@ -84,18 +84,18 @@ class CreateInven:
 
     def setWeek0(self):
         for d in self.day:
-            inven = Inventory.objects.create(carnum = self.carnum, bid = self.bid, snum = self.snum, day = d , alist=self.alist, anamelist = self.anamelist_inven, slist=self.slist, stime = self.stime, etime = self.etime, req = self.p_memo, memo=self.memo,week1 = 0, week2 = 0, week3 = 0)
+            inven = Inventory.objects.create(carnum = self.carnum, bid = self.bid, snum = self.snum, day = d ,slist=self.slist, stime = self.stime, etime = self.etime, req = self.p_memo, memo=self.memo,week1 = 0, week2 = 0, week3 = 0)
 
             iid = inven.id
 
             # lflag load -> 1 unload ->0 start -> 2 end -> 3
             for i in range(len(self.time)):
                 if i == 0:
-                    stable = ScheduleTable(iid_id = iid, time = self.time[i], addr = self.addr[i], alist='{}', slist='{}', sname=list(self.name2[i]), tflag='{}', lflag=2)
+                    stable = ScheduleTable(iid_id = iid, time = self.time[i], addr = self.addr[i], slist='{}', sname=list(self.name2[i]), tflag='{}', lflag=2)
                     stable.save()
 
                 elif i == len(self.time) - 1:
-                    stable = ScheduleTable(iid_id = iid, time = self.time[i], addr = self.addr[i], alist='{}', slist='{}', sname=list(self.name2[i]), tflag='{}', lflag=3)
+                    stable = ScheduleTable(iid_id = iid, time = self.time[i], addr = self.addr[i], slist='{}', sname=list(self.name2[i]), tflag='{}', lflag=3)
                     stable.save()
 
                 elif 0 < i < len(self.time) - 1:
@@ -121,13 +121,13 @@ class CreateInven:
                         aname = Academy.objects.get(id = aid)
                         anamelist.append(aname.name)
 
-                    stable = ScheduleTable(iid_id = iid, time = self.time[i], addr = self.addr[i], alist = temp_aca, anamelist = anamelist, slist = sidlist, sname = temp_name, tflag = temp_tflag, lflag = self.load[i])
+                    stable = ScheduleTable(iid_id = iid, time = self.time[i], addr = self.addr[i], slist = sidlist, sname = temp_name, tflag = temp_tflag, lflag = self.load[i])
                     stable.save()
 
     def setWeek1(self, unloadSidList = 0, iid = -1):
         #called by putSchedule
         if iid == -1:
-            inven = Inventory.objects.create(carnum = 0, bid = 0, snum = 0, day = 'fake', alist = '{}', slist = '{}',anamelist='{}', etime = 0, stime = 0, req = self.p_memo, memo=self.memo, week1 = 1, week2 = 1, week3 = 1)
+            inven = Inventory.objects.create(carnum = 0, bid = 0, snum = 0, day = 'fake',  slist = '{}',etime = 0, stime = 0, req = self.p_memo, memo=self.memo, week1 = 1, week2 = 1, week3 = 1)
             iid = inven.id 
         #called by updateSchedule week0
         else:
@@ -136,18 +136,18 @@ class CreateInven:
         
         for j in range(3):
             for d in self.day:
-                ei = EditedInven(iid_id = iid, carnum = self.carnum, bid = self.bid, snum = self.snum, day = d, alist = self.alist, anamelist = self.anamelist_inven, slist = self.slist, stime = self.stime, etime = self.etime,req=self.p_memo, memo = self.memo, week = j+1)
+                ei = EditedInven(iid_id = iid, carnum = self.carnum, bid = self.bid, snum = self.snum, day = d, slist = self.slist, stime = self.stime, etime = self.etime,req=self.p_memo, memo = self.memo, week = j+1)
                 ei.save()
                 eiid = ei.id
 
                 # lflag load -> 1 unload ->0 start -> 2 end -> 3
                 for i in range(len(self.time)):
                     if i == 0:
-                        estable = EditedScheduleTable(ieid_id = eiid, time = self.time[i], addr = self.addr[i], alist='{}', slist='{}', sname=list(self.name2[i]), tflag='{}', lflag=2)
+                        estable = EditedScheduleTable(ieid_id = eiid, time = self.time[i], addr = self.addr[i], slist='{}', sname=list(self.name2[i]), tflag='{}', lflag=2)
                         estable.save()
 
                     elif i == len(self.time) - 1:
-                        estable = EditedScheduleTable(ieid_id = eiid, time = self.time[i], addr = self.addr[i], alist='{}', slist='{}', sname=list(self.name2[i]), tflag='{}', lflag=3)
+                        estable = EditedScheduleTable(ieid_id = eiid, time = self.time[i], addr = self.addr[i],  slist='{}', sname=list(self.name2[i]), tflag='{}', lflag=3)
                         estable.save()
 
                     elif 0 < i < len(self.time) - 1:
@@ -173,22 +173,22 @@ class CreateInven:
                             aname = Academy.objects.get(id = aid)
                             anamelist.append(aname.name)
 
-                        estable = EditedScheduleTable(ieid_id = eiid, time = self.time[i], addr = self.addr[i], alist = temp_aca, anamelist = anamelist, slist = sidlist, sname = temp_name, tflag = temp_tflag, lflag = self.load[i])
+                        estable = EditedScheduleTable(ieid_id = eiid, time = self.time[i], addr = self.addr[i], slist = sidlist, sname = temp_name, tflag = temp_tflag, lflag = self.load[i])
                         estable.save()
 
     def setWeek2(self):
-        inven = Inventory.objects.create(carnum = 0, bid = 0, snum = 0, day = 'fake', alist = '{}', slist = '{}',anamelist='{}', etime = 0, stime = 0, req = self.p_memo,memo = self.memo, week1 = 0, week2 = 1, week3 = 1)
+        inven = Inventory.objects.create(carnum = 0, bid = 0, snum = 0, day = 'fake', slist = '{}', etime = 0, stime = 0, req = self.p_memo,memo = self.memo, week1 = 0, week2 = 1, week3 = 1)
  
         for j in range(2):
             for d in self.day:
-                ei = EditedInven(iid_id = inven.id, carnum = self.carnum, bid = self.bid, snum = self.snum, day = d, alist = self.alist, anamelist = self.anamelist_inven, slist = self.slist, stime = self.stime, etime = self.etime,req = self.p_memo, memo = self.memo, week = j+2)
+                ei = EditedInven(iid_id = inven.id, carnum = self.carnum, bid = self.bid, snum = self.snum, day = d, slist = self.slist, stime = self.stime, etime = self.etime,req = self.p_memo, memo = self.memo, week = j+2)
                 ei.save()
                 eiid = ei.id
 
                 # lflag load -> 1 unload ->0 start -> 2 end -> 3
                 for i in range(len(self.time)):
                     if i == 0:
-                        estable = EditedScheduleTable(ieid_id = eiid, time = self.time[i], addr = self.addr[i], alist='{}', slist='{}', sname=list(self.name2[i]), tflag='{}', lflag=2)
+                        estable = EditedScheduleTable(ieid_id = eiid, time = self.time[i], addr = self.addr[i], slist='{}', sname=list(self.name2[i]), tflag='{}', lflag=2)
                         estable.save()
 
                     elif i == len(self.time) - 1:
@@ -222,21 +222,21 @@ class CreateInven:
                         estable.save()
 
     def setWeek3(self):
-        inven = Inventory.objects.create(carnum = 0, bid = 0, snum = 0, day = 'fake', alist = '{}', slist = '{}',anamelist='{}', etime = 0, stime = 0, req = self.p_memo, memo = self.memo, week1 = 0, week2 = 0, week3 = 1)
+        inven = Inventory.objects.create(carnum = 0, bid = 0, snum = 0, day = 'fake',  slist = '{}', etime = 0, stime = 0, req = self.p_memo, memo = self.memo, week1 = 0, week2 = 0, week3 = 1)
         
         for d in self.day:
-            ei = EditedInven(iid_id = inven.id, carnum = self.carnum, bid = self.bid, snum = self.snum, day = d, alist = self.alist, anamelist = self.anamelist_inven, slist = self.slist, stime = self.stime, etime = self.etime, req = self.p_memo, memo = self.memo,week = self.week)
+            ei = EditedInven(iid_id = inven.id, carnum = self.carnum, bid = self.bid, snum = self.snum, day = d, slist = self.slist, stime = self.stime, etime = self.etime, req = self.p_memo, memo = self.memo,week = self.week)
             ei.save()
             eiid = ei.id
 
             # lflag load -> 1 unload ->0 start -> 2 end -> 3
             for i in range(len(self.time)):
                 if i == 0:
-                    estable = EditedScheduleTable(ieid_id = eiid, time = self.time[i], addr = self.addr[i], alist='{}', slist='{}', sname=list(self.name2[i]), tflag='{}', lflag=2)
+                    estable = EditedScheduleTable(ieid_id = eiid, time = self.time[i], addr = self.addr[i], slist='{}', sname=list(self.name2[i]), tflag='{}', lflag=2)
                     estable.save()
 
                 elif i == len(self.time) - 1:
-                    estable = EditedScheduleTable(ieid_id = eiid, time = self.time[i], addr = self.addr[i], alist='{}', slist='{}', sname=list(self.name2[i]), tflag='{}', lflag=3)
+                    estable = EditedScheduleTable(ieid_id = eiid, time = self.time[i], addr = self.addr[i],  slist='{}', sname=list(self.name2[i]), tflag='{}', lflag=3)
                     estable.save()
 
                 elif 0 < i < len(self.time) - 1:
@@ -262,5 +262,5 @@ class CreateInven:
                         aname = Academy.objects.get(id = aid)
                         anamelist.append(aname.name)
 
-                    estable = EditedScheduleTable(ieid_id = eiid, time = self.time[i], addr = self.addr[i], alist = temp_aca, anamelist = anamelist, slist = sidlist, sname = temp_name, tflag = temp_tflag, lflag = self.load[i])
+                    estable = EditedScheduleTable(ieid_id = eiid, time = self.time[i], addr = self.addr[i], slist = sidlist, sname = temp_name, tflag = temp_tflag, lflag = self.load[i])
                     estable.save()
