@@ -219,7 +219,6 @@ class StudentInfo(models.Model):
 
     created_time = models.CharField(max_length = 19, default = set_current_date_time())
     sended_time = models.CharField(max_length = 20, null = True)
-    check_in_inven = models.IntegerField(default=1)
 
     def __unicode__(self):
         return u"{0} // {1}".format(self.aid.name,self.sname)
