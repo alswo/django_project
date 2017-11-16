@@ -93,6 +93,7 @@ var salesChart;
 var salesPie;
 
   $(".select-car").change(function(e){
+    $('#fillgauge1').hide()
     if(salesPie){salesPie.destroy();}
     var car = this.value
     $.ajax({
@@ -141,6 +142,7 @@ var salesPie;
                 }]
            },
            onClick: function barCliked(evt){
+             $('#fillgauge1').show()
              if(salesPie){salesPie.destroy();}
              var ctx2 = document.getElementById("salesPie");
              var index = salesChart.getElementsAtEvent(evt)[0]['_index'];

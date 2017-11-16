@@ -1267,7 +1267,7 @@ def studentLoad(request):
     if request.method == "POST":
 
         aid = request.POST.get('aid')
-        stu = StudentInfo.objects.filter(aid = aid).order_by('sname')
+        stu = StudentInfo.objects.filter(aid = aid).filter(deleted_date__isnull = True).order_by('sname')
 
         data = serialize('json', stu)
 
@@ -1651,3 +1651,44 @@ def busAcademy(request):
         Inventory.objects.filter(id = iid).update(alist = alist, anamelist = anamelist)
 
         return HttpResponse(0)
+
+@csrf_exempt
+def copy_inven(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        flag = data['flag']
+
+        if flag == 'i':
+            for d in data['day']:
+                inventory = Inventory.objects.get(id = data['id'])
+                inventory.pk = None
+                inventory.day = d
+                inventory.carnum = data['cid']
+                """
+                if data['week'] == 0:
+                elif data['week'] == 1:
+                elif data['week'] == 2:
+                else: 
+                """                             
+                inventory.save()
+      
+                schedule_table = ScheduleTable.objects.filter(iid_id = data['id']) 
+                for st in schedule_table:
+                    st.pk = None
+                    st.iid_id = inventory.id
+                    st.save()
+        else:
+            for d in data['day']:
+                edited_inven = EditedInven.objects.get(id = data['id'])
+                edited_inven.pk = None
+                edited_inven.day = d
+                edited_inven.week = data['week']
+                edited_inven.carnum = data['cid']
+                edited_inven.save()
+                   
+        return HttpResponse(0)
+
+
+
+
+

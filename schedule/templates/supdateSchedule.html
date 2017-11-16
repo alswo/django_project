@@ -205,36 +205,68 @@
         </div>
       </div>
       <br>
-      <div class="row input-bus">
-        <br>
-        <div class="col-md-1">
-          <i style="font-size:50px;" class="fa fa-bus"></i><span></span>
+      <div class="row">
+        <div class="panel-warning">
+          <div class="col-md-6 panel-heading">
+            <br>
+            <div class="col-md-2">
+              <i style="font-size:50px;" class="fa fa-bus"></i><span></span>
+            </div>
+            <div class="col-md-7">
+              <select id='busAcademy' class="form-control selectpicker" name="alist[]" data-live-search="true" form="scheduleform{{c.id}}" multiple>
+                <option value="">학원선택</option>
+                {% if c.anamelist %}
+                  {% for ca in c.anamelist %}
+                    {% for a in academy %}
+                        {% if a.name.strip == ca.strip %}
+                            <option value = "{{a.id}}" selected>{{a.name}}</option>
+                        {% elif forloop.parentloop.last %}
+                            <option value = "{{a.id}}">{{a.name}}</option>
+                        {% endif %}
+                    {% endfor %}
+                  {% endfor %}
+                {% else %}
+                  {% for a in academy %}
+                    <option value = "{{a.id}}">{{a.name}}</option>
+                  {% endfor %}
+                {% endif %}
+              </select>
+            </div>
+            <div class="col-md-2">
+              <button type="button" class="btn btn-primary" onclick="busAcademy({{c.id}});">저장</button>
+            </div>
+            <br><br><br><br>
+          </div>
         </div>
-        <div class="col-md-2">
-          <select id='busAcademy' class="form-control selectpicker" name="alist[]" data-live-search="true" form="scheduleform{{c.id}}" multiple>
-            <option value="">학원선택</option>
-            {% if c.anamelist %}
-              {% for ca in c.anamelist %}
-                {% for a in academy %}
-                    {% if a.name.strip == ca.strip %}
-                        <option value = "{{a.id}}" selected>{{a.name}}</option>
-                    {% elif forloop.parentloop.last %}
-                        <option value = "{{a.id}}">{{a.name}}</option>
-                    {% endif %}
-                {% endfor %}
+      <div class="col-md-6 panel-warning copy-panel">
+        <div class="panel-heading copyInven">
+            <select class="selectpicker modal-select" id="cid{{c.id}}" name="car" data-live-search="true">
+              <option value="" selected>호차선택</option>
+              {% for car in carlist %}
+              <option value="{{car.id}}">{{car.carname}}호차</option>
               {% endfor %}
-            {% else %}
-              {% for a in academy %}
-                <option value = "{{a.id}}">{{a.name}}</option>
-              {% endfor %}
-            {% endif %}
-          </select>
+            </select>
+            <select class="selectpicker modal-select" id="day{{c.id}}" name="day[]" data-live-search="true" multiple>
+              <option value="월">월</option>
+              <option value="화">화</option>
+              <option value="수">수</option>
+              <option value="목">목</option>
+              <option value="금">금</option>
+              <option value="토">토</option>
+            </select>
+            <br><br>
+            <select class="selectpicker modal-select" id="week{{c.id}}" name="week[]" data-live-search="true">
+              <option value="" selected>주선택</option>
+              <option value="0">금주</option>
+              <option value="1">1주</option>
+              <option value="2">2주</option>
+              <option value="3">3주</option>
+            </select>
+            <button class="btn btn-primary pull-right copybtn" name="button" {% if c.editedscheduletables %} value="{{c.id}}/e" {% else %} value="{{c.id}}/i" {% endif %}>복사</button>
+            <br>
         </div>
-        <div class="col-md-2">
-          <button type="button" class="btn btn-primary" onclick="busAcademy({{c.id}});">저장</button>
-        </div>
-        <br><br><br>
       </div>
+    </div>
       <br>
       <div class="row">
         <div class="col-md-12">
@@ -358,7 +390,7 @@
                 <div class="modal-body">
                   <select id="academyselect" class="form-control selectpicker" data-live-search="ture"><option value="">학원선택</option>{% for a in academy %}<option value = "{{a.id}}">{{a.name}}</option>{% endfor %}</select>
                   <br>
-                  <select id="studentList" class="selectpicker modal-select" data-live-search="ture" multiple></select>
+                  <select id="studentList" class="selectpicker modal-select" data-live-search="true" multiple></select>
                   <input type="hidden" id="rowid" value="" />
                 </div>
                 <div class="modal-footer">
@@ -791,6 +823,28 @@
       $(e).parent().children("[name='option']").val(0)
     }
   }
+
+  $('.copybtn').click(function(){
+    var id = $(this).val().split('/')[0];
+
+    var data = {
+      week: $('#week'+id).val(),
+      day:$('#day'+id).val(),
+      cid: $('#cid'+id).val(),
+      id: id,
+      flag: $(this).val().split('/')[1]
+    }
+    $.ajax({
+      type: 'POST',
+      url: 'copyInven',
+      contentType:'application/json;charset=utf-8',
+      data: JSON.stringify(data),
+      success: function(data){
+        console.log(data)
+      }
+    });
+
+  })
 
 </script>
 {% endblock content %}

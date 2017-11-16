@@ -4,7 +4,7 @@ from __future__ import absolute_import
 from tayo.celery import app
 from passenger.models import StudentInfo, PersonalInfo
 from passenger.dateSchedule import timeToDate
-from fcmdev.models import PropOfDevice
+from fcmdev.models import PropOfDevice, PushConfirming, PushMonitoring
 from fcm_django.models import FCMDevice
 from schedule.models import Inventory, ScheduleTable
 from collections import Counter
@@ -12,6 +12,7 @@ import sys
 import requests
 import simplejson
 import ast
+import datetime
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
@@ -24,9 +25,20 @@ def getResponse(debug, code, msg):
 
 @app.task
 def today_schedule_notification():
+
+    fcmdevice =  FCMDevice.objects.all()
+    device_count=0
+    day = datetime.datetime.now()
+    # today = day.strftime('%Y-%m-%d')
+    today = '2017-10-27'
+    msg_count= 0
+    push_num = 0
+    push_false_num = 0
+    total_msg = 0
+    refuse_user = 0
+
     time = timeToDate()
     date = time.timeToD()
-    msg_c = 0
     si = []
     scheduleTables = []
     schedules = []
@@ -94,11 +106,26 @@ def today_schedule_notification():
 	                        break
 			except PersonalInfo.DoesNotExist:
 			        break
+        total_msg += 1
+	pin_prop = PropOfDevice.objects.filter(pin_number = module_push_content['pin'])
+
+        for p in pin_prop:
+            msg_count+= 1
+            if p.receivePush == False:
+                refuse_user += 1
+
+
+
+
+
+
 
         count = module_push_content['count']-1
 	lflag = module_push_content['lflag']
 	sname = module_push_content['sname']
 	sid = module_push_content['sid']
+
+
 	if dict_s.has_key(sid):
 		tflag_count = dict_s[sid]
 	else:
@@ -115,69 +142,62 @@ def today_schedule_notification():
             msg = "오늘 " + sname + " 학생의 " + module_push_content['aname'] + " " + flag + " " + module_push_content['time'] + " [" + module_push_content['addr'] + "] 승차 스케줄이 있습니다"
 	    if tflag_count > 0:
 		cancel_msg=  "[승차취소]오늘 " + sname + " 학생의 " + module_push_content['aname'] + " " + flag + " " + module_push_content['time'] + " [" + module_push_content['addr'] + "] 승차 스케줄을 취소하셨습니다."
-		# send_msg(module_push_content['sid'], module_push_content['pin'], cancel_msg)
-		msg_c += 1
+		send_msg(module_push_content['sid'], module_push_content['pin'], cancel_msg)
 	    else:
-		# send_msg(module_push_content['sid'], module_push_content['pin'], msg)
-		msg_c += 1
+		send_msg(module_push_content['sid'], module_push_content['pin'], msg)
         else:
             msg = "오늘 " + sname + " 학생의 " + module_push_content['aname'] + " " + flag + " " + module_push_content['time'] + " [" + module_push_content['addr'] + "]승차 외" + str(count) + "건의 스케줄이 있습니다."
 	    if tflag_count > 0:
 		cancel_msg = "오늘 " + sname + " 학생의 " + module_push_content['aname'] + " " + flag + " " + module_push_content['time'] + " [" + module_push_content['addr'] + "]승차 외" + str(tflag_count) + "건의 취소된 스케줄이 있습니다."
-		# send_msg(module_push_content['sid'], module_push_content['pin'], cancel_msg)
-		msg_c += 1
+		send_msg(module_push_content['sid'], module_push_content['pin'], cancel_msg)
 	    else:
-		# send_msg(module_push_content['sid'], module_push_content['pin'], msg)
-		msg_c += 1
+		send_msg(module_push_content['sid'], module_push_content['pin'], msg)
+    for fcmdevices in fcmdevice:
+		device_count +=1
+    pushconf = PushConfirming.objects.filter(date__icontains = today)
+    for pushconfs in pushconf:
+        push_num += 1
+	if pushconfs.status == False:
+	    push_false_num += 1
+    pm = PushMonitoring.objects.create(date= today, total_S= device_count,expec_push=total_msg, expec_push_s=msg_count, push_num=push_num, false_num= push_false_num, refuse_user =  refuse_user)
+    pm.save()
+    print today
+    print device_count
+    print total_msg
+    print msg_count
+    print push_num
+    print push_false_num
+    print refuse_user
 
-    print msg_c
-# def send_msg(sid, pin, msg):
-#     url = 'https://fcm.googleapis.com/fcm/send'
-#     header = {'authorization': 'key=AAAAWVvmwNU:APA91bH0IjidQtMmX6q9SRVekZqzNmWKRR15mdjOFFAt05v3E7PziYRb7sLMbtCtNXZYyKrz--fKvoZdDY94yjOrH9G6z-axN7qWS7H5VMBRUy8Z6-dysdj9ZaCYrESl2wnIfOoSnh7X','content-type': 'application/json'}
-#     result = {}
-#     prop = PropOfDevice.objects.filter(pin_number = pin)
-#     for p in prop:
-# 	pushcheck = p.receivePush
-# 	fcm = FCMDevice.objects.filter(device_id = p.device_id)
-# 	for f in fcm:
-# 	    token = f.registration_id
-# 	    types = f.type
-# 	    if pushcheck == False:
-# 	        print ("he/she doesn't want to receive push message.")
-# 	    else:
-# 	        if types == 'android':
-# 	            payload = '{\n    "to" : "' + str(token) + '","priority" : "high", "content-available" : "true","collapse_key" : "Updates Available" ,"notification": {\t  "body" : "'+str(msg)+'","title" : "셔틀타요", "sound":"default"},\t}'
-# 		elif types == 'ios':
-# 		    payload = '{\n    "to" : "' + str(token) + '","priority" : "high", "content-available" : "true","collapse_key" : "Updates Available" ,"notification": {\t  "body" : "'+str(msg)+'", "sound":"default"},\t}'
-# 		try:
-# 	            sid = str(sid)
-# 		    response = requests.request('POST', url, data=payload, headers=header)
-# 		    try:
-#                         result = ast.literal_eval(response.text)
-#                         status = str(result['success'])
-#                         pushurl = 'http://api.edticket.com/fcmdev/pushConfirmInfo'
-#                         data = "pin="+pin+"&confirming="+response.text+"&status="+status+"&token="+token+"&sid="+sid
-#                         headers = {'content-type': "application/x-www-form-urlencoded"}
-#                         response = requests.request("POST", pushurl, data=data, headers=headers)
-# 		    except:
-#                         print "msg check error"
-# 		except:
-#                     print "msg send error"
-
-
-# def send_msg(sid, pin, msg):
-#     try:
-#         prop = PropOfDevice.objects.filter(pin_number = pin)
-#
-#     except:
-#         print "no device info"
-#
-#     else:
-#         for p in prop:
-#             print p.device_id
-#             pushcheck = p.receivePush
-#             fcm = FCMDevice.objects.filter(device_id = p.device_id)
-#             for f in fcm:
-#                 token = f.registration_id
-#                 types = f.type
-# 	        print str(f.id) + types + " token :" + token
+def send_msg(sid, pin, msg):
+    url = 'https://fcm.googleapis.com/fcm/send'
+    # header = {'authorization': 'key=AAAAWVvmwNU:APA91bH0IjidQtMmX6q9SRVekZqzNmWKRR15mdjOFFAt05v3E7PziYRb7sLMbtCtNXZYyKrz--fKvoZdDY94yjOrH9G6z-axN7qWS7H5VMBRUy8Z6-dysdj9ZaCYrESl2wnIfOoSnh7X','content-type': 'application/json'}
+    # result = {}
+    # prop = PropOfDevice.objects.filter(pin_number = pin)
+    # for p in prop:
+	# pushcheck = p.receivePush
+	# fcm = FCMDevice.objects.filter(device_id = p.device_id)
+	# for f in fcm:
+	#     token = f.registration_id
+	#     types = f.type
+	#     if pushcheck == False:
+	#         print ("he/she doesn't want to receive push message.")
+	#     else:
+	#         if types == 'android':
+	#             payload = '{\n    "to" : "' + str(token) + '","priority" : "high", "content-available" : "true","collapse_key" : "Updates Available" ,"notification": {\t  "body" : "'+str(msg)+'","title" : "셔틀타요", "sound":"default"},\t}'
+	# 	elif types == 'ios':
+	# 	    payload = '{\n    "to" : "' + str(token) + '","priority" : "high", "content-available" : "true","collapse_key" : "Updates Available" ,"notification": {\t  "body" : "'+str(msg)+'", "sound":"default"},\t}'
+	# 	try:
+	#             sid = str(sid)
+	# 	    response = requests.request('POST', url, data=payload, headers=header)
+	# 	    try:
+    #                     result = ast.literal_eval(response.text)
+    #                     status = str(result['success'])
+    #                     pushurl = 'http://api.edticket.com/fcmdev/pushConfirmInfo'
+    #                     data = "pin="+pin+"&confirming="+response.text+"&status="+status+"&token="+token+"&sid="+sid
+    #                     headers = {'content-type': "application/x-www-form-urlencoded"}
+    #                     response = requests.request("POST", pushurl, data=data, headers=headers)
+	# 	    except:
+    #                     print "msg check error"
+	# 	except:
+    #                 print "msg send error"

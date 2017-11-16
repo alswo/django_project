@@ -7,6 +7,7 @@ from datetime import datetime
 from send import sendPin
 from requests.auth import HTTPBasicAuth
 from base64 import b64encode
+from schedule.models import ScheduleTable
 from passenger.models import StudentInfo, PersonalInfo
 from util.PhoneNumber import CleanPhoneNumber
 from message.models import Report
@@ -35,6 +36,13 @@ def sendMessage(request):
 	access_token = getToken()
         token = 'Basic ' + access_token
 
+        stables = ScheduleTable.objects.all()
+        slist_in_stable = []
+        for stable in stables:
+            slist_in_stable.extend(stable.slist)
+
+        all_slist = list(set(slist_in_stable))
+
         if kind == 0:
             sInfo = StudentInfo.objects.filter(id__in = sid)
         elif kind == 3:
@@ -43,6 +51,11 @@ def sendMessage(request):
             sInfo = StudentInfo.objects.filter(aid = aid)
        
         for s in sInfo:
+            
+            if s.id not in all_slist:
+                status = 'Does not exist in schedule table'
+                continue
+            
             list_to = []
             temp_p = {}
             temp_s = {}
@@ -91,7 +104,7 @@ def sendMessage(request):
             else:
                 s.sended_time ='발송 실패'
             s.save()
- 
+                  
         return HttpResponse(status)
 
 def getReport(request):
