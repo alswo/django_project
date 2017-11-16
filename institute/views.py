@@ -750,7 +750,6 @@ def addAcademy(request):
 		placement = Placement.objects.get(poi = poi, alias = aname)
 	except Placement.DoesNotExist:
 		placement = Placement.objects.create(poi = poi, alias = aname, branch = branch)
-	placement = None
 
 	try:
 		Academy.objects.create(name = aname, address = address, phone_1 = phone_1, phone_2 = phone_2, bid = bid, maxvehicle = maxvehicle, placement = placement, bank003 = giup[0].strip(), bank004 = gukmin[0].strip(), bank011 = nonghyup[0].strip(), bank020 = woori[0].strip(), bank027 = city[0].strip(), bank071 = woochegook[0].strip(), bank081 = hana[0].strip(), bank088 = shinhan[0].strip())
