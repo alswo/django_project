@@ -19,7 +19,7 @@ app.conf.accept_content = ['application/json']
 app.conf.beat_schedule = {
         'today-schedule-notification': {
                 'task': 'fcmdev.tasks.today_schedule_notification',
-                'schedule': crontab(hour=11, minute=10),
+                'schedule': crontab(hour=11, minute=00),
     	},
 	#'say-hello': {
 		#'task': 'schedule.tasks.say_hello',
@@ -27,7 +27,7 @@ app.conf.beat_schedule = {
 	#},
        'update-billinghistory': {
 		'task': 'institute.tasks.updateBillingHistory',
-		'schedule': crontab(hour=10, minute=10),
+		'schedule': crontab(hour='10,17', minute=00),
 	},
 	'store-historyschedule': {
 		'task': 'schedule.tasks.store_historyschedule',
