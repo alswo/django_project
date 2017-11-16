@@ -1781,7 +1781,7 @@ def copy_inven(request):
             for d in data['day']:
                 ei = EditedInven.objects.get(id = data['id'])
                 if data['week'] == '0':
-                    inven = Inventory(carnum = carname, bid = ei.bid, snum = ei.snum, day = d, slist =ei.slist, stime = ei.stime, etime = ei.etime, week1 = 0, week2 = 0, week3 = 0)
+                    inven = Inventory.objects.create(carnum = carname, bid = ei.bid, snum = ei.snum, day = d, slist =ei.slist, stime = ei.stime, etime = ei.etime, week1 = 0, week2 = 0, week3 = 0)
                     inven.save()
                     edited_schedule_table = EditedScheduleTable.objects.filter(ieid_id = data['id'])
                     
@@ -1789,8 +1789,7 @@ def copy_inven(request):
                         stable = ScheduleTable(iid_id = inven.id, time = st.time, addr = st.addr, req = st.req, slist =st.slist, sname = st.sname, tflag = st.tflag, lflag = st.lflag)
                         stable.save()
                 else:
-                    fi = Inventory(carnum = 0, bid = 0, snum = 0, day = 'fake', slist = '{}', etime =0, stime = 0, req = ei.req, memo = ei.memo, week1 = 0, week2 = 0, week3 = 0)
-                    fi.save()
+                    fi = Inventory.objects.create(carnum = 0, bid = 0, snum = 0, day = 'fake', slist = '{}', etime =0, stime = 0, req = ei.req, memo = ei.memo, week1 = 0, week2 = 0, week3 = 0)
                     if data['week'] == '1':
                         fi.week1 = 1
                         fi.week2 = 1
@@ -1809,11 +1808,13 @@ def copy_inven(request):
                         ei.day = d
                         ei.week = w
                         ei.carnum = carname
+                        ei.iid_id = fi.id
                         ei.save()
 
                         edited_schedule_table = EditedScheduleTable.objects.filter(ieid_id = data['id'])
                         for est in edited_schedule_table:
                             est.pk = None
                             est.ieid_id = ei.id
+                            est.save()
   
         return HttpResponse(0)

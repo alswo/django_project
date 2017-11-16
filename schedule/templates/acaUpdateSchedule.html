@@ -758,7 +758,12 @@
         contentType: 'application/json;charset=utf-8',
         data: JSON.stringify(data),
         success: function(data) {
-          console.log(data)
+          if(data == 0){
+            alert('success')
+            location.reload();
+          }else{
+            alert('error')
+          }
         }
       });
 
