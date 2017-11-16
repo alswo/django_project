@@ -232,4 +232,20 @@ def resetTodayLoad():
         s.tflag = [0]*lenTflag
         s.save()
 
+def check_student_in_inventory():
+    stables = ScheduleTable.objects.all()
+    slist_in_inven = []
+    for stable in stables:
+        slist_in_inven.extend(stable.slist)
 
+    all_slist = list(set(slist_in_inven))
+    
+    sinfos = StudentInfo.objects.all()
+
+    for sinfo in sinfos:
+        if sinfo.id in all_slist:
+            sinfo.check_in_inven = 1
+        else:
+            sinfo.check_in_inven = 0
+        sinfo.save()
+           

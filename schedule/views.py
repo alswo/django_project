@@ -808,7 +808,6 @@ def updateSchedule(request):
             else:
                 inven = Inventory.objects.get(id=iid)
                 inven.snum = snum 
-                inven.alist=alist 
                 inven.anamelist = anamelist_inven 
                 inven.slist=slist_temp3 
                 inven.stime = stime 

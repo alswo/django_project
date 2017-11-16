@@ -36,11 +36,11 @@ def sendMessage(request):
         token = 'Basic ' + access_token
 
         if kind == 0:
-            sInfo = StudentInfo.objects.filter(id__in = sid)
+            sInfo = StudentInfo.objects.filter(id__in = sid, check_in_inven = 1)
         elif kind == 3:
-            sInfo = StudentInfo.objects.filter(id__in = sid)
+            sInfo = StudentInfo.objects.filter(id__in = sid, check_in_inven = 1)
         else:
-            sInfo = StudentInfo.objects.filter(aid = aid)
+            sInfo = StudentInfo.objects.filter(aid = aid,check_in_inven = 1)
        
         for s in sInfo:
             list_to = []
