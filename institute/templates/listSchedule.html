@@ -133,7 +133,7 @@ $("#area,#day").on('change', function() {
 				var jsonResponse = JSON.parse(xmlhttp.responseText);
 				msg = '';
 				for (var i=0; i<jsonResponse['carnum'].length; i++) {
-					msg += "<a href<button class='btn btn-info'>" + jsonResponse['carnum'][i] + "</button> ";
+					msg += "<a href='/institute/aa?branchid=" + $('#area option:selected').val() + "&day=" + encodeURI($('#day option:selected').val()) + "&carnum=" + jsonResponse['carnum'][i] + "' class='btn btn-info'>" + jsonResponse['carnum'][i] + "</a> ";
 				}
 				$('#carnum').html(msg);
 			}
