@@ -27,7 +27,7 @@ def getResponse(debug, code, msg):
 
 @app.task
 def today_schedule_notification():
-    if socket.gethostbyname(socket.gethostname()) == '172.31.2.185':
+    if socket.gethostbyname(socket.gethostname()) == '172.31.1.206':
         fcmdevice =  FCMDevice.objects.all()
         device_count=0
         day = datetime.datetime.now()
