@@ -79,7 +79,8 @@ var dataSet = [
            "{{pushmonitors.expec_push}}",
            "{{pushmonitors.expec_push_s}}",
            "{{pushmonitors.push_num}}",
-           "{{pushmonitors.false_num}}"
+           "{{pushmonitors.false_num}}",
+					 "{{pushmonitors.refuse_user}}"
 
  ],
   {% endfor %}
@@ -98,6 +99,7 @@ $(document).ready(function() {
                { title : "푸시 예정 사용자 수" },
                { title : "전송 수" },
                { title : "실패건" },
+							 { title : "푸쉬거부 사용자" },
          ],
 	 "order": [
 				 [0, 'desc'],

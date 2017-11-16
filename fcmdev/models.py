@@ -41,3 +41,4 @@ class PushMonitoring(models.Model):
     expec_push_s = models.CharField(max_length=10, blank=True, null=True)
     push_num = models.CharField(max_length=10, blank=True, null=True)
     false_num = models.CharField(max_length=10, blank=True, null=True)
+    refuse_user = models.CharField(max_length=10, blank=True, null=True)

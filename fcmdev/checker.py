@@ -77,50 +77,58 @@ def today_schedule_notification():
                         sInfo = None
                         break
                     else:
-			try:
-				pin = PersonalInfo.objects.get(id = sInfo.personinfo_id)
-	                        module_push_content = {}
-	                        module_push_content['sname'] = sInfo.sname
-	                        module_push_content['time'] = schTable.time
-	                        module_push_content['addr'] = schTable.addr
-		                module_push_content['lflag'] = schTable.lflag
-	                        module_push_content['aname'] = sInfo.aid.name
-	                        module_push_content['pin'] = pin.pin_number
-	                        module_push_content['sid'] = key
-	                        module_push_content['count'] = value
-				module_push_content['sid'] = sInfo.id
-	                        push_content.append(module_push_content)
-	                        break
-			except PersonalInfo.DoesNotExist:
-			        break
+                        try:
+                                pin = PersonalInfo.objects.get(id = sInfo.personinfo_id)
+                                module_push_content = {}
+                                module_push_content['personinfoid'] = sInfo.personinfo_id
+                                module_push_content['sname'] = sInfo.sname
+                                module_push_content['time'] = schTable.time
+                                module_push_content['addr'] = schTable.addr
+                                module_push_content['lflag'] = schTable.lflag
+                                module_push_content['aname'] = sInfo.aid.name
+                                module_push_content['pin'] = pin.pin_number
+                                module_push_content['sid'] = key
+                                module_push_content['count'] = value
+                                module_push_content['sid'] = sInfo.id
+                                push_content.append(module_push_content)
+                                break
+                        except PersonalInfo.DoesNotExist:
+                                break
+        print module_push_content['personinfoid']
+        if module_push_content['personinfoid'] != 'None':
 
-        count = module_push_content['count']-1
-	lflag = module_push_content['lflag']
-	sname = module_push_content['sname']
-	sid = module_push_content['sid']
-	if dict_s.has_key(sid):
-		tflag_count = dict_s[sid]
-	else:
-		tflag_count = 0
+            count = module_push_content['count']-1
+            lflag = module_push_content['lflag']
+            sname = module_push_content['sname']
+            sid = module_push_content['sid']
+            if dict_s.has_key(sid):
+                    tflag_count = dict_s[sid]
+            else:
+                    tflag_count = 0
 
-	if lflag == 0:
-            flag = "하원을 위한"
+            if lflag == 0:
+                flag = "하원을 위한"
 
-	elif lflag == 1:
-	    flag = "등원을 위한"
-	else:
-	    flag = "에 대한"
-        if count == 0:
-            msg = "오늘 " + sname + " 학생의 " + module_push_content['aname'] + " " + flag + " " + module_push_content['time'] + " [" + module_push_content['addr'] + "] 승차 스케줄이 있습니다"
-	    if tflag_count > 0:
-		cancel_msg=  "[승차취소]오늘 " + sname + " 학생의 " + module_push_content['aname'] + " " + flag + " " + module_push_content['time'] + " [" + module_push_content['addr'] + "] 승차 스케줄을 취소하셨습니다."
-		print cancel_msg
-	    else:
-		print msg
-        else:
-            msg = "오늘 " + sname + " 학생의 " + module_push_content['aname'] + " " + flag + " " + module_push_content['time'] + " [" + module_push_content['addr'] + "]승차 외" + str(count) + "건의 스케줄이 있습니다."
-	    if tflag_count > 0:
-		cancel_msg = "오늘 " + sname + " 학생의 " + module_push_content['aname'] + " " + flag + " " + module_push_content['time'] + " [" + module_push_content['addr'] + "]승차 외" + str(tflag_count) + "건의 취소된 스케줄이 있습니다."
-		print cancel_msg
-	    else:
-		print msg
+            elif lflag == 1:
+                flag = "등원을 위한"
+            else:
+                flag = "에 대한"
+            if count == 0:
+                msg = "오늘 " + sname + " 학생의 " + module_push_content['aname'] + " " + flag + " " + module_push_content['time'] + " [" + module_push_content['addr'] + "] 승차 스케줄이 있습니다"
+                if tflag_count > 0:
+                    cancel_msg=  "[승차취소]오늘 " + sname + " 학생의 " + module_push_content['aname'] + " " + flag + " " + module_push_content['time'] + " [" + module_push_content['addr'] + "] 승차 스케줄을 취소하셨습니다."
+                    print cancel_msg
+                    module_push_content['personinfoid'] = 'None'
+
+                else:
+                    print msg
+                    module_push_content['personinfoid'] = 'None'
+            else:
+                msg = "오늘 " + sname + " 학생의 " + module_push_content['aname'] + " " + flag + " " + module_push_content['time'] + " [" + module_push_content['addr'] + "]승차 외" + str(count) + "건의 스케줄이 있습니다."
+                if tflag_count > 0:
+                    cancel_msg = "오늘 " + sname + " 학생의 " + module_push_content['aname'] + " " + flag + " " + module_push_content['time'] + " [" + module_push_content['addr'] + "]승차 외" + str(tflag_count) + "건의 취소된 스케줄이 있습니다."
+                    print cancel_msg
+                    module_push_content['personinfoid'] = 'None'
+                else:
+                    print msg
+                    module_push_content['personinfoid'] = 'None'
