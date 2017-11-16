@@ -1083,17 +1083,20 @@ def importStudentListForm(request):
 
 @login_required
 def listSchedule(request):
-	branchid = request.GET.get('branchid')
+	branchid = int(request.GET.get('branchid', 0))
 	day = request.GET.get('day')
-	week = request.GET.get('week')
-	carnum = int(request.GET.get('carnum', 0))
+	week = int(request.GET.get('week', 0))
+	carnum = request.GET.get('carnum')
 	searchTime = request.GET.get('searchTime')
 
-	branch = Branch.objects.filter(id = branchid)
+	if (branchid and day and carnum):
+		branch = Branch.objects.filter(id = branchid)
 
 	#contacts = getContacts(branchid, day, carnum, week, searchTime)
-	contacts = getContacts(1, '월', 1, 1, '')
-	return render(request, 'listSchedule.html', {'contacts': contacts});
+		contacts = getContacts(branchid, '월', carnum, week, '')
+	else:
+		contacts = None
+	return render(request, 'listSchedule.html', {'contacts': contacts, 'branchid': branchid, 'day': day, 'carnum': carnum});
 
 @login_required
 def getCarsByBranchIdAndDay(request):
@@ -1107,4 +1110,6 @@ def getCarsByBranchIdAndDay(request):
 	jsonObj['carnum'] = []
 	for carnum in carnums:
 		jsonObj['carnum'].append(carnum)
+
+	
 	return JsonResponse(jsonObj)

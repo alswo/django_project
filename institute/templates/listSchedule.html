@@ -15,7 +15,7 @@
 						<label>지역</label>
 						<select class="form-control" name="area" id="area">
 							{% for branch in branches %}
-								<option value="{{branch.id}}" {% if mybranch.id == branch.id %} selected {% endif %}>{{branch.bname}}</option>
+								<option value="{{branch.id}}" {% if branchid == branch.id %} selected {% endif %}>{{branch.bname}}</option>
 							{% endfor %}
 						</select>
 					</div>
@@ -23,7 +23,7 @@
 						<label>요일</label>
 						<select class="form-control" name="day" id="day">
 							{% for weekday in weekdaylist %}
-								<option value="{{weekday}}" {% if myweekday == weekday %} selected {% endif %}>{{weekday}}</option>
+								<option value="{{weekday}}" {% if day == weekday %} selected {% endif %}>{{weekday}}</option>
 							{% endfor %}
 						</select>
 					</div>
@@ -53,7 +53,7 @@
 			<div class="col-md-3">
 			</div>
 			<div class="col-md-6" style="background-color:white; border-radius:10px;">
-				<h3 style="font-family: 'Lucida Console'; font-weight: bold; color:rgb(77,77,77)"><a href='#'>{{c.stime}} - {{c.etime}}</a></h3>
+				<h3 style="font-family: 'Lucida Console'; font-weight: bold; color:rgb(77,77,77)"><a href='/schedule/editScheduleForm?inventoryid='>{{c.stime}} - {{c.etime}}</a></h3>
 			</div>
 			<div class="col-md-3">
 			</div>
@@ -133,7 +133,14 @@ $("#area,#day").on('change', function() {
 				var jsonResponse = JSON.parse(xmlhttp.responseText);
 				msg = '';
 				for (var i=0; i<jsonResponse['carnum'].length; i++) {
-					msg += "<a href='/institute/aa?branchid=" + $('#area option:selected').val() + "&day=" + encodeURI($('#day option:selected').val()) + "&carnum=" + jsonResponse['carnum'][i] + "' class='btn btn-info'>" + jsonResponse['carnum'][i] + "</a> ";
+					msg += "<a href='/institute/listSchedule?branchid=" + $('#area option:selected').val() + "&day=" + encodeURI($('#day option:selected').val()) + "&carnum=" + jsonResponse['carnum'][i] + "' class='btn ";
+					if (jsonResponse['carnum'][i] == '{{carnum}}') {
+						msg += "btn-success";
+					}
+					else {
+						msg += "btn-info";
+					}
+					msg += "'>" + jsonResponse['carnum'][i] + "</a> ";
 				}
 				$('#carnum').html(msg);
 			}
@@ -143,6 +150,8 @@ $("#area,#day").on('change', function() {
 	xmlhttp.open("GET", "/institute/getCarsByBranchIdAndDay?branchid=" + $('#area option:selected').val() + "&day=" + encodeURI($('#day option:selected').val()));
 	xmlhttp.send(null);
 });
+
+
 </script>
 
 {% endblock content %}
